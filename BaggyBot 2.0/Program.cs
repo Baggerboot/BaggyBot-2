@@ -21,7 +21,7 @@ namespace BaggyBot
 
 		public Program()
 		{
-			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Standard);
+			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
 
 			sqlConnector = new SqlConnector();
 			if (sqlConnector.OpenConnection()) {
@@ -34,9 +34,17 @@ namespace BaggyBot
 
 			client = new IrcClient();
 			client.OnMessageReceived += ProcessMessage;
+			client.OnRawLineReceived += ProcessRawLine;
 			dataFunctionSet = new DataFunctionSet(sqlConnector);
 			sHandler = new StatsHandler(dataFunctionSet, sqlConnector);
 			commandHandler = new CommandHandler(client.SendMessage, sqlConnector,dataFunctionSet);
+		}
+
+		private void ProcessRawLine(string line)
+		{
+			Console.ForegroundColor = ConsoleColor.Gray;
+			Console.WriteLine("[RAW]\t"+line);
+			Console.ResetColor();
 		}
 
 		internal void Connect()
@@ -44,7 +52,7 @@ namespace BaggyBot
 			Logger.Log("Connecting to the IRC server");
 			try {
 				client.Connect("irc.esper.net", 6669, "BaggyBetaBot", "Dredger2", "BaggyBot Beta");
-				client.JoinChannel("#fofftopic");
+				client.JoinChannel("#baggy");
 				Logger.Log("Connection established.");
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
@@ -54,7 +62,9 @@ namespace BaggyBot
 
 		private void ProcessMessage(IrcMessage message)
 		{
-			Console.WriteLine(message.ToString());
+			Console.ForegroundColor = ConsoleColor.DarkGray;
+			Console.WriteLine("[MSG]\t" + message.Sender.Nick+ ": " + message.Message);
+			Console.ResetColor();
 			if (message.Message.StartsWith(commandIdentifier)) {
 				commandHandler.ProcessCommand(message);
 			} else {

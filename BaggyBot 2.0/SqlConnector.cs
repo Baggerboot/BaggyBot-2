@@ -16,8 +16,8 @@ namespace BaggyBot
 		private MySqlConnection connection;
 		private string server;
 		private string database;
-		private string uid = (string)ConfigurationManager.AppSettings["sqluser"];
-		private string password = (string) ConfigurationManager.AppSettings["sqlpass"];
+		private string uid;
+		private string password;
 
 		public SqlConnector()
 		{
@@ -26,6 +26,9 @@ namespace BaggyBot
 
 		private void Initialize()
 		{
+
+			uid = Properties.Settings.Default.sqluser;
+			password = Properties.Settings.Default.sqlpass;
 			server = "127.0.0.1";
 			database = "stats_bot";
 			string connectionString;
@@ -37,7 +40,7 @@ namespace BaggyBot
 
 		public void InitializeDatabase()
 		{
-			Console.WriteLine("Attempting to initialize the database if this hasn't been done yet");
+			Logger.Log("Attempting to initialize the database if this hasn't been done yet");
 
 			List<string> createStmts = new List<string>();
 

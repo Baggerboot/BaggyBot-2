@@ -67,7 +67,7 @@ namespace BaggyBot
 		}
 		private void IncrementLineCount(uint uid)
 		{
-			string statement = String.Format("INSERT INTO userstats VALUES ({0}, 1, 0) ON DUPLICATE KEY UPDATE lines = lines +1", uid);
+			string statement = String.Format("INSERT INTO userstats VALUES ({0}, 1, 0, 0, 0) ON DUPLICATE KEY UPDATE `lines` = `lines` +1", uid);
 			sqlConnector.ExecuteStatement(statement);
 		}
 		private void IncrementWordCount(uint uid, int words)

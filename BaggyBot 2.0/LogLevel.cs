@@ -9,7 +9,7 @@ namespace BaggyBot
 	enum LogLevel
 	{
 		Debug,
-		Standard,
+		Info,
 		Warning,
 		Error
 	}

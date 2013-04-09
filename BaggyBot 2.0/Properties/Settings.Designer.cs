@@ -25,78 +25,6 @@ namespace BaggyBot.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("BaggyBetaBot")]
-        public string nick {
-            get {
-                return ((string)(this["nick"]));
-            }
-            set {
-                this["nick"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Dredger2")]
-        public string ident {
-            get {
-                return ((string)(this["ident"]));
-            }
-            set {
-                this["ident"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3306")]
-        public int sqlport {
-            get {
-                return ((int)(this["sqlport"]));
-            }
-            set {
-                this["sqlport"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("root")]
-        public string sqluser {
-            get {
-                return ((string)(this["sqluser"]));
-            }
-            set {
-                this["sqluser"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
-        public string sqlhost {
-            get {
-                return ((string)(this["sqlhost"]));
-            }
-            set {
-                this["sqlhost"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("#baggy")]
-        public string channel {
-            get {
-                return ((string)(this["channel"]));
-            }
-            set {
-                this["channel"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("14159265")]
         public string sqlpass {
             get {
@@ -104,6 +32,18 @@ namespace BaggyBot.Properties {
             }
             set {
                 this["sqlpass"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("statsbot")]
+        public string sqluser {
+            get {
+                return ((string)(this["sqluser"]));
+            }
+            set {
+                this["sqluser"] = value;
             }
         }
     }
