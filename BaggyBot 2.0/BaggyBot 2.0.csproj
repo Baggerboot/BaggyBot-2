@@ -50,12 +50,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CSNetLib">
-      <HintPath>..\..\CSNetLib\CSNetLib\bin\Debug\CSNetLib.dll</HintPath>
-    </Reference>
-    <Reference Include="IRCSharp">
-      <HintPath>..\..\IRCSharp\IRCSharp\bin\Debug\IRCSharp.dll</HintPath>
-    </Reference>
     <Reference Include="MySql.Data, Version=6.6.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <Private>True</Private>
     </Reference>
@@ -84,7 +78,7 @@
     <Compile Include="StatsHandler.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

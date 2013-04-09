@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
++
 namespace BaggyBot
 {
 	public delegate void MessageSender(string target, string message);
+	public delegate List<string> CommandSender(string ircCommand);
 
 	class CommandHandler
 	{

@@ -11,12 +11,12 @@ using System.Configuration;
 
 namespace BaggyBot
 {
-	class SqlConnector
+	class SqlConnector : IDisposable
 	{
 		private MySqlConnection connection;
 		private string server;
 		private string database;
-		private string uid;
+		private string uid = (string)ConfigurationManager.AppSettings["sqluser"];
 		private string password = (string) ConfigurationManager.AppSettings["sqlpass"];
 
 		public SqlConnector()
@@ -28,8 +28,6 @@ namespace BaggyBot
 		{
 			server = "127.0.0.1";
 			database = "stats_bot";
-			uid = "statsbot";
-			password = "HDD#94nl@ihm";
 			string connectionString;
 			connectionString = "SERVER=" + server + ";" + "DATABASE=" +
 			database + ";" + "UID=" + uid + ";" + "PASSWORD=" + password + ";";
@@ -104,21 +102,25 @@ namespace BaggyBot
 			}
 		}
 
+		public void Dispose()
+		{
+			CloseConnection();
+		}
+
 		public bool CloseConnection()
 		{
 			try {
 				connection.Close();
 				return true;
 			} catch (MySqlException ex) {
-				Console.WriteLine(ex.Message);
+				Logger.Log(ex.Message);
 				return false;
 			}
 		}
 
 		/// <summary>
-		/// Execute a statement without returning any data.
+		/// Execute an SQL statement without returning any data.
 		/// </summary>
-		/// <param name="statement">The statement to execute</param>
 		/// <returns>Number of rows affected</returns>
 		public int ExecuteStatement(string statement)
 		{
@@ -129,8 +131,6 @@ namespace BaggyBot
 		/// <summary>
 		/// Execute a query and tries to return the data as a DataView.
 		/// </summary>
-		/// <param name="query"></param>
-		/// <returns></returns>
 		public DataView Select(string query)
 		{
 			MySqlCommand cmd = new MySqlCommand(query, connection);
@@ -141,6 +141,10 @@ namespace BaggyBot
 			return ds.Tables[0].DefaultView;
 		}
 
+		/// <summary>
+		/// Selects a vector and returns it in the form of an array.
+		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
+		/// </summary>
 		public T[] SelectVector<T>(string query)
 		{
 			DataView dv = Select(query);
@@ -155,9 +159,6 @@ namespace BaggyBot
 			}
 		}
 
-		/// <typeparam name="T"></typeparam>
-		/// <param name="query"></param>
-		/// <returns></returns>
 		public T SelectOne<T>(string query)
 		{
 			DataView dv = Select(query);

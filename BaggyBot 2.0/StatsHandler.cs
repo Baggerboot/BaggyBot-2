@@ -29,7 +29,7 @@ namespace BaggyBot
 
 		private uint[] GetMatchesSecondLevel(IrcUser sender)
 		{
-			string query = String.Format("SELECT user_id FROM usercreds WHERE nick = '{0}' AND ident = '{1}'");
+			string query = String.Format("SELECT user_id FROM usercreds WHERE nick = '{0}' AND ident = '{1}'", sender.Nick, sender.Ident);
 			return sqlConnector.SelectVector<uint>(query);
 		}
 
@@ -39,11 +39,10 @@ namespace BaggyBot
 			uint[] matches = GetMatchesFirstLevel(message.Sender);
 
 			if (matches.Length == 0) {
-
-				// If their ident isn't on the 'blacklist' we can be 99% sure of a valid match
 				if (!sharedIdents.Contains(message.Sender.Ident)) {
-					string query = String.Format("SELECT user_id FROM usercreds WHERE nick = '{0}' AND ident = '{1}'", message.Sender.Nick, message.Sender.Ident);
-
+					uint[] matches2 = GetMatchesFirstLevel(message.Sender);
+					if (matches2.Length == 1)
+						userId = matches2[0];
 				} else { // Try a nickserv info call first
 
 				}

@@ -66,12 +66,10 @@ namespace BaggyBot
 		static void Main(string[] args)
 		{
 			Console.WriteLine("Clear the log file? (y/n)");
-			var key = Console.ReadKey();
-			if (key.KeyChar == 'y') {
+			if (Console.ReadKey().KeyChar == 'y') {
 				Logger.ClearLog();
 				Console.WriteLine();
 			}
-			
 			new Program().Connect();
 		}
 	}
