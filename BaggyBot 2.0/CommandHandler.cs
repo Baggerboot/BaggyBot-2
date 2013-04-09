@@ -28,7 +28,7 @@ namespace BaggyBot
 
 			string command = message.Message.Substring(1);
 			if (command.Equals("test")) {
-				uint[] uids = dataFunctionSet.GetUids(message.Sender);
+				int[] uids = dataFunctionSet.GetUids(message.Sender);
 				sendMessage(message.Channel, "Your uid is " + uids);
 			}
 		}

@@ -14,8 +14,6 @@ namespace BaggyBot
 		private SqlConnector sqlConnector;
 		private IrcClient client;
 
-		private string nickServCallResult;
-
 		// Non-exhaustive list of shared - idents that are commonly used by multiple people, often because they are standard values for their respective IRC clients.
 		private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
 
@@ -28,63 +26,97 @@ namespace BaggyBot
 
 		public void HandleNickChange(IrcUser user, string newNick)
 		{
-			uint[] uids = dataFunctionSet.GetUids(user);
+			int[] uids = dataFunctionSet.GetUids(user);
 			if (uids.Length != 1) {
 				Logger.Log("Unable to handle nick change for " + user.Nick + " to " + newNick + ": Invalid amount of Uids received: " + uids.Length, LogLevel.Warning);
 				return;
 			}
-			dataFunctionSet.AddCredCombination(new IrcUser(newNick, user.Ident, user.Hostmask), null, checked((int)uids[0]));
+			dataFunctionSet.AddCredCombination(new IrcUser(newNick, user.Ident, user.Hostmask), null, uids[0]);
 		}
 
-		private uint[] GetMatchesFirstLevel(IrcUser sender)
+		private int[] GetMatchesFirstLevel(IrcUser sender)
 		{
 			return dataFunctionSet.GetUids(sender);
 		}
-		private uint[] GetMatchesSecondLevel(IrcUser sender)
+		private int[] GetMatchesSecondLevel(IrcUser sender)
 		{
 			string query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE nick = '{0}' AND ident = '{1}'", sender.Nick, sender.Ident);
-			return sqlConnector.SelectVector<uint>(query);
+			return sqlConnector.SelectVector<int>(query);
 		}
-		private uint[] GetMatchesThirdLevel(string nickserv)
+		private int[] GetMatchesThirdLevel(string nickserv)
 		{
 			string query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE nickserv = '{0}'", nickserv);
-			return sqlConnector.SelectVector<uint>(query);
+			return sqlConnector.SelectVector<int>(query);
+		}
+		private int[] GetMatchesFourthLevel(IrcUser sender)
+		{
+			string query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE ident = '{0}' AND hostmask = '{1}'", sender.Ident, sender.Hostmask);
+			return sqlConnector.SelectVector<int>(query);
+		}
+
+		delegate int Level();
+		private int GetIdFromUser(IrcUser user)
+		{
+			Level l4 = () =>
+			{
+				var res = GetMatchesFourthLevel(user);
+				if (res.Length == 0) {
+					var uid = dataFunctionSet.AddCredCombination(user);
+					return uid;
+				} else if (res.Length == 1) {
+					dataFunctionSet.AddCredCombination(user, null, res[0]);
+					return res[0];
+				} else {
+					return -1;
+				}
+			};
+
+			Level l3 = () =>
+			{
+				var nickserv = DoNickservCall(user.Nick);
+
+				if(nickserv == null) // No nickserv info available, try a level 4 instead
+				{
+					return l4();
+				}
+
+				var res = GetMatchesThirdLevel(nickserv);
+				if (res.Length == 1) { // Match found trough NickServ, add a credentials combinations for easy access next time.
+					dataFunctionSet.AddCredCombination(user, nickserv, res[0]);
+					return res[0];
+				} else if (res.Length == 0) { // No matches found, not even with NickServ. Most likely a new user, unless you change your hostname and ident, and log in with a different nick than the one you logged out with.
+					var uid = dataFunctionSet.AddCredCombination(user, nickserv);
+					return uid;
+				} else { // Multiple people registered using the same NickServ account? That's most likely an error.
+					return -1;
+				}
+			};
+
+			Level l2 = () =>
+			{
+				var res = GetMatchesSecondLevel(user);
+				if (res.Length == 1) {
+					dataFunctionSet.AddCredCombination(user, null, res[0]);
+					return res[0];
+				} else {
+					return l3();
+				}
+			};
+
+			Level l1 = () =>
+			{
+				var res = GetMatchesFirstLevel(user);
+				if (res.Length == 1) return res[0];
+				else if (res.Length == 0) return l2();
+				else return l3();
+			};
+
+			return l1();
 		}
 
 		public void ProcessMessage(IrcMessage message)
 		{
-			uint userId = 0;
-
-			// Check if a user with credentials of message.Sender already exists
-			uint[] matches = GetMatchesFirstLevel(message.Sender);
-
-			if (matches.Length == 1) {
-				userId = matches[0];
-			} else if (matches.Length == 0) {
-				if (!sharedIdents.Contains(message.Sender.Ident)) {
-					uint[] matches2 = GetMatchesFirstLevel(message.Sender);
-					if (matches2.Length == 1) {// Found a match
-						userId = matches2[0];
-						dataFunctionSet.AddCredCombination(message.Sender, null, checked((int)userId));
-					} else { // Try a nickserv info call
-						Logger.Log("User not found.", LogLevel.Warning);
-						return;
-					}
-				} else { // Try a nickserv info call first
-					Logger.Log("User not found.", LogLevel.Warning);
-					return;
-				}
-				dataFunctionSet.AddCredCombination(message.Sender, null, -1);
-			} else { // Try a nickserv info call
-				string nickserv = DoNickservCall(message.Sender.Nick);
-				uint[] matches2 = GetMatchesThirdLevel(nickserv);
-				if (matches2.Length == 1) {
-					userId = matches2[0];
-					dataFunctionSet.AddCredCombination(message.Sender, nickserv, checked((int)userId));
-				} else {
-					Logger.Log("Could not make a distinction between these userIDs: " + matches.ToString(), LogLevel.Error);
-				}
-			}
+			int userId = GetIdFromUser(message.Sender);
 
 			List<string> words = GetWords(message.Message);
 
@@ -95,9 +127,7 @@ namespace BaggyBot
 		private string DoNickservCall(string nick)
 		{
 			client.SendMessage("NickServ", "INFO " + nick);
-			while (nickServCallResult == null) {
-				System.Threading.Thread.Sleep(20);
-			}
+			return null;
 		}
 
 		private List<string> GetWords(string message)
@@ -113,12 +143,12 @@ namespace BaggyBot
 			return words;
 		}
 
-		private void IncrementLineCount(uint uid)
+		private void IncrementLineCount(int uid)
 		{
 			string statement = String.Format("INSERT INTO userstats VALUES ({0}, 1, 0, 0, 0) ON DUPLICATE KEY UPDATE `lines` = `lines` +1", uid);
 			sqlConnector.ExecuteStatement(statement);
 		}
-		private void IncrementWordCount(uint uid, int words)
+		private void IncrementWordCount(int uid, int words)
 		{
 			string statement = String.Format("UPDATE userstats SET words = words + {0} WHERE user_id = {1}", words, uid);
 		}
