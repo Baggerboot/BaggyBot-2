@@ -33,11 +33,13 @@ namespace BaggyBot
 			sqlConnector.InitializeDatabase();
 
 			client = new IrcClient();
+			dataFunctionSet = new DataFunctionSet(sqlConnector);
+			sHandler = new StatsHandler(dataFunctionSet, sqlConnector, client);
+			commandHandler = new CommandHandler(client.SendMessage, sqlConnector,dataFunctionSet);
+
+			client.OnNickChanged += sHandler.HandleNickChange;
 			client.OnMessageReceived += ProcessMessage;
 			client.OnRawLineReceived += ProcessRawLine;
-			dataFunctionSet = new DataFunctionSet(sqlConnector);
-			sHandler = new StatsHandler(dataFunctionSet, sqlConnector);
-			commandHandler = new CommandHandler(client.SendMessage, sqlConnector,dataFunctionSet);
 		}
 
 		private void ProcessRawLine(string line)

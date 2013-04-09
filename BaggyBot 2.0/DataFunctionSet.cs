@@ -25,7 +25,7 @@ namespace BaggyBot
 		/// <returns>a list of User ID matches</returns>
 		internal uint[] GetUids(IrcUser ircUser)
 		{
-			string query = string.Format("SELECT user_id FROM usercreds WHERE nick = '{0}' AND ident = '{1}' AND hostmask = '{2}'", ircUser.Nick,ircUser.Ident,ircUser.Hostmask);
+			string query = string.Format("SELECT DISTINCT user_id FROM usercreds WHERE nick = '{0}' AND ident = '{1}' AND hostmask = '{2}'", ircUser.Nick,ircUser.Ident,ircUser.Hostmask);
 			return sqlConnector.SelectVector<uint>(query);
 		}
 
@@ -45,7 +45,8 @@ namespace BaggyBot
 			// Required since NULL must be passed without single quotes or SQL will see it as a string literal
 			nickserv = nickserv == null ? "NULL" : string.Format("'{0}'",nickserv);
 
-			string query = string.Format("INSERT INTO usercreds VALUES ({0},'{1}','{2}','{3}', {4})", uid, user.Nick, user.Ident, user.Hostmask, nickserv);
+			string query = string.Format("INSERT INTO usercreds VALUES (NULL, {0},'{1}','{2}','{3}', {4})", uid, user.Nick, user.Ident, user.Hostmask, nickserv);
+			sqlConnector.ExecuteStatement(query);
 		}
 	}
 }
