@@ -12,16 +12,16 @@ namespace BaggyBot
 	{
 		private DataFunctionSet dataFunctionSet;
 		private SqlConnector sqlConnector;
-		private IrcClient client;
+		private IrcInterface ircInterface;
 
 		// Non-exhaustive list of shared - idents that are commonly used by multiple people, often because they are standard values for their respective IRC clients.
 		private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
 
-		public StatsHandler(DataFunctionSet dm, SqlConnector sc, IrcClient c)
+		public StatsHandler(DataFunctionSet dm, SqlConnector sc, IrcInterface inter)
 		{
 			dataFunctionSet = dm;
 			sqlConnector = sc;
-			client = c;
+			ircInterface = inter;
 		}
 
 		public void HandleNickChange(IrcUser user, string newNick)
@@ -73,7 +73,7 @@ namespace BaggyBot
 
 			Level l3 = () =>
 			{
-				var nickserv = DoNickservCall(user.Nick);
+				string nickserv = ircInterface.DoNickservCall(user.Nick);
 
 				if(nickserv == null) // No nickserv info available, try a level 4 instead
 				{
@@ -124,11 +124,9 @@ namespace BaggyBot
 			IncrementWordCount(userId, words.Count);
 		}
 
-		private string DoNickservCall(string nick)
-		{
-			client.SendMessage("NickServ", "INFO " + nick);
-			return null;
-		}
+		
+
+		
 
 		private List<string> GetWords(string message)
 		{

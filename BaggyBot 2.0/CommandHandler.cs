@@ -10,26 +10,29 @@ namespace BaggyBot
 
 	class CommandHandler
 	{
-		private MessageSender sendMessage;
 		private SqlConnector sqlConnector;
 		private DataFunctionSet dataFunctionSet;
+		private IrcInterface ircInterface;
 
-		public CommandHandler(MessageSender ms, SqlConnector sc, DataFunctionSet ds)
+		public CommandHandler(IrcInterface inter, SqlConnector sc, DataFunctionSet ds)
 		{
-			sendMessage += ms;
+			ircInterface = inter;
 			sqlConnector = sc;
 			dataFunctionSet = ds;
 		}
+
 		public void ProcessCommand(IRCSharp.IrcMessage message)
 		{
 			if (!message.Sender.Ident.Equals("~baggerboo")) {
-				sendMessage(message.Channel, "You are not authorized to use commands.");
+				ircInterface.SendMessage(message.Channel, "You are not authorized to use commands.");
 			}
 
 			string command = message.Message.Substring(1);
 			if (command.Equals("test")) {
 				int[] uids = dataFunctionSet.GetUids(message.Sender);
-				sendMessage(message.Channel, "Your uid is " + uids);
+				ircInterface.SendMessage(message.Channel, "Your uid is " + string.Join(",", uids.Select(x => x.ToString()).ToArray()));
+			} else if (command.Equals("ns")) {
+				ircInterface.SendMessage(message.Channel, "Your NickServ is " + ircInterface.DoNickservCall(message.Sender.Nick));
 			}
 		}
 	}

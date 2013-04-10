@@ -15,6 +15,7 @@ namespace BaggyBot
 		private SqlConnector sqlConnector;
 		private DataFunctionSet dataFunctionSet;
 		private CommandHandler commandHandler;
+		private IrcInterface ircInterface;
 		private string commandIdentifier = "-";
 
 		public const string Version = "pre2.0";
@@ -33,13 +34,25 @@ namespace BaggyBot
 			sqlConnector.InitializeDatabase();
 
 			client = new IrcClient();
+			ircInterface = new IrcInterface(client);
 			dataFunctionSet = new DataFunctionSet(sqlConnector);
-			sHandler = new StatsHandler(dataFunctionSet, sqlConnector, client);
-			commandHandler = new CommandHandler(client.SendMessage, sqlConnector,dataFunctionSet);
+			sHandler = new StatsHandler(dataFunctionSet, sqlConnector, ircInterface);
+			commandHandler = new CommandHandler(ircInterface, sqlConnector,dataFunctionSet);
 
 			client.OnNickChanged += sHandler.HandleNickChange;
 			client.OnMessageReceived += ProcessMessage;
 			client.OnRawLineReceived += ProcessRawLine;
+			client.OnFormattedLineReceived += ProcessFormattedLine;
+		}
+
+		private void ProcessFormattedLine(IrcLine line)
+		{
+			if (line.Command.Equals("NOTICE") && ircInterface.HasNickservCall && client.GetUserFromSender(line.Sender).Ident.Equals("NickServ")) {
+				if (line.FinalArgument.StartsWith("Information on ☻")) {
+					string[] parts = line.FinalArgument.Split('☻');
+					ircInterface.AddNickserv(parts[1], parts[3]);
+				}
+			}
 		}
 
 		private void ProcessRawLine(string line)
@@ -53,7 +66,7 @@ namespace BaggyBot
 		{
 			Logger.Log("Connecting to the IRC server");
 			try {
-				client.Connect("irc.esper.net", 6669, "BaggyBetaBot", "Dredger2", "BaggyBot Beta");
+				client.Connect("localhost", 6667, "BaggyBetaBot", "Dredger2", "BaggyBot Beta");
 				client.JoinChannel("#baggy");
 				Logger.Log("Connection established.");
 			} catch (System.Net.Sockets.SocketException e) {
@@ -73,7 +86,6 @@ namespace BaggyBot
 				sHandler.ProcessMessage(message);
 			}
 		}
-
 
 		static void Main(string[] args)
 		{

@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="CommandHandler.cs" />
     <Compile Include="DataFunctionSet.cs" />
+    <Compile Include="IrcInterface.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="Program.cs" />
