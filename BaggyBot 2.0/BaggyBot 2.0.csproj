@@ -78,6 +78,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="RecordNullException.cs" />
     <Compile Include="SqlConnector.cs" />
     <Compile Include="StatsHandler.cs" />
   </ItemGroup>

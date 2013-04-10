@@ -40,17 +40,19 @@ namespace BaggyBot
 				var t = new System.Threading.Thread(() => SendMessage("NickServ", "INFO " + nick));
 				t.Start();
 			}
-			//while (!nickservCallResults.ContainsKey(nick)) {
-			//	System.Threading.Thread.Sleep(20);
-			//}
-			//nickservCalls.Remove(nick);
-			//return nickservCallResults[nick];
-			return null;
+			nick = nick.ToLower();
+			while (!nickservCallResults.ContainsKey(nick)) {
+				System.Threading.Thread.Sleep(20);
+			}
+			nickservCalls.Remove(nick);
+			return nickservCallResults[nick];
 		}
 
 		public void SendMessage(string target, string message)
 		{
 			client.SendMessage(target, message);
 		}
+
+
 	}
 }

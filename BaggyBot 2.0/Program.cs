@@ -35,7 +35,7 @@ namespace BaggyBot
 
 			client = new IrcClient();
 			ircInterface = new IrcInterface(client);
-			dataFunctionSet = new DataFunctionSet(sqlConnector);
+			dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
 			sHandler = new StatsHandler(dataFunctionSet, sqlConnector, ircInterface);
 			commandHandler = new CommandHandler(ircInterface, sqlConnector,dataFunctionSet);
 
@@ -47,10 +47,16 @@ namespace BaggyBot
 
 		private void ProcessFormattedLine(IrcLine line)
 		{
-			if (line.Command.Equals("NOTICE") && ircInterface.HasNickservCall && client.GetUserFromSender(line.Sender).Ident.Equals("NickServ")) {
-				if (line.FinalArgument.StartsWith("Information on ☻")) {
-					string[] parts = line.FinalArgument.Split('☻');
-					ircInterface.AddNickserv(parts[1], parts[3]);
+		if (line.Command.Equals("NOTICE") && ircInterface.HasNickservCall && client.GetUserFromSender(line.Sender).Ident.Equals("NickServ")) {
+				if (line.FinalArgument.StartsWith("Information on")) {
+					string data = line.FinalArgument.Substring("Information on  ".Length);
+					string nick = data.Substring(0, data.IndexOf(" ")-1);
+					data = data.Substring(nick.Length + 2 + "(account  ".Length);
+					string nickserv = data.Substring(0,data.Length-3);
+					ircInterface.AddNickserv(nick.ToLower(),nickserv);
+				} else if (line.FinalArgument.EndsWith("is not registered.")) {
+					string nick = line.FinalArgument.Substring(1, line.FinalArgument.Length - 2);
+					ircInterface.AddNickserv(nick, null);
 				}
 			}
 		}
@@ -64,9 +70,13 @@ namespace BaggyBot
 
 		internal void Connect()
 		{
+			if (!sqlConnector.Connected) {
+				Logger.Log("Not connected to an SQL server.", LogLevel.Error);
+				return;
+			}
 			Logger.Log("Connecting to the IRC server");
 			try {
-				client.Connect("localhost", 6667, "BaggyBetaBot", "Dredger2", "BaggyBot Beta");
+				client.Connect("irc.esper.net", 6667, "BaggyBetaBot", "Dredger2", "BaggyBot Beta");
 				client.JoinChannel("#baggy");
 				Logger.Log("Connection established.");
 			} catch (System.Net.Sockets.SocketException e) {

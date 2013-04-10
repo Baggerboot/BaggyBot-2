@@ -19,6 +19,8 @@ namespace BaggyBot
 		private string uid;
 		private string password;
 
+		public bool Connected { get; private set; }
+
 		public SqlConnector()
 		{
 			Initialize();
@@ -26,7 +28,6 @@ namespace BaggyBot
 
 		private void Initialize()
 		{
-
 			uid = Properties.Settings.Default.sqluser;
 			password = Properties.Settings.Default.sqlpass;
 			server = "127.0.0.1";
@@ -36,6 +37,7 @@ namespace BaggyBot
 			database + ";" + "UID=" + uid + ";" + "PASSWORD=" + password + ";";
 
 			connection = new MySqlConnection(connectionString);
+			Connected = true;
 		}
 
 		public void InitializeDatabase()
@@ -98,6 +100,7 @@ namespace BaggyBot
 		{
 			try {
 				connection.Open();
+				Connected = true;
 				return true;
 			} catch (MySqlException ex) {
 				Console.WriteLine("ERROR: " + ex.Message);
@@ -114,6 +117,7 @@ namespace BaggyBot
 		{
 			try {
 				connection.Close();
+				Connected = false;
 				return true;
 			} catch (MySqlException ex) {
 				Logger.Log(ex.Message);
@@ -156,18 +160,25 @@ namespace BaggyBot
 			} else {
 				T[] data = new T[dv.Count];
 				for (int i = 0; i < data.Length; i++) {
-					data[i] = (T) dv[0][i];
+					Object value = dv[0][i];
+					data[i] = (T) value;
 				}
 				return data;
 			}
 		}
 
+
 		public T SelectOne<T>(string query)
 		{
 			DataView dv = Select(query);
+
+			Object data = dv[0][0];
 			if (dv.Count == 1) {
-				Object data = dv[0][0];
-				return (T)data;
+				if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
+					throw new RecordNullException();
+				} else {
+					return (T)data;
+				}
 			} else {
 				throw new InvalidOperationException("The passed query returned more or less than one record.");
 			}
