@@ -20,7 +20,7 @@ namespace BaggyBot
 		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
 		private List<string> nickservCalls = new List<string>();
 
-		public bool HasNickservCall
+		internal bool HasNickservCall
 		{
 			get
 			{
@@ -28,12 +28,12 @@ namespace BaggyBot
 			}
 		}
 
-		public void AddNickserv(string nick, string nickserv)
+		internal void AddNickserv(string nick, string nickserv)
 		{
 			nickservCallResults.Add(nick, nickserv);
 		}
 
-		public string DoNickservCall(string nick)
+		internal string DoNickservCall(string nick)
 		{
 			if (!nickservCalls.Contains(nick)) {
 				nickservCalls.Add(nick);
@@ -48,11 +48,14 @@ namespace BaggyBot
 			return nickservCallResults[nick];
 		}
 
-		public void SendMessage(string target, string message)
+		internal void SendMessage(string target, string message)
 		{
 			client.SendMessage(target, message);
 		}
 
-
+		internal void JoinChannel(string channel)
+		{
+			client.JoinChannel(channel);
+		}
 	}
 }

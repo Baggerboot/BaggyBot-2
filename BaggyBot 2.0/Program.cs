@@ -18,7 +18,7 @@ namespace BaggyBot
 		private IrcInterface ircInterface;
 		private string commandIdentifier = "-";
 
-		public const string Version = "pre2.0";
+		internal const string Version = "pre2.0";
 
 		public Program()
 		{
@@ -31,6 +31,21 @@ namespace BaggyBot
 				Logger.Log("Failed to connect to the database!");
 				return;
 			}
+			Console.WriteLine("Purge the database? y/n");
+			var k = Console.ReadKey();
+			if (k.KeyChar == 'y') {
+				string statement = 
+					@"drop table `stats_bot`.`emoticons`;
+					drop table `stats_bot`.`quotes`;
+					drop table `stats_bot`.`urls`;
+					drop table `stats_bot`.`usercreds`;
+					drop table `stats_bot`.`userstats`;
+					drop table `stats_bot`.`var`;
+					drop table `stats_bot`.`words`;";
+				sqlConnector.ExecuteStatement(statement); 
+				Console.WriteLine("Database purged");
+			}
+
 			sqlConnector.InitializeDatabase();
 
 			client = new IrcClient();
@@ -39,7 +54,7 @@ namespace BaggyBot
 			sHandler = new StatsHandler(dataFunctionSet, sqlConnector, ircInterface);
 			commandHandler = new CommandHandler(ircInterface, sqlConnector,dataFunctionSet);
 
-			client.OnNickChanged += sHandler.HandleNickChange;
+			client.OnNickChanged += dataFunctionSet.HandleNickChange;
 			client.OnMessageReceived += ProcessMessage;
 			client.OnRawLineReceived += ProcessRawLine;
 			client.OnFormattedLineReceived += ProcessFormattedLine;
@@ -56,6 +71,7 @@ namespace BaggyBot
 					ircInterface.AddNickserv(nick.ToLower(),nickserv);
 				} else if (line.FinalArgument.EndsWith("is not registered.")) {
 					string nick = line.FinalArgument.Substring(1, line.FinalArgument.Length - 2);
+					nick = nick.Substring(0, nick.IndexOf(' ')-1);
 					ircInterface.AddNickserv(nick, null);
 				}
 			}

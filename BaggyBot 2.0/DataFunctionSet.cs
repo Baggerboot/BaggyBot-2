@@ -20,6 +20,16 @@ namespace BaggyBot
 			this.sqlConnector = sqlConnector;
 			ircInterface = inter;
 		}
+		internal void IncrementLineCount(int uid)
+		{
+			string statement = String.Format("INSERT INTO userstats VALUES ({0}, 1, 0, 0, 0) ON DUPLICATE KEY UPDATE `lines` = `lines` +1", uid);
+			sqlConnector.ExecuteStatement(statement);
+		}
+		internal void IncrementWordCount(int uid, int words)
+		{
+			string statement = String.Format("UPDATE userstats SET words = words + {0} WHERE user_id = {1}", words, uid);
+			sqlConnector.ExecuteStatement(statement);
+		}
 
 		/// <summary>
 		/// Attempts to find the User IDs for an IRC user, if the provided credentials combination already exists.
@@ -38,7 +48,7 @@ namespace BaggyBot
 		/// <param name="nickserv">The nickserv account used by the user</param>
 		/// <param name="uid">The user ID to be used. Set to -1 (default value) if the credentials belong to a new user</param>
 		/// <returns>The user id belonging to the new credentials combination</returns>
-		public int AddCredCombination(IrcUser user, string nickserv = null, int uid = -1)
+		internal int AddCredCombination(IrcUser user, string nickserv = null, int uid = -1)
 		{
 			if (uid == -1) {
 				try {
@@ -46,7 +56,7 @@ namespace BaggyBot
 					uid = result;
 					uid++;
 				} catch (RecordNullException) {
-					uid = 0;
+					uid = 1;
 				}
 			}
 
@@ -63,7 +73,6 @@ namespace BaggyBot
 			string query = string.Format("SELECT DISTINCT ns_login FROM usercreds WHERE user_id = {0} LIMIT 1", uid);
 			return sqlConnector.SelectOne<string>(query);
 		}
-
 
 		private int[] GetMatchesFirstLevel(IrcUser sender)
 		{
@@ -86,7 +95,7 @@ namespace BaggyBot
 		}
 
 		delegate int Level();
-		public int GetIdFromUser(IrcUser user)
+		internal int GetIdFromUser(IrcUser user)
 		{
 			Level l4 = () =>
 			{
@@ -143,6 +152,58 @@ namespace BaggyBot
 			};
 
 			return l1();
+		}
+		internal void IncrementEmoticon(string emoticon, int user)
+		{
+			string statement = String.Format("INSERT INTO emoticons VALUES (NULL, '{0}', 1, {1}) ON DUPLICATE KEY UPDATE `uses` = `uses` + 1, `last_used_by` = {1}", emoticon, user);
+			sqlConnector.ExecuteStatement(statement);
+			Logger.Log("Added emoticon: " + emoticon);
+		}
+
+		internal void IncrementVar(string id, int amount = 1)
+		{
+			string statement = String.Format("INSERT INTO var VALUES (NULL, '{0}', {1}) ON DUPLICATE KEY UPDATE `value` = `value` + {1}", id, amount);
+			sqlConnector.ExecuteStatement(statement);
+		}
+
+		internal void HandleNickChange(IrcUser user, string newNick)
+		{
+			int count = (int)sqlConnector.SelectOne<long>(String.Format("SELECT COUNT(*) FROM usercreds WHERE nick = '{0}' AND ident = '{1}' AND hostmask = '{2}'", newNick, user.Ident, user.Hostmask));
+			if (count == 1) {
+				return;
+			} else if (count > 1) {
+				Logger.Log(String.Format("Multiple credentials found for combination nick:{0}, ident{1}, hostmask{2}", newNick, user.Ident, user.Hostmask), LogLevel.Warning);
+				return;
+			}
+			int[] uids = GetUids(user);
+			if (uids.Length != 1) {
+				Logger.Log("Unable to handle nick change for " + user.Nick + " to " + newNick + ": Invalid amount of Uids received: " + uids.Length, LogLevel.Warning);
+				return;
+			}
+			string nickserv = GetNickserv(uids[0]);
+			AddCredCombination(new IrcUser(newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
+		}
+
+		internal void IncrementUrl(string url, int user, string usage)
+		{
+			string statement = String.Format("INSERT INTO urls VALUES (NULL, '{0}', 1, {1}, '{2}') ON DUPLICATE KEY UPDATE `uses` = `uses` + 1, `last_used_by` = {1}, `last_usage` = '{2}'", url, user, usage);
+			sqlConnector.ExecuteStatement(statement);
+		}
+		internal void IncrementWord(string word)
+		{
+			string statement = String.Format("INSERT INTO words VALUES (NULL, '{0}', 1) ON DUPLICATE KEY UPDATE `uses` = `uses` + 1", word);
+			sqlConnector.ExecuteStatement(statement);
+		}
+
+		internal void IncrementProfanities(int sender)
+		{
+			string statement = "UPDATE userstats SET profanities = profanities +1";
+			sqlConnector.ExecuteStatement(statement);
+		}
+		internal void IncrementActions(int sender)
+		{
+			string statement = "UPDATE userstats SET actions = actions +1";
+			sqlConnector.ExecuteStatement(statement);
 		}
 	}
 }

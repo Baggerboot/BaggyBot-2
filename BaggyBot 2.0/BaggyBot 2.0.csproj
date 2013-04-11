@@ -67,7 +67,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandHandler.cs" />
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\NickServ.cs" />
     <Compile Include="DataFunctionSet.cs" />
+    <Compile Include="Emoticons.cs" />
     <Compile Include="IrcInterface.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogLevel.cs" />
@@ -81,6 +85,7 @@
     <Compile Include="RecordNullException.cs" />
     <Compile Include="SqlConnector.cs" />
     <Compile Include="StatsHandler.cs" />
+    <Compile Include="WordTools.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

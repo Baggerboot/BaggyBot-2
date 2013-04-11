@@ -13,72 +13,76 @@ namespace BaggyBot
 		private DataFunctionSet dataFunctionSet;
 		private SqlConnector sqlConnector;
 		private IrcInterface ircInterface;
+		private Random rand;
 
 		// Non-exhaustive list of shared - idents that are commonly used by multiple people, often because they are standard values for their respective IRC clients.
 		private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
+		private string[] snagMessages = { "THERE'S BUTTER ON MY FACE!", "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
+		
 
 		public StatsHandler(DataFunctionSet dm, SqlConnector sc, IrcInterface inter)
 		{
 			dataFunctionSet = dm;
 			sqlConnector = sc;
 			ircInterface = inter;
+			rand = new Random();
 		}
-
-		public void HandleNickChange(IrcUser user, string newNick)
-		{
-			int count = (int) sqlConnector.SelectOne<long>(String.Format("SELECT COUNT(*) FROM usercreds WHERE nick = '{0}' AND ident = '{1}' AND hostmask = '{2}'", newNick, user.Ident, user.Hostmask));
-			if (count == 1) {
-				return;
-			} else if (count > 1) {
-				Logger.Log(String.Format("Multiple credentials found for combination nick:{0}, ident{1}, hostmask{2}", newNick, user.Ident, user.Hostmask), LogLevel.Warning);
-				return;
-			}
-			int[] uids = dataFunctionSet.GetUids(user);
-			if (uids.Length != 1) {
-				Logger.Log("Unable to handle nick change for " + user.Nick + " to " + newNick + ": Invalid amount of Uids received: " + uids.Length, LogLevel.Warning);
-				return;
-			}
-			string nickserv = dataFunctionSet.GetNickserv(uids[0]);
-			dataFunctionSet.AddCredCombination(new IrcUser(newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
-		}
-
-		
-
-		public void ProcessMessage(IrcMessage message)
+		internal void ProcessMessage(IrcMessage message)
 		{
 			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
-			List<string> words = GetWords(message.Message);
+			List<string> words = WordTools.GetWords(message.Message);
+			words.Select(s => s.Replace("'", "''"));
 
-			IncrementLineCount(userId);
-			IncrementWordCount(userId, words.Count);
+			dataFunctionSet.IncrementLineCount(userId);
+			dataFunctionSet.IncrementWordCount(userId, words.Count);
+			dataFunctionSet.IncrementVar("global_line_count");
+			dataFunctionSet.IncrementVar("global_word_count", words.Count);
+			GenerateRandomQuote(message, words);
+			GetEmoticons(userId, words);
+			foreach (string word in words) {
+				ProcessWord(message, word, userId);
+			}
 		}
 
-		
-
-		
-
-		private List<string> GetWords(string message)
+		private void ProcessWord(IrcMessage message, string word, int sender)
 		{
-			List<string> words = message.Trim().Split(' ').ToList<string>();
-			for (int i = 0; i < words.Count; i++) {
-				words[i] = words[i].Trim();
-				if (words[i] == string.Empty) {
-					words.RemoveAt(i);
-					i--;
+			if (word.StartsWith("http://") || word.StartsWith("https://")) {
+				dataFunctionSet.IncrementUrl(word, sender, message.Message);
+			} if (!WordTools.IsIgnoredWord(word) && word.Length >= 3) {
+				dataFunctionSet.IncrementWord(word);
+			} if (WordTools.IsProfanity(word)) {
+				dataFunctionSet.IncrementProfanities(sender);
+			}
+		}
+
+		private void GetEmoticons(int userId, List<string> words)
+		{
+			foreach (string word in words) {
+				if (Emoticons.List.Contains(word)) {
+					dataFunctionSet.IncrementEmoticon(word, userId);
 				}
 			}
-			return words;
 		}
 
-		private void IncrementLineCount(int uid)
+		private void GenerateRandomQuote(IrcMessage message, List<string> words)
 		{
-			string statement = String.Format("INSERT INTO userstats VALUES ({0}, 1, 0, 0, 0) ON DUPLICATE KEY UPDATE `lines` = `lines` +1", uid);
-			sqlConnector.ExecuteStatement(statement);
+			double chance = 0.03;
+			if (words.Count > 6) {
+				if (rand.NextDouble() <= chance) {
+					int randint = rand.Next(snagMessages.Length * 2);
+					if (randint < snagMessages.Length) {
+						ircInterface.SendMessage(message.Channel, snagMessages[randint]);
+					}else{
+						ircInterface.SendMessage(message.Channel, "Snagged!");
+					}
+				}
+			}
 		}
-		private void IncrementWordCount(int uid, int words)
-		{
-			string statement = String.Format("UPDATE userstats SET words = words + {0} WHERE user_id = {1}", words, uid);
-		}
+
+	
+		
+
+
 	}
 }

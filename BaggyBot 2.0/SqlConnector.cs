@@ -19,9 +19,9 @@ namespace BaggyBot
 		private string uid;
 		private string password;
 
-		public bool Connected { get; private set; }
+		internal bool Connected { get; private set; }
 
-		public SqlConnector()
+		internal SqlConnector()
 		{
 			Initialize();
 		}
@@ -40,7 +40,7 @@ namespace BaggyBot
 			Connected = true;
 		}
 
-		public void InitializeDatabase()
+		internal void InitializeDatabase()
 		{
 			Logger.Log("Attempting to initialize the database if this hasn't been done yet");
 
@@ -48,8 +48,8 @@ namespace BaggyBot
 
 			createStmts.Add( 
 			@"CREATE  TABLE IF NOT EXISTS `usercreds` (
-			  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-			  `user_id` INT UNSIGNED NOT NULL ,
+			  `id` INT NOT NULL AUTO_INCREMENT ,
+			  `user_id` INT NOT NULL ,
 			  `nick` VARCHAR(45) NOT NULL ,
 			  `ident` VARCHAR(16) NOT NULL ,
 			  `hostmask` VARCHAR(128) NOT NULL ,
@@ -61,11 +61,11 @@ namespace BaggyBot
 
 			createStmts.Add(
 			@"CREATE  TABLE IF NOT EXISTS `userstats` (
-			  `user_id` INT UNSIGNED NOT NULL ,
-			  `lines` INT UNSIGNED NOT NULL ,
-			  `words` INT UNSIGNED NOT NULL ,
-			  `actions` INT UNSIGNED NOT NULL ,
-			  `profanities` INT UNSIGNED NOT NULL ,
+			  `user_id` INT NOT NULL ,
+			  `lines` INT NOT NULL ,
+			  `words` INT NOT NULL ,
+			  `actions` INT NOT NULL ,
+			  `profanities` INT NOT NULL ,
 			  PRIMARY KEY (`user_id`) ,
 			  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) )
 			DEFAULT CHARACTER SET = utf8
@@ -73,21 +73,59 @@ namespace BaggyBot
 
 			createStmts.Add(
 			@"CREATE TABLE IF NOT EXISTS `quotes` (
-			  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-			  `user_id` INT UNSIGNED NOT NULL ,
-			  `quote` VARCHAR(500) NOT NULL ,
+			  `id` INT NOT NULL AUTO_INCREMENT,
+			  `user_id` INT NOT NULL ,
+			  `quote` TEXT NOT NULL ,
 			  PRIMARY KEY (`id`) )
 			DEFAULT CHARACTER SET = utf8
 			COLLATE = utf8_bin;");
 
 			createStmts.Add(
 			@"CREATE  TABLE IF NOT EXISTS `var` (
-			  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+			  `id` INT NOT NULL AUTO_INCREMENT ,
 			  `key` VARCHAR(45) NOT NULL ,
-			  `value` INT UNSIGNED NOT NULL ,
+			  `value` INT NOT NULL ,
 			  PRIMARY KEY (`id`) ,
 			  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
-			  UNIQUE INDEX `key_UNIQUE` (`key` ASC) );");
+			  UNIQUE INDEX `key_UNIQUE` (`key` ASC) )
+			DEFAULT CHARACTER SET = utf8
+			COLLATE = utf8_bin;");
+
+			createStmts.Add(
+			@"CREATE  TABLE IF NOT EXISTS `emoticons` (
+			  `id` INT NOT NULL AUTO_INCREMENT ,
+			  `emoticon` VARCHAR(45) NOT NULL ,
+			  `uses` INT NOT NULL ,
+			  `last_used_by` INT NOT NULL ,
+			  PRIMARY KEY (`id`) ,
+			  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
+			  UNIQUE INDEX `emoticon_UNIQUE` (`emoticon` ASC) )
+			DEFAULT CHARACTER SET = utf8
+			COLLATE = utf8_bin;");
+
+			createStmts.Add(
+			@"CREATE  TABLE IF NOT EXISTS `urls` (
+			  `id` INT NOT NULL AUTO_INCREMENT ,
+			  `url` VARCHAR(220) NOT NULL ,
+			  `uses` INT NOT NULL ,
+			  `last_used_by` INT NOT NULL ,
+			  `last_usage` TEXT NOT NULL ,
+			  PRIMARY KEY (`id`) ,
+			  UNIQUE INDEX `urlid_UNIQUE` (`id` ASC) ,
+			  UNIQUE INDEX `url_UNIQUE` (`url` ASC) )
+			DEFAULT CHARACTER SET = utf8
+			COLLATE = utf8_bin;");
+
+			createStmts.Add(
+			@"CREATE  TABLE IF NOT EXISTS `words` (
+			  `id` INT NOT NULL AUTO_INCREMENT ,
+			  `word` VARCHAR(220) NOT NULL ,
+			  `uses` INT NOT NULL ,
+			  PRIMARY KEY (`id`) ,
+			  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
+			  UNIQUE INDEX `word_UNIQUE` (`word` ASC) )
+			DEFAULT CHARACTER SET = utf8
+			COLLATE = utf8_bin;");
 
 			foreach (string str in createStmts) {
 				ExecuteStatement(str);
@@ -96,7 +134,7 @@ namespace BaggyBot
 			Logger.Log("Done.");
 		}
 
-		public bool OpenConnection()
+		internal bool OpenConnection()
 		{
 			try {
 				connection.Open();
@@ -113,7 +151,7 @@ namespace BaggyBot
 			CloseConnection();
 		}
 
-		public bool CloseConnection()
+		internal bool CloseConnection()
 		{
 			try {
 				connection.Close();
@@ -129,7 +167,7 @@ namespace BaggyBot
 		/// Execute an SQL statement without returning any data.
 		/// </summary>
 		/// <returns>Number of rows affected</returns>
-		public int ExecuteStatement(string statement)
+		internal int ExecuteStatement(string statement)
 		{
 			MySqlCommand cmd = new MySqlCommand(statement, connection);
 			return cmd.ExecuteNonQuery();
@@ -138,7 +176,7 @@ namespace BaggyBot
 		/// <summary>
 		/// Execute a query and tries to return the data as a DataView.
 		/// </summary>
-		public DataView Select(string query)
+		internal DataView Select(string query)
 		{
 			MySqlCommand cmd = new MySqlCommand(query, connection);
 			MySqlDataAdapter da = new MySqlDataAdapter(cmd);
@@ -152,7 +190,7 @@ namespace BaggyBot
 		/// Selects a vector and returns it in the form of an array.
 		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
 		/// </summary>
-		public T[] SelectVector<T>(string query)
+		internal T[] SelectVector<T>(string query)
 		{
 			DataView dv = Select(query);
 			if (dv.Table.Columns.Count > 1) {
@@ -167,14 +205,33 @@ namespace BaggyBot
 			}
 		}
 
-
-		public T SelectOne<T>(string query)
+		/*internal Nullable<T> SelectOneN<T>(string query)
 		{
 			DataView dv = Select(query);
 
 			Object data = dv[0][0];
 			if (dv.Count == 1) {
+				if (data == DBNull.Value) {
+					return null;
+				} else {
+					return (T)data;
+				}
+			} else {
+				throw new InvalidOperationException("The passed query returned more or less than one record.");
+			}
+		}*/
+
+		internal T SelectOne<T>(string query)
+		{
+			DataView dv = Select(query);
+
+			Object data = dv[0][0];
+			if (dv.Count == 1) {
+				
 				if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
+					if (typeof(T) == typeof(String)) {
+						return default(T);
+					}
 					throw new RecordNullException();
 				} else {
 					return (T)data;
