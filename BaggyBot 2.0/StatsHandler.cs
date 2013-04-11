@@ -32,7 +32,7 @@ namespace BaggyBot
 			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
 			List<string> words = WordTools.GetWords(message.Message);
-			words.Select(s => s.Replace("'", "''"));
+			words = words.Select(s => s.Replace("'", "''")).ToList();
 
 			dataFunctionSet.IncrementLineCount(userId);
 			dataFunctionSet.IncrementWordCount(userId, words.Count);

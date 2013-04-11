@@ -25,66 +25,6 @@ namespace BaggyBot.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("BaggyBetaBot")]
-        public string nick {
-            get {
-                return ((string)(this["nick"]));
-            }
-            set {
-                this["nick"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Dredger2")]
-        public string ident {
-            get {
-                return ((string)(this["ident"]));
-            }
-            set {
-                this["ident"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3306")]
-        public int sqlport {
-            get {
-                return ((int)(this["sqlport"]));
-            }
-            set {
-                this["sqlport"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
-        public string sqlhost {
-            get {
-                return ((string)(this["sqlhost"]));
-            }
-            set {
-                this["sqlhost"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("#baggy")]
-        public string channel {
-            get {
-                return ((string)(this["channel"]));
-            }
-            set {
-                this["channel"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("14159265")]
         public string sqlpass {
             get {
@@ -104,6 +44,102 @@ namespace BaggyBot.Properties {
             }
             set {
                 this["sqluser"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("BaggyBotRC")]
+        public string nick {
+            get {
+                return ((string)(this["nick"]));
+            }
+            set {
+                this["nick"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("dredger")]
+        public string ident {
+            get {
+                return ((string)(this["ident"]));
+            }
+            set {
+                this["ident"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("irc.esper.net")]
+        public string ircserver {
+            get {
+                return ((string)(this["ircserver"]));
+            }
+            set {
+                this["ircserver"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6667")]
+        public int ircserverport {
+            get {
+                return ((int)(this["ircserverport"]));
+            }
+            set {
+                this["ircserverport"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("BaggyBot 2.0 Release Candidate 1")]
+        public string realname {
+            get {
+                return ((string)(this["realname"]));
+            }
+            set {
+                this["realname"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#fofftopic")]
+        public string firstchannel {
+            get {
+                return ((string)(this["firstchannel"]));
+            }
+            set {
+                this["firstchannel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string sqlhost {
+            get {
+                return ((string)(this["sqlhost"]));
+            }
+            set {
+                this["sqlhost"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("stats_bot")]
+        public string database {
+            get {
+                return ((string)(this["database"]));
+            }
+            set {
+                this["database"] = value;
             }
         }
     }

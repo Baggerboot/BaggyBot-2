@@ -26,6 +26,7 @@ namespace BaggyBot
 		internal static void Log(string message, LogLevel level = LogLevel.Debug)
 		{
 			string format = String.Format("[{0}]\t{1}", level.ToString(), message);
+			//await textWriter.WriteLineAsync(format);
 			textWriter.WriteLine(format);
 			Console.WriteLine(format);
 			textWriter.Flush();

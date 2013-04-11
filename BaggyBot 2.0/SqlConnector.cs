@@ -8,36 +8,28 @@ using System.Threading.Tasks;
 using System.Data;
 using MySql.Data.MySqlClient;
 using System.Configuration;
+using BaggyBot.Properties;
 
 namespace BaggyBot
 {
-	class SqlConnector : IDisposable
+	class SqlConnector
 	{
 		private MySqlConnection connection;
-		private string server;
-		private string database;
-		private string uid;
-		private string password;
 
-		internal bool Connected { get; private set; }
-
-		internal SqlConnector()
+		public SqlConnector()
 		{
 			Initialize();
 		}
 
 		private void Initialize()
 		{
-			uid = Properties.Settings.Default.sqluser;
-			password = Properties.Settings.Default.sqlpass;
-			server = "127.0.0.1";
-			database = "stats_bot";
-			string connectionString;
-			connectionString = "SERVER=" + server + ";" + "DATABASE=" +
-			database + ";" + "UID=" + uid + ";" + "PASSWORD=" + password + ";";
+			string uid = Settings.Default.sqluser;
+			string password = Settings.Default.sqlpass;
+			string server = Settings.Default.sqlhost;
+			string database = Settings.Default.database;
+			string connectionString = String.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};", server, database, uid, password);
 
 			connection = new MySqlConnection(connectionString);
-			Connected = true;
 		}
 
 		internal void InitializeDatabase()
@@ -134,110 +126,112 @@ namespace BaggyBot
 			Logger.Log("Done.");
 		}
 
-		internal bool OpenConnection()
+		private bool OpenConnection()
 		{
 			try {
 				connection.Open();
-				Connected = true;
 				return true;
 			} catch (MySqlException ex) {
-				Console.WriteLine("ERROR: " + ex.Message);
+				Logger.Log("Failed to open a connection to the SQL database. Error mesage: " + ex.Message, LogLevel.Error);
 				return false;
 			}
 		}
 
-		public void Dispose()
-		{
-			CloseConnection();
-		}
-
-		internal bool CloseConnection()
+		private bool CloseConnection()
 		{
 			try {
 				connection.Close();
-				Connected = false;
 				return true;
 			} catch (MySqlException ex) {
-				Logger.Log(ex.Message);
+				Logger.Log("Failed to close the connection to the SQL database. Error mesage: " + ex.Message, LogLevel.Error);
 				return false;
 			}
 		}
 
-		/// <summary>
-		/// Execute an SQL statement without returning any data.
-		/// </summary>
-		/// <returns>Number of rows affected</returns>
 		internal int ExecuteStatement(string statement)
 		{
-			MySqlCommand cmd = new MySqlCommand(statement, connection);
-			return cmd.ExecuteNonQuery();
+			if (OpenConnection()) {
+				using (MySqlCommand cmd = new MySqlCommand(statement, connection)) {
+					int result = cmd.ExecuteNonQuery();
+					CloseConnection();
+					return result;
+				}
+			} else {
+				return -1;
+			}
 		}
 
-		/// <summary>
-		/// Execute a query and tries to return the data as a DataView.
-		/// </summary>
-		internal DataView Select(string query)
+		private DataView Select(string query)
 		{
-			MySqlCommand cmd = new MySqlCommand(query, connection);
-			MySqlDataAdapter da = new MySqlDataAdapter(cmd);
-
-			DataSet ds = new DataSet();
-			da.Fill(ds);
-			return ds.Tables[0].DefaultView;
+			if (OpenConnection()) {
+				using (MySqlCommand cmd = new MySqlCommand(query, connection)) {
+					using (MySqlDataAdapter da = new MySqlDataAdapter(cmd)) {
+						using (DataSet ds = new DataSet()) {
+							da.Fill(ds);
+							CloseConnection();
+							return ds.Tables[0].DefaultView;
+						}
+					}
+				}
+			} else {
+				return null;
+			}
 		}
 
-		/// <summary>
+		/*private DataView Select(string query)
+		{
+			using( MySqlCommand cmd = new MySqlCommand(query, connection)){
+				using(MySqlDataAdapter da = new MySqlDataAdapter(cmd)){
+					using (DataSet ds = new DataSet()) {
+						try {
+							da.Fill(ds);
+							return ds.Tables[0].DefaultView;
+						} catch (MySqlException e) {
+							Logger.Log(String.Format("Failed to execute a query: Error message: \"{0}\", SQL Query: \"{1}\"", e.Message, query), LogLevel.Error);
+							return null;
+						}
+					}
+				}
+			}
+		}*/
+
 		/// Selects a vector and returns it in the form of an array.
 		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
 		/// </summary>
 		internal T[] SelectVector<T>(string query)
 		{
-			DataView dv = Select(query);
-			if (dv.Table.Columns.Count > 1) {
-				throw new InvalidOperationException("The passed query returned more than one column.");
-			} else {
-				T[] data = new T[dv.Count];
-				for (int i = 0; i < data.Length; i++) {
-					Object value = dv[0][i];
-					data[i] = (T) value;
+			using (DataView dv = Select(query)) {
+				if (dv.Table.Columns.Count > 1) {
+					throw new InvalidOperationException("The passed query returned more than one column.");
+				} else {
+					T[] data = new T[dv.Count];
+					for (int i = 0; i < data.Length; i++) {
+						Object value = dv[0][i];
+						data[i] = (T)value;
+					}
+					return data;
 				}
-				return data;
 			}
 		}
 
-		/*internal Nullable<T> SelectOneN<T>(string query)
-		{
-			DataView dv = Select(query);
-
-			Object data = dv[0][0];
-			if (dv.Count == 1) {
-				if (data == DBNull.Value) {
-					return null;
-				} else {
-					return (T)data;
-				}
-			} else {
-				throw new InvalidOperationException("The passed query returned more or less than one record.");
-			}
-		}*/
-
 		internal T SelectOne<T>(string query)
 		{
-			DataView dv = Select(query);
+			using (DataView dv = Select(query)) {
 
-			Object data = dv[0][0];
-			if (dv.Count == 1) {
-				
-				if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
-					if (typeof(T) == typeof(String)) {
-						return default(T);
+				Object data = dv[0][0];
+				if (dv.Count == 1) {
+
+					if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
+						if (typeof(T) == typeof(String)) {
+							return default(T);
+						}
+						throw new RecordNullException();
+					} else {
+						return (T)data;
 					}
-					throw new RecordNullException();
 				} else {
-					return (T)data;
+					throw new InvalidOperationException("The passed query returned more or less than one record.");
 				}
-			} else {
-				throw new InvalidOperationException("The passed query returned more or less than one record.");
 			}
 		}
 	}

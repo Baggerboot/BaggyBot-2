@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using IRCSharp;
+using BaggyBot.Properties;
 
 namespace BaggyBot
 {
@@ -16,21 +17,16 @@ namespace BaggyBot
 		private DataFunctionSet dataFunctionSet;
 		private CommandHandler commandHandler;
 		private IrcInterface ircInterface;
-		private string commandIdentifier = "-";
+		public const string commandIdentifier = "-";
 
-		internal const string Version = "pre2.0";
+		internal const string Version = "2.0 Release Candidate 1";
 
 		public Program()
 		{
 			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
 
 			sqlConnector = new SqlConnector();
-			if (sqlConnector.OpenConnection()) {
-				Logger.Log("Succesfully connected to the database.");
-			} else {
-				Logger.Log("Failed to connect to the database!");
-				return;
-			}
+
 			Console.WriteLine("Purge the database? y/n");
 			var k = Console.ReadKey();
 			if (k.KeyChar == 'y') {
@@ -86,19 +82,22 @@ namespace BaggyBot
 
 		internal void Connect()
 		{
-			if (!sqlConnector.Connected) {
-				Logger.Log("Not connected to an SQL server.", LogLevel.Error);
-				return;
-			}
 			Logger.Log("Connecting to the IRC server");
+
+			string server = Settings.Default.ircserver;
+			int port = Settings.Default.ircserverport;
+			string nick = Settings.Default.nick;
+			string ident = Settings.Default.ident;
+			string realname = Settings.Default.realname;
+			string firschannel = Settings.Default.firstchannel;
+
 			try {
-				client.Connect("irc.esper.net", 6667, "BaggyBetaBot", "Dredger2", "BaggyBot Beta");
-				client.JoinChannel("#baggy");
+				client.Connect(server,port, nick, ident, realname);
+				client.JoinChannel(firschannel);
 				Logger.Log("Connection established.");
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 			}
-			
 		}
 
 		private void ProcessMessage(IrcMessage message)

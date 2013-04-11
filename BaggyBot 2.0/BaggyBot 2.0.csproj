@@ -68,6 +68,8 @@
   <ItemGroup>
     <Compile Include="CommandHandler.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\Crash.cs" />
+    <Compile Include="Commands\Example.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\NickServ.cs" />
     <Compile Include="DataFunctionSet.cs" />

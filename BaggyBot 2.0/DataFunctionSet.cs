@@ -197,7 +197,7 @@ namespace BaggyBot
 
 		internal void IncrementProfanities(int sender)
 		{
-			string statement = "UPDATE userstats SET profanities = profanities +1";
+			string statement = String.Format("UPDATE userstats SET profanities = profanities +1 WHERE user_id = {0}", sender);
 			sqlConnector.ExecuteStatement(statement);
 		}
 		internal void IncrementActions(int sender)

@@ -4,21 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// NOTE: This is not an actual command, just a template for quickly adding a new command
+
 namespace BaggyBot.Commands
 {
-	class NickServ : ICommand
+	class Example : ICommand
 	{
 		private IrcInterface ircInterface;
-		private DataFunctionSet dataFunctionSet;
 
-		public NickServ(IrcInterface inter, DataFunctionSet df)
+		public Example(IrcInterface inter)
 		{
 			ircInterface = inter;
 		}
 
-		public void Use(Command c)
+		public void Use(Command command)
 		{
-			
+
 		}
 	}
 }

@@ -11,10 +11,10 @@ namespace BaggyBot.Commands
 	struct Command
 	{
 		public string Primary;
-		public string Args;
+		public string[] Args;
 		public IrcUser Sender;
 
-		public Command(string command, string args, IrcUser sender)
+		public Command(string command, string[] args, IrcUser sender)
 		{
 			Primary = command;
 			Args = args;

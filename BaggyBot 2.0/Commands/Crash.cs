@@ -6,19 +6,18 @@ using System.Threading.Tasks;
 
 namespace BaggyBot.Commands
 {
-	class NickServ : ICommand
+	class Crash : ICommand
 	{
 		private IrcInterface ircInterface;
-		private DataFunctionSet dataFunctionSet;
 
-		public NickServ(IrcInterface inter, DataFunctionSet df)
+		public Crash(IrcInterface inter)
 		{
 			ircInterface = inter;
 		}
 
-		public void Use(Command c)
+		public void Use(Command command)
 		{
-			
+
 		}
 	}
 }

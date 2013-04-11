@@ -14,6 +14,7 @@ namespace BaggyBot
 		private IrcInterface ircInterface;
 
 		private Dictionary<string, ICommand> commands;
+
 		public CommandHandler(IrcInterface inter, SqlConnector sc, DataFunctionSet ds)
 		{
 			ircInterface = inter;
@@ -22,27 +23,31 @@ namespace BaggyBot
 
 			commands = new Dictionary<string, ICommand>()
 			{
-				{"ns", new NickServ(ircInterface)}
+				{"ns", new NickServ(ircInterface, dataFunctionSet)}
 			};
-
 		}
 
 		internal void ProcessCommand(IRCSharp.IrcMessage message)
 		{
-			if (!message.Sender.Ident.Equals("~baggerboo")) {
-				ircInterface.SendMessage(message.Channel, "You are not authorized to use commands.");
-			}
+			if(message.Message.Equals(Program.commandIdentifier)) return;
 
 			string command = message.Message.Substring(1);
-			string[] args = command.Substring(command.IndexOf(' ')).Split(' ');
-			if (command.Equals("test")) {
-				int[] uids = dataFunctionSet.GetUids(message.Sender);
-				ircInterface.SendMessage(message.Channel, "Your uid is " + string.Join(",", uids.Select(x => x.ToString()).ToArray()));
-			} else if (command.Equals("ns")) {
-				ircInterface.SendMessage(message.Channel, "Your NickServ is " + ircInterface.DoNickservCall(message.Sender.Nick));
-			} else if (command.Equals("join")) {
-				ircInterface.JoinChannel(args[1]);
+			string[] args = command.Split(' ');
+			string primary = args[0];
+
+			// Don't bother parsing the message if it's not a command
+			if (!commands.ContainsKey(primary)) {
+				return;
 			}
+
+			if(args.Length > 1){
+				args = args.Skip(1).ToArray();
+			}else{
+				args = null;
+			}
+			Command cmd = new Command(primary, args, message.Sender);
+
+			commands[primary].Use(cmd);
 		}
 	}
 }
