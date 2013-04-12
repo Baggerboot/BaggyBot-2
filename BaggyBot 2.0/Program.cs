@@ -60,7 +60,7 @@ namespace BaggyBot
 
 		private void ProcessFormattedLine(IrcLine line)
 		{
-		if (line.Command.Equals("NOTICE") && ircInterface.HasNickservCall && client.GetUserFromSender(line.Sender).Ident.Equals("NickServ")) {
+			if (line.Command.Equals("NOTICE") && ircInterface.HasNickservCall && client.GetUserFromSender(line.Sender).Ident.Equals("NickServ")) {
 				if (line.FinalArgument.StartsWith("Information on")) {
 					string data = line.FinalArgument.Substring("Information on  ".Length);
 					string nick = data.Substring(0, data.IndexOf(" ")-1);
@@ -72,6 +72,8 @@ namespace BaggyBot
 					nick = nick.Substring(0, nick.IndexOf(' ')-1);
 					ircInterface.AddNickserv(nick, null);
 				}
+			}else if(line.Command.Equals("401") && ircInterface.HasNickservCall && line.FinalArgument.ToLower().Contains("nickserv: no such nick")){
+				ircInterface.DisableNickservCalls();
 			}
 		}
 
@@ -95,6 +97,7 @@ namespace BaggyBot
 
 			try {
 				client.Connect(server,port, nick, ident, realname);
+				ircInterface.TestNickServ();
 				client.JoinChannel(firschannel);
 				Logger.Log("Connection established.");
 			} catch (System.Net.Sockets.SocketException e) {

@@ -20,7 +20,11 @@ namespace BaggyBot.Commands
 		public void Use(Command c)
 		{
 			string ns = dataFunctionSet.GetNickserv(dataFunctionSet.GetIdFromUser(c.Sender));
-			ircInterface.SendMessage(c.Channel, "Your NickServ username is " + ns);
+			if (ns == null) {
+				ircInterface.SendMessage(c.Channel, "You don't appear to be identified with NickServ.");
+			} else {
+				ircInterface.SendMessage(c.Channel, "Your NickServ username is " + ns);
+			}
 		}
 	}
 }

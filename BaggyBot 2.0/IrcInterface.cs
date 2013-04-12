@@ -10,22 +10,22 @@ namespace BaggyBot
 {
 	class IrcInterface
 	{
-		private IrcClient client;
-		
+		private IrcClient 
+			client;
+		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
+		private List<string> nickservCalls = new List<string>();
+		private bool CanDoNickservCall = true;
+		internal bool HasNickservCall { get { return nickservCalls.Count > 0; } }
+
+
 		public IrcInterface(IrcClient client)
 		{
 			this.client = client;
 		}
 
-		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
-		private List<string> nickservCalls = new List<string>();
-
-		internal bool HasNickservCall
+		internal void DisableNickservCalls()
 		{
-			get
-			{
-				return nickservCalls.Count > 0;
-			}
+			CanDoNickservCall = false;
 		}
 
 		internal void AddNickserv(string nick, string nickserv)
@@ -35,6 +35,8 @@ namespace BaggyBot
 
 		internal string DoNickservCall(string nick)
 		{
+			if (!CanDoNickservCall) return null;
+
 			if (!nickservCalls.Contains(nick)) {
 				nickservCalls.Add(nick);
 				var t = new System.Threading.Thread(() => SendMessage("NickServ", "INFO " + nick));
@@ -56,6 +58,11 @@ namespace BaggyBot
 		internal void JoinChannel(string channel)
 		{
 			client.JoinChannel(channel);
+		}
+
+		internal void TestNickServ()
+		{
+			client.SendMessage("NickServ", "INFO");
 		}
 	}
 }
