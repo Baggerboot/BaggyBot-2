@@ -13,12 +13,14 @@ namespace BaggyBot.Commands
 		public string Primary;
 		public string[] Args;
 		public IrcUser Sender;
+		public string Channel;
 
-		public Command(string command, string[] args, IrcUser sender)
+		public Command(string command, string[] args, IrcUser sender, string channel)
 		{
 			Primary = command;
 			Args = args;
 			Sender = sender;
+			Channel = channel;
 		}
 	}
 }

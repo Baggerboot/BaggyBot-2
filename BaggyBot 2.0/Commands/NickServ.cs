@@ -14,11 +14,13 @@ namespace BaggyBot.Commands
 		public NickServ(IrcInterface inter, DataFunctionSet df)
 		{
 			ircInterface = inter;
+			dataFunctionSet = df;
 		}
 
 		public void Use(Command c)
 		{
-			
+			string ns = dataFunctionSet.GetNickserv(dataFunctionSet.GetIdFromUser(c.Sender));
+			ircInterface.SendMessage(c.Channel, "Your NickServ username is " + ns);
 		}
 	}
 }

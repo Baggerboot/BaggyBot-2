@@ -48,7 +48,7 @@ namespace BaggyBot
 		private void ProcessWord(IrcMessage message, string word, int sender)
 		{
 			if (word.StartsWith("http://") || word.StartsWith("https://")) {
-				dataFunctionSet.IncrementUrl(word, sender, message.Message);
+				dataFunctionSet.IncrementUrl(word, sender, message.Message.Replace("'", "''"));
 			} if (!WordTools.IsIgnoredWord(word) && word.Length >= 3) {
 				dataFunctionSet.IncrementWord(word);
 			} if (WordTools.IsProfanity(word)) {

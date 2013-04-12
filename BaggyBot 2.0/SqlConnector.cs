@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Threading;
 using System.Data;
 using MySql.Data.MySqlClient;
 using System.Configuration;
@@ -15,6 +16,7 @@ namespace BaggyBot
 	class SqlConnector
 	{
 		private MySqlConnection connection;
+		private bool busy;
 
 		public SqlConnector()
 		{
@@ -126,18 +128,21 @@ namespace BaggyBot
 			Logger.Log("Done.");
 		}
 
-		private bool OpenConnection()
+		public bool OpenConnection()
 		{
 			try {
 				connection.Open();
 				return true;
-			} catch (MySqlException ex) {
-				Logger.Log("Failed to open a connection to the SQL database. Error mesage: " + ex.Message, LogLevel.Error);
+			} catch (MySqlException e) {
+				Logger.Log("Failed to open a connection to the SQL database. Error mesage: " + e.Message, LogLevel.Error);
 				return false;
+			} catch (InvalidOperationException e) {
+				Logger.Log("Failed to open a connection to the SQL database. Error message: " + e.Message, LogLevel.Error);
+				return true;
 			}
 		}
 
-		private bool CloseConnection()
+		public bool CloseConnection()
 		{
 			try {
 				connection.Close();
@@ -150,88 +155,92 @@ namespace BaggyBot
 
 		internal int ExecuteStatement(string statement)
 		{
-			if (OpenConnection()) {
-				using (MySqlCommand cmd = new MySqlCommand(statement, connection)) {
-					int result = cmd.ExecuteNonQuery();
-					CloseConnection();
-					return result;
+			if (busy) {
+				while (busy) {
+					Thread.Sleep(10);
 				}
-			} else {
-				return -1;
+				Logger.Log("Finished waiting for other thread to release resources.");
 			}
+			busy = true;
+			int result;
+			using (MySqlCommand cmd = new MySqlCommand(statement, connection)) {
+				result = cmd.ExecuteNonQuery();
+			}
+			busy = false;
+			return result;
 		}
 
 		private DataView Select(string query)
 		{
-			if (OpenConnection()) {
-				using (MySqlCommand cmd = new MySqlCommand(query, connection)) {
-					using (MySqlDataAdapter da = new MySqlDataAdapter(cmd)) {
-						using (DataSet ds = new DataSet()) {
-							da.Fill(ds);
-							CloseConnection();
-							return ds.Tables[0].DefaultView;
-						}
-					}
-				}
-			} else {
-				return null;
-			}
-		}
-
-		/*private DataView Select(string query)
-		{
-			using( MySqlCommand cmd = new MySqlCommand(query, connection)){
-				using(MySqlDataAdapter da = new MySqlDataAdapter(cmd)){
+			DataView ret;
+			using (MySqlCommand cmd = new MySqlCommand(query, connection)) {
+				using (MySqlDataAdapter da = new MySqlDataAdapter(cmd)) {
 					using (DataSet ds = new DataSet()) {
-						try {
-							da.Fill(ds);
-							return ds.Tables[0].DefaultView;
-						} catch (MySqlException e) {
-							Logger.Log(String.Format("Failed to execute a query: Error message: \"{0}\", SQL Query: \"{1}\"", e.Message, query), LogLevel.Error);
-							return null;
-						}
+						da.Fill(ds);
+						ret = ds.Tables[0].DefaultView;
 					}
 				}
 			}
-		}*/
-
+			return ret;
+		}
 		/// Selects a vector and returns it in the form of an array.
 		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
 		/// </summary>
 		internal T[] SelectVector<T>(string query)
 		{
+			int ID = new Random().Next(100, 999);
+			if (busy) {
+				while (busy) {
+					Thread.Sleep(10);
+				}
+				Logger.Log("Finished waiting for other thread to release resources.");
+			}
+			busy = true;
+			T[] data;
 			using (DataView dv = Select(query)) {
 				if (dv.Table.Columns.Count > 1) {
+					busy = false;
 					throw new InvalidOperationException("The passed query returned more than one column.");
 				} else {
-					T[] data = new T[dv.Count];
+					data = new T[dv.Count];
 					for (int i = 0; i < data.Length; i++) {
 						Object value = dv[0][i];
 						data[i] = (T)value;
 					}
-					return data;
 				}
 			}
+			busy = false;
+			return data;
 		}
 
 		internal T SelectOne<T>(string query)
 		{
+			if (busy) {
+				while (busy) {
+					Thread.Sleep(10);
+				}
+				Logger.Log("Finished waiting for other thread to release resources.");
+			}
+			busy = true;
+			Object data;
 			using (DataView dv = Select(query)) {
-
-				Object data = dv[0][0];
 				if (dv.Count == 1) {
-
-					if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
-						if (typeof(T) == typeof(String)) {
-							return default(T);
-						}
-						throw new RecordNullException();
-					} else {
-						return (T)data;
-					}
+					data = dv[0][0];
 				} else {
+					busy = false;
 					throw new InvalidOperationException("The passed query returned more or less than one record.");
 				}
+			}
+			if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
+				if (typeof(T) == typeof(String)) {
+					busy = false;
+					return default(T);
+				}
+				busy = false;
+				throw new RecordNullException();
+			} else {
+				busy = false;
+				return (T)data;
 			}
 		}
 	}

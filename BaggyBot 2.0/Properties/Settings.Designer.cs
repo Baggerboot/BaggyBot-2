@@ -97,7 +97,7 @@ namespace BaggyBot.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("BaggyBot 2.0 Release Candidate 1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("BaggyBot")]
         public string realname {
             get {
                 return ((string)(this["realname"]));
@@ -109,7 +109,7 @@ namespace BaggyBot.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("#fofftopic")]
+        [global::System.Configuration.DefaultSettingValueAttribute("#baggy")]
         public string firstchannel {
             get {
                 return ((string)(this["firstchannel"]));
@@ -140,6 +140,24 @@ namespace BaggyBot.Properties {
             }
             set {
                 this["database"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Release Candidate 1 Version 1")]
+        public string version {
+            get {
+                return ((string)(this["version"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("BaggyBot.log")]
+        public string logfile {
+            get {
+                return ((string)(this["logfile"]));
             }
         }
     }

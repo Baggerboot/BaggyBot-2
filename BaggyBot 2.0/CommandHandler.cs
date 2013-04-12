@@ -23,7 +23,10 @@ namespace BaggyBot
 
 			commands = new Dictionary<string, ICommand>()
 			{
-				{"ns", new NickServ(ircInterface, dataFunctionSet)}
+				{"ns", new NickServ(ircInterface, dataFunctionSet)},
+				{"crash", new Crash(ircInterface, dataFunctionSet)},
+				{"join", new Join(ircInterface, dataFunctionSet)},
+				{"elycool", new Elycool(ircInterface)}
 			};
 		}
 
@@ -45,7 +48,7 @@ namespace BaggyBot
 			}else{
 				args = null;
 			}
-			Command cmd = new Command(primary, args, message.Sender);
+			Command cmd = new Command(primary, args, message.Sender, message.Channel);
 
 			commands[primary].Use(cmd);
 		}

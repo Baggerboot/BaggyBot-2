@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace BaggyBot.Commands
 {
-	class Crash : ICommand
+	class Join : ICommand
 	{
 		private IrcInterface ircInterface;
 		private DataFunctionSet dataFunctionSet;
 
-		public Crash(IrcInterface inter, DataFunctionSet df)
+		public Join(IrcInterface inter, DataFunctionSet df)
 		{
 			ircInterface = inter;
 			dataFunctionSet = df;
@@ -20,7 +20,13 @@ namespace BaggyBot.Commands
 		public void Use(Command command)
 		{
 			if (dataFunctionSet.GetNickserv(dataFunctionSet.GetIdFromUser(command.Sender)).Equals("Baggerboot")) {
-				throw new Exception("Manually initiated crash.");
+				if (command.Args.Length == 1) {
+					ircInterface.JoinChannel(command.Args[0]);
+				} else {
+					ircInterface.SendMessage(command.Channel, "Usage: -join <channel>");
+				}
+			} else {
+				ircInterface.SendMessage(command.Channel, "You are not authorized to use this command");
 			}
 		}
 	}

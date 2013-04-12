@@ -27,6 +27,8 @@ namespace BaggyBot
 
 			sqlConnector = new SqlConnector();
 
+			sqlConnector.OpenConnection();
+
 			Console.WriteLine("Purge the database? y/n");
 			var k = Console.ReadKey();
 			if (k.KeyChar == 'y') {
