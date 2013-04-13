@@ -9,8 +9,6 @@ using System.Threading;
 using System.Data;
 using MySql.Data.MySqlClient;
 using System.Configuration;
-using BaggyBot.Properties;
-
 namespace BaggyBot
 {
 	class SqlConnector
@@ -25,10 +23,11 @@ namespace BaggyBot
 
 		private void Initialize()
 		{
-			string uid = Settings.Default.sqluser;
-			string password = Settings.Default.sqlpass;
-			string server = Settings.Default.sqlhost;
-			string database = Settings.Default.database;
+			Settings set = new Settings();
+			string uid = set["sql_user"];
+			string password = set["sql_password"];
+			string server = set["sql_host"];
+			string database = set["sql_database"];
 			string connectionString = String.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};", server, database, uid, password);
 
 			connection = new MySqlConnection(connectionString);

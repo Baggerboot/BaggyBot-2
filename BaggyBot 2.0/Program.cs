@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 using IRCSharp;
-using BaggyBot.Properties;
 
 namespace BaggyBot
 {
@@ -75,25 +74,33 @@ namespace BaggyBot
 			}else if(line.Command.Equals("401") && ircInterface.HasNickservCall && line.FinalArgument.ToLower().Contains("nickserv: no such nick")){
 				ircInterface.DisableNickservCalls();
 			}
+			if (!line.Command.Equals("PRIVMSG")) {
+				ConsoleWriteLine("[RAW]\t" + line, ConsoleColor.DarkGray);
+			}
+		}
+
+		private static void ConsoleWriteLine(string line, ConsoleColor color = ConsoleColor.Gray)
+		{
+			Console.ForegroundColor = color;
+			Console.WriteLine(line);
 		}
 
 		private void ProcessRawLine(string line)
 		{
-			Console.ForegroundColor = ConsoleColor.Gray;
-			Console.WriteLine("[RAW]\t"+line);
-			Console.ResetColor();
+			ConsoleWriteLine("[RAW]\t" + line);
 		}
 
 		internal void Connect()
 		{
 			Logger.Log("Connecting to the IRC server");
+			Settings s = new Settings();
 
-			string server = Settings.Default.ircserver;
-			int port = Settings.Default.ircserverport;
-			string nick = Settings.Default.nick;
-			string ident = Settings.Default.ident;
-			string realname = Settings.Default.realname;
-			string firschannel = Settings.Default.firstchannel;
+			string server = s["irc_server"];
+			int port = int.Parse(s["irc_port"]);
+			string nick = s["irc_nick"];
+			string ident = s["irc_ident"];
+			string realname = s["irc_realname"];
+			string firschannel = s["irc_initial_channel"];
 
 			try {
 				client.Connect(server,port, nick, ident, realname);
@@ -107,9 +114,7 @@ namespace BaggyBot
 
 		private void ProcessMessage(IrcMessage message)
 		{
-			Console.ForegroundColor = ConsoleColor.DarkGray;
-			Console.WriteLine("[MSG]\t" + message.Sender.Nick+ ": " + message.Message);
-			Console.ResetColor();
+			ConsoleWriteLine("[MSG]\t" + message.Sender.Nick+ ": " + message.Message, ConsoleColor.DarkGreen);
 			if (message.Message.StartsWith(commandIdentifier)) {
 				commandHandler.ProcessCommand(message);
 			} else {
@@ -119,7 +124,7 @@ namespace BaggyBot
 
 		static void Main(string[] args)
 		{
-			Console.WriteLine("Clear the log file? (y/n)");
+			ConsoleWriteLine("Clear the log file? (y/n)");
 			if (Console.ReadKey().KeyChar == 'y') {
 				Logger.ClearLog();
 				Console.WriteLine();

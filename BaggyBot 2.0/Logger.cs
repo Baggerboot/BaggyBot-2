@@ -5,16 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.IO;
-using BaggyBot.Properties;
-
 namespace BaggyBot
 {
 	static class Logger
 	{
-		private static string filename = Settings.Default.logfile;
+		private static string filename = "baggybot.log";
 
 		static Logger()
 		{
+
 			LoadLogFile();
 		}
 		private static void LoadLogFile()
