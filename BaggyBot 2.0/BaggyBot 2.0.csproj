@@ -67,25 +67,33 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandHandler.cs" />
-    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\CommandArgs.cs" />
     <Compile Include="Commands\Crash.cs" />
     <Compile Include="Commands\Elycool.cs" />
     <Compile Include="Commands\Example.cs" />
+    <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\NickServ.cs" />
+    <Compile Include="Commands\PermissionLevel.cs" />
+    <Compile Include="Commands\Query.cs" />
+    <Compile Include="Commands\Resolve.cs" />
+    <Compile Include="Commands\Snag.cs" />
+    <Compile Include="ControlVariables.cs" />
     <Compile Include="DataFunctionSet.cs" />
     <Compile Include="Emoticons.cs" />
     <Compile Include="IrcInterface.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogLevel.cs" />
+    <Compile Include="Messages.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecordNullException.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SqlConnector.cs" />
     <Compile Include="StatsHandler.cs" />
-    <Compile Include="WordTools.cs" />
+    <Compile Include="Tools\UserTools.cs" />
+    <Compile Include="Tools\WordTools.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

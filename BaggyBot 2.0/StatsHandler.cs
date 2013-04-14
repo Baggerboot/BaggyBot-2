@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using IRCSharp;
+using BaggyBot.Tools;
 
 namespace BaggyBot
 {
 	class StatsHandler
 	{
 		private DataFunctionSet dataFunctionSet;
-		private SqlConnector sqlConnector;
 		private IrcInterface ircInterface;
 		private Random rand;
 
@@ -20,10 +20,9 @@ namespace BaggyBot
 		private string[] snagMessages = { "THERE'S BUTTER ON MY FACE!", "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
 		
 
-		public StatsHandler(DataFunctionSet dm, SqlConnector sc, IrcInterface inter)
+		public StatsHandler(DataFunctionSet dm, IrcInterface inter)
 		{
 			dataFunctionSet = dm;
-			sqlConnector = sc;
 			ircInterface = inter;
 			rand = new Random();
 		}
@@ -67,14 +66,25 @@ namespace BaggyBot
 
 		private void GenerateRandomQuote(IrcMessage message, List<string> words)
 		{
+			if (ControlVariables.SnagNextLine) {
+				ControlVariables.SnagNextLine = false;
+				dataFunctionSet.Snag(message);
+				return;
+			} else if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy.Equals(message.Sender)) {
+				ControlVariables.SnagNextLineBy = null;
+				dataFunctionSet.Snag(message);
+				return;
+			}
 			double chance = 0.03;
 			if (words.Count > 6) {
 				if (rand.NextDouble() <= chance) {
 					int randint = rand.Next(snagMessages.Length * 2);
 					if (randint < snagMessages.Length) {
 						ircInterface.SendMessage(message.Channel, snagMessages[randint]);
+						dataFunctionSet.Snag(message);
 					}else{
 						ircInterface.SendMessage(message.Channel, "Snagged!");
+						dataFunctionSet.Snag(message);
 					}
 				}
 			}

@@ -8,24 +8,29 @@ using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	class Join : ICommand
+	class Snag : ICommand
 	{
 		private IrcInterface ircInterface;
-		private DataFunctionSet dataFunctionSet;
+
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Join(IrcInterface inter, DataFunctionSet df)
+		public Snag(IrcInterface inter)
 		{
 			ircInterface = inter;
-			dataFunctionSet = df;
 		}
 
 		public void Use(CommandArgs command)
 		{
-			if (command.Args.Length == 1) {
-				ircInterface.JoinChannel(command.Args[0]);
-			} else {
-				ircInterface.SendMessage(command.Channel, "Usage: -join <channel>");
+			switch (command.Args.Length) {
+				case 0:
+					ControlVariables.SnagNextLine = true;
+					break;
+				case 1:
+					ControlVariables.SnagNextLineBy = command.Args[0];
+					break;
+				default:
+					ircInterface.SendMessage(command.Channel, "Usage: -snag [nickname]");
+					break;
 			}
 		}
 	}

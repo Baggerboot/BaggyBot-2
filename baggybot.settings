@@ -1,0 +1,20 @@
+sql_user=
+sql_password=
+sql_host=
+sql_database=
+
+irc_server=
+irc_port=
+irc_nick=
+irc_ident=
+irc_realname=
+irc_initial_channel=
+
+bot_logfile=baggybot.log
+
+operator_nick=
+operator_ident=
+operator_host=
+operator_uid=*
+# currently not in use
+operator_pass=*

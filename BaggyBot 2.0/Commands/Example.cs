@@ -11,13 +11,14 @@ namespace BaggyBot.Commands
 	class Example : ICommand
 	{
 		private IrcInterface ircInterface;
+		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 
 		public Example(IrcInterface inter)
 		{
 			ircInterface = inter;
 		}
 
-		public void Use(Command command)
+		public void Use(CommandArgs command)
 		{
 
 		}

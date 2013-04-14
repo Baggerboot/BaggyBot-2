@@ -25,10 +25,31 @@ namespace BaggyBot
 
 		internal static void Log(string message, LogLevel level = LogLevel.Debug)
 		{
-			string format = String.Format("[{0}]\t{1}", level.ToString(), message);
-			//await textWriter.WriteLineAsync(format);
-			textWriter.WriteLine(format);
-			Console.WriteLine(format);
+			string line = "";
+			ConsoleColor lineColor = ConsoleColor.Gray;
+
+			switch (level) {
+				case LogLevel.Debug:
+					line += "[DEB]\t";
+					lineColor = ConsoleColor.White;
+					break;
+				case LogLevel.Info:
+					line += "[INF]\t";
+					lineColor = ConsoleColor.Green;
+					break;
+				case LogLevel.Warning:
+					line += "[WRN]\t";
+					lineColor = ConsoleColor.Yellow;
+					break;
+				case LogLevel.Error:
+					line += "[ERR]\t";
+					lineColor = ConsoleColor.Red;
+					break;
+			}
+			line += message;
+			Console.ForegroundColor = lineColor;
+			Console.WriteLine(message);
+			textWriter.WriteLine(line);
 			textWriter.Flush();
 		}
 		internal static void ClearLog()

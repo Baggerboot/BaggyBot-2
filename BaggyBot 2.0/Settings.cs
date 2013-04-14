@@ -11,9 +11,18 @@ namespace BaggyBot
 	class Settings
 	{
 		private Dictionary<string, string> settings = new Dictionary<string, string>();
-		private bool settingsChanged;
 
 		private const string filename = "baggybot.settings";
+
+		private static Settings instance;
+		internal static Settings Instance
+		{
+			get { 
+				if (instance == null) 
+					instance = new Settings(); 
+				return instance; 
+			}
+		}
 
 		public string this[string key]
 		{
@@ -28,7 +37,7 @@ namespace BaggyBot
 			}
 		}
 
-		public Settings()
+		private Settings()
 		{
 			using (var sr = new StreamReader(filename))
 			{

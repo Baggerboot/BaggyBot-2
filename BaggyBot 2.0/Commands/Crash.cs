@@ -10,6 +10,7 @@ namespace BaggyBot.Commands
 	{
 		private IrcInterface ircInterface;
 		private DataFunctionSet dataFunctionSet;
+		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
 		public Crash(IrcInterface inter, DataFunctionSet df)
 		{
@@ -17,11 +18,9 @@ namespace BaggyBot.Commands
 			dataFunctionSet = df;
 		}
 
-		public void Use(Command command)
+		public void Use(CommandArgs command)
 		{
-			if (dataFunctionSet.GetNickserv(dataFunctionSet.GetIdFromUser(command.Sender)).Equals("Baggerboot")) {
-				throw new Exception("Manually initiated crash.");
-			}
+			throw new Exception("Manually initiated crash.");
 		}
 	}
 }

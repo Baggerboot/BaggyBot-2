@@ -4,13 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using IRCSharp;
-
 namespace BaggyBot.Commands
 {
-	interface ICommand
+	enum PermissionLevel
 	{
-		void Use(CommandArgs c);
-		PermissionLevel Permissions { get; }
+		All,
+		BotOperator
 	}
 }

@@ -23,7 +23,7 @@ namespace BaggyBot
 
 		private void Initialize()
 		{
-			Settings set = new Settings();
+			Settings set = Settings.Instance;
 			string uid = set["sql_user"];
 			string password = set["sql_password"];
 			string server = set["sql_host"];

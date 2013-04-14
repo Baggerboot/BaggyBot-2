@@ -16,45 +16,40 @@ namespace BaggyBot
 		private DataFunctionSet dataFunctionSet;
 		private CommandHandler commandHandler;
 		private IrcInterface ircInterface;
-		public const string commandIdentifier = "-";
+		internal const string commandIdentifier = "-";
 
-		internal const string Version = "2.0 Release Candidate 1";
+		internal const string Version = "2.0 Release Candidate 2";
 
 		public Program()
 		{
 			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
 
 			sqlConnector = new SqlConnector();
-
-			sqlConnector.OpenConnection();
-
-			Console.WriteLine("Purge the database? y/n");
-			var k = Console.ReadKey();
-			if (k.KeyChar == 'y') {
-				string statement = 
-					@"drop table `stats_bot`.`emoticons`;
-					drop table `stats_bot`.`quotes`;
-					drop table `stats_bot`.`urls`;
-					drop table `stats_bot`.`usercreds`;
-					drop table `stats_bot`.`userstats`;
-					drop table `stats_bot`.`var`;
-					drop table `stats_bot`.`words`;";
-				sqlConnector.ExecuteStatement(statement); 
-				Console.WriteLine("Database purged");
-			}
-
-			sqlConnector.InitializeDatabase();
-
 			client = new IrcClient();
-			ircInterface = new IrcInterface(client);
+			ircInterface = new IrcInterface(client, dataFunctionSet);
 			dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
-			sHandler = new StatsHandler(dataFunctionSet, sqlConnector, ircInterface);
+			sHandler = new StatsHandler(dataFunctionSet, ircInterface);
 			commandHandler = new CommandHandler(ircInterface, sqlConnector,dataFunctionSet);
+			BaggyBot.Tools.UserTools.DataFunctionSet = dataFunctionSet;
 
 			client.OnNickChanged += dataFunctionSet.HandleNickChange;
 			client.OnMessageReceived += ProcessMessage;
-			client.OnRawLineReceived += ProcessRawLine;
 			client.OnFormattedLineReceived += ProcessFormattedLine;
+
+			sqlConnector.OpenConnection();
+			ConfirmPurge();
+			sqlConnector.InitializeDatabase();
+		}
+
+		private void ConfirmPurge()
+		{
+			ConsoleWriteLine("Purge the database? y/n", ConsoleColor.Blue);
+			Console.ForegroundColor = ConsoleColor.Gray;
+			var k = Console.ReadKey();
+			if (k.KeyChar == 'y') {
+				dataFunctionSet.PurgeDatabase();
+			}
+			Console.WriteLine();
 		}
 
 		private void ProcessFormattedLine(IrcLine line)
@@ -73,6 +68,10 @@ namespace BaggyBot
 				}
 			}else if(line.Command.Equals("401") && ircInterface.HasNickservCall && line.FinalArgument.ToLower().Contains("nickserv: no such nick")){
 				ircInterface.DisableNickservCalls();
+			}else if(line.Command.Equals("311") && ircInterface.HasWhoisCall)
+			{
+				IrcUser user = new IrcUser(line.Arguments[1], line.Arguments[2], line.Arguments[3]);
+				ircInterface.AddUser(user.Nick, user);
 			}
 			if (!line.Command.Equals("PRIVMSG")) {
 				ConsoleWriteLine("[RAW]\t" + line, ConsoleColor.DarkGray);
@@ -93,8 +92,8 @@ namespace BaggyBot
 		internal void Connect()
 		{
 			Logger.Log("Connecting to the IRC server");
-			Settings s = new Settings();
 
+			Settings s = Settings.Instance;
 			string server = s["irc_server"];
 			int port = int.Parse(s["irc_port"]);
 			string nick = s["irc_nick"];
@@ -124,7 +123,8 @@ namespace BaggyBot
 
 		static void Main(string[] args)
 		{
-			ConsoleWriteLine("Clear the log file? (y/n)");
+			ConsoleWriteLine("Clear the log file? (y/n)", ConsoleColor.Blue);
+			Console.ForegroundColor = ConsoleColor.Gray;
 			if (Console.ReadKey().KeyChar == 'y') {
 				Logger.ClearLog();
 				Console.WriteLine();

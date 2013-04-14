@@ -9,16 +9,16 @@ namespace BaggyBot.Commands
 	class Elycool : ICommand
 	{
 		private IrcInterface ircInterface;
+		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 
 		public Elycool(IrcInterface inter)
 		{
 			ircInterface = inter;
 		}
 
-		public void Use(Command command)
+		public void Use(CommandArgs command)
 		{
 			ircInterface.SendMessage("#fofftopic", "Elystus is a cool guy.");
-
 		}
 	}
 }

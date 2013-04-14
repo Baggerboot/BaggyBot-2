@@ -10,17 +10,22 @@ namespace BaggyBot
 {
 	class IrcInterface
 	{
-		private IrcClient 
-			client;
+		private IrcClient client;
 		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
+		private Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
+		private DataFunctionSet dataFunctionSet;
+
+		private List<string> whoisCalls = new List<string>();
 		private List<string> nickservCalls = new List<string>();
 		private bool CanDoNickservCall = true;
 		internal bool HasNickservCall { get { return nickservCalls.Count > 0; } }
+		internal bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
 
 
-		public IrcInterface(IrcClient client)
+		public IrcInterface(IrcClient client, DataFunctionSet df)
 		{
 			this.client = client;
+			this.dataFunctionSet = df;
 		}
 
 		internal void DisableNickservCalls()
@@ -63,6 +68,26 @@ namespace BaggyBot
 		internal void TestNickServ()
 		{
 			client.SendMessage("NickServ", "INFO");
+		}
+
+		internal IrcUser DoWhoisCall(string nick)
+		{
+			whoisCalls.Add(nick);
+			var t = new System.Threading.Thread(() => client.SendRaw("WHOIS " + nick));
+			t.Start();
+
+			while (!whoisCallResults.ContainsKey(nick)) {
+				System.Threading.Thread.Sleep(20);
+			}
+			whoisCalls.Remove(nick);
+			IrcUser result = whoisCallResults[nick];
+			whoisCallResults.Remove(nick);
+			return result;
+		}
+
+		internal void AddUser(string nick, IrcUser user)
+		{
+			whoisCallResults.Add(nick, user);
 		}
 	}
 }

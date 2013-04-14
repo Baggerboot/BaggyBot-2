@@ -23,10 +23,14 @@ namespace BaggyBot
 
 			commands = new Dictionary<string, ICommand>()
 			{
-				{"ns", new NickServ(ircInterface, dataFunctionSet)},
+				{"ns", new NickServ(ircInterface, dataFunctionSet, sqlConnector)},
 				{"crash", new Crash(ircInterface, dataFunctionSet)},
 				{"join", new Join(ircInterface, dataFunctionSet)},
-				{"elycool", new Elycool(ircInterface)}
+				{"elycool", new Elycool(ircInterface)},
+				{"help", new Help(ircInterface)},
+				{"resolve", new Resolve(ircInterface)},
+				{"snag", new Snag(ircInterface)},
+				{"query", new Query(ircInterface, sqlConnector)}
 			};
 		}
 
@@ -34,23 +38,28 @@ namespace BaggyBot
 		{
 			if(message.Message.Equals(Program.commandIdentifier)) return;
 
-			string command = message.Message.Substring(1);
-			string[] args = command.Split(' ');
-			string primary = args[0];
+			string line = message.Message.Substring(1);
+			string[] args = line.Split(' ');
+			string command = args[0];
 
 			// Don't bother parsing the message if it's not a command
-			if (!commands.ContainsKey(primary)) {
+			if (!commands.ContainsKey(command)) {
 				return;
 			}
 
-			if(args.Length > 1){
-				args = args.Skip(1).ToArray();
-			}else{
-				args = null;
-			}
-			Command cmd = new Command(primary, args, message.Sender, message.Channel);
+			args = args.Skip(1).ToArray();
 
-			commands[primary].Use(cmd);
+			CommandArgs cmd = new CommandArgs(command, args, message.Sender, message.Channel);
+
+			if (line.ToLower().Equals("help") || line.ToLower().Equals("about") || line.ToLower().Equals("info") || line.ToLower().Equals("baggybot")) {
+				ircInterface.SendMessage(message.Channel,"BaggyBot " + Program.Version + " -- Stats page: http://www.jgeluk.net/stats -- Made by baggerboot. For help, try the -help command.");
+			}
+
+			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && Tools.UserTools.Validate(message.Sender)) {
+				commands[command].Use(cmd);
+			} else {
+				ircInterface.SendMessage(message.Channel, Messages.CMD_NOT_AUTHORIZED);
+			}
 		}
 	}
 }

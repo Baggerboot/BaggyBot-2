@@ -8,16 +8,16 @@ using IRCSharp;
 
 namespace BaggyBot.Commands
 {
-	struct Command
+	struct CommandArgs
 	{
-		public string Primary;
+		public string Command;
 		public string[] Args;
 		public IrcUser Sender;
 		public string Channel;
 
-		public Command(string command, string[] args, IrcUser sender, string channel)
+		public CommandArgs(string command, string[] args, IrcUser sender, string channel)
 		{
-			Primary = command;
+			Command = command;
 			Args = args;
 			Sender = sender;
 			Channel = channel;
