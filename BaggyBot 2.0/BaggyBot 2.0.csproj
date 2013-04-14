@@ -78,6 +78,7 @@
     <Compile Include="Commands\PermissionLevel.cs" />
     <Compile Include="Commands\Query.cs" />
     <Compile Include="Commands\Resolve.cs" />
+    <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Snag.cs" />
     <Compile Include="ControlVariables.cs" />
     <Compile Include="DataFunctionSet.cs" />

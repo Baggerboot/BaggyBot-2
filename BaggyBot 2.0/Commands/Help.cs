@@ -23,7 +23,7 @@ namespace BaggyBot.Commands
 
 		private string GetHelpMessage(string[] args)
 		{
-			string defaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: help, nickserv, resolve. -- Operator commands: crash, join, snag.";
+			string defaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: help, ns, resolve. -- Operator commands: crash, join, snag.";
 
 			switch (args.Length) {
 				case 1:
@@ -32,7 +32,7 @@ namespace BaggyBot.Commands
 							return "Yo dawg..";
 						case "resolve":
 							return "Resolves a domain name to its IP addresses. Usage: -resolve <ip>";
-						case "nickserv":
+						case "ns":
 							return "Returns your NickServ username, provided that you have registered a NickServ username, and that you have identified your nickname. Mainly used for debugging purposes, though some individuals have expressed great pleasure in repeatedly executing this command. Usage: -nickserv";
 						case "crash":
 							return "Yes, this does exactly what you think it does.";

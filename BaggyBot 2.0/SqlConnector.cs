@@ -14,7 +14,6 @@ namespace BaggyBot
 	class SqlConnector
 	{
 		private MySqlConnection connection;
-		private bool busy;
 
 		public SqlConnector()
 		{
@@ -154,33 +153,38 @@ namespace BaggyBot
 
 		internal int ExecuteStatement(string statement)
 		{
-			if (busy) {
+			/*if (busy) {
 				while (busy) {
 					Thread.Sleep(10);
 				}
 				Logger.Log("Finished waiting for other thread to release resources.");
 			}
-			busy = true;
-			int result;
-			using (MySqlCommand cmd = new MySqlCommand(statement, connection)) {
-				result = cmd.ExecuteNonQuery();
+			busy = true;*/
+
+			lock (connection) {
+
+				int result;
+				using (MySqlCommand cmd = new MySqlCommand(statement, connection)) {
+					result = cmd.ExecuteNonQuery();
+				}
+				return result;
 			}
-			busy = false;
-			return result;
 		}
 
 		private DataView Select(string query)
 		{
-			DataView ret;
-			using (MySqlCommand cmd = new MySqlCommand(query, connection)) {
-				using (MySqlDataAdapter da = new MySqlDataAdapter(cmd)) {
-					using (DataSet ds = new DataSet()) {
-						da.Fill(ds);
-						ret = ds.Tables[0].DefaultView;
+			lock (connection) {
+				DataView ret;
+				using (MySqlCommand cmd = new MySqlCommand(query, connection)) {
+					using (MySqlDataAdapter da = new MySqlDataAdapter(cmd)) {
+						using (DataSet ds = new DataSet()) {
+							da.Fill(ds);
+							ret = ds.Tables[0].DefaultView;
+						}
 					}
 				}
+				return ret;
 			}
-			return ret;
 		}
 		/// Selects a vector and returns it in the form of an array.
 		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
@@ -188,17 +192,10 @@ namespace BaggyBot
 		internal T[] SelectVector<T>(string query)
 		{
 			int ID = new Random().Next(100, 999);
-			if (busy) {
-				while (busy) {
-					Thread.Sleep(10);
-				}
-				Logger.Log("Finished waiting for other thread to release resources.");
-			}
-			busy = true;
 			T[] data;
 			using (DataView dv = Select(query)) {
 				if (dv.Table.Columns.Count > 1) {
-					busy = false;
+					//busy = false;
 					throw new InvalidOperationException("The passed query returned more than one column.");
 				} else {
 					data = new T[dv.Count];
@@ -208,37 +205,25 @@ namespace BaggyBot
 					}
 				}
 			}
-			busy = false;
 			return data;
 		}
 
 		internal T SelectOne<T>(string query)
 		{
-			if (busy) {
-				while (busy) {
-					Thread.Sleep(10);
-				}
-				Logger.Log("Finished waiting for other thread to release resources.");
-			}
-			busy = true;
 			Object data;
 			using (DataView dv = Select(query)) {
 				if (dv.Count == 1) {
 					data = dv[0][0];
 				} else {
-					busy = false;
 					throw new InvalidOperationException("The passed query returned more or less than one record.");
 				}
 			}
 			if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
 				if (typeof(T) == typeof(String)) {
-					busy = false;
 					return default(T);
 				}
-				busy = false;
 				throw new RecordNullException();
 			} else {
-				busy = false;
 				return (T)data;
 			}
 		}
