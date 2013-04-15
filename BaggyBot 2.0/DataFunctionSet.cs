@@ -108,10 +108,16 @@ namespace BaggyBot
 			string query = string.Format("INSERT INTO usercreds VALUES (NULL, {0}, {1}, {2}, {3}, {4})", uid, Safe(user.Nick), Safe(user.Ident), Safe(user.Hostmask), nickserv);
 			sqlConnector.ExecuteStatement(query);
 
-			query = string.Format("INSERT INTO names VALUES ({0}, {1})", uid, Safe(user.Nick));
+			query = string.Format("INSERT INTO names VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE name=name", uid, Safe(user.Nick));
 			sqlConnector.ExecuteStatement(query);
 
 			return uid;
+		}
+
+		internal int SetPrimary(int uid, string name)
+		{
+			string query = query = string.Format("UPDATE names SET name={0} WHERE user_id = {1}", Safe(name), uid);
+			return sqlConnector.ExecuteStatement(query);
 		}
 
 		internal string GetNickserv(int uid)
@@ -142,12 +148,18 @@ namespace BaggyBot
 
 		/// <summary>
 		/// Attempts to retrieve the user ID for a given nickname from the database.
-		/// Will not work if other users have used that nickname at some point.
+		/// Will not work if other users have used that nickname at some point and that nickname is not in the table of primary nicks.
 		/// </summary>
 		/// <returns>The user ID of the user if successful, -1 if there were multiple matches, -2 if there were no matches.</returns>
 		internal int GetIdFromNick(string nick)
 		{
-			string query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE nick = {0}", Safe(nick));
+			string query = String.Format("SELECT user_id FROM nicks WHERE nick = {0}", Safe(nick));
+			try {
+				int result = sqlConnector.SelectOne<int>(query);
+				return result;
+			} catch (InvalidOperationException) { }
+
+			query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE nick = {0}", Safe(nick));
 			int[] results = sqlConnector.SelectVector<int>(query);
 			if (results.Length > 1) {
 				return -1;

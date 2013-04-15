@@ -124,7 +124,7 @@ namespace BaggyBot
 			  `user_id` INT NOT NULL ,
 			  `name` VARCHAR(90) NOT NULL ,
 			  PRIMARY KEY (`user_id`) ,
-			  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) );
+			  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) )
 			DEFAULT CHARACTER SET = utf8
 			COLLATE = utf8_bin;");
 
@@ -162,14 +162,6 @@ namespace BaggyBot
 
 		internal int ExecuteStatement(string statement)
 		{
-			/*if (busy) {
-				while (busy) {
-					Thread.Sleep(10);
-				}
-				Logger.Log("Finished waiting for other thread to release resources.");
-			}
-			busy = true;*/
-
 			lock (connection) {
 
 				int result;

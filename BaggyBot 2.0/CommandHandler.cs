@@ -27,11 +27,13 @@ namespace BaggyBot
 				{"crash", new Crash(ircInterface, dataFunctionSet)},
 				{"join", new Join(ircInterface, dataFunctionSet)},
 				{"elycool", new Elycool(ircInterface)},
+				{"get", new Get(ircInterface, dataFunctionSet)},
 				{"help", new Help(ircInterface)},
 				{"resolve", new Resolve(ircInterface)},
 				{"snag", new Snag(ircInterface)},
 				{"query", new Query(ircInterface, sqlConnector)},
-				{"shutdown", new Shutdown(ircInterface)}
+				{"shutdown", new Shutdown(ircInterface)},
+				{"update", new Update(ircInterface)}
 			};
 		}
 
