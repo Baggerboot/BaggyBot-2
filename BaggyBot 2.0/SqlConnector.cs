@@ -119,6 +119,15 @@ namespace BaggyBot
 			DEFAULT CHARACTER SET = utf8
 			COLLATE = utf8_bin;");
 
+			createStmts.Add(
+			@"CREATE  TABLE IF NOT EXISTS `names` (
+			  `user_id` INT NOT NULL ,
+			  `name` VARCHAR(90) NOT NULL ,
+			  PRIMARY KEY (`user_id`) ,
+			  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) );
+			DEFAULT CHARACTER SET = utf8
+			COLLATE = utf8_bin;");
+
 			foreach (string str in createStmts) {
 				ExecuteStatement(str);
 			}

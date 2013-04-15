@@ -107,6 +107,10 @@ namespace BaggyBot
 
 			string query = string.Format("INSERT INTO usercreds VALUES (NULL, {0}, {1}, {2}, {3}, {4})", uid, Safe(user.Nick), Safe(user.Ident), Safe(user.Hostmask), nickserv);
 			sqlConnector.ExecuteStatement(query);
+
+			query = string.Format("INSERT INTO names VALUES ({0}, {1})", uid, Safe(user.Nick));
+			sqlConnector.ExecuteStatement(query);
+
 			return uid;
 		}
 

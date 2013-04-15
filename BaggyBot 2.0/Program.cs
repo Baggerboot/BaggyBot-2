@@ -18,7 +18,7 @@ namespace BaggyBot
 		private IrcInterface ircInterface;
 		internal const string commandIdentifier = "-";
 
-		internal const string Version = "2.0 Release Candidate 2";
+		internal const string Version = "2.0.1";
 
 		public Program()
 		{
