@@ -9,16 +9,21 @@ namespace BaggyBot.Commands
 	class Shutdown : ICommand
 	{
 		private IrcInterface ircInterface;
+		private SqlConnector sqlConnector;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Shutdown(IrcInterface inter)
+		public Shutdown(IrcInterface inter, SqlConnector sc)
 		{
 			ircInterface = inter;
+			sqlConnector = sc;
 		}
 
 		public void Use(CommandArgs command)
 		{
 			ircInterface.Disconnect();
+			sqlConnector.CloseConnection();
+			sqlConnector.Dispose();
+			Logger.Dispose();
 		}
 	}
 }

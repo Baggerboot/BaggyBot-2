@@ -46,8 +46,12 @@ namespace BaggyBot.Tools
 				Logger.Log(String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned no user IDs.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
 				return false;
 			}
+			bool nickM = match(user.Nick, nick);
+			bool identM = match(user.Ident, ident);
+			bool hostM = match(user.Hostmask, host);
+			bool uidM = match(uids[0].ToString(), uid);
 
-			return (match(nick, user.Nick) && match(ident, user.Ident) && match(host, user.Hostmask) && match(uids[0].ToString(), uid));
+			return (nickM && identM && hostM && uidM);
 		}
 	}
 }

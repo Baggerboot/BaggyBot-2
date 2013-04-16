@@ -228,5 +228,10 @@ namespace BaggyBot
 				return (T)data;
 			}
 		}
+
+		internal void Dispose()
+		{
+			connection.Dispose();
+		}
 	}
 }

@@ -18,10 +18,16 @@ namespace BaggyBot
 		private IrcInterface ircInterface;
 		internal const string commandIdentifier = "-";
 
-		internal const string Version = "2.0.1";
+		public static bool noColor;
 
-		public Program()
+		internal const string Version = "2.0.3";
+
+		private string previousVersion = null;
+
+		public Program(string previousVersion = null)
 		{
+			this.previousVersion = previousVersion;
+
 			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
 
 			sqlConnector = new SqlConnector();
@@ -37,19 +43,7 @@ namespace BaggyBot
 			client.OnFormattedLineReceived += ProcessFormattedLine;
 
 			sqlConnector.OpenConnection();
-			ConfirmPurge();
 			sqlConnector.InitializeDatabase();
-		}
-
-		private void ConfirmPurge()
-		{
-			ConsoleWriteLine("Purge the database? y/n", ConsoleColor.Blue);
-			Console.ForegroundColor = ConsoleColor.Gray;
-			var k = Console.ReadKey();
-			if (k.KeyChar == 'y') {
-				dataFunctionSet.PurgeDatabase();
-			}
-			Console.WriteLine();
 		}
 
 		private void ProcessFormattedLine(IrcLine line)
@@ -80,7 +74,10 @@ namespace BaggyBot
 
 		private static void ConsoleWriteLine(string line, ConsoleColor color = ConsoleColor.Gray)
 		{
-			Console.ForegroundColor = color;
+			if (!noColor) {
+				Console.ForegroundColor = color;
+			}
+
 			Console.WriteLine(line);
 		}
 
@@ -109,6 +106,11 @@ namespace BaggyBot
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 			}
+			if(previousVersion != null && previousVersion != Version){
+				client.SendMessage(firschannel, "Succesfully updated from version " + previousVersion + " to version " + Version);
+			} else if (previousVersion != null) {
+				client.SendMessage(firschannel, "Failed to update: No newer version available.");
+			}
 		}
 
 		private void ProcessMessage(IrcMessage message)
@@ -123,13 +125,23 @@ namespace BaggyBot
 
 		static void Main(string[] args)
 		{
-			ConsoleWriteLine("Clear the log file? (y/n)", ConsoleColor.Blue);
-			Console.ForegroundColor = ConsoleColor.Gray;
-			if (Console.ReadKey().KeyChar == 'y') {
-				Logger.ClearLog();
-				Console.WriteLine();
+			Console.ResetColor();
+
+			string previousVersion = null;
+
+			for (int i = 0; i < args.Length; i++) {
+				switch (args[i]) {
+					case "-nc":
+						noColor = true;
+						break;
+					case "-pv":
+						previousVersion = args[i + 1];
+						i++;
+						break;
+				}
 			}
-			new Program().Connect();
+			Logger.ClearLog();
+			new Program(previousVersion).Connect();
 		}
 	}
 }

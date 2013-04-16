@@ -47,7 +47,9 @@ namespace BaggyBot
 					break;
 			}
 			line += message;
-			Console.ForegroundColor = lineColor;
+			if (!Program.noColor) {
+				Console.ForegroundColor = lineColor;
+			}
 			Console.WriteLine(message);
 			textWriter.WriteLine(line);
 			textWriter.Flush();
@@ -57,6 +59,11 @@ namespace BaggyBot
 			textWriter.Close();
 			File.Delete(filename);
 			LoadLogFile();
+		}
+		internal static void Dispose()
+		{
+			textWriter.Close();
+			textWriter.Dispose();
 		}
 	}
 }
