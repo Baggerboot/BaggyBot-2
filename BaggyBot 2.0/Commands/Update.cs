@@ -1,5 +1,5 @@
-﻿//#define	LINUX
-#define	WINDOWS
+﻿#define	LINUX
+//#define	WINDOWS
 
 using System;
 using System.Collections.Generic;
@@ -33,8 +33,8 @@ namespace BaggyBot.Commands
 						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/BaggyBot20.exe", "BaggyBot20.exe");
 						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/CSNetLib.dll", "CSNetLib.dll");
 						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/IRCSharp.dll", "IRCSharp.dll");
-					} catch (Exception e) {
-						ircInterface.SendMessage(command.Channel, "Error: " + e.Message);
+					} catch (WebException e) {
+						ircInterface.SendMessage(command.Channel, "Web Exception: " + e.Message + ", more information: " + e.HelpLink);
 					}
 				}
 			}

@@ -20,7 +20,7 @@ namespace BaggyBot
 
 		public static bool noColor;
 
-		internal const string Version = "2.0.3";
+		internal const string Version = "2.0.5";
 
 		private string previousVersion = null;
 

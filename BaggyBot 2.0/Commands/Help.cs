@@ -23,7 +23,7 @@ namespace BaggyBot.Commands
 
 		private string GetHelpMessage(string[] args)
 		{
-			string defaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: help, ns, resolve. -- Operator commands: crash, join, snag, shutdown, query.";
+			string defaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: help, ns, resolve. -- Operator commands: crash, join, query, set, shutdown, snag, update.";
 
 			switch (args.Length) {
 				case 1:
@@ -44,6 +44,12 @@ namespace BaggyBot.Commands
 							return "Execute an SQL query. Usage: -query <SQL query>";
 						case "shutdown":
 							return "Cleanly disconnects and shuts down the bot. Usage: -shutdown";
+						case "update":
+							return "Updates the bot to a new version, which can optionally be downloaded first. Usage: -update [-d]";
+						case "set":
+							return "Sets a property to the specified value. Usage: -set <property> [key] <value>";
+						case "get":
+							return "Retrieves the value for a given property. Usage: -get <property> [key]";
 						default:
 							return defaultReply;
 					}
