@@ -20,7 +20,7 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			ircInterface.Disconnect();
+			ircInterface.Disconnect("Shutting down");
 			sqlConnector.CloseConnection();
 			sqlConnector.Dispose();
 			Logger.Dispose();

@@ -50,6 +50,8 @@ namespace BaggyBot.Commands
 							return "Sets a property to the specified value. Usage: -set <property> [key] <value>";
 						case "get":
 							return "Retrieves the value for a given property. Usage: -get <property> [key]";
+						case "ping":
+							return "Returns \"Pong!\" as soon as possible. Useful for debugging or testing your connection.";
 						default:
 							return defaultReply;
 					}

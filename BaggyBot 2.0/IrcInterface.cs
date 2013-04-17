@@ -90,9 +90,9 @@ namespace BaggyBot
 			whoisCallResults.Add(nick, user);
 		}
 
-		internal void Disconnect()
+		internal void Disconnect(string reason = null)
 		{
-			client.Quit();
+			client.Quit(reason);
 		}
 	}
 }

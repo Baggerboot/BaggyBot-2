@@ -1,5 +1,5 @@
-﻿#define	LINUX
-//#define	WINDOWS
+﻿//#define	LINUX
+#define	WINDOWS
 
 using System;
 using System.Collections.Generic;
@@ -27,23 +27,21 @@ namespace BaggyBot.Commands
 		public void Use(CommandArgs command)
 		{
 			if (command.Args.Length == 1 && command.Args[0] == "-d") {
-				ircInterface.SendMessage(command.Channel, "Starting download...");
+				ircInterface.SendMessage(command.Channel, "Downloading update.");
 				using (WebClient Client = new WebClient()) {
 					try {
-						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/BaggyBot20.exe", "BaggyBot20.exe");
-						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/CSNetLib.dll", "CSNetLib.dll");
-						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/IRCSharp.dll", "IRCSharp.dll");
+						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/BaggyBot20.exe", "BaggyBot20_new.exe");
+						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/CSNetLib.dll", "CSNetLib_new.dll");
+						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/IRCSharp.dll", "IRCSharp_new.dll");
 					} catch (WebException e) {
 						ircInterface.SendMessage(command.Channel, "Web Exception: " + e.Message + ", more information: " + e.HelpLink);
+						return;
 					}
 				}
 			}
-#if LINUX
-			Process.Start("mono", "BaggyBot20.exe -nc -pv " + Program.Version);
-#elif WINDOWS
-			Process.Start("BaggyBot20.exe", "-pv " + Program.Version);
-#endif
-			ircInterface.Disconnect();
+			Process.Start("sh", String.Format("update.sh " + Program.Version));
+
+			ircInterface.Disconnect("Updating");
 			sqlConnector.CloseConnection();
 			sqlConnector.Dispose();
 			Logger.Dispose();

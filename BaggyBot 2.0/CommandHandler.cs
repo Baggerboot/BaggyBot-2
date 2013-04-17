@@ -33,7 +33,9 @@ namespace BaggyBot
 				{"snag", new Snag(ircInterface)},
 				{"query", new Query(ircInterface, sqlConnector)},
 				{"shutdown", new Shutdown(ircInterface, sqlConnector)},
-				{"update", new Update(ircInterface, sqlConnector)}
+				{"update", new Update(ircInterface, sqlConnector)},
+				{"ping", new Ping(ircInterface)},
+				{"set", new Set(ircInterface, dataFunctionSet)}
 			};
 		}
 

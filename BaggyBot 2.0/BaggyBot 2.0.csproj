@@ -96,6 +96,7 @@
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\NickServ.cs" />
     <Compile Include="Commands\PermissionLevel.cs" />
+    <Compile Include="Commands\Ping.cs" />
     <Compile Include="Commands\Query.cs" />
     <Compile Include="Commands\Resolve.cs" />
     <Compile Include="Commands\Set.cs" />
@@ -144,8 +145,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetDir)" C:\Xampp\htdocs\files\baggybot20\</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

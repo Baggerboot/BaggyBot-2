@@ -19,8 +19,7 @@ namespace BaggyBot
 		internal const string commandIdentifier = "-";
 
 		public static bool noColor;
-
-		internal const string Version = "2.0.5";
+		internal const string Version = "2.0.21";
 
 		private string previousVersion = null;
 
@@ -41,6 +40,19 @@ namespace BaggyBot
 			client.OnNickChanged += dataFunctionSet.HandleNickChange;
 			client.OnMessageReceived += ProcessMessage;
 			client.OnFormattedLineReceived += ProcessFormattedLine;
+			client.OnConnectionLost += () => {
+				Logger.Log("Connection lost. Attempting to reconnect...", LogLevel.Info);
+				bool reconnected = false;
+				do {
+					System.Threading.Thread.Sleep(2000);
+					try {
+						client.Reconnect();
+						reconnected = true;
+					} catch (System.Net.Sockets.SocketException) {
+						Logger.Log("Failed to reconnect. Retrying in 2 seconds.", LogLevel.Info);
+					}
+				} while (!reconnected);
+			}; 
 
 			sqlConnector.OpenConnection();
 			sqlConnector.InitializeDatabase();
@@ -101,15 +113,21 @@ namespace BaggyBot
 			try {
 				client.Connect(server,port, nick, ident, realname);
 				ircInterface.TestNickServ();
-				client.JoinChannel(firschannel);
+				System.Threading.Thread.Sleep(2000);
 				Logger.Log("Connection established.");
+				do {
+					client.JoinChannel(firschannel);
+					System.Threading.Thread.Sleep(1000);
+				} while (!client.InChannel(firschannel));
+
+
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 			}
 			if(previousVersion != null && previousVersion != Version){
 				client.SendMessage(firschannel, "Succesfully updated from version " + previousVersion + " to version " + Version);
 			} else if (previousVersion != null) {
-				client.SendMessage(firschannel, "Failed to update: No newer version available.");
+				client.SendMessage(firschannel, "Failed to update: No newer version available. Previous version: " + previousVersion);
 			}
 		}
 
@@ -125,8 +143,6 @@ namespace BaggyBot
 
 		static void Main(string[] args)
 		{
-			Console.ResetColor();
-
 			string previousVersion = null;
 
 			for (int i = 0; i < args.Length; i++) {
