@@ -94,5 +94,20 @@ namespace BaggyBot
 		{
 			client.Quit(reason);
 		}
+
+		internal void Part(string channel, string reason = null)
+		{
+			client.Part(channel, reason);
+		}
+
+		internal System.Net.Sockets.SocketInformation DuplicateAndClose(int targetProcessId)
+		{
+			return client.DuplicateAndClose(targetProcessId);
+		}
+
+		internal System.Net.Sockets.Socket GetHandle()
+		{
+			return client.GetHandle();
+		}
 	}
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using IRCSharp;
 
 namespace BaggyBot
@@ -19,7 +21,7 @@ namespace BaggyBot
 		internal const string commandIdentifier = "-";
 
 		public static bool noColor;
-		internal const string Version = "2.0.21";
+		internal const string Version = "2.0.28";
 
 		private string previousVersion = null;
 
@@ -56,6 +58,56 @@ namespace BaggyBot
 
 			sqlConnector.OpenConnection();
 			sqlConnector.InitializeDatabase();
+		}
+
+		private void ConnectFromSocket()
+		{
+			// Read the serialized socket from standard input
+			Console.OpenStandardInput();
+			BinaryFormatter bf = new BinaryFormatter();
+			Object input = bf.Deserialize(Console.OpenStandardInput());
+			
+			//SocketInformation si = (SocketInformation)input;
+			Socket s = (Socket)input;
+
+			client.ConnectFromSocket(s);
+
+			Settings set = Settings.Instance;
+
+			client.SendMessage(set["irc_initial_channel"], "Succesfully updated to version " + Version);
+		}
+
+		internal void Connect()
+		{
+			Logger.Log("Connecting to the IRC server");
+
+			Settings s = Settings.Instance;
+			string server = s["irc_server"];
+			int port = int.Parse(s["irc_port"]);
+			string nick = s["irc_nick"];
+			string ident = s["irc_ident"];
+			string realname = s["irc_realname"];
+			string firschannel = s["irc_initial_channel"];
+
+			try {
+				client.Connect(server, port, nick, ident, realname);
+				ircInterface.TestNickServ();
+				System.Threading.Thread.Sleep(2000);
+				Logger.Log("Connection established.");
+				do {
+					client.JoinChannel(firschannel);
+					System.Threading.Thread.Sleep(1000);
+				} while (!client.InChannel(firschannel));
+
+
+			} catch (System.Net.Sockets.SocketException e) {
+				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
+			}
+			if (previousVersion != null && previousVersion != Version) {
+				client.SendMessage(firschannel, "Succesfully updated from version " + previousVersion + " to version " + Version);
+			} else if (previousVersion != null) {
+				client.SendMessage(firschannel, "Failed to update: No newer version available. Previous version: " + previousVersion);
+			}
 		}
 
 		private void ProcessFormattedLine(IrcLine line)
@@ -98,38 +150,7 @@ namespace BaggyBot
 			ConsoleWriteLine("[RAW]\t" + line);
 		}
 
-		internal void Connect()
-		{
-			Logger.Log("Connecting to the IRC server");
-
-			Settings s = Settings.Instance;
-			string server = s["irc_server"];
-			int port = int.Parse(s["irc_port"]);
-			string nick = s["irc_nick"];
-			string ident = s["irc_ident"];
-			string realname = s["irc_realname"];
-			string firschannel = s["irc_initial_channel"];
-
-			try {
-				client.Connect(server,port, nick, ident, realname);
-				ircInterface.TestNickServ();
-				System.Threading.Thread.Sleep(2000);
-				Logger.Log("Connection established.");
-				do {
-					client.JoinChannel(firschannel);
-					System.Threading.Thread.Sleep(1000);
-				} while (!client.InChannel(firschannel));
-
-
-			} catch (System.Net.Sockets.SocketException e) {
-				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
-			}
-			if(previousVersion != null && previousVersion != Version){
-				client.SendMessage(firschannel, "Succesfully updated from version " + previousVersion + " to version " + Version);
-			} else if (previousVersion != null) {
-				client.SendMessage(firschannel, "Failed to update: No newer version available. Previous version: " + previousVersion);
-			}
-		}
+		
 
 		private void ProcessMessage(IrcMessage message)
 		{
@@ -144,6 +165,7 @@ namespace BaggyBot
 		static void Main(string[] args)
 		{
 			string previousVersion = null;
+			bool deserialize = false;
 
 			for (int i = 0; i < args.Length; i++) {
 				switch (args[i]) {
@@ -154,10 +176,19 @@ namespace BaggyBot
 						previousVersion = args[i + 1];
 						i++;
 						break;
+					case "-ds":
+						deserialize = true;
+						break;
 				}
 			}
 			Logger.ClearLog();
-			new Program(previousVersion).Connect();
+			if (deserialize) {
+				new Program(previousVersion).ConnectFromSocket();
+			} else {
+				new Program(previousVersion).Connect();
+			}
 		}
+
+		
 	}
 }

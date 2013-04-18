@@ -10,6 +10,7 @@ namespace BaggyBot
 	static class Logger
 	{
 		private static string filename = "baggybot.log";
+		private static bool disposed = false;
 
 		static Logger()
 		{
@@ -51,8 +52,11 @@ namespace BaggyBot
 				Console.ForegroundColor = lineColor;
 			}
 			Console.WriteLine(message);
-			textWriter.WriteLine(line);
-			textWriter.Flush();
+
+			if (!disposed) {
+				textWriter.WriteLine(line);
+				textWriter.Flush();
+			}
 		}
 		internal static void ClearLog()
 		{
@@ -64,6 +68,7 @@ namespace BaggyBot
 		{
 			textWriter.Close();
 			textWriter.Dispose();
+			disposed = true;
 		}
 	}
 }

@@ -20,10 +20,15 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			if (command.Args.Length != 2) {
+			if (command.Args.Length >2) {
 				ircInterface.SendMessage(command.Channel, "Usage: -get <property> <key>");
 				return;
-			} switch (command.Args[0]) {
+			}
+			if (command.Args.Length == 1 && command.Args[0] == "handle") {
+				ircInterface.SendMessage(command.Channel, "Socket handle: *" + ircInterface.GetHandle().Handle.ToInt32());
+				return;
+			}
+			switch (command.Args[0]) {
 				case "uid":
 					int uid = dataFunctionSet.GetIdFromNick(command.Args[1]);
 					break;

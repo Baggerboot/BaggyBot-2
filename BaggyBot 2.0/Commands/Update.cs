@@ -7,8 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.IO;
+using System.Threading;
 using System.Diagnostics;
 using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace BaggyBot.Commands
 {
@@ -39,12 +42,30 @@ namespace BaggyBot.Commands
 					}
 				}
 			}
-			Process.Start("sh", String.Format("update.sh " + Program.Version));
 
-			ircInterface.Disconnect("Updating");
 			sqlConnector.CloseConnection();
 			sqlConnector.Dispose();
 			Logger.Dispose();
+
+			//Process.Start("sh", String.Format("update.sh " + Program.Version));
+
+			Process proc = new Process();
+			//proc.StartInfo.FileName = "mono";
+			//proc.StartInfo.Arguments = "UpdateManager.exe " + Program.Version;
+			proc.StartInfo.FileName = "UpdateManager.exe";
+			proc.StartInfo.Arguments = Program.Version;
+
+			proc.Start();
+
+			//System.Net.Sockets.SocketInformation si = ircInterface.DuplicateAndClose(proc.Id);
+			System.Net.Sockets.Socket s = ircInterface.GetHandle();
+
+			BinaryFormatter bf = new BinaryFormatter();
+
+			using (Stream str = File.Open("socket.stream", FileMode.Create)) {
+				bf.Serialize(str, s);
+			}
+			Environment.Exit(0);
 		}
 	}
 }

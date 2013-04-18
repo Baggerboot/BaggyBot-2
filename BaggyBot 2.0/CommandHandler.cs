@@ -23,19 +23,21 @@ namespace BaggyBot
 
 			commands = new Dictionary<string, ICommand>()
 			{
-				{"ns", new NickServ(ircInterface, dataFunctionSet, sqlConnector)},
 				{"crash", new Crash(ircInterface, dataFunctionSet)},
-				{"join", new Join(ircInterface, dataFunctionSet)},
 				{"elycool", new Elycool(ircInterface)},
 				{"get", new Get(ircInterface, dataFunctionSet)},
 				{"help", new Help(ircInterface)},
-				{"resolve", new Resolve(ircInterface)},
-				{"snag", new Snag(ircInterface)},
-				{"query", new Query(ircInterface, sqlConnector)},
-				{"shutdown", new Shutdown(ircInterface, sqlConnector)},
-				{"update", new Update(ircInterface, sqlConnector)},
+				{"join", new Join(ircInterface, dataFunctionSet)},
+				{"ns", new NickServ(ircInterface, dataFunctionSet, sqlConnector)},
+				{"part", new Part(ircInterface)},
 				{"ping", new Ping(ircInterface)},
-				{"set", new Set(ircInterface, dataFunctionSet)}
+				{"query", new Query(ircInterface, sqlConnector)},
+				{"resolve", new Resolve(ircInterface)},
+				{"say", new Say(ircInterface)},
+				{"set", new Set(ircInterface, dataFunctionSet)},
+				{"shutdown", new Shutdown(ircInterface, sqlConnector)},
+				{"snag", new Snag(ircInterface)},
+				{"update", new Update(ircInterface, sqlConnector)},
 			};
 		}
 
