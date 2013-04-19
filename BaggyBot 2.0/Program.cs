@@ -21,7 +21,7 @@ namespace BaggyBot
 		internal const string commandIdentifier = "-";
 
 		public static bool noColor;
-		internal const string Version = "2.0.28";
+		internal const string Version = "2.0.31";
 
 		private string previousVersion = null;
 
@@ -67,10 +67,10 @@ namespace BaggyBot
 			BinaryFormatter bf = new BinaryFormatter();
 			Object input = bf.Deserialize(Console.OpenStandardInput());
 			
-			//SocketInformation si = (SocketInformation)input;
-			Socket s = (Socket)input;
+			SocketInformation si = (SocketInformation)input;
+			//Socket s = (Socket)input;
 
-			client.ConnectFromSocket(s);
+			client.ConnectFromSocket(si);
 
 			Settings set = Settings.Instance;
 

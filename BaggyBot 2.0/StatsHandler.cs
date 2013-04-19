@@ -38,9 +38,19 @@ namespace BaggyBot
 			dataFunctionSet.IncrementVar("global_line_count");
 			dataFunctionSet.IncrementVar("global_word_count", words.Count);
 			GenerateRandomQuote(message, words);
+			ProcessRandomEvents(message, words);
 			GetEmoticons(userId, words);
 			foreach (string word in words) {
 				ProcessWord(message, word, userId);
+			}
+		}
+
+		private void ProcessRandomEvents(IrcMessage message, List<string> words)
+		{
+			if (message.Sender.Nick == "Ralph" && message.Message.ToLower().Contains("baggybot")) {
+				ircInterface.SendMessage(message.Channel, "Shut up you fool");
+			} else if (message.Sender.Nick == "Hodor" && message.Message.ToLower().Contains("hodor") && rand.NextDouble() < 0.05) {
+				ircInterface.SendMessage(message.Channel, "This is getting annoying");
 			}
 		}
 

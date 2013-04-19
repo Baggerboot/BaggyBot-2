@@ -33,9 +33,9 @@ namespace BaggyBot.Commands
 				ircInterface.SendMessage(command.Channel, "Downloading update.");
 				using (WebClient Client = new WebClient()) {
 					try {
-						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/BaggyBot20.exe", "BaggyBot20_new.exe");
-						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/CSNetLib.dll", "CSNetLib_new.dll");
-						Client.DownloadFile("http://home1.jgeluk.net/files/baggybot20/IRCSharp.dll", "IRCSharp_new.dll");
+						Client.DownloadFile("http://home2.jgeluk.net/files/baggybot20/BaggyBot20.exe", "BaggyBot20_new.exe");
+						Client.DownloadFile("http://home2.jgeluk.net/files/baggybot20/CSNetLib.dll", "CSNetLib_new.dll");
+						Client.DownloadFile("http://home2.jgeluk.net/files/baggybot20/IRCSharp.dll", "IRCSharp_new.dll");
 					} catch (WebException e) {
 						ircInterface.SendMessage(command.Channel, "Web Exception: " + e.Message + ", more information: " + e.HelpLink);
 						return;
@@ -57,13 +57,13 @@ namespace BaggyBot.Commands
 
 			proc.Start();
 
-			//System.Net.Sockets.SocketInformation si = ircInterface.DuplicateAndClose(proc.Id);
-			System.Net.Sockets.Socket s = ircInterface.GetHandle();
+			System.Net.Sockets.SocketInformation si = ircInterface.DuplicateAndClose(proc.Id);
+			//System.Net.Sockets.Socket s = ircInterface.GetHandle();
 
 			BinaryFormatter bf = new BinaryFormatter();
 
 			using (Stream str = File.Open("socket.stream", FileMode.Create)) {
-				bf.Serialize(str, s);
+				bf.Serialize(str, si);
 			}
 			Environment.Exit(0);
 		}

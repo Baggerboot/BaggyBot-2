@@ -34,12 +34,12 @@ namespace UpdateManager
 
 			Console.WriteLine("Done. Deserializing socket...");
 
-			//SocketInformation si = (SocketInformation)input;
+			SocketInformation si = (SocketInformation)input;
 
 			// This will kill the bot
-			//Socket s = new Socket(si);
+			Socket s = new Socket(si);
 
-			Socket s = (Socket)input;
+			//Socket s = (Socket)input;
 
 			TcpClient client = new TcpClient();
 			client.Client = s;
@@ -59,8 +59,8 @@ namespace UpdateManager
 			//proc.StartInfo.Arguments = "BaggyBot20.exe -nc -ds -pv " + previousVersion;
 			proc.Start();
 
-			//si = s.DuplicateAndClose(proc.Id);
-			bf.Serialize(proc.StandardInput.BaseStream, s);
+			si = s.DuplicateAndClose(proc.Id);
+			bf.Serialize(proc.StandardInput.BaseStream, si);
 		}
 
 		private void UpdateBot()
