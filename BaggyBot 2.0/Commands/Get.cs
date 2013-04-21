@@ -28,6 +28,14 @@ namespace BaggyBot.Commands
 				ircInterface.SendMessage(command.Channel, "Socket handle: *" + ircInterface.GetHandle().Handle.ToInt32());
 				return;
 			}
+			if (command.Args.Length == 2 && command.Args[0] == "-s") {
+				string result = null;
+				result = Settings.Instance[command.Args[1]];
+				if (result != null) {
+					ircInterface.SendMessage(command.Channel, String.Format("value for {0}: {1}", command.Args[1], result));
+					return;
+				}
+			}
 			switch (command.Args[0]) {
 				case "uid":
 					int uid = dataFunctionSet.GetIdFromNick(command.Args[1]);

@@ -53,7 +53,7 @@ namespace UpdateManager
 			proc.StartInfo.RedirectStandardInput = true;
 
 			proc.StartInfo.FileName = "BaggyBot20.exe";
-			proc.StartInfo.Arguments = "-nc -ds -pv " + previousVersion;
+			proc.StartInfo.Arguments = "-ds -pv " + previousVersion;
 
 			//proc.StartInfo.FileName = "mono";
 			//proc.StartInfo.Arguments = "BaggyBot20.exe -nc -ds -pv " + previousVersion;

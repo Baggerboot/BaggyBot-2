@@ -46,20 +46,18 @@ namespace BaggyBot
 			if(message.Message.Equals(Program.commandIdentifier)) return;
 
 			string line = message.Message.Substring(1);
-			string[] args = line.Split(' ');
-			string command = args[0];
-
-			// Don't bother parsing the message if it's not a command
-			if (!commands.ContainsKey(command)) {
-				return;
-			}
-
-			args = args.Skip(1).ToArray();
-
-			CommandArgs cmd = new CommandArgs(command, args, message.Sender, message.Channel);
-
+			
 			if (line.ToLower().Equals("help") || line.ToLower().Equals("about") || line.ToLower().Equals("info") || line.ToLower().Equals("baggybot")) {
 				ircInterface.SendMessage(message.Channel,"BaggyBot " + Program.Version + " -- Stats page: http://www.jgeluk.net/stats -- Made by baggerboot. For help, try the -help command.");
+			}
+
+			string[] args = line.Split(' ');
+			string command = args[0];
+			args = args.Skip(1).ToArray();
+			CommandArgs cmd = new CommandArgs(command, args, message.Sender, message.Channel, line.Substring(line.IndexOf(' ')+1));
+
+			if (!commands.ContainsKey(command)) {
+				return;
 			}
 
 			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && Tools.UserTools.Validate(message.Sender)) {

@@ -21,7 +21,14 @@ namespace BaggyBot
 		internal const string commandIdentifier = "-";
 
 		public static bool noColor;
-		internal const string Version = "2.0.31";
+		internal const string Version = "2.0.41";
+
+		private static List<Exception> exceptions = new List<Exception>();
+
+		public static List<Exception> Exceptions
+		{
+			get { return exceptions; }
+		}
 
 		private string previousVersion = null;
 
@@ -60,7 +67,7 @@ namespace BaggyBot
 			sqlConnector.InitializeDatabase();
 		}
 
-		private void ConnectFromSocket()
+		private void ConnectFromSocket(string previousVersion)
 		{
 			// Read the serialized socket from standard input
 			Console.OpenStandardInput();
@@ -74,7 +81,11 @@ namespace BaggyBot
 
 			Settings set = Settings.Instance;
 
-			client.SendMessage(set["irc_initial_channel"], "Succesfully updated to version " + Version);
+			if (previousVersion != Version) {
+				client.SendMessage(set["irc_initial_channel"], String.Format("Succesfully updated from version {0} to version {1}.", previousVersion, Version));
+			} else {
+				client.SendMessage(set["irc_initial_channel"], "Failed to update: no newer version available.");
+			}
 		}
 
 		internal void Connect()
@@ -162,6 +173,12 @@ namespace BaggyBot
 			}
 		}
 
+		private void HandleException(Exception e)
+		{
+			exceptions.Add(e);
+			ircInterface.SendMessage(Settings.Instance["operator_nick"], "WARNING: an exception occured: " + e.Message);
+		}
+
 		static void Main(string[] args)
 		{
 			string previousVersion = null;
@@ -182,10 +199,17 @@ namespace BaggyBot
 				}
 			}
 			Logger.ClearLog();
-			if (deserialize) {
-				new Program(previousVersion).ConnectFromSocket();
-			} else {
-				new Program(previousVersion).Connect();
+
+			Program p = new Program(previousVersion);
+
+			try {
+				if (deserialize) {
+					p.ConnectFromSocket(previousVersion);
+				} else {
+					p.Connect();
+				}
+			} catch (Exception e) {
+				p.HandleException(e);
 			}
 		}
 

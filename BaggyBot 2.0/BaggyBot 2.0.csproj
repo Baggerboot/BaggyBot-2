@@ -88,6 +88,7 @@
     <Compile Include="CommandHandler.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
     <Compile Include="Commands\Crash.cs" />
+    <Compile Include="Commands\Details.cs" />
     <Compile Include="Commands\Elycool.cs" />
     <Compile Include="Commands\Example.cs" />
     <Compile Include="Commands\Get.cs" />

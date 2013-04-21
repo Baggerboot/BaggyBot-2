@@ -14,7 +14,6 @@ namespace BaggyBot
 
 		static Logger()
 		{
-
 			LoadLogFile();
 		}
 		private static void LoadLogFile()

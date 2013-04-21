@@ -29,8 +29,24 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
+			if (command.Args.Length == 2 && command.Args[0] == "-m" && command.Args[1] == "-d") {
+				Logger.Log("Performing meta-update...", LogLevel.Debug);
+				using (WebClient Client = new WebClient()) {
+					try {
+						Client.DownloadFile("http://home2.jgeluk.net/files/baggybot20/UpdateManager.exe", "UpdateManager_new.exe");
+						File.Delete("UpdateManager.exe");
+						File.Move("UpdateManager_new.exe", "UpdateManager.exe");
+						ircInterface.SendMessage(command.Channel, "Meta-update finished.");
+						return;
+					} catch (WebException e) {
+						ircInterface.SendMessage(command.Channel, "Web Exception: " + e.Message + ", more information: " + e.HelpLink);
+						return;
+					}
+				}
+			}
+
 			if (command.Args.Length == 1 && command.Args[0] == "-d") {
-				ircInterface.SendMessage(command.Channel, "Downloading update.");
+				Logger.Log("Updating...", LogLevel.Debug);
 				using (WebClient Client = new WebClient()) {
 					try {
 						Client.DownloadFile("http://home2.jgeluk.net/files/baggybot20/BaggyBot20.exe", "BaggyBot20_new.exe");
