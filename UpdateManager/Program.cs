@@ -16,11 +16,11 @@ namespace UpdateManager
 	class Program
 	{
 
-		public Program(string previousVersion)
+		public Program(string argument)
 		{
-			Run(previousVersion);
+			Run(argument);
 		}
-		private void Run(string previousVersion)
+		private void Run(string argument)
 		{
 			Thread.Sleep(2000);
 			BinaryFormatter bf = new BinaryFormatter();
@@ -44,19 +44,21 @@ namespace UpdateManager
 			TcpClient client = new TcpClient();
 			client.Client = s;
 
-			Console.WriteLine("Updating bot...");
+			bool recover = argument == "-recover";
 
-			UpdateBot();
+			if (recover) {
+				Console.WriteLine("Recovering bot...");
+				Thread.Sleep(1000);
+			} else {
+				Console.WriteLine("Updating bot...");
+				UpdateBot();
+			}
 
 			Process proc = new Process();
 			proc.StartInfo.UseShellExecute = false;
 			proc.StartInfo.RedirectStandardInput = true;
-
 			proc.StartInfo.FileName = "BaggyBot20.exe";
-			proc.StartInfo.Arguments = "-ds -pv " + previousVersion;
-
-			//proc.StartInfo.FileName = "mono";
-			//proc.StartInfo.Arguments = "BaggyBot20.exe -nc -ds -pv " + previousVersion;
+			proc.StartInfo.Arguments = recover ? "-ds" : ( "-ds -pv " + argument );
 			proc.Start();
 
 			si = s.DuplicateAndClose(proc.Id);
@@ -66,11 +68,14 @@ namespace UpdateManager
 		private void UpdateBot()
 		{
 			Thread.Sleep(1000);
-			System.IO.File.Delete("CSNetLib.dll");
-			System.IO.File.Delete("IRCSharp.dll");
+			if (File.Exists("CSNetLib.dll")) {
+				System.IO.File.Delete("CSNetLib.dll");
+				System.IO.File.Delete("IRCSharp.dll");
+				System.IO.File.Move("CSNetLib_new.dll", "CSNetLib.dll");
+				System.IO.File.Move("IRCSharp_new.dll", "IRCSharp.dll");
+			}
 			System.IO.File.Delete("BaggyBot20.exe");
-			System.IO.File.Move("CSNetLib_new.dll", "CSNetLib.dll");
-			System.IO.File.Move("IRCSharp_new.dll", "IRCSharp.dll");
+
 			System.IO.File.Move("BaggyBot20_new.exe", "BaggyBot20.exe");
 
 		}

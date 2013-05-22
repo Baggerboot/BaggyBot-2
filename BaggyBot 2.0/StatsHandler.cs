@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using IRCSharp;
 using BaggyBot.Tools;
+using System.Text.RegularExpressions;
 
 namespace BaggyBot
 {
@@ -28,20 +29,22 @@ namespace BaggyBot
 		}
 		internal void ProcessMessage(IrcMessage message)
 		{
-			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
+			lock (dataFunctionSet.Lock) {
+				int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
-			List<string> words = WordTools.GetWords(message.Message);
-			words = words.Select(s => s.Replace("'", "''")).ToList();
+				List<string> words = WordTools.GetWords(message.Message);
+				words = words.Select(s => s.Replace("'", "''")).ToList();
 
-			dataFunctionSet.IncrementLineCount(userId);
-			dataFunctionSet.IncrementWordCount(userId, words.Count);
-			dataFunctionSet.IncrementVar("global_line_count");
-			dataFunctionSet.IncrementVar("global_word_count", words.Count);
-			GenerateRandomQuote(message, words);
-			ProcessRandomEvents(message, words);
-			GetEmoticons(userId, words);
-			foreach (string word in words) {
-				ProcessWord(message, word, userId);
+				dataFunctionSet.IncrementLineCount(userId);
+				dataFunctionSet.IncrementWordCount(userId, words.Count);
+				dataFunctionSet.IncrementVar("global_line_count");
+				dataFunctionSet.IncrementVar("global_word_count", words.Count);
+				GenerateRandomQuote(message, words);
+				ProcessRandomEvents(message, words);
+				GetEmoticons(userId, words);
+				foreach (string word in words) {
+					ProcessWord(message, word, userId);
+				}
 			}
 		}
 
@@ -49,21 +52,23 @@ namespace BaggyBot
 		{
 			if (message.Sender.Nick == "Ralph" && message.Message.ToLower().Contains("baggybot")) {
 				ircInterface.SendMessage(message.Channel, "Shut up you fool");
-			} else if (message.Sender.Nick == "Hodor" && message.Message.ToLower().Contains("hodor") && rand.NextDouble() < 0.05) {
-				ircInterface.SendMessage(message.Channel, "This is getting annoying");
 			}
 		}
 
 		private void ProcessWord(IrcMessage message, string word, int sender)
 		{
+			string lword = word.ToLower();
+			string cword = textOnly.Replace(lword, "");
 			if (word.StartsWith("http://") || word.StartsWith("https://")) {
 				dataFunctionSet.IncrementUrl(word, sender, message.Message.Replace("'", "''"));
-			} if (!WordTools.IsIgnoredWord(word) && word.Length >= 3) {
-				dataFunctionSet.IncrementWord(word);
-			} if (WordTools.IsProfanity(word)) {
+			} else if (WordTools.IsProfanity(lword)) {
 				dataFunctionSet.IncrementProfanities(sender);
-			}
+			} else if (!WordTools.IsIgnoredWord(cword) && cword.Length >= 3) {
+				dataFunctionSet.IncrementWord(cword);
+			} 
 		}
+
+		Regex textOnly = new Regex("[^a-z]");
 
 		private void GetEmoticons(int userId, List<string> words)
 		{
@@ -79,10 +84,12 @@ namespace BaggyBot
 			if (ControlVariables.SnagNextLine) {
 				ControlVariables.SnagNextLine = false;
 				dataFunctionSet.Snag(message);
+				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
 				return;
-			} else if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy.Equals(message.Sender)) {
+			} else if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nick) {
 				ControlVariables.SnagNextLineBy = null;
 				dataFunctionSet.Snag(message);
+				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
 				return;
 			}
 			double chance = 0.03;

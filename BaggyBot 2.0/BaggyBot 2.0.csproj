@@ -78,6 +78,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -88,33 +89,46 @@
     <Compile Include="CommandHandler.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
     <Compile Include="Commands\Crash.cs" />
-    <Compile Include="Commands\Details.cs" />
     <Compile Include="Commands\Elycool.cs" />
     <Compile Include="Commands\Example.cs" />
+    <Compile Include="Commands\ExceptionDetails.cs" />
     <Compile Include="Commands\Get.cs" />
     <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\NickServ.cs" />
+    <Compile Include="Commands\Nuke.cs" />
     <Compile Include="Commands\Part.cs" />
     <Compile Include="Commands\PermissionLevel.cs" />
     <Compile Include="Commands\Ping.cs" />
-    <Compile Include="Commands\Query.cs" />
     <Compile Include="Commands\Resolve.cs" />
     <Compile Include="Commands\Say.cs" />
     <Compile Include="Commands\Set.cs" />
     <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Snag.cs" />
+    <Compile Include="Commands\SqlReconnect.cs" />
     <Compile Include="Commands\Update.cs" />
+    <Compile Include="Commands\Version.cs" />
     <Compile Include="ControlVariables.cs" />
+    <Compile Include="Database\StatsBot.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StatsBot.dbml</DependentUpon>
+    </Compile>
     <Compile Include="DataFunctionSet.cs" />
     <Compile Include="Emoticons.cs" />
     <Compile Include="IrcInterface.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="Messages.cs" />
+    <Compile Include="PerfLogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="RecordNullException.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SqlConnector.cs" />
@@ -143,8 +157,29 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="BaggyBot 2.0_TemporaryKey.pfx" />
-    <None Include="Properties\app.manifest" />
+    <None Include="Database\StatsBot.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>StatsBot.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\app.manifest">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Database\StatsBot.dbml.layout">
+      <DependentUpon>StatsBot.dbml</DependentUpon>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

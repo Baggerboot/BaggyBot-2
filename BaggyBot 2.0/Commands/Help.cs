@@ -28,6 +28,8 @@ namespace BaggyBot.Commands
 			switch (args.Length) {
 				case 1:
 					switch (args[0]) {
+						case "ed":
+							return "Shows detailed information about an exception. Usage: -ed [-ra] [-r] [-i <index>]";
 						case "help":
 							return "Yo dawg..";
 						case "resolve":
@@ -38,6 +40,8 @@ namespace BaggyBot.Commands
 							return "Yes, this does exactly what you think it does.";
 						case "join":
 							return "Join a channel. Usage: -join <channel>";
+						case "nuke":
+							return "Clears the database, or a single table. Usage: -nuke [table]";
 						case "snag":
 							return "Snag a quote. If nickname isn't specified, the first received message will be snagged. Usage: -snag [nickname]";
 						case "query":

@@ -6,20 +6,22 @@ using System.Threading.Tasks;
 
 namespace BaggyBot.Commands
 {
-	class Say : ICommand
+	class SqlReconnect : ICommand
 	{
 		private IrcInterface ircInterface;
+		private SqlConnector sqlConnector;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Say(IrcInterface inter)
+		public SqlReconnect(IrcInterface inter, SqlConnector sc)
 		{
 			ircInterface = inter;
+			sqlConnector = sc;
 		}
-		public void Use(CommandArgs command){
-			string msg = String.Join(" ", command.Args.Skip(1));
-			Logger.Log("Saying: " + msg);
 
-			ircInterface.SendMessage(command.Args[0], msg);
+		public void Use(CommandArgs command)
+		{
+			sqlConnector.Reconnect();
+			ircInterface.SendMessage(command.Channel, "Done.");
 		}
 	}
 }

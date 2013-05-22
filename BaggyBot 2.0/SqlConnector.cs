@@ -7,13 +7,26 @@ using System.Threading.Tasks;
 
 using System.Threading;
 using System.Data;
-using MySql.Data.MySqlClient;
+using System.Data.Linq;
+using System.Data.SqlClient;
 using System.Configuration;
+
 namespace BaggyBot
 {
 	class SqlConnector
 	{
-		private MySqlConnection connection;
+		private SqlConnection connection;
+		private Database.StatsBotDataContext context;
+
+		public Table<Database.UserStatistics> UserStats { get; private set; }
+		public Table<Database.Name> UserNames { get; private set; }
+		public Table<Database.Url> Urls { get; private set; }
+		public Table<Database.Quote> Quotes { get; private set; }
+		public Table<Database.Emoticon> Emoticons { get; private set; }
+		public Table<Database.UserCredentials> UserCreds { get; private set; }
+		public Table<Database.KeyValuePair> KeyValuePairs { get; private set; }
+		public Table<Database.Word> Words { get; private set; }
+		
 
 		public SqlConnector()
 		{
@@ -22,125 +35,38 @@ namespace BaggyBot
 
 		private void Initialize()
 		{
+			connection = new SqlConnection();
+
 			Settings set = Settings.Instance;
 			string uid = set["sql_user"];
 			string password = set["sql_password"];
 			string server = set["sql_host"];
 			string database = set["sql_database"];
-			string connectionString = String.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};", server, database, uid, password);
 
-			connection = new MySqlConnection(connectionString);
+			connection.ConnectionString = "persist security info=False;integrated security=SSPI;database=stats_bot;server=localhost";
 		}
 
-		internal void InitializeDatabase()
+		internal void SubmitChanges()
 		{
-			Logger.Log("Attempting to initialize the database if this hasn't been done yet");
-
-			List<string> createStmts = new List<string>();
-
-			createStmts.Add( 
-			@"CREATE  TABLE IF NOT EXISTS `usercreds` (
-			  `id` INT NOT NULL AUTO_INCREMENT ,
-			  `user_id` INT NOT NULL ,
-			  `nick` VARCHAR(45) NOT NULL ,
-			  `ident` VARCHAR(16) NOT NULL ,
-			  `hostmask` VARCHAR(128) NOT NULL ,
-			  `ns_login` VARCHAR(45) NULL ,
-			  PRIMARY KEY (`id`) ,
-			  UNIQUE INDEX `id_UNIQUE` (`id` ASC) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			createStmts.Add(
-			@"CREATE  TABLE IF NOT EXISTS `userstats` (
-			  `user_id` INT NOT NULL ,
-			  `lines` INT NOT NULL ,
-			  `words` INT NOT NULL ,
-			  `actions` INT NOT NULL ,
-			  `profanities` INT NOT NULL ,
-			  PRIMARY KEY (`user_id`) ,
-			  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			createStmts.Add(
-			@"CREATE TABLE IF NOT EXISTS `quotes` (
-			  `id` INT NOT NULL AUTO_INCREMENT,
-			  `user_id` INT NOT NULL ,
-			  `quote` TEXT NOT NULL ,
-			  PRIMARY KEY (`id`) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			createStmts.Add(
-			@"CREATE  TABLE IF NOT EXISTS `var` (
-			  `id` INT NOT NULL AUTO_INCREMENT ,
-			  `key` VARCHAR(45) NOT NULL ,
-			  `value` INT NOT NULL ,
-			  PRIMARY KEY (`id`) ,
-			  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
-			  UNIQUE INDEX `key_UNIQUE` (`key` ASC) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			createStmts.Add(
-			@"CREATE  TABLE IF NOT EXISTS `emoticons` (
-			  `id` INT NOT NULL AUTO_INCREMENT ,
-			  `emoticon` VARCHAR(45) NOT NULL ,
-			  `uses` INT NOT NULL ,
-			  `last_used_by` INT NOT NULL ,
-			  PRIMARY KEY (`id`) ,
-			  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
-			  UNIQUE INDEX `emoticon_UNIQUE` (`emoticon` ASC) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			createStmts.Add(
-			@"CREATE  TABLE IF NOT EXISTS `urls` (
-			  `id` INT NOT NULL AUTO_INCREMENT ,
-			  `url` VARCHAR(220) NOT NULL ,
-			  `uses` INT NOT NULL ,
-			  `last_used_by` INT NOT NULL ,
-			  `last_usage` TEXT NOT NULL ,
-			  PRIMARY KEY (`id`) ,
-			  UNIQUE INDEX `urlid_UNIQUE` (`id` ASC) ,
-			  UNIQUE INDEX `url_UNIQUE` (`url` ASC) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			createStmts.Add(
-			@"CREATE  TABLE IF NOT EXISTS `words` (
-			  `id` INT NOT NULL AUTO_INCREMENT ,
-			  `word` VARCHAR(220) NOT NULL ,
-			  `uses` INT NOT NULL ,
-			  PRIMARY KEY (`id`) ,
-			  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
-			  UNIQUE INDEX `word_UNIQUE` (`word` ASC) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			createStmts.Add(
-			@"CREATE  TABLE IF NOT EXISTS `names` (
-			  `user_id` INT NOT NULL ,
-			  `name` VARCHAR(90) NOT NULL ,
-			  PRIMARY KEY (`user_id`) ,
-			  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) )
-			DEFAULT CHARACTER SET = utf8
-			COLLATE = utf8_bin;");
-
-			foreach (string str in createStmts) {
-				ExecuteStatement(str);
-			}
-
-			Logger.Log("Done.");
+			context.SubmitChanges();
 		}
 
 		public bool OpenConnection()
 		{
 			try {
 				connection.Open();
+				context = new Database.StatsBotDataContext(connection);
+				UserStats = context.GetTable<Database.UserStatistics>();
+				Emoticons = context.GetTable<Database.Emoticon>();
+				UserNames = context.GetTable<Database.Name>();
+				Quotes = context.GetTable<Database.Quote>();
+				Urls = context.GetTable<Database.Url>();
+				UserCreds = context.GetTable<Database.UserCredentials>();
+				KeyValuePairs = context.GetTable<Database.KeyValuePair>();
+				Words = context.GetTable<Database.Word>();
+
 				return true;
-			} catch (MySqlException e) {
+			} catch (SqlException e) {
 				Logger.Log("Failed to open a connection to the SQL database. Error mesage: " + e.Message, LogLevel.Error);
 				return false;
 			} catch (InvalidOperationException e) {
@@ -149,12 +75,23 @@ namespace BaggyBot
 			}
 		}
 
+		public void Reconnect()
+		{
+			lock (connection) {
+				connection.Close();
+				connection.Dispose();
+				connection = null;
+				Initialize();
+				OpenConnection();
+			}
+		}
+
 		public bool CloseConnection()
 		{
 			try {
 				connection.Close();
 				return true;
-			} catch (MySqlException ex) {
+			} catch (SqlException ex) {
 				Logger.Log("Failed to close the connection to the SQL database. Error mesage: " + ex.Message, LogLevel.Error);
 				return false;
 			}
@@ -165,19 +102,19 @@ namespace BaggyBot
 			lock (connection) {
 
 				int result;
-				using (MySqlCommand cmd = new MySqlCommand(statement, connection)) {
+				using (SqlCommand cmd = new SqlCommand(statement, connection)) {
 					result = cmd.ExecuteNonQuery();
 				}
 				return result;
 			}
 		}
 
-		private DataView Select(string query)
+		/*private DataView Select(string query)
 		{
 			lock (connection) {
 				DataView ret;
-				using (MySqlCommand cmd = new MySqlCommand(query, connection)) {
-					using (MySqlDataAdapter da = new MySqlDataAdapter(cmd)) {
+				using (SqlCommand cmd = new SqlCommand(query, connection)) {
+					using (SqlDataAdapter da = new SqlDataAdapter(cmd)) {
 						using (DataSet ds = new DataSet()) {
 							da.Fill(ds);
 							ret = ds.Tables[0].DefaultView;
@@ -186,11 +123,11 @@ namespace BaggyBot
 				}
 				return ret;
 			}
-		}
+		}*/
 		/// Selects a vector and returns it in the form of an array.
 		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
 		/// </summary>
-		internal T[] SelectVector<T>(string query)
+		/*internal T[] SelectVector<T>(string query)
 		{
 			int ID = new Random().Next(100, 999);
 			T[] data;
@@ -207,10 +144,12 @@ namespace BaggyBot
 				}
 			}
 			return data;
-		}
+		}*/
 
-		internal T SelectOne<T>(string query)
+
+		/*internal T SelectOne<T>(string query)
 		{
+
 			Object data;
 			using (DataView dv = Select(query)) {
 				if (dv.Count == 1) {
@@ -227,7 +166,7 @@ namespace BaggyBot
 			} else {
 				return (T)data;
 			}
-		}
+		}*/
 
 		internal void Dispose()
 		{

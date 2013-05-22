@@ -28,12 +28,8 @@ namespace BaggyBot.Commands
 				case "name":
 					int uid;
 					if (int.TryParse(command.Args[1], out uid)) {
-						int updr = dataFunctionSet.SetPrimary(uid, command.Args[2]);
-						if (updr != 1) {
-							ircInterface.SendMessage(command.Channel, "Something probably went wrong. Amount of updated rows: " + updr);
-						} else {
-							ircInterface.SendMessage(command.Channel, "Done.");
-						}
+						dataFunctionSet.SetPrimary(uid, command.Args[2]);
+						ircInterface.SendMessage(command.Channel, "Done.");
 					}
 					break;
 				case "-s":

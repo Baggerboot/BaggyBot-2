@@ -25,19 +25,22 @@ namespace BaggyBot
 			{
 				{"crash", new Crash(ircInterface, dataFunctionSet)},
 				{"elycool", new Elycool(ircInterface)},
+				{"ed", new ExceptionDetails(ircInterface)},
 				{"get", new Get(ircInterface, dataFunctionSet)},
 				{"help", new Help(ircInterface)},
 				{"join", new Join(ircInterface, dataFunctionSet)},
 				{"ns", new NickServ(ircInterface, dataFunctionSet, sqlConnector)},
+				{"nuke", new Nuke(ircInterface, dataFunctionSet)},
 				{"part", new Part(ircInterface)},
 				{"ping", new Ping(ircInterface)},
-				{"query", new Query(ircInterface, sqlConnector)},
 				{"resolve", new Resolve(ircInterface)},
 				{"say", new Say(ircInterface)},
 				{"set", new Set(ircInterface, dataFunctionSet)},
+				{"sqlreconnect", new SqlReconnect(ircInterface, sqlConnector)},
 				{"shutdown", new Shutdown(ircInterface, sqlConnector)},
 				{"snag", new Snag(ircInterface)},
 				{"update", new Update(ircInterface, sqlConnector)},
+				{"version", new Commands.Version(ircInterface)}
 			};
 		}
 
@@ -61,7 +64,12 @@ namespace BaggyBot
 			}
 
 			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && Tools.UserTools.Validate(message.Sender)) {
-				commands[command].Use(cmd);
+				try {
+					commands[command].Use(cmd);
+				} catch (Exception e) {
+					ircInterface.SendMessage(message.Channel, "An unhandled exception occured while trying to process your command! Exception details: " + e.Message);
+					Program.Exceptions.Add(e);
+				}
 			} else {
 				ircInterface.SendMessage(message.Channel, Messages.CMD_NOT_AUTHORIZED);
 			}

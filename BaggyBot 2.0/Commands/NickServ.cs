@@ -27,9 +27,13 @@ namespace BaggyBot.Commands
 					int uid = dataFunctionSet.GetIdFromNick(c.Args[1]);
 					if (uid < 0) uid = dataFunctionSet.GetIdFromUser(ircInterface.DoWhoisCall(c.Args[1]));
 					string nickserv = ircInterface.DoNickservCall(c.Args[1]);
-					string statement = String.Format("UPDATE usercreds SET ns_login = {0} WHERE user_id = {1}", dataFunctionSet.Safe(nickserv), uid);
-					int rows = sqlConnector.ExecuteStatement(statement);
-					ircInterface.SendMessage(c.Channel, rows + " rows affected.");
+
+					(from cred in sqlConnector.UserCreds
+					 where cred.user_id == uid
+					 select cred).First().ns_login = nickserv;
+
+					sqlConnector.SubmitChanges();
+					ircInterface.SendMessage(c.Channel, string.Format("Nickserv updated to {0} for {1}.", nickserv, c.Args[1]));
 					return;
 				} else {
 					ircInterface.SendMessage(c.Channel, Messages.CMD_NOT_AUTHORIZED);

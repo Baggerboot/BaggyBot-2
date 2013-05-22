@@ -6,19 +6,23 @@ using System.Threading.Tasks;
 
 namespace BaggyBot.Commands
 {
-	class Details : ICommand
+	class Nuke : ICommand
 	{
 		private IrcInterface ircInterface;
+		private DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Details(IrcInterface inter)
+		public Nuke(IrcInterface inter, DataFunctionSet df)
 		{
 			ircInterface = inter;
+			dataFunctionSet = df;
 		}
 
 		public void Use(CommandArgs command)
 		{
-			ircInterface.SendMessage(command.Channel, Program.Exceptions[0].ToString());
+			dataFunctionSet.PurgeDatabase();
+			dataFunctionSet.InitializeDatabase();
+			ircInterface.SendMessage(command.Channel, "Database cleared.");
 		}
 	}
 }

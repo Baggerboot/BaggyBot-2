@@ -7,6 +7,9 @@ using IRCSharp;
 using MySql.Data;
 using MySql.Data.MySqlClient;
 
+using System.Data.Linq;
+using BaggyBot.Database;
+
 namespace BaggyBot
 {
 	/// <summary>
@@ -21,39 +24,159 @@ namespace BaggyBot
 		{
 			this.sqlConnector = sqlConnector;
 			ircInterface = inter;
+			Lock = sqlConnector;
 
 		}
+
+		public object Lock;
 
 		/// <summary>
 		/// Turns an 'unsafe' string into a safe string, by escaping all escape characters, and adding single quotes around the string.
 		/// This means that you do NOT have to use single quotes in your insert statements anymore.
 		/// </summary>
-		internal string Safe(string sqlString)
+		/*internal string Safe(string sqlString)
 		{
 			string newString = sqlString.Replace(@"\", @"\\");
 			newString = newString.Replace("'", "''");
 			newString = newString.Insert(0, "'");
 			newString += "'";
 			return newString;
-		}
+		}*/
 
 		internal void IncrementLineCount(int uid)
 		{
-			string statement = String.Format("INSERT INTO userstats VALUES ({0}, 1, 0, 0, 0) ON DUPLICATE KEY UPDATE `lines` = `lines` +1", uid);
-			sqlConnector.ExecuteStatement(statement);
+			UserStatistics nstat = null;
+
+			var matches =
+				from stat in sqlConnector.UserStats
+				where stat.user_id == uid
+				select stat;
+
+			if (matches.Count() != 0) {
+				matches.First().lines++;
+				sqlConnector.SubmitChanges();
+			} else {
+				nstat = new UserStatistics();
+				nstat.user_id = uid;
+				nstat.lines = 1;
+				sqlConnector.UserStats.InsertOnSubmit(nstat);
+				sqlConnector.SubmitChanges();
+			}
+			
+		}
+
+		internal void InitializeDatabase()
+		{
+			Logger.Log("Initializing database...");
+
+			List<string> createStmts = new List<string>();
+
+
+			createStmts.Add(
+			@"CREATE  TABLE usercreds (
+			  id INT NOT NULL IDENTITY ,
+			  user_id INT NOT NULL ,
+			  nick NVARCHAR(45) NOT NULL ,
+			  ident NVARCHAR(16) NOT NULL ,
+			  hostmask NVARCHAR(128) NOT NULL ,
+			  ns_login NVARCHAR(45) NULL ,
+			  PRIMARY KEY (id) 
+			);");
+
+			createStmts.Add(
+			@"CREATE  TABLE userstats (
+			  user_id INT NOT NULL ,
+			  lines INT NOT NULL ,
+			  words INT NOT NULL ,
+			  actions INT NOT NULL ,
+			  profanities INT NOT NULL ,
+			  PRIMARY KEY (user_id) 
+			);");
+
+			createStmts.Add(
+			@"CREATE TABLE quotes (
+			  id INT NOT NULL IDENTITY,
+			  user_id INT NOT NULL ,
+			  quote TEXT NOT NULL ,
+			  PRIMARY KEY (id) 
+			);");
+
+			createStmts.Add(
+			@"CREATE  TABLE var (
+			  id INT NOT NULL IDENTITY ,
+			  [key] NVARCHAR(45) NOT NULL ,
+			  value INT NOT NULL ,
+			  PRIMARY KEY (id) ,
+			  CONSTRAINT unq_key UNIQUE ([key]) 
+			);");
+
+			createStmts.Add(
+			@"CREATE  TABLE emoticons (
+			  id INT NOT NULL IDENTITY ,
+			  emoticon NVARCHAR(45) NOT NULL ,
+			  uses INT NOT NULL ,
+			  last_used_by INT NOT NULL ,
+			  PRIMARY KEY (id) ,
+			  CONSTRAINT unq_emoticon UNIQUE (emoticon) 
+			);");
+
+			createStmts.Add(
+			@"CREATE  TABLE urls (
+			  id INT NOT NULL IDENTITY ,
+			  url NVARCHAR(220) NOT NULL ,
+			  uses INT NOT NULL ,
+			  last_used_by INT NOT NULL ,
+			  last_usage TEXT NOT NULL ,
+			  PRIMARY KEY (id) ,
+			  CONSTRAINT unq_url UNIQUE (url) 
+			);");
+
+			createStmts.Add(
+			@"CREATE  TABLE words (
+			  id INT NOT NULL IDENTITY ,
+			  word NVARCHAR(220) NOT NULL ,
+			  uses INT NOT NULL ,
+			  PRIMARY KEY (id) ,
+			  CONSTRAINT unq_word UNIQUE (word) 
+			);");
+
+			createStmts.Add(
+			@"CREATE TABLE names (
+			  user_id INT NOT NULL ,
+			  name NVARCHAR(90) NOT NULL ,
+			  PRIMARY KEY (user_id) 
+			);");
+
+			foreach (string str in createStmts) {
+				sqlConnector.ExecuteStatement(str);
+			}
+
+			Logger.Log("Done.");
 		}
 
 		internal void IncrementWordCount(int uid, int words)
 		{
-			string statement = String.Format("UPDATE userstats SET words = words + {0} WHERE user_id = {1}", words, uid);
-			sqlConnector.ExecuteStatement(statement);
+			var matches =
+				from stat in sqlConnector.UserStats
+				where stat.user_id == uid
+				select stat;
+
+			matches.First().words += words;
+
+			sqlConnector.SubmitChanges();
+			//string statement = String.Format("UPDATE userstats SET words = words + {0} WHERE user_id = {1}", words, uid);
+			//sqlConnector.ExecuteStatement(statement);
 		}
 
 		internal void Snag(IrcMessage message)
 		{
 			int uid = GetIdFromUser(message.Sender);
-			string query = string.Format("INSERT INTO quotes VALUES(NULL, {0}, {1})", uid, Safe(message.Message));
-			sqlConnector.ExecuteStatement(query);
+			Quote q = new Quote();
+			q.quote1 = message.Message;
+			q.user_id = uid;
+
+			sqlConnector.Quotes.InsertOnSubmit(q);
+			sqlConnector.SubmitChanges();
 		}
 
 		/// <summary>
@@ -62,8 +185,21 @@ namespace BaggyBot
 		/// <returns>a list of User ID matches</returns>
 		internal int[] GetUids(IrcUser ircUser)
 		{
-			string query = string.Format("SELECT DISTINCT user_id FROM usercreds WHERE nick = {0} AND ident = {1} AND hostmask = {2}", Safe(ircUser.Nick), Safe(ircUser.Ident), Safe(ircUser.Hostmask));
-			return sqlConnector.SelectVector<int>(query);
+			var results = (from res in sqlConnector.UserCreds
+						   where res.nick == ircUser.Nick
+						   && res.ident == ircUser.Ident
+						   && res.hostmask == ircUser.Hostmask
+						   select res.user_id).Distinct();
+
+			int count = results.Count();
+			try {
+				return results.ToArray();
+			} catch (InvalidOperationException) {
+				int[] arr = new int[1];
+				arr[0] = results.First();
+
+				return arr;
+			}
 		}
 
 		/// <summary>
@@ -72,19 +208,20 @@ namespace BaggyBot
 		internal void PurgeDatabase()
 		{
 			string statement =
-					@"drop table `stats_bot`.`emoticons`;
-					drop table `stats_bot`.`quotes`;
-					drop table `stats_bot`.`urls`;
-					drop table `stats_bot`.`usercreds`;
-					drop table `stats_bot`.`userstats`;
-					drop table `stats_bot`.`var`;
-					drop table `stats_bot`.`words`;";
+					@"drop table stats_bot.dbo.emoticons;
+					drop table stats_bot.dbo.quotes;
+					drop table stats_bot.dbo.urls;
+					drop table stats_bot.dbo.usercreds;
+					drop table stats_bot.dbo.userstats;
+					drop table stats_bot.dbo.var;
+					drop table stats_bot.dbo.words;
+					drop table stats_bot.dbo.names";
 			sqlConnector.ExecuteStatement(statement);
 			Console.WriteLine("Database purged");
 		}
 
 		/// <summary>
-		/// Adds a user credentials combination to the usercreds table.
+		/// Adds a user credentials combination to the dbo.usercreds table.
 		/// </summary>
 		/// <param name="user">The user to draw the credentials from</param>
 		/// <param name="nickserv">The nickserv account used by the user</param>
@@ -93,37 +230,69 @@ namespace BaggyBot
 		internal int AddCredCombination(IrcUser user, string nickserv = null, int uid = -1)
 		{
 			if (uid == -1) {
-				try {
-					int result = sqlConnector.SelectOne<int>("SELECT MAX(user_id) FROM usercreds");
-					uid = result;
-					uid++;
-				} catch (RecordNullException) {
+				var results = (from c in sqlConnector.UserCreds
+					   select c.user_id);
+				if (!results.Any()) {
 					uid = 1;
+				} else {
+					uid = results.Max() + 1;
 				}
 			}
 
-			if (nickserv == null) nickserv = "NULL";
-			else nickserv = Safe(nickserv);
+			/*if (nickserv == null) nickserv = "NULL";
+			else nickserv = Safe(nickserv);*/
 
-			string query = string.Format("INSERT INTO usercreds VALUES (NULL, {0}, {1}, {2}, {3}, {4})", uid, Safe(user.Nick), Safe(user.Ident), Safe(user.Hostmask), nickserv);
-			sqlConnector.ExecuteStatement(query);
+			UserCredentials cred = new UserCredentials();
+			cred.nick = user.Nick;
+			cred.ident = user.Ident;
+			cred.hostmask = user.Hostmask;
+			cred.ns_login = nickserv;
+			cred.user_id = uid;
 
-			query = string.Format("INSERT INTO names VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE name=name", uid, Safe(user.Nick));
-			sqlConnector.ExecuteStatement(query);
+			sqlConnector.UserCreds.InsertOnSubmit(cred);
+			sqlConnector.SubmitChanges();
+
+			if ((from n in sqlConnector.UserNames
+				 where n.user_id == uid
+				 select n).Any()) return uid;
+
+			Name name = new Name();
+			name.user_id = uid;
+			name.name1 = user.Nick;
+
+			sqlConnector.UserNames.InsertOnSubmit(name);
+			sqlConnector.SubmitChanges();
 
 			return uid;
 		}
 
-		internal int SetPrimary(int uid, string name)
+		internal void SubmitChanges()
 		{
-			string query = query = string.Format("UPDATE names SET name={0} WHERE user_id = {1}", Safe(name), uid);
-			return sqlConnector.ExecuteStatement(query);
+			sqlConnector.SubmitChanges();
+		}
+
+		internal void SetPrimary(int uid, string name)
+		{
+			var results = (from n in sqlConnector.UserNames
+						   where n.user_id == uid
+						   select n);
+			if (results.Any()) {
+				results.First().name1 = name;
+			} else {
+				Name n = new Name();
+				n.user_id = uid;
+				n.name1 = name;
+				sqlConnector.UserNames.InsertOnSubmit(n);
+			}
+
+			sqlConnector.SubmitChanges();
 		}
 
 		internal string GetNickserv(int uid)
 		{
-			string query = string.Format("SELECT DISTINCT ns_login FROM usercreds WHERE user_id = {0} LIMIT 1", uid);
-			return sqlConnector.SelectOne<string>(query);
+			return (from c in sqlConnector.UserCreds
+					where c.user_id == uid
+					select c.ns_login).First();
 		}
 
 		private int[] GetMatchesFirstLevel(IrcUser sender)
@@ -132,18 +301,23 @@ namespace BaggyBot
 		}
 		private int[] GetMatchesSecondLevel(IrcUser sender)
 		{
-			string query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE nick = {0} AND ident = {1}", Safe(sender.Nick), Safe(sender.Ident));
-			return sqlConnector.SelectVector<int>(query);
+			return (from c in sqlConnector.UserCreds
+					where c.nick == sender.Nick
+					&& c.ident == sender.Ident
+					select c.user_id).Distinct().ToArray();
 		}
 		private int[] GetMatchesThirdLevel(string nickserv)
 		{
-			string query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE ns_login = {0}", Safe(nickserv));
-			return sqlConnector.SelectVector<int>(query);
+			return (from c in sqlConnector.UserCreds
+					where c.ns_login == nickserv
+					select c.user_id).Distinct().ToArray();
 		}
 		private int[] GetMatchesFourthLevel(IrcUser sender)
 		{
-			string query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE ident = {0} AND hostmask = {1}", Safe(sender.Ident), Safe(sender.Hostmask));
-			return sqlConnector.SelectVector<int>(query);
+			return (from c in sqlConnector.UserCreds
+					where c.hostmask == sender.Hostmask
+					&& c.ident == sender.Ident
+					select c.user_id).Distinct().ToArray();
 		}
 
 		/// <summary>
@@ -153,26 +327,29 @@ namespace BaggyBot
 		/// <returns>The user ID of the user if successful, -1 if there were multiple matches, -2 if there were no matches.</returns>
 		internal int GetIdFromNick(string nick)
 		{
-			string query = String.Format("SELECT user_id FROM nicks WHERE nick = {0}", Safe(nick));
-			try {
-				int result = sqlConnector.SelectOne<int>(query);
-				return result;
-			} catch (InvalidOperationException) { }
+			var results = (from n in sqlConnector.UserNames
+						   where n.name1 == nick
+						   select n.user_id);
 
-			query = String.Format("SELECT DISTINCT user_id FROM usercreds WHERE nick = {0}", Safe(nick));
-			int[] results = sqlConnector.SelectVector<int>(query);
-			if (results.Length > 1) {
-				return -1;
-			} if (results.Length == 0) {
-				return -2;
-			} else {
-				return results[0];
-			}
+			int count = results.Count();
+
+			if (count == 1) return results.First();
+			else if (count > 1) return -1;
+
+			results = (from c in sqlConnector.UserCreds
+					   where c.nick == nick
+					   select c.user_id);
+
+			if (count == 1) return results.First();
+			else if (count > 1) return -1;
+			else return -2;
 		}
 
 		delegate int Level();
 		internal int GetIdFromUser(IrcUser user)
 		{
+
+			// Check for a match with ident and hostmask, but only if nickserv fails
 			Level l4 = () =>
 			{
 				var res = GetMatchesFourthLevel(user);
@@ -187,6 +364,7 @@ namespace BaggyBot
 				}
 			};
 
+			// Check for a nickserv match
 			Level l3 = () =>
 			{
 				string nickserv = ircInterface.DoNickservCall(user.Nick);
@@ -208,6 +386,7 @@ namespace BaggyBot
 				}
 			};
 
+			// Check for a match with nick and ident
 			Level l2 = () =>
 			{
 				var res = GetMatchesSecondLevel(user);
@@ -219,6 +398,7 @@ namespace BaggyBot
 				}
 			};
 
+			// Check for a match with nick, ident and hostmask
 			Level l1 = () =>
 			{
 				var res = GetMatchesFirstLevel(user);
@@ -232,15 +412,37 @@ namespace BaggyBot
 
 		internal void IncrementEmoticon(string emoticon, int user)
 		{
-			string statement = String.Format("INSERT INTO emoticons VALUES (NULL, {0}, 1, {1}) ON DUPLICATE KEY UPDATE `uses` = `uses` + 1, `last_used_by` = {1}", Safe(emoticon), user);
-			sqlConnector.ExecuteStatement(statement);
-			Logger.Log("Added emoticon: " + emoticon);
+			var matches = from tEmoticon in sqlConnector.Emoticons
+						  where tEmoticon.emoticon1 == emoticon
+						  select tEmoticon;
+			if (matches.Count() == 0) {
+				Emoticon insert = new Emoticon();
+				insert.emoticon1 = emoticon;
+				insert.last_used_by = user;
+				insert.uses = 1;
+				sqlConnector.Emoticons.InsertOnSubmit(insert);
+			} else {
+				matches.First().uses++;
+				matches.First().last_used_by = user;
+			}
+			sqlConnector.SubmitChanges();
 		}
 
-		internal void IncrementVar(string id, int amount = 1)
+		internal void IncrementVar(string key, int amount = 1)
 		{
-			string statement = String.Format("INSERT INTO var VALUES (NULL, {0}, {1}) ON DUPLICATE KEY UPDATE `value` = `value` + {1}", Safe(id), amount);
-			sqlConnector.ExecuteStatement(statement);
+			var matches = from pair in sqlConnector.KeyValuePairs
+						  where pair.key == key
+						  select pair;
+
+			if (matches.Count() == 0) {
+				KeyValuePair p = new KeyValuePair();
+				p.key = key;
+				p.value = amount;
+				sqlConnector.KeyValuePairs.InsertOnSubmit(p);
+			} else {
+				matches.First().value += amount;
+			}
+			sqlConnector.SubmitChanges();
 		}
 
 		/// <summary>
@@ -250,14 +452,21 @@ namespace BaggyBot
 		/// <param name="newNick"></param>
 		internal void HandleNickChange(IrcUser user, string newNick)
 		{
-			
-			int count = (int)sqlConnector.SelectOne<long>(String.Format("SELECT COUNT(*) FROM usercreds WHERE nick = {0} AND ident = {1} AND hostmask = {2}", Safe(newNick), Safe(user.Ident), Safe(user.Hostmask)));
-			if (count == 1) { // No need to add an entry if an identical set of credentials already exists
+			var newCreds = (from c in sqlConnector.UserCreds
+							where c.nick == newNick
+							&& c.ident == user.Ident
+							&& c.hostmask == user.Hostmask
+							select c);
+
+			int count = newCreds.Count();
+
+			if (count != 0) {
 				return;
 			} else if (count > 1) {
 				Logger.Log(String.Format("Multiple credentials found for combination: nick={0}, ident={1}, hostmask={2}", newNick, user.Ident, user.Hostmask), LogLevel.Warning);
 				return;
 			}
+
 			int[] uids = GetUids(user);
 			if (uids.Length != 1) {
 				Logger.Log("Unable to handle nick change for " + user.Nick + " to " + newNick + ": Invalid amount of Uids received: " + uids.Length, LogLevel.Warning);
@@ -269,27 +478,58 @@ namespace BaggyBot
 
 		internal void IncrementUrl(string url, int user, string usage)
 		{
-			string statement = String.Format("INSERT INTO urls VALUES (NULL, {0}, 1, {1}, {2}) ON DUPLICATE KEY UPDATE `uses` = `uses` + 1, `last_used_by` = {1}, `last_usage` = {2}", Safe(url), user, Safe(usage));
-			sqlConnector.ExecuteStatement(statement);
+			var matches = from tUrl in sqlConnector.Urls
+						  where tUrl.url1 == url
+						  select tUrl;
+
+			if (matches.Count() == 0) {
+				Url u = new Url();
+				u.last_usage = usage;
+				u.last_used_by = user;
+				u.url1 = url;
+				sqlConnector.Urls.InsertOnSubmit(u);
+			} else {
+				matches.First().uses++;
+				matches.First().last_usage = usage;
+				matches.First().last_used_by = user;
+			}
+			sqlConnector.SubmitChanges();
 		}
 
 		internal void IncrementWord(string word)
 		{
-			string statement = String.Format("INSERT INTO words VALUES (NULL, {0}, 1) ON DUPLICATE KEY UPDATE `uses` = `uses` + 1", Safe(word));
-			sqlConnector.ExecuteStatement(statement);
+			var matches = from tWord in sqlConnector.Words
+						  where tWord.word1 == word
+						  select tWord;
+
+			if (matches.Count() == 0) {
+				Word w = new Word();
+				w.word1 = word;
+				w.uses = 1;
+				sqlConnector.Words.InsertOnSubmit(w);
+			} else {
+				matches.First().uses++;
+			}
+			sqlConnector.SubmitChanges();
 		}
 
 		internal void IncrementProfanities(int sender)
 		{
-			string statement = String.Format("UPDATE userstats SET profanities = profanities +1 WHERE user_id = {0}", sender);
-			sqlConnector.ExecuteStatement(statement);
+			(from s in sqlConnector.UserStats
+			 where s.user_id == sender
+			 select s).First().profanities++;
+
+			sqlConnector.SubmitChanges();
 		}
 
 
 		internal void IncrementActions(int sender)
 		{
-			string statement = "UPDATE userstats SET actions = actions + 1 WHERE user_id = " + sender;
-			sqlConnector.ExecuteStatement(statement);
+			(from s in sqlConnector.UserStats
+			 where s.user_id == sender
+			 select s).First().actions++;
+
+			sqlConnector.SubmitChanges();
 		}
 	}
 }
