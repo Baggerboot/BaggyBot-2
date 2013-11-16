@@ -229,6 +229,7 @@ namespace BaggyBot
 		/// </summary>
 		internal void PurgeDatabase()
 		{
+			// TODO Add databage engine-specific support for purging the database.
 			throw new NotSupportedException("Purging the database is not yet supported");
 			/*
 			string statement =
