@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using BaggyBot.Commands;
+using BaggyBot.Database;
 
 namespace BaggyBot
 {

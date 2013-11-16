@@ -21,7 +21,7 @@ namespace BaggyBot.Commands
 		public void Use(CommandArgs command)
 		{
 			if (command.Args.Length != 3) {
-				ircInterface.SendMessage(command.Channel, "Usage: -set <property> <key> <value>");
+				ircInterface.SendMessage(command.Channel, "Usage: -set <property> [key] <value>");
 				return;
 			}
 			switch (command.Args[0]) {

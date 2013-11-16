@@ -35,8 +35,6 @@ namespace BaggyBot.Commands
 
 			if (hostEntry.AddressList.Length > 0) {
 				string addr = "";
-				//hostEntry.AddressList.Select(var => (addr += "," + var.ToString()));
-
 				foreach (var address in hostEntry.AddressList) {
 					addr += ", " + address;
 				}

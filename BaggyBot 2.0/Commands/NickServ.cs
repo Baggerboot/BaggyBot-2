@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using BaggyBot.Database;
+
 namespace BaggyBot.Commands
 {
 	class NickServ : ICommand
@@ -29,8 +31,8 @@ namespace BaggyBot.Commands
 					string nickserv = ircInterface.DoNickservCall(c.Args[1]);
 
 					(from cred in sqlConnector.UserCreds
-					 where cred.user_id == uid
-					 select cred).First().ns_login = nickserv;
+					 where cred.UserId == uid
+					 select cred).First().NsLogin = nickserv;
 
 					sqlConnector.SubmitChanges();
 					ircInterface.SendMessage(c.Channel, string.Format("Nickserv updated to {0} for {1}.", nickserv, c.Args[1]));

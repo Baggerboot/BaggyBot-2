@@ -28,7 +28,11 @@ namespace BaggyBot
 		{
 			get
 			{
-				return settings[key];
+				try {
+					return settings[key];
+				} catch (KeyNotFoundException) {
+					return string.Empty;
+				}
 			}
 			set
 			{

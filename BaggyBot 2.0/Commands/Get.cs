@@ -39,6 +39,7 @@ namespace BaggyBot.Commands
 			switch (command.Args[0]) {
 				case "uid":
 					int uid = dataFunctionSet.GetIdFromNick(command.Args[1]);
+					ircInterface.SendMessage(command.Channel, "Your user Id is " + uid);
 					break;
 				default:
 					ircInterface.SendMessage(command.Channel, "That is not a valid property.");

@@ -35,7 +35,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;postgresql</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>true</Prefer32Bit>
@@ -69,6 +69,13 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DbLinq">
+      <HintPath>..\..\..\..\Desktop\DbLinq-0.20.1\DbLinq.dll</HintPath>
+    </Reference>
+    <Reference Include="DbLinq.PostgreSql, Version=0.20.0.0, Culture=neutral, PublicKeyToken=61e015a67077348b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\lin\DbLinq-0.20.1\build.dbg\DbLinq.PostgreSql.dll</HintPath>
+    </Reference>
     <Reference Include="IRCSharp">
       <HintPath>..\..\IRCSharp\IRCSharp\bin\Debug\IRCSharp.dll</HintPath>
     </Reference>
@@ -110,11 +117,19 @@
     <Compile Include="Commands\Update.cs" />
     <Compile Include="Commands\Version.cs" />
     <Compile Include="ControlVariables.cs" />
-    <Compile Include="Database\StatsBot.designer.cs">
+    <Compile Include="Database\EntityProvider\EntityProviderFactory.cs" />
+    <Compile Include="Database\EntityProvider\AbstractEntityProvider.cs" />
+    <Compile Include="Database\MS_SQL\MsEntityProvider.cs" />
+    <Compile Include="Database\MS_SQL\StatsBot.cs">
+      <DependentUpon>StatsBot.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\MS_SQL\StatsBot.designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>StatsBot.dbml</DependentUpon>
     </Compile>
+    <Compile Include="Database\PostgreSQL\DataAccess.cs" />
+    <Compile Include="Database\PostgreSQL\PgEntityProvider.cs" />
     <Compile Include="DataFunctionSet.cs" />
     <Compile Include="Emoticons.cs" />
     <Compile Include="IrcInterface.cs" />
@@ -131,7 +146,7 @@
     </Compile>
     <Compile Include="RecordNullException.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="SqlConnector.cs" />
+    <Compile Include="Database\SqlConnector.cs" />
     <Compile Include="StatsHandler.cs" />
     <Compile Include="Tools\UserTools.cs" />
     <Compile Include="Tools\WordTools.cs" />
@@ -159,10 +174,11 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="BaggyBot 2.0_TemporaryKey.pfx" />
-    <None Include="Database\StatsBot.dbml">
+    <None Include="Database\MS_SQL\StatsBot.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>StatsBot.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <CustomToolNamespace>BaggyBot.Database.MS_SQL</CustomToolNamespace>
     </None>
     <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
@@ -177,10 +193,14 @@
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Database\StatsBot.dbml.layout">
+    <None Include="Database\MS_SQL\StatsBot.dbml.layout">
       <DependentUpon>StatsBot.dbml</DependentUpon>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Npgsql.dll" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)" C:\Xampp\htdocs\files\baggybot20\</PostBuildEvent>

@@ -12,6 +12,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
+using BaggyBot.Database;
 
 namespace BaggyBot.Commands
 {

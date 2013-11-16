@@ -9,6 +9,8 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using IRCSharp;
 using System.Timers;
+using System.IO;
+using BaggyBot.Database;
 
 namespace BaggyBot
 {
@@ -23,15 +25,16 @@ namespace BaggyBot
 		internal const string commandIdentifier = "-";
 
 		private Timer taskScheduler;
+		private Timer restartScheduler;
 		private Process selfProc;
 		private PerformanceCounter pc = new PerformanceCounter();
 		private PerfLogger perfLogger = new PerfLogger("performance_log.csv");
 
 		public static bool noColor;
-		internal const string Version = "2.2.5";
+		internal const string Version = "3.2.5";
 
 
-		internal static DateTime LastUpdate = new DateTime(2013, 5, 19, 13, 55, 14, DateTimeKind.Local);
+		internal static DateTime LastUpdate = new DateTime(2013, 11, 16, 4, 9, 18, DateTimeKind.Local);
 
 		private static List<Exception> exceptions = new List<Exception>();
 
@@ -49,6 +52,29 @@ namespace BaggyBot
 			client.SendMessage(Settings.Instance["operator_nick"], "A fatal unhandled exception occured.");
 			Logger.Log("A fatal unhandled exception occured: " + e.GetType().Name, LogLevel.Error);
 			Logger.Log("Private memory size: " + mem + " bytes.", LogLevel.Info);
+		}
+
+		private void Restart()
+		{
+			sqlConnector.CloseConnection();
+			sqlConnector.Dispose();
+			Logger.Dispose();
+
+			Process proc = new Process();
+			proc.StartInfo.FileName = "UpdateManager.exe";
+			proc.StartInfo.Arguments = "-recover";
+
+			proc.Start();
+
+			System.Net.Sockets.SocketInformation si = ircInterface.DuplicateAndClose(proc.Id);
+			//System.Net.Sockets.Socket s = ircInterface.GetHandle();
+
+			BinaryFormatter bf = new BinaryFormatter();
+
+			using (Stream str = File.Open("socket.stream", FileMode.Create)) {
+				bf.Serialize(str, si);
+			}
+			Environment.Exit(0);
 		}
 
 		public Program(string previousVersion = null, bool createDB = false)
@@ -69,6 +95,13 @@ namespace BaggyBot
 			BaggyBot.Tools.UserTools.DataFunctionSet = dataFunctionSet;
 			taskScheduler = new Timer();
 			taskScheduler.Interval = 2000;
+			restartScheduler = new Timer();
+			restartScheduler.Interval = 1000 * 3600 * 5; // milisecond, second, hour
+			restartScheduler.AutoReset = false;
+			restartScheduler.Elapsed += (par, par2) =>
+			{
+				Restart();
+			};
 			selfProc = Process.GetCurrentProcess();
 			pc.CategoryName = "Process";
 			pc.CounterName = "Working Set - Private";
@@ -274,7 +307,5 @@ namespace BaggyBot
 				p.Connect();
 			}
 		}
-
-
 	}
 }

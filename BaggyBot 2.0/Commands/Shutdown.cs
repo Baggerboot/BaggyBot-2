@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using BaggyBot.Database;
+
 namespace BaggyBot.Commands
 {
 	class Shutdown : ICommand

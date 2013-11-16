@@ -26,6 +26,11 @@ namespace BaggyBot
 			dataFunctionSet = dm;
 			ircInterface = inter;
 			rand = new Random();
+
+			double snagChance;
+			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance)) {
+				Logger.Log("Error in bot settings: invalid value for snag_chance. Default value will be used.");
+			}
 		}
 		internal void ProcessMessage(IrcMessage message)
 		{
@@ -92,24 +97,36 @@ namespace BaggyBot
 				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
 				return;
 			}
-			double chance = 0.03;
-			if (words.Count > 6) {
-				if (rand.NextDouble() <= chance) {
-					int randint = rand.Next(snagMessages.Length * 2);
-					if (randint < snagMessages.Length) {
-						ircInterface.SendMessage(message.Channel, snagMessages[randint]);
+
+			double snagChance;
+			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance)) {
+				snagChance = 0.03;
+			}
+
+			if (words.Count > 6) { // Do not snag if the amount of words to be snagged is less than 7
+				if (rand.NextDouble() <= snagChance) {
+					bool allowSnagMessage;
+					bool.TryParse(Settings.Instance["display_snag_message"], out allowSnagMessage);
+					double displayChance = 0.5;
+					double.TryParse(Settings.Instance["snag_chance_display"], out displayChance);
+					bool hideSnagMessage = rand.NextDouble() <= displayChance;
+					if ( !allowSnagMessage || hideSnagMessage) { // Check if snag message should be displayed
 						dataFunctionSet.Snag(message);
-					}else{
-						ircInterface.SendMessage(message.Channel, "Snagged!");
-						dataFunctionSet.Snag(message);
+					} else {
+						int randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
+						if (randint < snagMessages.Length) {
+							SnagMessage(message, snagMessages[randint]);
+						} else {
+							SnagMessage(message, "Snagged!");
+						}
 					}
 				}
 			}
 		}
-
-	
-		
-
-
+		private void SnagMessage(IrcMessage message, string snagMessage)
+		{
+			ircInterface.SendMessage(message.Channel, snagMessage);
+			dataFunctionSet.Snag(message);
+		}
 	}
 }

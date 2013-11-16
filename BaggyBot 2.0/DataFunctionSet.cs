@@ -6,9 +6,15 @@ using System.Text;
 using IRCSharp;
 using MySql.Data;
 using MySql.Data.MySqlClient;
-
-using System.Data.Linq;
 using BaggyBot.Database;
+using System.Data.Linq;
+
+#if postgresql
+using BaggyBot.Database.PostgreSQL;
+#endif
+#if mssql
+using BaggyBot.Database.MS_SQL;
+#endif
 
 namespace BaggyBot
 {
@@ -49,25 +55,33 @@ namespace BaggyBot
 
 			var matches =
 				from stat in sqlConnector.UserStats
-				where stat.user_id == uid
+				where stat.UserId == uid
 				select stat;
 
+			int line = 0;
+			UserStatistics match = null;
+
 			if (matches.Count() != 0) {
-				matches.First().lines++;
-				sqlConnector.SubmitChanges();
+				match = matches.First();
+				line = match.Lines;
+				match.Lines++;
+				Logger.Log("Incremented lines for " + uid + ".", LogLevel.Debug);
+				SubmitChanges();
 			} else {
 				nstat = new UserStatistics();
-				nstat.user_id = uid;
-				nstat.lines = 1;
+				nstat.UserId = uid;
+				nstat.Lines = 1;
 				sqlConnector.UserStats.InsertOnSubmit(nstat);
-				sqlConnector.SubmitChanges();
+				Logger.Log("Created new stats row for " + uid + ".", LogLevel.Debug);
+				SubmitChanges();
 			}
-			
 		}
 
 		internal void InitializeDatabase()
 		{
-			Logger.Log("Initializing database...");
+			throw new Exception("Initializing the database is not yet supported");
+
+			/*Logger.Log("Initializing database...");
 
 			List<string> createStmts = new List<string>();
 
@@ -151,32 +165,34 @@ namespace BaggyBot
 				sqlConnector.ExecuteStatement(str);
 			}
 
-			Logger.Log("Done.");
+			Logger.Log("Done.");*/
 		}
 
 		internal void IncrementWordCount(int uid, int words)
 		{
 			var matches =
 				from stat in sqlConnector.UserStats
-				where stat.user_id == uid
+				where stat.UserId == uid
 				select stat;
 
-			matches.First().words += words;
+			var match = matches.First();
+			int originalWords = match.Words;
+			match.Words += words;
 
-			sqlConnector.SubmitChanges();
-			//string statement = String.Format("UPDATE userstats SET words = words + {0} WHERE user_id = {1}", words, uid);
-			//sqlConnector.ExecuteStatement(statement);
+			Logger.Log("Incremented words for " + uid + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 
 		internal void Snag(IrcMessage message)
 		{
 			int uid = GetIdFromUser(message.Sender);
 			Quote q = new Quote();
-			q.quote1 = message.Message;
-			q.user_id = uid;
+			q.Quote1 = message.Message;
+			q.UserId = uid;
 
 			sqlConnector.Quotes.InsertOnSubmit(q);
-			sqlConnector.SubmitChanges();
+			Logger.Log("Added quote for " + message.Sender.Nick + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 
 		/// <summary>
@@ -186,19 +202,25 @@ namespace BaggyBot
 		internal int[] GetUids(IrcUser ircUser)
 		{
 			var results = (from res in sqlConnector.UserCreds
-						   where res.nick == ircUser.Nick
-						   && res.ident == ircUser.Ident
-						   && res.hostmask == ircUser.Hostmask
-						   select res.user_id).Distinct();
+						   where res.Nick == ircUser.Nick
+						   && res.Ident == ircUser.Ident
+						   && res.HostMask == ircUser.Hostmask
+						   select res);
+
+			int[] uids = results.Select(r => r.UserId).ToArray();
+
+			uids = uids.Distinct().ToArray();
 
 			int count = results.Count();
 			try {
-				return results.ToArray();
-			} catch (InvalidOperationException) {
+				return uids;
+			} catch (InvalidOperationException e) {
+				throw new Exception("InvalidOperationException thrown while trying to return user ids.", e);
+				/*
 				int[] arr = new int[1];
 				arr[0] = results.First();
 
-				return arr;
+				return arr;*/
 			}
 		}
 
@@ -207,6 +229,8 @@ namespace BaggyBot
 		/// </summary>
 		internal void PurgeDatabase()
 		{
+			throw new NotSupportedException("Purging the database is not yet supported");
+			/*
 			string statement =
 					@"drop table stats_bot.dbo.emoticons;
 					drop table stats_bot.dbo.quotes;
@@ -217,7 +241,7 @@ namespace BaggyBot
 					drop table stats_bot.dbo.words;
 					drop table stats_bot.dbo.names";
 			sqlConnector.ExecuteStatement(statement);
-			Console.WriteLine("Database purged");
+			Console.WriteLine("Database purged");*/
 		}
 
 		/// <summary>
@@ -231,7 +255,7 @@ namespace BaggyBot
 		{
 			if (uid == -1) {
 				var results = (from c in sqlConnector.UserCreds
-					   select c.user_id);
+					   select c.UserId);
 				if (!results.Any()) {
 					uid = 1;
 				} else {
@@ -243,25 +267,27 @@ namespace BaggyBot
 			else nickserv = Safe(nickserv);*/
 
 			UserCredentials cred = new UserCredentials();
-			cred.nick = user.Nick;
-			cred.ident = user.Ident;
-			cred.hostmask = user.Hostmask;
-			cred.ns_login = nickserv;
-			cred.user_id = uid;
+			cred.Nick = user.Nick;
+			cred.Ident = user.Ident;
+			cred.HostMask = user.Hostmask;
+			cred.NsLogin = nickserv;
+			cred.UserId = uid;
 
 			sqlConnector.UserCreds.InsertOnSubmit(cred);
-			sqlConnector.SubmitChanges();
+			Logger.Log("Addecd credentials row for " + user.Nick + ".", LogLevel.Debug);
+			SubmitChanges();
 
 			if ((from n in sqlConnector.UserNames
-				 where n.user_id == uid
+				 where n.UserId == uid
 				 select n).Any()) return uid;
 
 			Name name = new Name();
-			name.user_id = uid;
-			name.name1 = user.Nick;
+			name.UserId = uid;
+			name.Name1 = user.Nick;
 
 			sqlConnector.UserNames.InsertOnSubmit(name);
-			sqlConnector.SubmitChanges();
+			Logger.Log("Added name row for " + user.Nick + ".", LogLevel.Debug);
+			SubmitChanges();
 
 			return uid;
 		}
@@ -274,27 +300,28 @@ namespace BaggyBot
 		internal void SetPrimary(int uid, string name)
 		{
 			var results = (from n in sqlConnector.UserNames
-						   where n.user_id == uid
+						   where n.UserId == uid
 						   select n);
 			if (results.Any()) {
-				results.First().name1 = name;
+				results.First().Name1 = name;
 			} else {
 				Name n = new Name();
-				n.user_id = uid;
-				n.name1 = name;
+				n.UserId = uid;
+				n.Name1 = name;
 				sqlConnector.UserNames.InsertOnSubmit(n);
 			}
-
-			sqlConnector.SubmitChanges();
+			Logger.Log("Changed name for " + uid + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 
 		internal string GetNickserv(int uid)
 		{
 			return (from c in sqlConnector.UserCreds
-					where c.user_id == uid
-					select c.ns_login).First();
+					where c.UserId == uid
+					select c.NsLogin).First();
 		}
 
+		#region Match Levels
 		private int[] GetMatchesFirstLevel(IrcUser sender)
 		{
 			return GetUids(sender);
@@ -302,23 +329,24 @@ namespace BaggyBot
 		private int[] GetMatchesSecondLevel(IrcUser sender)
 		{
 			return (from c in sqlConnector.UserCreds
-					where c.nick == sender.Nick
-					&& c.ident == sender.Ident
-					select c.user_id).Distinct().ToArray();
+					where c.Nick == sender.Nick
+					&& c.Ident == sender.Ident
+					select c.UserId).Distinct().ToArray();
 		}
 		private int[] GetMatchesThirdLevel(string nickserv)
 		{
 			return (from c in sqlConnector.UserCreds
-					where c.ns_login == nickserv
-					select c.user_id).Distinct().ToArray();
+					where c.NsLogin == nickserv
+					select c.UserId).Distinct().ToArray();
 		}
 		private int[] GetMatchesFourthLevel(IrcUser sender)
 		{
 			return (from c in sqlConnector.UserCreds
-					where c.hostmask == sender.Hostmask
-					&& c.ident == sender.Ident
-					select c.user_id).Distinct().ToArray();
+					where c.HostMask == sender.Hostmask
+					&& c.Ident == sender.Ident
+					select c.UserId).Distinct().ToArray();
 		}
+		#endregion
 
 		/// <summary>
 		/// Attempts to retrieve the user ID for a given nickname from the database.
@@ -328,8 +356,8 @@ namespace BaggyBot
 		internal int GetIdFromNick(string nick)
 		{
 			var results = (from n in sqlConnector.UserNames
-						   where n.name1 == nick
-						   select n.user_id);
+						   where n.Name1 == nick
+						   select n.UserId);
 
 			int count = results.Count();
 
@@ -337,8 +365,8 @@ namespace BaggyBot
 			else if (count > 1) return -1;
 
 			results = (from c in sqlConnector.UserCreds
-					   where c.nick == nick
-					   select c.user_id);
+					   where c.Nick == nick
+					   select c.UserId);
 
 			if (count == 1) return results.First();
 			else if (count > 1) return -1;
@@ -402,8 +430,10 @@ namespace BaggyBot
 			Level l1 = () =>
 			{
 				var res = GetMatchesFirstLevel(user);
-				if (res.Length == 1) return res[0];
-				else if (res.Length == 0) return l2();
+				if (res.Length == 1) {
+					Logger.Log("Found user id match at level 1 with user id " + res[0]);
+					return res[0];
+				} else if (res.Length == 0) return l2();
 				else return l3();
 			};
 
@@ -413,36 +443,39 @@ namespace BaggyBot
 		internal void IncrementEmoticon(string emoticon, int user)
 		{
 			var matches = from tEmoticon in sqlConnector.Emoticons
-						  where tEmoticon.emoticon1 == emoticon
+						  where tEmoticon.Emoticon1 == emoticon
 						  select tEmoticon;
 			if (matches.Count() == 0) {
 				Emoticon insert = new Emoticon();
-				insert.emoticon1 = emoticon;
-				insert.last_used_by = user;
-				insert.uses = 1;
+				insert.Emoticon1 = emoticon;
+				insert.LastUsedBy = user;
+				insert.Uses = 1;
 				sqlConnector.Emoticons.InsertOnSubmit(insert);
 			} else {
-				matches.First().uses++;
-				matches.First().last_used_by = user;
+				matches.First().Uses++;
+				matches.First().LastUsedBy = user;
 			}
-			sqlConnector.SubmitChanges();
+			Logger.Log("Incremented emoticon count with emoticon: " + emoticon + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 
 		internal void IncrementVar(string key, int amount = 1)
 		{
 			var matches = from pair in sqlConnector.KeyValuePairs
-						  where pair.key == key
+						  where pair.Key == key
 						  select pair;
 
 			if (matches.Count() == 0) {
 				KeyValuePair p = new KeyValuePair();
-				p.key = key;
-				p.value = amount;
+				p.Key = key;
+				p.Value = amount;
 				sqlConnector.KeyValuePairs.InsertOnSubmit(p);
+				Logger.Log("Inserted keyvaluepair with key: " + key + ".", LogLevel.Debug);
 			} else {
-				matches.First().value += amount;
+				matches.First().Value += amount;
+				Logger.Log("Incremented keyvaluepair with key: " + key + ".", LogLevel.Debug);
 			}
-			sqlConnector.SubmitChanges();
+			SubmitChanges();
 		}
 
 		/// <summary>
@@ -453,9 +486,9 @@ namespace BaggyBot
 		internal void HandleNickChange(IrcUser user, string newNick)
 		{
 			var newCreds = (from c in sqlConnector.UserCreds
-							where c.nick == newNick
-							&& c.ident == user.Ident
-							&& c.hostmask == user.Hostmask
+							where c.Nick == newNick
+							&& c.Ident == user.Ident
+							&& c.HostMask == user.Hostmask
 							select c);
 
 			int count = newCreds.Count();
@@ -479,57 +512,61 @@ namespace BaggyBot
 		internal void IncrementUrl(string url, int user, string usage)
 		{
 			var matches = from tUrl in sqlConnector.Urls
-						  where tUrl.url1 == url
+						  where tUrl.Url1 == url
 						  select tUrl;
 
 			if (matches.Count() == 0) {
 				Url u = new Url();
-				u.last_usage = usage;
-				u.last_used_by = user;
-				u.url1 = url;
+				u.LastUsage = usage;
+				u.LastUsedBy = user;
+				u.Url1 = url;
 				sqlConnector.Urls.InsertOnSubmit(u);
 			} else {
-				matches.First().uses++;
-				matches.First().last_usage = usage;
-				matches.First().last_used_by = user;
+				matches.First().Uses++;
+				matches.First().LastUsage = usage;
+				matches.First().LastUsedBy = user;
 			}
-			sqlConnector.SubmitChanges();
+			Logger.Log("Incremented URL count with URL: " + url + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 
 		internal void IncrementWord(string word)
 		{
 			var matches = from tWord in sqlConnector.Words
-						  where tWord.word1 == word
+						  where tWord.Word1 == word
 						  select tWord;
 
 			if (matches.Count() == 0) {
 				Word w = new Word();
-				w.word1 = word;
-				w.uses = 1;
+				w.Word1 = word;
+				w.Uses = 1;
 				sqlConnector.Words.InsertOnSubmit(w);
 			} else {
-				matches.First().uses++;
+				matches.First().Uses++;
 			}
-			sqlConnector.SubmitChanges();
+			Logger.Log("Incremented word count for word: " + word + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 
 		internal void IncrementProfanities(int sender)
 		{
 			(from s in sqlConnector.UserStats
-			 where s.user_id == sender
-			 select s).First().profanities++;
+			 where s.UserId == sender
+			 select s).First().Profanities++;
 
-			sqlConnector.SubmitChanges();
+			Logger.Log("Incremented profanities for " + sender + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 
 
 		internal void IncrementActions(int sender)
 		{
 			(from s in sqlConnector.UserStats
-			 where s.user_id == sender
-			 select s).First().actions++;
+			 where s.UserId == sender
+			 select s).First().Actions++;
 
-			sqlConnector.SubmitChanges();
+			Logger.Log("Incremented actions for " + sender + ".", LogLevel.Debug);
+			SubmitChanges();
 		}
 	}
 }

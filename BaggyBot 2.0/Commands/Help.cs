@@ -35,7 +35,7 @@ namespace BaggyBot.Commands
 						case "resolve":
 							return "Resolves a domain name to its IP addresses. Usage: -resolve <ip>";
 						case "ns":
-							return "Returns your NickServ username, provided that you have registered a NickServ username, and that you have identified your nickname. Mainly used for debugging purposes, though some individuals have expressed great pleasure in repeatedly executing this command. Usage: -nickserv";
+							return "Returns your NickServ username, provided that you have registered a NickServ username, and that you have identified your nickname. Mainly used for debugging purposes, although certain individuals have expressed great pleasure in repeatedly executing this particular command. Usage: -nickserv";
 						case "crash":
 							return "Yes, this does exactly what you think it does.";
 						case "join":
@@ -51,7 +51,7 @@ namespace BaggyBot.Commands
 						case "update":
 							return "Updates the bot to a new version, which can optionally be downloaded first. Usage: -update [-d]";
 						case "set":
-							return "Sets a property to the specified value. Usage: -set <property> [key] <value>";
+							return "Changes bot settings. Usage: -set <property> [key] <value>";
 						case "get":
 							return "Retrieves the value for a given property. Usage: -get <property> [key]";
 						case "ping":

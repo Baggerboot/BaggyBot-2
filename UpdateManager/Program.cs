@@ -36,7 +36,7 @@ namespace UpdateManager
 
 			SocketInformation si = (SocketInformation)input;
 
-			// This will kill the bot
+			// This kills the bot
 			Socket s = new Socket(si);
 
 			//Socket s = (Socket)input;
