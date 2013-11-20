@@ -1015,6 +1015,7 @@ public partial class BaggyBoT
 			}
 		}
 	}
+
 	[Table(Name = "dbo.userstatistics")]
 	public partial class UserStatistics : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
 	{
@@ -1141,7 +1142,7 @@ public partial class BaggyBoT
 					this.OnProfAnITiesChanging(value);
 					this.SendPropertyChanging();
 					this._profAnItIes = value;
-					this.SendPropertyChanged("ProfAnItIes");
+					this.SendPropertyChanged("Profanities");
 					this.OnProfAnITiesChanged();
 				}
 			}

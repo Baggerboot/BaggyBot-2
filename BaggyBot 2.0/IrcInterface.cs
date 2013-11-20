@@ -10,10 +10,10 @@ namespace BaggyBot
 {
 	class IrcInterface
 	{
-		private IrcClient client;
 		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
 		private Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
 		private DataFunctionSet dataFunctionSet;
+		private IrcClient client;
 
 		private List<string> whoisCalls = new List<string>();
 		private List<string> nickservCalls = new List<string>();
@@ -21,11 +21,13 @@ namespace BaggyBot
 		internal bool HasNickservCall { get { return nickservCalls.Count > 0; } }
 		internal bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
 
+		public int ChannelCount { get { return client.ChannelCount; } }
+		public int TotalUserCount { get { return client.TotalUserCount; } }
 
 		public IrcInterface(IrcClient client, DataFunctionSet df)
 		{
-			this.client = client;
 			this.dataFunctionSet = df;
+			this.client = client;
 		}
 
 		internal void DisableNickservCalls()

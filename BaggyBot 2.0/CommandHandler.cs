@@ -27,6 +27,7 @@ namespace BaggyBot
 				{"crash", new Crash(ircInterface, dataFunctionSet)},
 				{"elycool", new Elycool(ircInterface)},
 				{"ed", new ExceptionDetails(ircInterface)},
+				{"feature", new Feature(ircInterface, dataFunctionSet)},
 				{"get", new Get(ircInterface, dataFunctionSet)},
 				{"help", new Help(ircInterface)},
 				{"join", new Join(ircInterface, dataFunctionSet)},
@@ -34,12 +35,13 @@ namespace BaggyBot
 				{"nuke", new Nuke(ircInterface, dataFunctionSet)},
 				{"part", new Part(ircInterface)},
 				{"ping", new Ping(ircInterface)},
+				{"regen", new RegenerateGraphs(ircInterface)},
 				{"resolve", new Resolve(ircInterface)},
 				{"say", new Say(ircInterface)},
 				{"set", new Set(ircInterface, dataFunctionSet)},
-				{"sqlreconnect", new SqlReconnect(ircInterface, sqlConnector)},
 				{"shutdown", new Shutdown(ircInterface, sqlConnector)},
 				{"snag", new Snag(ircInterface)},
+				{"sqlreconnect", new SqlReconnect(ircInterface, sqlConnector)},
 				{"update", new Update(ircInterface, sqlConnector)},
 				{"version", new Commands.Version(ircInterface)}
 			};

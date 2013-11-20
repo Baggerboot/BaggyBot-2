@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using IRCSharp;
 using BaggyBot.Tools;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace BaggyBot
 {
@@ -34,12 +35,19 @@ namespace BaggyBot
 		}
 		internal void ProcessMessage(IrcMessage message)
 		{
-			lock (dataFunctionSet.Lock) {
+			Logger.Log("Processing message for " + message.Sender.Nick);
+
+			if (!Monitor.TryEnter(dataFunctionSet.Lock, 10000)) { // FIXME: Occasionally a thread will not release its lock on the Lock Object. This control statement should detect these cases, but is unable to do anything about it.
+				Logger.Log("dataFunctionSet.Lock was locked for longer than 10 seconds.", LogLevel.Error);
+				Logger.Log("Attempting to access message anyway. This might go wrong!");
+			} else {
+				Logger.Log("Locked datafunctionset.");
+			}
 				int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
 				List<string> words = WordTools.GetWords(message.Message);
 				words = words.Select(s => s.Replace("'", "''")).ToList();
-
+				
 				dataFunctionSet.IncrementLineCount(userId);
 				dataFunctionSet.IncrementWordCount(userId, words.Count);
 				dataFunctionSet.IncrementVar("global_line_count");
@@ -50,7 +58,8 @@ namespace BaggyBot
 				foreach (string word in words) {
 					ProcessWord(message, word, userId);
 				}
-			}
+			Monitor.Exit(dataFunctionSet.Lock);
+			Logger.Log("Sucessfully exited the lock.");
 		}
 
 		private void ProcessRandomEvents(IrcMessage message, List<string> words)

@@ -56,6 +56,8 @@ namespace BaggyBot.Commands
 							return "Retrieves the value for a given property. Usage: -get <property> [key]";
 						case "ping":
 							return "Returns \"Pong!\" as soon as possible. Useful for debugging or testing your connection.";
+						case "regen":
+							return "Forces the graphs on the stats page to be regenerated.";
 						default:
 							return defaultReply;
 					}

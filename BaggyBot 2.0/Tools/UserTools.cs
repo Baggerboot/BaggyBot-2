@@ -13,8 +13,6 @@ namespace BaggyBot.Tools
 	/// </summary>
 	internal static class UserTools
 	{
-		private static Settings settings = Settings.Instance;
-
 		internal static DataFunctionSet DataFunctionSet
 		{
 			set;
@@ -33,10 +31,10 @@ namespace BaggyBot.Tools
 				return (reference.Equals("*") || input.Equals(reference));
 			};
 
-			string nick = settings["operator_nick"];
-			string ident = settings["operator_ident"];
-			string host = settings["operator_host"];
-			string uid = settings["operator_uid"];
+			string nick = Settings.Instance["operator_nick"];
+			string ident = Settings.Instance["operator_ident"];
+			string host = Settings.Instance["operator_host"];
+			string uid = Settings.Instance["operator_uid"];
 
 			int[] uids = DataFunctionSet.GetUids(user);
 			if (uids.Length > 1) {

@@ -8,7 +8,7 @@ namespace BaggyBot
 {
 	class Emoticons
 	{
-		//Thanks lyyti
+		//Thanks Lyyti
 		internal static string[] List = 
 		{
 		":)", ";)", ">:)", ">;)", "):", ");", "):<", ");<", ":')", ";')", ">:')", ">;')", ")':", ")';", ")':<", ")';<", 

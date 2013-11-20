@@ -38,7 +38,8 @@ namespace BaggyBot.Commands
 			}
 			switch (command.Args[0]) {
 				case "uid":
-					int uid = dataFunctionSet.GetIdFromNick(command.Args[1]);
+					string nick = command.Args.Length > 1 ? command.Args[1] : command.Sender.Nick;
+					int uid = dataFunctionSet.GetIdFromNick(nick);
 					ircInterface.SendMessage(command.Channel, "Your user Id is " + uid);
 					break;
 				default:

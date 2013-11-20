@@ -51,6 +51,7 @@ namespace BaggyBot
 
 		internal void IncrementLineCount(int uid)
 		{
+			Logger.Log("Preparing to increment lines.");
 			UserStatistics nstat = null;
 
 			var matches =
@@ -65,14 +66,14 @@ namespace BaggyBot
 				match = matches.First();
 				line = match.Lines;
 				match.Lines++;
-				Logger.Log("Incremented lines for " + uid + ".", LogLevel.Debug);
+				Logger.Log("Incremented lines for " + uid + ".");
 				SubmitChanges();
 			} else {
 				nstat = new UserStatistics();
 				nstat.UserId = uid;
 				nstat.Lines = 1;
 				sqlConnector.UserStats.InsertOnSubmit(nstat);
-				Logger.Log("Created new stats row for " + uid + ".", LogLevel.Debug);
+				Logger.Log("Created new stats row for " + uid + ".");
 				SubmitChanges();
 			}
 		}
@@ -179,8 +180,23 @@ namespace BaggyBot
 			int originalWords = match.Words;
 			match.Words += words;
 
-			Logger.Log("Incremented words for " + uid + ".", LogLevel.Debug);
+			Logger.Log("Incremented words for " + uid + ".");
 			SubmitChanges();
+		}
+
+		internal List<Quote> FindQuote(string search)
+		{
+			var matches =
+				from quote in sqlConnector.Quotes
+				where quote.Quote1.ToLower().Contains(search.ToLower())
+				select quote;
+
+			int count = matches.Count();
+
+			if (count == 0) {
+				return null;
+			}
+			return matches.ToList();
 		}
 
 		internal void Snag(IrcMessage message)
@@ -191,7 +207,7 @@ namespace BaggyBot
 			q.UserId = uid;
 
 			sqlConnector.Quotes.InsertOnSubmit(q);
-			Logger.Log("Added quote for " + message.Sender.Nick + ".", LogLevel.Debug);
+			Logger.Log("Added quote for " + message.Sender.Nick + ".");
 			SubmitChanges();
 		}
 
@@ -229,7 +245,7 @@ namespace BaggyBot
 		/// </summary>
 		internal void PurgeDatabase()
 		{
-			// TODO Add databage engine-specific support for purging the database.
+			// LOPRIO: Add databage engine-specific support for purging the database.
 			throw new NotSupportedException("Purging the database is not yet supported");
 			/*
 			string statement =
@@ -275,7 +291,7 @@ namespace BaggyBot
 			cred.UserId = uid;
 
 			sqlConnector.UserCreds.InsertOnSubmit(cred);
-			Logger.Log("Addecd credentials row for " + user.Nick + ".", LogLevel.Debug);
+			Logger.Log("Addecd credentials row for " + user.Nick + ".");
 			SubmitChanges();
 
 			if ((from n in sqlConnector.UserNames
@@ -287,7 +303,7 @@ namespace BaggyBot
 			name.Name1 = user.Nick;
 
 			sqlConnector.UserNames.InsertOnSubmit(name);
-			Logger.Log("Added name row for " + user.Nick + ".", LogLevel.Debug);
+			Logger.Log("Added name row for " + user.Nick + ".");
 			SubmitChanges();
 
 			return uid;
@@ -311,7 +327,7 @@ namespace BaggyBot
 				n.Name1 = name;
 				sqlConnector.UserNames.InsertOnSubmit(n);
 			}
-			Logger.Log("Changed name for " + uid + ".", LogLevel.Debug);
+			Logger.Log("Changed name for " + uid + ".");
 			SubmitChanges();
 		}
 
@@ -456,7 +472,26 @@ namespace BaggyBot
 				matches.First().Uses++;
 				matches.First().LastUsedBy = user;
 			}
-			Logger.Log("Incremented emoticon count with emoticon: " + emoticon + ".", LogLevel.Debug);
+			Logger.Log("Incremented emoticon count with emoticon: " + emoticon + ".");
+			SubmitChanges();
+		}
+
+		internal void SetVar(string key, int amount)
+		{
+			var matches = from pair in sqlConnector.KeyValuePairs
+						  where pair.Key == key
+						  select pair;
+
+			if (matches.Count() == 0) {
+				KeyValuePair p = new KeyValuePair();
+				p.Key = key;
+				p.Value = amount;
+				sqlConnector.KeyValuePairs.InsertOnSubmit(p);
+				Logger.Log("Inserted keyvaluepair with key: " + key + ".");
+			} else {
+				matches.First().Value = amount;
+				Logger.Log("Changed keyvaluepair with key: " + key + ".");
+			}
 			SubmitChanges();
 		}
 
@@ -471,10 +506,10 @@ namespace BaggyBot
 				p.Key = key;
 				p.Value = amount;
 				sqlConnector.KeyValuePairs.InsertOnSubmit(p);
-				Logger.Log("Inserted keyvaluepair with key: " + key + ".", LogLevel.Debug);
+				Logger.Log("Inserted keyvaluepair with key: " + key + ".");
 			} else {
 				matches.First().Value += amount;
-				Logger.Log("Incremented keyvaluepair with key: " + key + ".", LogLevel.Debug);
+				Logger.Log("Incremented keyvaluepair with key: " + key + ".");
 			}
 			SubmitChanges();
 		}
@@ -521,13 +556,14 @@ namespace BaggyBot
 				u.LastUsage = usage;
 				u.LastUsedBy = user;
 				u.Url1 = url;
+				u.Uses = 1;
 				sqlConnector.Urls.InsertOnSubmit(u);
 			} else {
 				matches.First().Uses++;
 				matches.First().LastUsage = usage;
 				matches.First().LastUsedBy = user;
 			}
-			Logger.Log("Incremented URL count with URL: " + url + ".", LogLevel.Debug);
+			Logger.Log("Incremented URL count with URL: " + url + ".");
 			SubmitChanges();
 		}
 
@@ -545,7 +581,7 @@ namespace BaggyBot
 			} else {
 				matches.First().Uses++;
 			}
-			Logger.Log("Incremented word count for word: " + word + ".", LogLevel.Debug);
+			Logger.Log("Incremented word count for word: " + word + ".");
 			SubmitChanges();
 		}
 
@@ -555,7 +591,7 @@ namespace BaggyBot
 			 where s.UserId == sender
 			 select s).First().Profanities++;
 
-			Logger.Log("Incremented profanities for " + sender + ".", LogLevel.Debug);
+			Logger.Log("Incremented profanities for " + sender + ".");
 			SubmitChanges();
 		}
 
@@ -566,7 +602,7 @@ namespace BaggyBot
 			 where s.UserId == sender
 			 select s).First().Actions++;
 
-			Logger.Log("Incremented actions for " + sender + ".", LogLevel.Debug);
+			Logger.Log("Incremented actions for " + sender + ".");
 			SubmitChanges();
 		}
 	}

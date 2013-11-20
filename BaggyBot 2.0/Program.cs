@@ -31,10 +31,10 @@ namespace BaggyBot
 		private PerfLogger perfLogger = new PerfLogger("performance_log.csv");
 
 		public static bool noColor;
-		internal const string Version = "3.2.5";
+		internal const string Version = "3.5";
 
 
-		internal static DateTime LastUpdate = new DateTime(2013, 11, 16, 4, 9, 18, DateTimeKind.Local);
+		internal static DateTime LastUpdate; // = new DateTime(2013, 11, 16, 4, 9, 18, DateTimeKind.Local);
 
 		private static List<Exception> exceptions = new List<Exception>();
 
@@ -45,11 +45,69 @@ namespace BaggyBot
 
 		private string previousVersion = null;
 
+		public Program(string previousVersion = null, bool createDB = false)
+		{
+			this.previousVersion = previousVersion;
+
+			AppDomain.CurrentDomain.UnhandledException += HandleException;
+
+			Console.Title = "BaggyBot Statistics Collector version " + Version;
+			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
+
+			LastUpdate = Tools.MiscTools.RetrieveLinkerTimestamp();
+			sqlConnector = new SqlConnector();
+			client = new IrcClient();
+			ircInterface = new IrcInterface(client, dataFunctionSet);
+			dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
+			sHandler = new StatsHandler(dataFunctionSet, ircInterface);
+			commandHandler = new CommandHandler(ircInterface, sqlConnector, dataFunctionSet);
+			BaggyBot.Tools.UserTools.DataFunctionSet = dataFunctionSet;
+			taskScheduler = new Timer();
+			taskScheduler.Interval = 2000;
+			restartScheduler = new Timer();
+			restartScheduler.Interval = 1000 * 3600 * 5; // milisecond, second, hour
+			restartScheduler.AutoReset = false;
+			restartScheduler.Elapsed += (par, par2) =>
+			{
+				Restart();
+			};
+			selfProc = Process.GetCurrentProcess();
+			pc.CategoryName = "Process";
+			pc.CounterName = "Working Set - Private";
+			pc.InstanceName = selfProc.ProcessName;
+
+			client.OnNickChanged += dataFunctionSet.HandleNickChange;
+			client.OnMessageReceived += ProcessMessage;
+			client.OnFormattedLineReceived += ProcessFormattedLine;
+			client.OnDisconnect += () =>
+			{
+				Logger.Log("Disconnected.");
+			};
+			client.OnConnectionLost += () =>
+			{
+				Logger.Log("Connection lost. Attempting to reconnect...", LogLevel.Info);
+				bool reconnected = false;
+				do {
+					System.Threading.Thread.Sleep(2000);
+					try {
+						client.Reconnect();
+						reconnected = true;
+					} catch (System.Net.Sockets.SocketException) {
+						Logger.Log("Failed to reconnect. Retrying in 2 seconds.", LogLevel.Info);
+					}
+				} while (!reconnected);
+			};
+
+			sqlConnector.OpenConnection();
+
+			if (createDB) dataFunctionSet.InitializeDatabase();
+		}
+
 		private void HandleException(Object sender, UnhandledExceptionEventArgs args)
 		{
 			Exception e = (Exception)args.ExceptionObject;
 			long mem = selfProc.PrivateMemorySize64;
-			client.SendMessage(Settings.Instance["operator_nick"], "A fatal unhandled exception occured.");
+			ircInterface.SendMessage(Settings.Instance["operator_nick"], "A fatal unhandled exception occured.");
 			Logger.Log("A fatal unhandled exception occured: " + e.GetType().Name, LogLevel.Error);
 			Logger.Log("Private memory size: " + mem + " bytes.", LogLevel.Info);
 		}
@@ -75,62 +133,6 @@ namespace BaggyBot
 				bf.Serialize(str, si);
 			}
 			Environment.Exit(0);
-		}
-
-		public Program(string previousVersion = null, bool createDB = false)
-		{
-			this.previousVersion = previousVersion;
-
-			AppDomain.CurrentDomain.UnhandledException += HandleException;
-
-			Console.Title = "BaggyBot Statistics Collector version " + Version;
-			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
-
-			sqlConnector = new SqlConnector();
-			client = new IrcClient();
-			ircInterface = new IrcInterface(client, dataFunctionSet);
-			dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
-			sHandler = new StatsHandler(dataFunctionSet, ircInterface);
-			commandHandler = new CommandHandler(ircInterface, sqlConnector, dataFunctionSet);
-			BaggyBot.Tools.UserTools.DataFunctionSet = dataFunctionSet;
-			taskScheduler = new Timer();
-			taskScheduler.Interval = 2000;
-			restartScheduler = new Timer();
-			restartScheduler.Interval = 1000 * 3600 * 5; // milisecond, second, hour
-			restartScheduler.AutoReset = false;
-			restartScheduler.Elapsed += (par, par2) =>
-			{
-				Restart();
-			};
-			selfProc = Process.GetCurrentProcess();
-			pc.CategoryName = "Process";
-			pc.CounterName = "Working Set - Private";
-			pc.InstanceName = selfProc.ProcessName;
-
-			client.OnNickChanged += dataFunctionSet.HandleNickChange;
-			client.OnMessageReceived += ProcessMessage;
-			client.OnFormattedLineReceived += ProcessFormattedLine;
-			client.OnDisconnect += () => {
-				Logger.Log("Disconnected.");
-			};
-			client.OnConnectionLost += () =>
-			{
-				Logger.Log("Connection lost. Attempting to reconnect...", LogLevel.Info);
-				bool reconnected = false;
-				do {
-					System.Threading.Thread.Sleep(2000);
-					try {
-						client.Reconnect();
-						reconnected = true;
-					} catch (System.Net.Sockets.SocketException) {
-						Logger.Log("Failed to reconnect. Retrying in 2 seconds.", LogLevel.Info);
-					}
-				} while (!reconnected);
-			};
-
-			sqlConnector.OpenConnection();
-
-			if(createDB) dataFunctionSet.InitializeDatabase();
 		}
 
 		private void ConnectFromSocket(string previousVersion)
@@ -159,18 +161,26 @@ namespace BaggyBot
 		internal void PostConnect()
 		{
 			if (previousVersion != null && previousVersion != Version) {
-				client.SendMessage(Settings.Instance["operator_nick"], "Succesfully updated from version " + previousVersion + " to version " + Version);
+				ircInterface.SendMessage(Settings.Instance["operator_nick"], "Succesfully updated from version " + previousVersion + " to version " + Version);
 			} else if (previousVersion != null) {
-				client.SendMessage(Settings.Instance["operator_nick"], "Failed to update: No newer version available. Previous version: " + previousVersion);
+				ircInterface.SendMessage(Settings.Instance["operator_nick"], "Failed to update: No newer version available. Previous version: " + previousVersion);
 			}
 
 			taskScheduler.Start();
 			taskScheduler.Elapsed += (source, eventArgs) =>
 			{
 				long mem = (long)(pc.NextValue() / 1024);
-				int users = client.TotalUserCount;
-				int chans = client.ChannelCount;
+				int users = ircInterface.TotalUserCount;
+				int chans = ircInterface.ChannelCount;
 				perfLogger.Log(mem, chans, users);
+			};
+			
+			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
+			Logger.OnLogEvent += (message, level) =>
+			{
+				if (level == LogLevel.Error || level == LogLevel.Warning) {
+					ircInterface.SendMessage(Settings.Instance["operator_nick"], "LOG WARNING: " + message);
+				}
 			};
 		}
 
@@ -215,6 +225,10 @@ namespace BaggyBot
 			PostConnect();
 		}
 
+		/// <summary>
+		/// Custom code for checking whether a user has registered with NickServ. Ugly, but it works.
+		/// </summary>
+		/// <param name="line"></param>
 		private void ProcessFormattedLine(IrcLine line)
 		{
 			if (line.Command.Equals("NOTICE") && ircInterface.HasNickservCall && client.GetUserFromSender(line.Sender).Ident.Equals("NickServ")) {

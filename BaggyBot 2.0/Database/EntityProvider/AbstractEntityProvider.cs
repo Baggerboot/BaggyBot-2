@@ -28,6 +28,7 @@ namespace BaggyBot.Database.EntityProvider
 
 		public void Reconnect()
 		{
+			Logger.Log("Attempting to reconnect to the SQL database.");
 			lock (connection) {
 				connection.Close();
 				connection.Dispose();
@@ -47,6 +48,7 @@ namespace BaggyBot.Database.EntityProvider
 		}
 		internal int ExecuteStatement(string statement)
 		{
+			Logger.Log("Manually executing an SQL statement.");
 			lock (connection) {
 				int result;
 				using (SqlCommand cmd = new SqlCommand(statement, connection)) {

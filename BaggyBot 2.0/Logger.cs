@@ -7,10 +7,14 @@ using System.Threading.Tasks;
 using System.IO;
 namespace BaggyBot
 {
+	delegate void LogEvent(string message, LogLevel level);
+
 	static class Logger
 	{
 		private static string filename = "baggybot.log";
 		private static bool disposed = false;
+
+		public static event LogEvent OnLogEvent;
 
 		static Logger()
 		{
@@ -55,6 +59,9 @@ namespace BaggyBot
 			}
 			if (level != LogLevel.Debug || writeDebug) {
 				Console.WriteLine(lineBuilder.ToString());
+			}
+			if (level == LogLevel.Error && OnLogEvent != null) {
+				OnLogEvent(lineBuilder.ToString(), level);
 			}
 
 			if (!disposed) {

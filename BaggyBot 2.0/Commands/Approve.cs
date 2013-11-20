@@ -4,23 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using System.Globalization;
-
 namespace BaggyBot.Commands
 {
-	class Version : ICommand
+	class Approve : ICommand
 	{
 		private IrcInterface ircInterface;
+		private DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 
-		public Version(IrcInterface inter)
+		public Approve(IrcInterface inter, DataFunctionSet df)
 		{
 			ircInterface = inter;
 		}
 
 		public void Use(CommandArgs command)
 		{
-			ircInterface.SendMessage(command.Channel, String.Format("I am currently running version {0}, last updated {1} UTC.", Program.Version, Program.LastUpdate.ToUniversalTime().ToString("MMM d, yyyy a\\t HH:mm")));
+			// TODO: Add implementation for approve command
 		}
 	}
 }
