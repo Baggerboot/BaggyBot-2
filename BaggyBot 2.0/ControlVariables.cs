@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BaggyBot
 {
-	static class ControlVariables
+	public static class ControlVariables
 	{
-		internal static bool SnagNextLine;
-		internal static string SnagNextLineBy;
+		public static bool SnagNextLine;
+		public static string SnagNextLineBy;
 	}
 }

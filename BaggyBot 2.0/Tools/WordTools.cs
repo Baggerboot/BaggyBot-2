@@ -17,7 +17,7 @@ namespace BaggyBot.Tools
 		private static readonly string[] ignoredWords = { "you", "its", "not", "was", "are", "can", "now", "all", "how", "that", "this", "what", "thats", "they", "then", "there", "when", "with", "well", "from", "will", "here", "out", "dont"};
 		private static readonly string[] articles = { "the", "an", "a" };
 
-		internal static List<string> GetWords(string message)
+		public static List<string> GetWords(string message)
 		{
 			List<string> words = message.Trim().Split(' ').ToList<string>();
 			for (int i = 0; i < words.Count; i++) {
@@ -30,17 +30,17 @@ namespace BaggyBot.Tools
 			return words;
 		}
 
-		internal static string[] GetProfanities()
+		public static string[] GetProfanities()
 		{
 			return profanities;
 		}
 
-		internal static bool IsIgnoredWord(string word)
+		public static bool IsIgnoredWord(string word)
 		{
 			word = word.ToLower();
 			return (conjunctions.Contains(word) || ignoredWords.Contains(word) || articles.Contains(word));
 		}
-		internal static bool IsProfanity(string word)
+		public static bool IsProfanity(string word)
 		{
 			return profanities.Select(x => word.Contains(x)).Contains(true);
 		}

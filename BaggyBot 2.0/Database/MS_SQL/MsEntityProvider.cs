@@ -10,7 +10,7 @@ using BaggyBot.Database.EntityProvider;
 
 namespace BaggyBot.Database.MS_SQL
 {
-	class MsEntityProvider : AbstractEntityProvider
+	class MsEntityProvider : AbstractEntityProvider 
 	{
 		private StatsBotDataContext context;
 
@@ -22,6 +22,10 @@ namespace BaggyBot.Database.MS_SQL
 		public override IQueryable Urls { get { return context.Urls; }}
 		public override IQueryable UserNames { get { return context.Names; }}
 		public override IQueryable Words { get { return context.Words; } }
+		public override IQueryable IrcLog
+		{
+			get { throw new NotImplementedException(); }
+		}
 
 		public override bool OpenConnection()
 		{

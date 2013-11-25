@@ -8,7 +8,7 @@ using BaggyBot.Database;
 
 namespace BaggyBot.Commands
 {
-	class SqlReconnect : ICommand
+	public class SqlReconnect : ICommand
 	{
 		private IrcInterface ircInterface;
 		private SqlConnector sqlConnector;

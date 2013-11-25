@@ -11,9 +11,9 @@ namespace BaggyBot.Tools
 	/// <summary>
 	/// For all Tools classes goes: they must be static, and they may not change any state.
 	/// </summary>
-	internal static class UserTools
+	public static class UserTools
 	{
-		internal static DataFunctionSet DataFunctionSet
+		public static DataFunctionSet DataFunctionSet
 		{
 			set;
 			private get; // restrict access to the DataFunctionSet class to only this class
@@ -25,7 +25,7 @@ namespace BaggyBot.Tools
 		/// <param name="user"></param>
 		/// <returns></returns>
 		delegate bool match(string input, string reference);
-		internal static bool Validate(IrcUser user)
+		public static bool Validate(IrcUser user)
 		{
 			match match = (input, reference) => {
 				return (reference.Equals("*") || input.Equals(reference));

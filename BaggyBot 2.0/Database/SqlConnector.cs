@@ -20,7 +20,7 @@ using System.Data.Linq;
 
 namespace BaggyBot.Database
 {
-	class SqlConnector : IDisposable
+	public class SqlConnector : IDisposable
 	{
 		private AbstractEntityProvider provider;
 
@@ -33,6 +33,7 @@ namespace BaggyBot.Database
 		public Table<PostgreSQL.Url> Urls;
 		public Table<PostgreSQL.Name> UserNames;
 		public Table<PostgreSQL.Word> Words;
+		public Table<PostgreSQL.IrcLog> IrcLog;
 #endif
 #if mssql
 		public Table<MS_SQL.UserCredentials> UserCreds;
@@ -45,7 +46,7 @@ namespace BaggyBot.Database
 		public Table<MS_SQL.Word> Words;
 #endif
 
-		internal void SubmitChanges()
+		public void SubmitChanges()
 		{
 			provider.SubmitChanges();
 		}
@@ -70,6 +71,7 @@ namespace BaggyBot.Database
 			Urls = (Table<PostgreSQL.Url>)provider.Urls;
 			UserNames = (Table<PostgreSQL.Name>)provider.UserNames;
 			Words = (Table<PostgreSQL.Word>)provider.Words;
+			IrcLog = (Table<PostgreSQL.IrcLog>)provider.IrcLog;
 #endif
 #if mssql
 			UserCreds = (Table<MS_SQL.UserCredentials>) provider.UserCreds;
@@ -112,7 +114,7 @@ namespace BaggyBot.Database
 		/// Selects a vector and returns it in the form of an array.
 		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
 		/// </summary>
-		/*internal T[] SelectVector<T>(string query)
+		/*public T[] SelectVector<T>(string query)
 		{
 			int ID = new Random().Next(100, 999);
 			T[] data;
@@ -132,7 +134,7 @@ namespace BaggyBot.Database
 		}*/
 
 
-		/*internal T SelectOne<T>(string query)
+		/*public T SelectOne<T>(string query)
 		{
 
 			Object data;

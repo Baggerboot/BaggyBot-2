@@ -9,9 +9,17 @@ namespace BaggyBot.Tools
 	/// <summary>
 	/// For all Tools classes goes: they must be static, and they may not change any state.
 	/// </summary>
-	internal static class MiscTools
+	public static class MiscTools
 	{
-		internal static DateTime RetrieveLinkerTimestamp()
+		public static void ConsoleWriteLine(string line, ConsoleColor color = ConsoleColor.Gray)
+		{
+			var prev = Console.ForegroundColor;
+			Console.ForegroundColor = color;
+			Console.WriteLine(line);
+			Console.ForegroundColor = prev;
+		}
+
+		public static DateTime RetrieveLinkerTimestamp()
 		{
 			string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
 			const int c_PeHeaderOffset = 60;

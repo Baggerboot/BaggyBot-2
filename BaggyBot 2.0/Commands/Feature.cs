@@ -53,7 +53,7 @@ namespace BaggyBot.Commands
 				return;
 			} else {
 				ircInterface.SendMessage(command.Channel, "The following quote has been featured: \"" + searchResults[0].Quote1 + "\"");
-				dataFunctionSet.IncrementVar("featured_quote", searchResults[0].ID);
+				dataFunctionSet.SetVar("featured_quote", searchResults[0].ID);
 			}
 		}
 	}

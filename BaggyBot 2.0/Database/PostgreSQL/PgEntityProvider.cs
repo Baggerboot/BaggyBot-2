@@ -21,7 +21,8 @@ namespace BaggyBot.Database.PostgreSQL
 		public override IQueryable KeyValuePairs { get { return context.KeyValuePairs; } }
 		public override IQueryable Urls { get { return context.URLS; } }
 		public override IQueryable UserNames { get { return context.Names; } }
-		public override IQueryable Words { get { return context.Words; } } 
+		public override IQueryable Words { get { return context.Words; } }
+		public override IQueryable IrcLog { get { return context.IrcLog; } }
 
 		public override bool OpenConnection()
 		{

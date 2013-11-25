@@ -30,6 +30,9 @@ namespace BaggyBot.Commands
 			}
 			if (command.Args.Length == 2 && command.Args[0] == "-s") {
 				string result = null;
+				if (command.Args[1] == "sql_connection_string") {
+
+				}
 				result = Settings.Instance[command.Args[1]];
 				if (result != null) {
 					ircInterface.SendMessage(command.Channel, String.Format("value for {0}: {1}", command.Args[1], result));

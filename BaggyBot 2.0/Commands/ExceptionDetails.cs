@@ -9,11 +9,13 @@ namespace BaggyBot.Commands
 	class ExceptionDetails : ICommand
 	{
 		private IrcInterface ircInterface;
+		private BotDiagnostics botDiagnostics;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public ExceptionDetails(IrcInterface inter)
+		public ExceptionDetails(IrcInterface inter, BotDiagnostics diag)
 		{
 			ircInterface = inter;
+			botDiagnostics = diag;
 		}
 
 		public void Use(CommandArgs command)
@@ -23,7 +25,7 @@ namespace BaggyBot.Commands
 			for (int i = 0; i < command.Args.Length; i++) {
 				switch (command.Args[i]) {
 					case "-ra":
-						Program.Exceptions.Clear();
+						botDiagnostics.Exceptions.Clear();
 						ircInterface.SendMessage(command.Channel, "All exceptions removed.");
 						return;
 					case "-r":
@@ -36,16 +38,16 @@ namespace BaggyBot.Commands
 				}
 			}
 
-			if (Program.Exceptions.Count == 0) {
+			if (botDiagnostics.Exceptions.Count == 0) {
 				ircInterface.SendMessage(command.Channel, "No exceptions left.");
 				return;
-			} else if (Program.Exceptions.Count <= index) {
+			} else if (botDiagnostics.Exceptions.Count <= index) {
 				ircInterface.SendMessage(command.Channel, "There is no exception with that ID");
 				return;
 			}
 
-			Exception e = Program.Exceptions[index];
-			if(remove) Program.Exceptions.RemoveAt(index);
+			Exception e = botDiagnostics.Exceptions[index];
+			if (remove) botDiagnostics.Exceptions.RemoveAt(index);
 			ircInterface.SendMessage(command.Channel, string.Format("Exception #{0}: \"{1}\"", index, e.Message));
 		}
 	}

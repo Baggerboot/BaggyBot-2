@@ -8,7 +8,7 @@ using IRCSharp;
 
 namespace BaggyBot.Commands
 {
-	struct CommandArgs
+	public struct CommandArgs
 	{
 		public string Command;
 		public string[] Args;

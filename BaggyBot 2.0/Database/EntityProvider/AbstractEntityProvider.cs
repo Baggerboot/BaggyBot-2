@@ -20,7 +20,8 @@ namespace BaggyBot.Database.EntityProvider
 		public abstract IQueryable KeyValuePairs { get; } 
 		public abstract IQueryable Urls { get; } 
 		public abstract IQueryable UserNames { get; } 
-		public abstract IQueryable Words { get; } 
+		public abstract IQueryable Words { get; }
+		public abstract IQueryable IrcLog { get; }
 
 		public abstract void SubmitChanges();
 		public abstract bool OpenConnection();
@@ -46,7 +47,7 @@ namespace BaggyBot.Database.EntityProvider
 				return false;
 			}
 		}
-		internal int ExecuteStatement(string statement)
+		public int ExecuteStatement(string statement)
 		{
 			Logger.Log("Manually executing an SQL statement.");
 			lock (connection) {

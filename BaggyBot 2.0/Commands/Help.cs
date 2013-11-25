@@ -23,7 +23,7 @@ namespace BaggyBot.Commands
 
 		private string GetHelpMessage(string[] args)
 		{
-			string defaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: help, ns, resolve. -- Operator commands: crash, join, query, set, shutdown, snag, update.";
+			string defaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: help, ns, ping, regen, resolve, version. -- Operator commands: crash, ed, feature, get, join, part, query, say, set, shutdown, snag, sqlreconnect.";
 
 			switch (args.Length) {
 				case 1:
@@ -35,13 +35,17 @@ namespace BaggyBot.Commands
 						case "resolve":
 							return "Resolves a domain name to its IP addresses. Usage: -resolve <ip>";
 						case "ns":
-							return "Returns your NickServ username, provided that you have registered a NickServ username, and that you have identified your nickname. Mainly used for debugging purposes, although certain individuals have expressed great pleasure in repeatedly executing this particular command. Usage: -nickserv";
+							return "Returns your NickServ username, provided that you have registered a NickServ username, and that you have identified your nickname. Mainly used for debugging purposes, although certain individuals have expressed great pleasure in repeatedly executing this particular command. Usage: -ns";
 						case "crash":
 							return "Yes, this does exactly what you think it does.";
 						case "join":
 							return "Join a channel. Usage: -join <channel>";
+						case "part":
+							return "Leave a channel. Usage: -part <channel>";
 						case "nuke":
 							return "Clears the database, or a single table. Usage: -nuke [table]";
+						case "regen":
+							return "Regenerate the graphs on the stats page. Since these aren't automatically generated yet, you have to trigger a regen manually using this command.";
 						case "snag":
 							return "Snag a quote. If nickname isn't specified, the first received message will be snagged. Usage: -snag [nickname]";
 						case "query":
@@ -56,8 +60,10 @@ namespace BaggyBot.Commands
 							return "Retrieves the value for a given property. Usage: -get <property> [key]";
 						case "ping":
 							return "Returns \"Pong!\" as soon as possible. Useful for debugging or testing your connection.";
-						case "regen":
-							return "Forces the graphs on the stats page to be regenerated.";
+						case "feature":
+							return "Feature a quote, so it appears in the 'Featured Quote' box on the stats page. Usage: -feature <part of quote contents>";
+						case "say":
+							return "Make the bot say something. Usage: -say <message>";
 						default:
 							return defaultReply;
 					}

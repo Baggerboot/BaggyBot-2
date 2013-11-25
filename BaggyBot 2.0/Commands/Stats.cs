@@ -18,7 +18,7 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			ircInterface.SendMessage(command.Channel, "Statistics can be found at http://www.jgeluk.net/stats/. For now, please use the -regen command to");
+			ircInterface.SendMessage(command.Channel, "Statistics can be found at http://www.jgeluk.net/stats/. For now, please use the -regen command to regenerate the graph on the stats page.");
 		}
 	}
 }

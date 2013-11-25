@@ -57,6 +57,14 @@ namespace BaggyBot.Database.PostgreSQL
 			}
 		}
 
+		public Table<IrcLog> IrcLog
+		{
+			get
+			{
+				return this.GetTable<IrcLog>();
+			}
+		}
+
 		public Table<KeyValuePair> KeyValuePairs
 		{
 			get
@@ -274,6 +282,191 @@ public partial class BaggyBoT
 					this._uses = value;
 					this.SendPropertyChanged("Uses");
 					this.OnUsesChanged();
+				}
+			}
+		}
+
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+
+		protected virtual void SendPropertyChanging()
+		{
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null)) {
+				h(this, emptyChangingEventArgs);
+			}
+		}
+
+		protected virtual void SendPropertyChanged(string propertyName)
+		{
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null)) {
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+
+	[Table(Name = "dbo.irclog")]
+	public partial class IrcLog
+	{
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+
+		private string _channel;
+
+		private int _id;
+
+		private string _message;
+
+		private string _nick;
+
+		private System.Nullable<int> _sender;
+
+		private System.DateTime _time;
+
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+
+		partial void OnChannelChanged();
+
+		partial void OnChannelChanging(string value);
+
+		partial void OnIDChanged();
+
+		partial void OnIDChanging(int value);
+
+		partial void OnMessageChanged();
+
+		partial void OnMessageChanging(string value);
+
+		partial void OnNickChanged();
+
+		partial void OnNickChanging(string value);
+
+		partial void OnSenderChanged();
+
+		partial void OnSenderChanging(System.Nullable<int> value);
+
+		partial void OnTimeChanged();
+
+		partial void OnTimeChanging(System.DateTime value);
+		#endregion
+
+
+		public IrcLog()
+		{
+			this.OnCreated();
+		}
+
+		[Column(Storage = "_channel", Name = "channel", DbType = "character varying(64)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		[DebuggerNonUserCode()]
+		public string Channel
+		{
+			get
+			{
+				return this._channel;
+			}
+			set
+			{
+				if (((_channel == value)
+							== false)) {
+					this.OnChannelChanging(value);
+					this.SendPropertyChanging();
+					this._channel = value;
+					this.SendPropertyChanged("Channel");
+					this.OnChannelChanged();
+				}
+			}
+		}
+
+		[Column(Storage = "_id", Name = "id", DbType = "integer(32,0)", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false, Expression = "nextval(\'irclog_id_seq\')")]
+		[DebuggerNonUserCode()]
+		public int ID
+		{
+			get
+			{
+				return this._id;
+			}
+			set
+			{
+				if ((_id != value)) {
+					this.OnIDChanging(value);
+					this._id = value;
+					this.OnIDChanged();
+				}
+			}
+		}
+
+		[Column(Storage = "_message", Name = "message", DbType = "text", AutoSync = AutoSync.Never, CanBeNull = false)]
+		[DebuggerNonUserCode()]
+		public string Message
+		{
+			get
+			{
+				return this._message;
+			}
+			set
+			{
+				if (((_message == value)
+							== false)) {
+					this.OnMessageChanging(value);
+					this._message = value;
+					this.OnMessageChanged();
+				}
+			}
+		}
+
+		[Column(Storage = "_nick", Name = "nick", DbType = "character varying(64)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		[DebuggerNonUserCode()]
+		public string Nick
+		{
+			get
+			{
+				return this._nick;
+			}
+			set
+			{
+				if (((_nick == value)
+							== false)) {
+					this.OnNickChanging(value);
+					this._nick = value;
+					this.OnNickChanged();
+				}
+			}
+		}
+
+		[Column(Storage = "_sender", Name = "sender", DbType = "integer(32,0)", AutoSync = AutoSync.Never)]
+		[DebuggerNonUserCode()]
+		public System.Nullable<int> Sender
+		{
+			get
+			{
+				return this._sender;
+			}
+			set
+			{
+				if ((_sender != value)) {
+					this.OnSenderChanging(value);
+					this._sender = value;
+					this.OnSenderChanged();
+				}
+			}
+		}
+
+		[Column(Storage = "_time", Name = "time", DbType = "timestamp without time zone", AutoSync = AutoSync.Never, CanBeNull = false)]
+		[DebuggerNonUserCode()]
+		public System.DateTime Time
+		{
+			get
+			{
+				return this._time;
+			}
+			set
+			{
+				if ((_time != value)) {
+					this.OnTimeChanging(value);
+					this._time = value;
+					this.OnTimeChanged();
 				}
 			}
 		}

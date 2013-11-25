@@ -8,7 +8,7 @@ using IRCSharp;
 
 namespace BaggyBot
 {
-	class IrcInterface
+	public class IrcInterface
 	{
 		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
 		private Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
@@ -18,8 +18,8 @@ namespace BaggyBot
 		private List<string> whoisCalls = new List<string>();
 		private List<string> nickservCalls = new List<string>();
 		private bool CanDoNickservCall = true;
-		internal bool HasNickservCall { get { return nickservCalls.Count > 0; } }
-		internal bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
+		public bool HasNickservCall { get { return nickservCalls.Count > 0; } }
+		public bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
 
 		public int ChannelCount { get { return client.ChannelCount; } }
 		public int TotalUserCount { get { return client.TotalUserCount; } }
@@ -30,19 +30,21 @@ namespace BaggyBot
 			this.client = client;
 		}
 
-		internal void DisableNickservCalls()
+		public void DisableNickservCalls()
 		{
 			CanDoNickservCall = false;
 		}
 
-		internal void AddNickserv(string nick, string nickserv)
+		public void AddNickserv(string nick, string nickserv)
 		{
 			nickservCallResults.Add(nick, nickserv);
 		}
 
-		internal string DoNickservCall(string nick)
+		public string DoNickservCall(string nick)
 		{
 			if (!CanDoNickservCall) return null;
+
+			Logger.Log("Calling NickServ for " + nick, LogLevel.Info);
 
 			if (!nickservCalls.Contains(nick)) {
 				nickservCalls.Add(nick);
@@ -50,6 +52,9 @@ namespace BaggyBot
 				t.Start();
 			}
 			nick = nick.ToLower();
+
+			
+
 			while (!nickservCallResults.ContainsKey(nick)) {
 				System.Threading.Thread.Sleep(20);
 			}
@@ -57,22 +62,22 @@ namespace BaggyBot
 			return nickservCallResults[nick];
 		}
 
-		internal void SendMessage(string target, string message)
+		public void SendMessage(string target, string message)
 		{
 			client.SendMessage(target, message);
 		}
 
-		internal void JoinChannel(string channel)
+		public void JoinChannel(string channel)
 		{
 			client.JoinChannel(channel);
 		}
 
-		internal void TestNickServ()
+		public void TestNickServ()
 		{
 			client.SendMessage("NickServ", "INFO");
 		}
 
-		internal IrcUser DoWhoisCall(string nick)
+		public IrcUser DoWhoisCall(string nick)
 		{
 			whoisCalls.Add(nick);
 			var t = new System.Threading.Thread(() => client.SendRaw("WHOIS " + nick));
@@ -87,27 +92,27 @@ namespace BaggyBot
 			return result;
 		}
 
-		internal void AddUser(string nick, IrcUser user)
+		public void AddUser(string nick, IrcUser user)
 		{
 			whoisCallResults.Add(nick, user);
 		}
 
-		internal void Disconnect(string reason = null)
+		public void Disconnect(string reason = null)
 		{
 			client.Quit(reason);
 		}
 
-		internal void Part(string channel, string reason = null)
+		public void Part(string channel, string reason = null)
 		{
 			client.Part(channel, reason);
 		}
 
-		internal System.Net.Sockets.SocketInformation DuplicateAndClose(int targetProcessId)
+		public System.Net.Sockets.SocketInformation DuplicateAndClose(int targetProcessId)
 		{
 			return client.DuplicateAndClose(targetProcessId);
 		}
 
-		internal System.Net.Sockets.Socket GetHandle()
+		public System.Net.Sockets.Socket GetHandle()
 		{
 			return client.GetHandle();
 		}
