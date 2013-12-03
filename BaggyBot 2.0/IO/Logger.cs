@@ -13,6 +13,7 @@ namespace BaggyBot
 	{
 		private static string filename = "baggybot.log";
 		private static bool disposed = false;
+		private static string prefix = string.Empty;
 
 		public static event LogEvent OnLogEvent;
 
@@ -27,8 +28,21 @@ namespace BaggyBot
 
 		private static TextWriter textWriter;
 
-		public static void Log(string message, LogLevel level = LogLevel.Debug, bool writeLine = true)
+		public static void SetPrefix(string prefix)
 		{
+			Logger.prefix = prefix;
+		}
+
+		public static void ClearPrefix()
+		{
+			Logger.prefix = string.Empty;
+		}
+
+		public static void Log(string message, LogLevel level = LogLevel.Debug, bool writeLine = true, params object[] format)
+		{
+			if (format.Length != 0) {
+				message = String.Format(message, format);
+			}
 			StringBuilder lineBuilder = new StringBuilder();
 			ConsoleColor lineColor = ConsoleColor.Gray;
 
@@ -58,6 +72,7 @@ namespace BaggyBot
 					lineColor = ConsoleColor.DarkRed;
 					break;
 			}
+			lineBuilder.Append(prefix);
 			lineBuilder.Append(message);
 
 			WriteToConsole(lineColor, level, writeLine, lineBuilder);

@@ -96,68 +96,22 @@ namespace BaggyBot.Database
 			provider.Reconnect();
 		}
 
-		/*private DataView Select(string query)
-		{
-			lock (connection) {
-				DataView ret;
-				using (SqlCommand cmd = new SqlCommand(query, connection)) {
-					using (SqlDataAdapter da = new SqlDataAdapter(cmd)) {
-						using (DataSet ds = new DataSet()) {
-							da.Fill(ds);
-							ret = ds.Tables[0].DefaultView;
-						}
-					}
-				}
-				return ret;
-			}
-		}*/
-		/// Selects a vector and returns it in the form of an array.
-		/// The data returned may only contain one column, or else an InvalidOperationException will be thrown.
-		/// </summary>
-		/*public T[] SelectVector<T>(string query)
-		{
-			int ID = new Random().Next(100, 999);
-			T[] data;
-			using (DataView dv = Select(query)) {
-				if (dv.Table.Columns.Count > 1) {
-					//busy = false;
-					throw new InvalidOperationException("The passed query returned more than one column.");
-				} else {
-					data = new T[dv.Count];
-					for (int i = 0; i < data.Length; i++) {
-						Object value = dv[0][i];
-						data[i] = (T)value;
-					}
-				}
-			}
-			return data;
-		}*/
-
-
-		/*public T SelectOne<T>(string query)
-		{
-
-			Object data;
-			using (DataView dv = Select(query)) {
-				if (dv.Count == 1) {
-					data = dv[0][0];
-				} else {
-					throw new InvalidOperationException("The passed query returned more or less than one record.");
-				}
-			}
-			if (data == DBNull.Value && Nullable.GetUnderlyingType(typeof(T)) == null) {
-				if (typeof(T) == typeof(String)) {
-					return default(T);
-				}
-				throw new RecordNullException();
-			} else {
-				return (T)data;
-			}
-		}*/
-
 		public void Dispose()
 		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool cleanAll)
+		{
+			if (cleanAll) {
+			}
 			provider.Dispose();
+		}
+
+		~SqlConnector()
+		{
+			Dispose(false);
 		}
 	}
 }

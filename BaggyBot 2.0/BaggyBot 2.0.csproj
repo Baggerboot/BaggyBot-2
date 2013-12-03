@@ -77,9 +77,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\IRCSharp\IRCSharp\bin\Debug\IRCSharp.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.6.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -92,6 +91,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
+    <Compile Include="Commands\Py.cs" />
+    <Compile Include="Commands\Remember.cs" />
+    <Compile Include="Commands\ResolveReverse.cs" />
+    <Compile Include="Commands\WolframAlpha.cs" />
     <Compile Include="DataProcessors\CommandHandler.cs" />
     <Compile Include="Commands\Approve.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
@@ -115,7 +118,6 @@
     <Compile Include="Commands\Set.cs" />
     <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Snag.cs" />
-    <Compile Include="Commands\SqlReconnect.cs" />
     <Compile Include="Commands\Stats.cs" />
     <Compile Include="Commands\Version.cs" />
     <Compile Include="ControlVariables.cs" />
@@ -135,12 +137,12 @@
     <Compile Include="DataProcessors\DataFunctionSet.cs" />
     <Compile Include="IO\Emoticons.cs" />
     <Compile Include="DataProcessors\IrcEventHandler.cs" />
-    <Compile Include="IrcInterface.cs" />
+    <Compile Include="IO\IrcInterface.cs" />
     <Compile Include="IO\Logger.cs" />
     <Compile Include="IO\LogLevel.cs" />
     <Compile Include="IO\Messages.cs" />
     <Compile Include="IO\PerfLogger.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Bot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

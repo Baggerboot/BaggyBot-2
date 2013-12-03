@@ -44,6 +44,7 @@ namespace BaggyBot.Database.MS_SQL
 		public override void Dispose()
 		{
 			connection.Dispose();
+			context.Dispose();
 		}
 	}
 }

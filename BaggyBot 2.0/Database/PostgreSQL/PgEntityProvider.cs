@@ -38,7 +38,8 @@ namespace BaggyBot.Database.PostgreSQL
 
 		public override void Dispose()
 		{
-			connection.Dispose();
+			context.Dispose();
+			if(connection != null) connection.Dispose();
 		}
 	}
 }

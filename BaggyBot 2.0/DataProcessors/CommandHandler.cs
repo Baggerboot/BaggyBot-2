@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using System.Diagnostics;
 using BaggyBot.Commands;
 using BaggyBot.Database;
 
@@ -14,7 +15,7 @@ namespace BaggyBot
 		private IrcInterface ircInterface;
 		private BotDiagnostics botDiagnostics;
 
-		public CommandHandler(IrcInterface ircInterface, SqlConnector sqlConnector, DataFunctionSet dataFunctionSet, Program program, BotDiagnostics botDiagnostics)
+		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot program, BotDiagnostics botDiagnostics)
 		{
 			this.ircInterface = ircInterface;
 			this.botDiagnostics = botDiagnostics;
@@ -30,33 +31,37 @@ namespace BaggyBot
 				{"ns", new NickServ(ircInterface, dataFunctionSet)},
 				{"part", new Part(ircInterface)},
 				{"ping", new Ping(ircInterface)},
+				{"py", new Py(ircInterface, dataFunctionSet)},
+				{"rdns", new ResolveReverse(ircInterface)},
 				{"regen", new RegenerateGraphs(ircInterface)},
+				{"rem", new Remember(ircInterface)},
 				{"resolve", new Resolve(ircInterface)},
 				{"say", new Say(ircInterface)},
 				{"set", new Set(ircInterface, dataFunctionSet)},
 				{"shutdown", new Shutdown(ircInterface, program)},
 				{"snag", new Snag(ircInterface)},
-				{"sqlreconnect", new SqlReconnect(ircInterface, sqlConnector)},
 				{"version", new Commands.Version(ircInterface)}
 			};
 		}
 
 		public void ProcessCommand(IRCSharp.IrcMessage message)
 		{
-			if(message.Message.Equals(Program.commandIdentifier)) return;
+			Logger.Log("Processing command: " + message.Message);
+			if(message.Message.Equals(Bot.commandIdentifier)) return;
 
 			string line = message.Message.Substring(1);
-			
-			if (line.ToLower().Equals("help") || line.ToLower().Equals("about") || line.ToLower().Equals("info") || line.ToLower().Equals("baggybot") || line.ToLower().Equals("stats")) {
-				ircInterface.SendMessage(message.Channel,"BaggyBot " + Program.Version + " -- Stats page: http://www.jgeluk.net/stats -- Made by baggerboot. For help, try the -help command.");
+			if (new string[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower())) {
+				ircInterface.SendMessage(message.Channel, "BaggyBot " + Bot.Version + " -- Stats page: http://www.jgeluk.net/stats -- Made by baggerboot. For help, try the -help command.");
 			}
-
 			string[] args = line.Split(' ');
 			string command = args[0];
 			args = args.Skip(1).ToArray();
-			CommandArgs cmd = new CommandArgs(command, args, message.Sender, message.Channel, line.Substring(line.IndexOf(' ')+1));
+
+			int cmdIndex = line.IndexOf(' ');
+			CommandArgs cmd = new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex+1));
 
 			if (!commands.ContainsKey(command)) {
+				((Remember)commands["rem"]).UseRem(cmd);
 				return;
 			}
 
@@ -64,7 +69,8 @@ namespace BaggyBot
 				try {
 					commands[command].Use(cmd);
 				} catch (Exception e) {
-					ircInterface.SendMessage(message.Channel, "An unhandled exception occured while trying to process your command! Exception details: " + e.Message);
+					string exceptionMessage = string.Format("An unhandled exception (type: {0}) occurred while trying to process your command! Exception message: \"{1}\", Occurred at line {2}", e.GetType().ToString(), e.Message, new StackTrace(e, true).GetFrame(0).GetFileLineNumber());
+					ircInterface.SendMessage(message.Channel, exceptionMessage);
 					botDiagnostics.Exceptions.Add(e);
 				}
 			} else {

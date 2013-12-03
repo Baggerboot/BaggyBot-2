@@ -12,7 +12,7 @@ namespace BaggyBot
 	{
 		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
 		private Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
-		private DataFunctionSet dataFunctionSet;
+		public DataFunctionSet dataFunctionSet { private get; set; }
 		private IrcClient client;
 
 		private List<string> whoisCalls = new List<string>();
@@ -24,9 +24,8 @@ namespace BaggyBot
 		public int ChannelCount { get { return client.ChannelCount; } }
 		public int TotalUserCount { get { return client.TotalUserCount; } }
 
-		public IrcInterface(IrcClient client, DataFunctionSet df)
+		public IrcInterface(IrcClient client)
 		{
-			this.dataFunctionSet = df;
 			this.client = client;
 		}
 
@@ -64,6 +63,7 @@ namespace BaggyBot
 
 		public void SendMessage(string target, string message)
 		{
+			dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
 			client.SendMessage(target, message);
 		}
 
@@ -105,16 +105,6 @@ namespace BaggyBot
 		public void Part(string channel, string reason = null)
 		{
 			client.Part(channel, reason);
-		}
-
-		public System.Net.Sockets.SocketInformation DuplicateAndClose(int targetProcessId)
-		{
-			return client.DuplicateAndClose(targetProcessId);
-		}
-
-		public System.Net.Sockets.Socket GetHandle()
-		{
-			return client.GetHandle();
 		}
 	}
 }

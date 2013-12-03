@@ -24,10 +24,6 @@ namespace BaggyBot.Commands
 				ircInterface.SendMessage(command.Channel, "Usage: -get <property> <key>");
 				return;
 			}
-			if (command.Args.Length == 1 && command.Args[0] == "handle") {
-				ircInterface.SendMessage(command.Channel, "Socket handle: *" + ircInterface.GetHandle().Handle.ToInt32());
-				return;
-			}
 			if (command.Args.Length == 2 && command.Args[0] == "-s") {
 				string result = null;
 				if (command.Args[1] == "sql_connection_string") {

@@ -14,12 +14,12 @@ namespace BaggyBot.Database.EntityProvider
 		protected SqlConnection connection;
 
 		public abstract IQueryable UserCreds { get; }
-		public abstract IQueryable Quotes { get; } 
-		public abstract IQueryable UserStats { get; } 
-		public abstract IQueryable Emoticons { get; } 
-		public abstract IQueryable KeyValuePairs { get; } 
-		public abstract IQueryable Urls { get; } 
-		public abstract IQueryable UserNames { get; } 
+		public abstract IQueryable Quotes { get; }
+		public abstract IQueryable UserStats { get; }
+		public abstract IQueryable Emoticons { get; }
+		public abstract IQueryable KeyValuePairs { get; }
+		public abstract IQueryable Urls { get; }
+		public abstract IQueryable UserNames { get; }
 		public abstract IQueryable Words { get; }
 		public abstract IQueryable IrcLog { get; }
 
@@ -30,12 +30,10 @@ namespace BaggyBot.Database.EntityProvider
 		public void Reconnect()
 		{
 			Logger.Log("Attempting to reconnect to the SQL database.");
-			lock (connection) {
-				connection.Close();
-				connection.Dispose();
-				connection = null;
-				OpenConnection();
-			}
+			connection.Close();
+			connection.Dispose();
+			connection = null;
+			OpenConnection();
 		}
 		public bool CloseConnection()
 		{
@@ -49,14 +47,13 @@ namespace BaggyBot.Database.EntityProvider
 		}
 		public int ExecuteStatement(string statement)
 		{
-			Logger.Log("Manually executing an SQL statement.");
-			lock (connection) {
-				int result;
-				using (SqlCommand cmd = new SqlCommand(statement, connection)) {
-					result = cmd.ExecuteNonQuery();
-				}
-				return result;
+			throw new NotImplementedException();
+			/*Logger.Log("Manually executing an SQL statement.");
+			int result;
+			using (SqlCommand cmd = new SqlCommand(statement, connection)) {
+				result = cmd.ExecuteNonQuery();
 			}
+			return result;*/
 		}
 	}
 }

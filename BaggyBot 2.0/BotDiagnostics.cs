@@ -9,7 +9,7 @@ using System.Timers;
 
 namespace BaggyBot
 {
-	class BotDiagnostics
+	class BotDiagnostics : IDisposable
 	{
 		private IrcInterface ircInterface;
 		private Timer taskScheduler;
@@ -24,10 +24,16 @@ namespace BaggyBot
 			get { return exceptions; }
 		}
 
+		public void Dispose()
+		{
+			pc.Dispose();
+			perfLogger.Dispose();
+			taskScheduler.Dispose();
+		}
 
 		public BotDiagnostics(IrcInterface ircInterface)
 		{
-			AppDomain.CurrentDomain.UnhandledException += HandleException;
+			//AppDomain.CurrentDomain.UnhandledException += HandleException;
 			this.ircInterface = ircInterface;
 
 			selfProc = Process.GetCurrentProcess();
@@ -43,8 +49,13 @@ namespace BaggyBot
 		{
 			Exception e = (Exception)args.ExceptionObject;
 			long mem = selfProc.PrivateMemorySize64;
-			ircInterface.SendMessage(Settings.Instance["operator_nick"], "A fatal unhandled exception occured.");
-			Logger.Log("A fatal unhandled exception occured: " + e.GetType().Name, LogLevel.Error);
+			var trace = new StackTrace(e, true);
+			var bottomFrame = trace.GetFrame(0);
+
+			string message = "A fatal unhandled exception occured: " + e.GetType().Name + " - " + e.Message + " - stacktrace: " + bottomFrame.GetFileName() + " at line " + bottomFrame.GetFileLineNumber();
+
+			ircInterface.SendMessage(Settings.Instance["operator_nick"], message);
+			Logger.Log(message, LogLevel.Error);
 			Logger.Log("Private memory size: " + mem + " bytes.", LogLevel.Info);
 		}
 

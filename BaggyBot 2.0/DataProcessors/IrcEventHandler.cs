@@ -27,19 +27,24 @@ namespace BaggyBot
 		{
 			Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
 
-			int userId;
-			lock (dataFunctionSet.Lock) {
-				userId = dataFunctionSet.GetIdFromUser(message.Sender);
-			}
+			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
+
 			if (message.Action) {
 				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, "*" + message.Sender.Nick + " " + message.Message + "*");
 			} else {
 				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
 			}
 
-			if (message.Message.StartsWith(Program.commandIdentifier)) {
+			if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py")) {
+				message.Message = "-py " + message.Message;
+				commandHandler.ProcessCommand(message);
+				return;
+			}
+			if (message.Message.StartsWith(Bot.commandIdentifier)) {
+				Logger.Log("This is a command");
 				commandHandler.ProcessCommand(message);
 			} else {
+				Logger.Log("This is a message");
 				statsHandler.ProcessMessage(message);
 			}
 		}
@@ -104,6 +109,11 @@ namespace BaggyBot
 		{
 			Logger.Log(message, LogLevel.Irc);
 			dataFunctionSet.AddIrcMessage(DateTime.Now, null, "ALL", "NOTICE", message);
+		}
+
+		internal void ProcessRawLine(string line)
+		{
+			Logger.Log("--" + line, LogLevel.Irc);
 		}
 	}
 }

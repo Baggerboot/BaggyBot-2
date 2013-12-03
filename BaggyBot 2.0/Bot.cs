@@ -8,7 +8,7 @@ using BaggyBot.Tools;
 
 namespace BaggyBot
 {
-	public class Program
+	public class Bot : IDisposable
 	{
 		private StatsHandler statsHandler;
 		private CommandHandler commandHandler;
@@ -20,11 +20,17 @@ namespace BaggyBot
 		private BotDiagnostics botDiagnostics;
 
 		public const string commandIdentifier = "-";
-		public const string Version = "3.12.3";
+		public const string Version = "3.16";
 
 		public static DateTime LastUpdate; // = new DateTime(2013, 11, 16, 4, 9, 18, DateTimeKind.Local);
 
 		private string previousVersion = null;
+
+		public void Dispose()
+		{
+			botDiagnostics.Dispose();
+			sqlConnector.Dispose();
+		}
 
 		public void Shutdown()
 		{
@@ -54,7 +60,7 @@ namespace BaggyBot
 			} while (!reconnected);
 		}
 
-		public Program(string previousVersion = null)
+		public Bot(string previousVersion = null)
 		{
 			this.previousVersion = previousVersion;
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
@@ -63,22 +69,25 @@ namespace BaggyBot
 			LastUpdate = Tools.MiscTools.RetrieveLinkerTimestamp();
 			sqlConnector = new SqlConnector();
 			client = new IrcClient();
-			ircInterface = new IrcInterface(client, dataFunctionSet);
+			ircInterface = new IrcInterface(client);
 			dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
+			ircInterface.dataFunctionSet = dataFunctionSet;
 			statsHandler = new StatsHandler(dataFunctionSet, ircInterface);
-			BaggyBot.Tools.UserTools.DataFunctionSet = dataFunctionSet;
+			Tools.UserTools.DataFunctionSet = dataFunctionSet;
 			botDiagnostics = new BotDiagnostics(ircInterface);
-			commandHandler = new CommandHandler(ircInterface, sqlConnector, dataFunctionSet, this, botDiagnostics);
+			commandHandler = new CommandHandler(ircInterface, dataFunctionSet, this, botDiagnostics);
 			ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, commandHandler, statsHandler);
 
 			client.OnNickChanged += dataFunctionSet.HandleNickChange;
 			client.OnMessageReceived += ircEventHandler.ProcessMessage;
 			client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
+			//client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;
 			client.OnDisconnect += () => { Logger.Log("Disconnected.", LogLevel.Debug); };
 			client.OnConnectionLost += HandleConnectionLoss;
 			client.OnKicked += (channel) => { Logger.Log("I was kicked from " + channel, LogLevel.Warning); };
 			client.OnDebugLog += (message) => { MiscTools.ConsoleWriteLine("[INF]\t" + message, ConsoleColor.DarkCyan); };
+			client.OnNetLibDebugLog += (message) => { MiscTools.ConsoleWriteLine("[INF]\t" + message, ConsoleColor.Cyan); };
 			client.OnJoinChannel += ircEventHandler.HandleJoin;
 			client.OnPartChannel += ircEventHandler.HandlePart;
 			client.OnKick += ircEventHandler.HandleKick;
@@ -87,24 +96,6 @@ namespace BaggyBot
 			Logger.Log("Connecting to the database", LogLevel.Info);
 			sqlConnector.OpenConnection();
 			Logger.Log("Database connection established", LogLevel.Info);
-		}
-
-		public void PostConnect()
-		{
-			botDiagnostics.StartPerformanceLogging();
-
-			if (previousVersion != null && previousVersion != Version) {
-				ircInterface.SendMessage(Settings.Instance["operator_nick"], "Succesfully updated from version " + previousVersion + " to version " + Version);
-			} else if (previousVersion != null) {
-				ircInterface.SendMessage(Settings.Instance["operator_nick"], "Failed to update: No newer version available. Previous version: " + previousVersion);
-			}
-			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
-			Logger.OnLogEvent += (message, level) =>
-			{
-				if (level == LogLevel.Error || level == LogLevel.Warning) {
-					ircInterface.SendMessage(Settings.Instance["operator_nick"], "LOG WARNING: " + message);
-				}
-			};
 		}
 
 		public void Connect()
@@ -142,6 +133,36 @@ namespace BaggyBot
 			PostConnect();
 		}
 
+		public void PostConnect()
+		{
+			botDiagnostics.StartPerformanceLogging();
+
+			if (previousVersion != null && previousVersion != Version) {
+				ircInterface.SendMessage(Settings.Instance["operator_nick"], "Succesfully updated from version " + previousVersion + " to version " + Version);
+			} else if (previousVersion != null) {
+				ircInterface.SendMessage(Settings.Instance["operator_nick"], "Failed to update: No newer version available. Previous version: " + previousVersion);
+			}
+			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
+			Logger.OnLogEvent += (message, level) =>
+			{
+				if (level == LogLevel.Error || level == LogLevel.Warning) {
+					ircInterface.SendMessage(Settings.Instance["operator_nick"], "LOG WARNING: " + message);
+				}
+			};
+			KeepAlive();
+		}
+
+		private void KeepAlive()
+		{
+			while (true) {
+				if (!client.Connected) {
+					Logger.Log("Connection lost! Attempting to reconnect.", LogLevel.Warning);
+					Connect();
+				}
+				System.Threading.Thread.Sleep(500);
+			}
+		}
+
 		static void Main(string[] args)
 		{
 			string previousVersion = null;
@@ -155,7 +176,7 @@ namespace BaggyBot
 			}
 			Logger.ClearLog();
 
-			Program p = new Program(previousVersion);
+			Bot p = new Bot(previousVersion);
 			p.Connect();
 		}
 	}

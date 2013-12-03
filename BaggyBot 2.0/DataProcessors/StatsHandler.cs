@@ -37,12 +37,6 @@ namespace BaggyBot
 		{
 			Logger.Log("Processing message for " + message.Sender.Nick);
 
-			if (!Monitor.TryEnter(dataFunctionSet.Lock, 10000)) { // MAYBE: Following bug might be fixed, but also might not: Occasionally a thread will not release its lock on the Lock Object. This control statement should detect these cases, but is unable to do anything about it.
-				Logger.Log("dataFunctionSet.Lock was locked for longer than 10 seconds.", LogLevel.Error);
-				Logger.Log("Attempting to access message anyway. This might go wrong!");
-			} else {
-				Logger.Log("Locked datafunctionset.");
-			}
 			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 			Logger.Log("UserId acquired.");
 
@@ -63,8 +57,7 @@ namespace BaggyBot
 			foreach (string word in words) {
 				ProcessWord(message, word, userId);
 			}
-			Monitor.Exit(dataFunctionSet.Lock);
-			Logger.Log("Sucessfully exited the lock.");
+			Logger.Log("Done processing message");
 		}
 
 		private void ProcessRandomEvents(IrcMessage message, List<string> words)
@@ -97,7 +90,6 @@ namespace BaggyBot
 				}
 			}
 		}
-
 		private void GenerateRandomQuote(IrcMessage message, List<string> words)
 		{
 			if (message.Action) {

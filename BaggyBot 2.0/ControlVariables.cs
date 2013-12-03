@@ -10,5 +10,6 @@ namespace BaggyBot
 	{
 		public static bool SnagNextLine;
 		public static string SnagNextLineBy;
+		public static bool QueryConsole;
 	}
 }

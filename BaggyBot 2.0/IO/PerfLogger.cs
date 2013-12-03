@@ -8,10 +8,9 @@ using System.IO;
 
 namespace BaggyBot
 {
-	class PerfLogger
+	class PerfLogger : IDisposable
 	{
 		private StreamWriter sw;
-
 
 		public PerfLogger(string filename)
 		{
@@ -23,6 +22,12 @@ namespace BaggyBot
 		{
 			sw.WriteLine("{0}, {1}, {2}", memSize, channelCount, userCount);
 			sw.Flush();
+		}
+
+		public void Dispose()
+		{
+			sw.Close();
+			sw.Dispose();
 		}
 	}
 }
