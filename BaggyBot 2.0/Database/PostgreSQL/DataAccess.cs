@@ -734,6 +734,8 @@ public partial class BaggyBoT
 
 		private string _quote1;
 
+		private System.Nullable<System.DateTime> _snagGedAt;
+
 		private int _userID;
 
 		#region Extensibility Method Declarations
@@ -746,6 +748,10 @@ public partial class BaggyBoT
 		partial void OnQuote1Changed();
 
 		partial void OnQuote1Changing(string value);
+
+		partial void OnSnagGedAtChanged();
+
+		partial void OnSnagGedAtChanging(System.Nullable<System.DateTime> value);
 
 		partial void OnUserIDChanged();
 
@@ -796,6 +802,26 @@ public partial class BaggyBoT
 					this._quote1 = value;
 					this.SendPropertyChanged("Quote1");
 					this.OnQuote1Changed();
+				}
+			}
+		}
+
+		[Column(Storage = "_snagGedAt", Name = "snagged_at", DbType = "timestamp without time zone", AutoSync = AutoSync.Never)]
+		[DebuggerNonUserCode()]
+		public System.Nullable<System.DateTime> SnaggedAt
+		{
+			get
+			{
+				return this._snagGedAt;
+			}
+			set
+			{
+				if ((_snagGedAt != value)) {
+					this.OnSnagGedAtChanging(value);
+					this.SendPropertyChanging();
+					this._snagGedAt = value;
+					this.SendPropertyChanged("SnagGedAt");
+					this.OnSnagGedAtChanged();
 				}
 			}
 		}

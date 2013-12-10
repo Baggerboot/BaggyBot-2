@@ -86,9 +86,9 @@ namespace BaggyBot.Database
 			return result;
 		}
 
-		public void CloseConnection()
+		public bool CloseConnection()
 		{
-			provider.CloseConnection();
+			return provider.CloseConnection();
 		}
 
 		public void Reconnect()

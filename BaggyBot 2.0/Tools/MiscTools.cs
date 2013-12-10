@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
+
 namespace BaggyBot.Tools
 {
 	/// <summary>
@@ -17,6 +20,15 @@ namespace BaggyBot.Tools
 			Console.ForegroundColor = color;
 			Console.WriteLine(line);
 			Console.ForegroundColor = prev;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public static string GetCurrentMethod()
+		{
+			StackTrace st = new StackTrace();
+			StackFrame sf = st.GetFrame(1);
+
+			return sf.GetMethod().Name;
 		}
 
 		public static DateTime RetrieveLinkerTimestamp()

@@ -16,7 +16,7 @@ namespace BaggyBot
 		private IrcClient client;
 
 		private List<string> whoisCalls = new List<string>();
-		private List<string> nickservCalls = new List<string>();
+		private List<string> nickservCalls = new List<string>(); // Holds information about which users are currently being looked up
 		private bool CanDoNickservCall = true;
 		public bool HasNickservCall { get { return nickservCalls.Count > 0; } }
 		public bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
@@ -43,19 +43,25 @@ namespace BaggyBot
 		{
 			if (!CanDoNickservCall) return null;
 
-			Logger.Log("Calling NickServ for " + nick, LogLevel.Info);
+			Logger.Log("Nickserv call requested for " + nick, LogLevel.Debug);
 
 			if (!nickservCalls.Contains(nick)) {
 				nickservCalls.Add(nick);
-				var t = new System.Threading.Thread(() => SendMessage("NickServ", "INFO " + nick));
-				t.Start();
+				Logger.Log("Calling NickServ for " + nick, LogLevel.Info);
+				SendMessage("NickServ", "INFO " + nick);
+			} else {
+				Logger.Log("An entry already exists for " + nick, LogLevel.Debug);
 			}
 			nick = nick.ToLower();
 
-			
 
+			int waitTime = 0;
 			while (!nickservCallResults.ContainsKey(nick)) {
 				System.Threading.Thread.Sleep(20);
+				waitTime += 20;
+				if (waitTime == 6000) {
+					Logger.Log("No nickserv reply received for {0} after 6 seconds", LogLevel.Warning, true, nick);
+				}
 			}
 			nickservCalls.Remove(nick);
 			return nickservCallResults[nick];

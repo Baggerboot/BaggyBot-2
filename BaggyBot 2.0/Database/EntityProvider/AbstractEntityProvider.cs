@@ -38,6 +38,7 @@ namespace BaggyBot.Database.EntityProvider
 		public bool CloseConnection()
 		{
 			try {
+				Logger.Log("Closing SQL server connection", LogLevel.Info);
 				connection.Close();
 				return true;
 			} catch (SqlException ex) {

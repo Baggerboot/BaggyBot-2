@@ -73,10 +73,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Desktop\lin\DbLinq-0.20.1\build.dbg\DbLinq.PostgreSql.dll</HintPath>
     </Reference>
-    <Reference Include="IRCSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\IRCSharp\IRCSharp\bin\Debug\IRCSharp.dll</HintPath>
-    </Reference>
     <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="System" />
@@ -91,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
+    <Compile Include="Commands\Html.cs" />
     <Compile Include="Commands\Py.cs" />
     <Compile Include="Commands\Remember.cs" />
     <Compile Include="Commands\ResolveReverse.cs" />
@@ -143,6 +140,7 @@
     <Compile Include="IO\Messages.cs" />
     <Compile Include="IO\PerfLogger.cs" />
     <Compile Include="Bot.cs" />
+    <Compile Include="LockObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -203,6 +201,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\IRCSharp\IRCSharp\IRCSharp.csproj">
+      <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
+      <Name>IRCSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DbLinq\DbLinq.csproj">
       <Project>{7950197d-4122-49cb-9fd7-45e666bafec2}</Project>
       <Name>DbLinq</Name>

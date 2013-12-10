@@ -36,9 +36,7 @@ namespace BaggyBot
 		public void ProcessMessage(IrcMessage message)
 		{
 			Logger.Log("Processing message for " + message.Sender.Nick);
-
 			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
-			Logger.Log("UserId acquired.");
 
 			List<string> words = WordTools.GetWords(message.Message);
 			words = words.Select(s => s.Replace("'", "''")).ToList();
@@ -51,7 +49,7 @@ namespace BaggyBot
 			dataFunctionSet.IncrementWordCount(userId, words.Count);
 			dataFunctionSet.IncrementVar("global_line_count");
 			dataFunctionSet.IncrementVar("global_word_count", words.Count);
-			GenerateRandomQuote(message, words);
+			GenerateRandomQuote(message, words, userId);
 			ProcessRandomEvents(message, words);
 			GetEmoticons(userId, words);
 			foreach (string word in words) {
@@ -90,7 +88,7 @@ namespace BaggyBot
 				}
 			}
 		}
-		private void GenerateRandomQuote(IrcMessage message, List<string> words)
+		private void GenerateRandomQuote(IrcMessage message, List<string> words, int userId)
 		{
 			if (message.Action) {
 				message.Message =  "*" + message.Sender.Nick + " " + message.Message + "*";
@@ -108,19 +106,39 @@ namespace BaggyBot
 				return;
 			}
 
-			double snagChance;
-			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance)) {
-				snagChance = 0.03;
+			PerformSnagLogic(message, words, userId);
+		}
+
+		private void PerformSnagLogic(IrcMessage message, List<string> words, int userId)
+		{
+			DateTime? last = dataFunctionSet.GetLastSnaggedLine(userId);
+			if (last.HasValue) {
+				if ((DateTime.Now - last.Value).Hours < int.Parse(Settings.Instance["snag_min_wait"])) {
+					Logger.Log("Dropped a snag as this user has recently been snagged already");
+					return;
+				}
+			} else {
+				Logger.Log("This user hasn't been snagged before");
 			}
+
+			double snagChance;
+			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance)) { // Set the base snag chance
+				snagChance = 0.015;
+			}
+
+			double silenceChance;
+			if (!double.TryParse(Settings.Instance["snag_silence_chance"], out silenceChance)) { // Set the chance for a silent snag
+				silenceChance = 0.6;
+			}
+
 
 			if (words.Count > 6) { // Do not snag if the amount of words to be snagged is less than 7
 				if (rand.NextDouble() <= snagChance) {
 					bool allowSnagMessage;
 					bool.TryParse(Settings.Instance["display_snag_message"], out allowSnagMessage);
-					double displayChance = 0.5;
-					double.TryParse(Settings.Instance["snag_chance_display"], out displayChance);
-					bool hideSnagMessage = rand.NextDouble() <= displayChance;
+					bool hideSnagMessage = rand.NextDouble() <= silenceChance;
 					if (!allowSnagMessage || hideSnagMessage) { // Check if snag message should be displayed
+						Logger.Log("Silently snagging this message");
 						dataFunctionSet.Snag(message);
 					} else {
 						int randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
@@ -133,6 +151,7 @@ namespace BaggyBot
 				}
 			}
 		}
+
 		private void SnagMessage(IrcMessage message, string snagMessage)
 		{
 			ircInterface.SendMessage(message.Channel, snagMessage);

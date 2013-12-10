@@ -20,11 +20,12 @@ namespace BaggyBot
 		private BotDiagnostics botDiagnostics;
 
 		public const string commandIdentifier = "-";
-		public const string Version = "3.16";
+		public const string Version = "3.19.2";
 
 		public static DateTime LastUpdate; // = new DateTime(2013, 11, 16, 4, 9, 18, DateTimeKind.Local);
 
 		private string previousVersion = null;
+		private bool shutdownSignalReceived;
 
 		public void Dispose()
 		{
@@ -34,6 +35,7 @@ namespace BaggyBot
 
 		public void Shutdown()
 		{
+			shutdownSignalReceived = true;
 			Logger.Log("Preparing to shut down", LogLevel.Info);
 			ircInterface.Disconnect("Shutting down");
 			Logger.Log("Disconnected from IRC server", LogLevel.Info);
@@ -154,13 +156,14 @@ namespace BaggyBot
 
 		private void KeepAlive()
 		{
-			while (true) {
+			while (true && !shutdownSignalReceived) {
 				if (!client.Connected) {
 					Logger.Log("Connection lost! Attempting to reconnect.", LogLevel.Warning);
 					Connect();
 				}
 				System.Threading.Thread.Sleep(500);
 			}
+			Logger.Log("Exiting main loop");
 		}
 
 		static void Main(string[] args)

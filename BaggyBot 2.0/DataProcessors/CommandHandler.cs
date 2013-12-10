@@ -26,6 +26,7 @@ namespace BaggyBot
 				{"ed", new ExceptionDetails(ircInterface, botDiagnostics)},
 				{"feature", new Feature(ircInterface, dataFunctionSet)},
 				{"get", new Get(ircInterface, dataFunctionSet)},
+				{"html", new Html(ircInterface)},
 				{"help", new Help(ircInterface)},
 				{"join", new Join(ircInterface, dataFunctionSet)},
 				{"ns", new NickServ(ircInterface, dataFunctionSet)},

@@ -36,10 +36,19 @@ namespace BaggyBot.Commands
 					ircInterface.SendMessage(c.Channel, Messages.CMD_NOT_AUTHORIZED);
 					return;
 				}
+			}else if (c.Args.Length == 1 && c.Args[0].Equals("-f")) {
+				ircInterface.SendMessage(c.Channel, "Sending a NickServ call");
+				string username = ircInterface.DoNickservCall(c.Sender.Nick);
+				if (username == null) {
+					ircInterface.SendMessage(c.Channel, "You don't appear to be registered with NickServ");
+				} else {
+					ircInterface.SendMessage(c.Channel, "Your NickServ username is " + username);
+					return;
+				}
 			} else if (c.Args.Length != 0) {
 				ircInterface.SendMessage(c.Channel, "Usage: -ns; -ns add <username>");
 				return;
-			}
+			} 
 			string ns = dataFunctionSet.GetNickserv(dataFunctionSet.GetIdFromUser(c.Sender));
 			if (ns == null) {
 				ircInterface.SendMessage(c.Channel, "You don't appear to be identified with NickServ.");
