@@ -66,7 +66,7 @@ namespace BaggyBot
 					string nick = notice.Substring(1, notice.Length - 2);
 					nick = nick.Substring(0, nick.IndexOf(' ') - 1);
 					Logger.Log("'{0}' does not appear to be registered with NickServ.", LogLevel.Debug, true, nick);
-					ircInterface.AddNickserv(nick, null);
+					ircInterface.AddNickserv(nick.ToLower(), null);
 				} else {
 					Logger.Log("Received an unexpected NickServ response: " + notice, LogLevel.Warning);
 				}
