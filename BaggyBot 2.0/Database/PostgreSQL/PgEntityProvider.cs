@@ -27,6 +27,8 @@ namespace BaggyBot.Database.PostgreSQL
 		public override bool OpenConnection()
 		{
 			context = new BaggyBoT(Settings.Instance["sql_connection_string"]);
+			base.connection = context.Connection;
+			context.Connection.Open();
 			return true;
 		}
 

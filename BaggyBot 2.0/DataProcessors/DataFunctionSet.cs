@@ -65,6 +65,16 @@ namespace BaggyBot
 			Lock.LockMessage = "None";
 		}
 
+		public int ExecuteStatement(string statement)
+		{
+			return sqlConnector.ExecuteStatement(statement);
+		}
+
+		public List<object> ExecuteQuery(string query)
+		{
+			return sqlConnector.ExecuteQuery(query);
+		}
+
 		public void IncrementWordCount(int uid, int words)
 		{
 			lock (Lock) {
@@ -147,6 +157,7 @@ namespace BaggyBot
 				Quote q = new Quote();
 				q.Quote1 = message.Message;
 				q.UserId = uid;
+				q.SnaggedAt = DateTime.Now;
 
 				sqlConnector.Quotes.InsertOnSubmit(q);
 				Logger.Log("Added quote for " + message.Sender.Nick + ".");
@@ -290,8 +301,8 @@ namespace BaggyBot
 			lock (Lock) {
 				Lock.LockMessage = Tools.MiscTools.GetCurrentMethod();
 				ret = (from c in sqlConnector.UserCreds
-						where c.UserId == uid
-						select c.NsLogin).First();
+					   where c.UserId == uid
+					   select c.NsLogin).First();
 			}
 			Lock.LockMessage = "None";
 			return ret;
@@ -517,7 +528,7 @@ namespace BaggyBot
 				// Multiple credentials rows were returned for the new user. This is most likely an error.
 				if (count > 1) {
 					Logger.Log(String.Format("Multiple credentials found for combination: nick={0}, ident={1}, hostmask={2}", newNick, user.Ident, user.Hostmask), LogLevel.Warning);
-				} else if(count == 0){
+				} else if (count == 0) {
 					int[] uids = GetUids(user);
 					// It looks like this user does not have a database entry yet, so we can ignore them.
 					if (uids.Length == 0) {
@@ -624,19 +635,22 @@ namespace BaggyBot
 			Lock.LockMessage = "None";
 		}
 
-		internal DateTime? GetLastSnaggedLine(int userId)
+		public DateTime? GetLastSnaggedLine(int userId)
 		{
 			DateTime? ret;
 			lock (Lock) {
 				Lock.LockMessage = Tools.MiscTools.GetCurrentMethod();
 				var data = (from quot in sqlConnector.Quotes
 							where quot.UserId == userId
+							&& quot.SnaggedAt != null
 							select quot
 				).OrderBy(q => q.SnaggedAt);
-				try {
+				if (data.ToList().Count != 0) {
 					ret = data.Last().SnaggedAt;
-				} catch (InvalidOperationException) {
-					Logger.Log("InvalidOperationException occurred when trying to grab the last quote for user #{0}! Data count: {1}", LogLevel.Error, true, userId, data.Count());
+					var item = data.Last();
+					ret = item.SnaggedAt;
+				} else {
+					Logger.Log("No last snagged line available for user #" + userId);
 					ret = null;
 				}
 			}

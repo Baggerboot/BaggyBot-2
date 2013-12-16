@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Data;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 using System.Configuration;
 using BaggyBot.Database.EntityProvider;
 
@@ -112,6 +113,16 @@ namespace BaggyBot.Database
 		~SqlConnector()
 		{
 			Dispose(false);
+		}
+
+		internal int ExecuteStatement(string statement)
+		{
+			return provider.ExecuteStatement(statement);
+		}
+
+		internal List<object> ExecuteQuery(string query)
+		{
+			return provider.ExecuteQuery(query);
 		}
 	}
 }

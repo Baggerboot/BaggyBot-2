@@ -123,6 +123,7 @@ namespace DbLinq.Data.Linq.Sugar.Implementation
             {
                 case null: // some calls, like Count() generate SQL and the resulting projection method name is null (never initialized)
                     return SelectSingle<S>(selectQuery, false); // Single() for safety, but First() should work
+					//return SelectFirst<S>(selectQuery, false);
                 case "First":
                     return SelectFirst<S>(selectQuery, false);
                 case "FirstOrDefault":

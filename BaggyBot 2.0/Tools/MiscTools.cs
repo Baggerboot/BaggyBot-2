@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using System.IO;
 
 namespace BaggyBot.Tools
 {
@@ -29,6 +30,24 @@ namespace BaggyBot.Tools
 			StackFrame sf = st.GetFrame(1);
 
 			return sf.GetMethod().Name;
+		}
+
+		public static string GetContentName(out string filename, out int num, string dirname, string extension, int depth)
+		{
+			string prefix = "/var/www/html/usercontent/" + dirname;
+
+			var files = Directory.GetFiles(prefix).Where(s => s.EndsWith(extension)).OrderBy(s => s);
+			num = 1;
+			if (files.Count() != 0) {
+				string name = files.Last();
+
+				name = name.Split('/').Last();
+				name = name.Substring(0, depth);
+				num = int.Parse(name);
+				num++;
+			}
+			filename = num.ToString("D"+depth) + extension;
+			return prefix + "/" + filename;
 		}
 
 		public static DateTime RetrieveLinkerTimestamp()

@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 using System.Data.SqlClient;
 using System.Data.Linq;
+using System.Data.Common;
 
 namespace BaggyBot.Database.EntityProvider
 {
 	abstract class AbstractEntityProvider : IDisposable
 	{
-		protected SqlConnection connection;
+		protected DbConnection connection;
 
 		public abstract IQueryable UserCreds { get; }
 		public abstract IQueryable Quotes { get; }
@@ -48,13 +49,27 @@ namespace BaggyBot.Database.EntityProvider
 		}
 		public int ExecuteStatement(string statement)
 		{
-			throw new NotImplementedException();
-			/*Logger.Log("Manually executing an SQL statement.");
+			Logger.Log("Manually executing an SQL statement.");
 			int result;
-			using (SqlCommand cmd = new SqlCommand(statement, connection)) {
+			using (DbCommand cmd = connection.CreateCommand()) {
+				cmd.CommandText = statement;
 				result = cmd.ExecuteNonQuery();
 			}
-			return result;*/
+			return result;
+		}
+
+		public List<object> ExecuteQuery(string query)
+		{
+			List<object> data = new List<object>();
+			Logger.Log("Manually executing an SQL query.");
+			using (DbCommand cmd = connection.CreateCommand()) {
+				cmd.CommandText = query;
+				var reader = cmd.ExecuteReader();
+				while (reader.Read()) {
+					data.Add(reader[0]);
+				}
+			}
+			return data;
 		}
 	}
 }

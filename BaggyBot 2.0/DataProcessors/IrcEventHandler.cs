@@ -125,5 +125,10 @@ namespace BaggyBot
 		{
 			Logger.Log("--" + line, LogLevel.Irc);
 		}
+
+		internal void HandleQuit(IrcUser user, string reason)
+		{
+			DisplayEvent(user.ToString() + " has quit (" + reason + ")"); 
+		}
 	}
 }

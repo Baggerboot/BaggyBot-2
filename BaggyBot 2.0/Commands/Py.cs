@@ -109,6 +109,7 @@ namespace BaggyBot.Commands
 			scope = engine.CreateScope();
 			scope.SetVariable("ircInterface", ircInterface);
 			scope.SetVariable("dataFunctionSet", df);
+			scope.SetVariable("tools", new Tools.PythonTools(ircInterface));
 			outputStream = new ProducerConsumerStream();
 			outputStreamWriter = new StreamWriter(outputStream);
 			outputStreamReader = new StreamReader(outputStream);
@@ -155,6 +156,11 @@ namespace BaggyBot.Commands
 			security = (InterpreterSecurity)Enum.Parse(typeof(InterpreterSecurity), setting, true);
 		}
 
+		/// <summary>
+		/// This method checks if a regular user (non-operator) is allowed to execute the given command.
+		/// </summary>
+		/// <param name="command">The command that should be checked.</param>
+		/// <returns>True if the user is allowed to execute the command, false if only the bot operator may execute it.</returns>
 		private bool RestrictionsCheck(CommandArgs command)
 		{
 			if (!command.Channel.StartsWith("#")) {
@@ -166,8 +172,8 @@ namespace BaggyBot.Commands
 				return false;
 			}
 			if (security == InterpreterSecurity.Notify) {
+				// Do not return anything yet, but do notify the bot operator.
 				ircInterface.SendMessage(Settings.Instance["operator_nick"], "-py used by " + command.Sender.Nick + ": " + command.FullArgument);
-				return true;
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset"))) {
 				ircInterface.SendMessage(command.Channel, "Access to my guts is restricted to the operator.");
@@ -178,8 +184,6 @@ namespace BaggyBot.Commands
 			}
 			return true;
 		}
-
-
 		public void Use(CommandArgs command)
 		{
 			bool isOperator = Tools.UserTools.Validate(command.Sender);

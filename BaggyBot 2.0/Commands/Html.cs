@@ -23,7 +23,6 @@ namespace BaggyBot.Commands
 			if (string.IsNullOrEmpty(command.FullArgument)) {
 				ircInterface.SendMessage(command.Channel, "Usage: html [-h] <html code> - Use the -h switch to automatically add a doctype decoration, and opening and closing HTML and body tags");
 			}
-			string prefix = "/var/www/html/usercontent/html";
 			//string prefix = ".";
 
 			bool wrapBoilerplate = false;
@@ -33,20 +32,12 @@ namespace BaggyBot.Commands
 				command.FullArgument = command.FullArgument.Substring(3);
 			}
 
-			var files = Directory.GetFiles(prefix).Where(s => s.EndsWith(".html")).OrderBy(s => s);
-			int num = 1;
-			if(files.Count() != 0){
-				string name = files.Last();
-				
-				name = name.Split('/').Last();
-				name = name.Substring(0, 4);
-				num = int.Parse(name);
-				num++;
-			}
-			using (StreamWriter sw = new StreamWriter(prefix + "/" + num.ToString("D4") + ".html")) {
+			string filename;
+			int fileId;
+			using (StreamWriter sw = new StreamWriter(Tools.MiscTools.GetContentName(out filename, out fileId, "html", ".html", 4))) {
 				sw.WriteLine((wrapBoilerplate ? "<!DOCTYPE html><html><body>" : "") + command.FullArgument.Replace("<?php", "") + (wrapBoilerplate ? "</body></html>" : ""));
 			}
-			ircInterface.SendMessage(command.Channel, string.Format("{0}, http://jgeluk.net/usercontent/html/{1}.html", command.Sender.Nick, num.ToString("D4")));
+			ircInterface.SendMessage(command.Channel, string.Format("{0}, http://jgeluk.net/usercontent/html/{1}", command.Sender.Nick, filename));
 		}
 	}
 }

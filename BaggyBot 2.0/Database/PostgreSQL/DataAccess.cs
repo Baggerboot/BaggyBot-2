@@ -805,8 +805,7 @@ public partial class BaggyBoT
 				}
 			}
 		}
-
-		[Column(Storage = "_snagGedAt", Name = "snagged_at", DbType = "timestamp without time zone", AutoSync = AutoSync.Never)]
+		[Column(Storage = "_snagGedAt", Name = "snagged_at", DbType = "timestamp without time zone", AutoSync = AutoSync.Never, CanBeNull = true)]
 		[DebuggerNonUserCode()]
 		public System.Nullable<System.DateTime> SnaggedAt
 		{

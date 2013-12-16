@@ -151,6 +151,7 @@
     <Compile Include="Database\SqlConnector.cs" />
     <Compile Include="DataProcessors\StatsHandler.cs" />
     <Compile Include="Tools\MiscTools.cs" />
+    <Compile Include="Tools\PythonTools.cs" />
     <Compile Include="Tools\UserTools.cs" />
     <Compile Include="Tools\WordTools.cs" />
   </ItemGroup>
@@ -177,6 +178,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="BaggyBot 2.0_TemporaryKey.pfx" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
     <None Include="Database\MS_SQL\StatsBot.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>StatsBot.designer.cs</LastGenOutput>
