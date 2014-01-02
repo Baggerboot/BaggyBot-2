@@ -8,18 +8,30 @@ using System.IO;
 
 namespace BaggyBot
 {
-	class PerfLogger : IDisposable
+	class PerformanceLogger : IDisposable
 	{
 		private StreamWriter sw;
-
-		public PerfLogger(string filename)
+		public List<PerformanceObject> PerformanceLog
 		{
+			get;
+			private set;
+		}
+
+		public PerformanceLogger(string filename)
+		{
+			PerformanceLog = new List<PerformanceObject>();
 			sw = new StreamWriter(filename);
 			sw.WriteLine("private.memory, channels.count, users.count");
 		}
 
 		public void Log(long memSize, int channelCount, int userCount)
 		{
+			PerformanceLog.Add(new PerformanceObject()
+			{
+				MemorySize = memSize,
+				ChannelCount = channelCount,
+				UserCount = userCount
+			});
 			sw.WriteLine("{0}, {1}, {2}", memSize, channelCount, userCount);
 			sw.Flush();
 		}

@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using BaggyBot.Tools;
+using BaggyBot.DataProcessors;
+
 
 namespace BaggyBot.Commands
 {
@@ -25,7 +27,7 @@ namespace BaggyBot.Commands
 			if (command.Args.Length == 1) {
 				ircInterface.JoinChannel(command.Args[0]);
 			} else {
-				ircInterface.SendMessage(command.Channel, "Usage: -join <channel>");
+				command.Reply("Usage: -join <channel>");
 			}
 		}
 	}

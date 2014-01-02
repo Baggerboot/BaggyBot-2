@@ -9,6 +9,9 @@ using System.Timers;
 
 namespace BaggyBot
 {
+	/// <summary>
+	/// This class gathers data about the bot's performance and sends it to a logger so it can be written to a log file.
+	/// </summary>
 	class BotDiagnostics : IDisposable
 	{
 		private IrcInterface ircInterface;
@@ -16,23 +19,25 @@ namespace BaggyBot
 		private Process selfProc;
 		private PerformanceCounter pc = new PerformanceCounter();
 		private const string perfLogFile = "performance_log.csv";
-		private PerfLogger perfLogger = new PerfLogger(perfLogFile);
-
-		private List<Exception> exceptions = new List<Exception>();
-		public List<Exception> Exceptions
+		private PerformanceLogger performanceLogger = new PerformanceLogger(perfLogFile);
+		public List<PerformanceObject> PerformanceLog
 		{
-			get { return exceptions; }
+			get
+			{
+				return performanceLogger.PerformanceLog;
+			}
 		}
 
 		public void Dispose()
 		{
 			pc.Dispose();
-			perfLogger.Dispose();
+			performanceLogger.Dispose();
 			taskScheduler.Dispose();
 		}
 
 		public BotDiagnostics(IrcInterface ircInterface)
 		{
+			// TODO: Figure out wheter to remove this or put this back
 			//AppDomain.CurrentDomain.UnhandledException += HandleException;
 			this.ircInterface = ircInterface;
 
@@ -48,15 +53,13 @@ namespace BaggyBot
 		private void HandleException(Object sender, UnhandledExceptionEventArgs args)
 		{
 			Exception e = (Exception)args.ExceptionObject;
-			long mem = selfProc.PrivateMemorySize64;
 			var trace = new StackTrace(e, true);
 			var bottomFrame = trace.GetFrame(0);
 
-			string message = "A fatal unhandled exception occured: " + e.GetType().Name + " - " + e.Message + " - stacktrace: " + bottomFrame.GetFileName() + " at line " + bottomFrame.GetFileLineNumber();
+			string message = "A fatal unhandled exception occured: " + e.GetType().Name + " - " + e.Message + " - in file: " + bottomFrame.GetFileName() + ":" + bottomFrame.GetFileLineNumber();
 
-			ircInterface.SendMessage(Settings.Instance["operator_nick"], message);
+			ircInterface.NotifyOperator(message);
 			Logger.Log(message, LogLevel.Error);
-			Logger.Log("Private memory size: " + mem + " bytes.", LogLevel.Info);
 		}
 
 		internal void StartPerformanceLogging()
@@ -68,7 +71,7 @@ namespace BaggyBot
 				long mem = (long)(pc.NextValue() / 1024);
 				int users = ircInterface.TotalUserCount;
 				int chans = ircInterface.ChannelCount;
-				perfLogger.Log(mem, chans, users);
+				performanceLogger.Log(mem, chans, users);
 			};
 		}
 	}

@@ -8,17 +8,12 @@ namespace BaggyBot.Commands
 {
 	class Help : ICommand
 	{
-		private IrcInterface ircInterface;
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 
-		public Help(IrcInterface inter)
-		{
-			ircInterface = inter;
-		}
 
 		public void Use(CommandArgs command)
 		{
-			ircInterface.SendMessage(command.Channel, GetHelpMessage(command.Args));
+			command.ReturnMessage(GetHelpMessage(command.Args));
 		}
 
 		private string GetHelpMessage(string[] args)

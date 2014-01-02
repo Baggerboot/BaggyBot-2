@@ -19,7 +19,7 @@ namespace BaggyBot.Commands
 		public void Use(CommandArgs command)
 		{
 			if (command.Args.Length == 0 || command.Args.Length > 2) {
-				ircInterface.SendMessage(command.Channel, "Usage: -part <channel> [reason]");
+				command.Reply("Usage: -part <channel> [reason]");
 			} else {
 				ircInterface.Part(command.Args[0], (command.Args.Length == 2 ? command.Args[1] : null));
 			}

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 using IRCSharp;
 
-namespace BaggyBot
+namespace BaggyBot.DataProcessors
 {
 	class IrcEventHandler
 	{
 		private DataFunctionSet dataFunctionSet;
-		private IrcInterface ircInterface;
 		private CommandHandler commandHandler;
+		private IrcInterface ircInterface;
 		private StatsHandler statsHandler;
 
 		public IrcEventHandler(DataFunctionSet dataFunctionSet, IrcInterface ircInterface, CommandHandler commandHandler, StatsHandler statsHandler)
@@ -30,10 +30,10 @@ namespace BaggyBot
 			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
 			if (message.Action) {
-				Logger.Log("Adding regular IRC message to the IRC log");
+				Logger.Log("Adding action message to the IRC log");
 				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, "*" + message.Sender.Nick + " " + message.Message + "*");
 			} else {
-				Logger.Log("Adding action message to the IRC log");
+				Logger.Log("Adding regular IRC message to the IRC log");
 				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
 			}
 
@@ -44,11 +44,9 @@ namespace BaggyBot
 				return;
 			}
 			if (message.Message.StartsWith(Bot.commandIdentifier)) {
-				Logger.Log("This is a command");
 				commandHandler.ProcessCommand(message);
 			} else {
-				Logger.Log("This is a message");
-				statsHandler.ProcessMessage(message);
+				statsHandler.ProcessMessage(message, userId);
 			}
 		}
 		internal void ProcessNotice(IrcUser sender, string notice)
@@ -90,7 +88,29 @@ namespace BaggyBot
 			}
 			//
 			if (!ignoredCommands.Contains(line.Command)) {
-				Logger.Log(line.ToString(), LogLevel.Irc);
+				switch (line.Command) {
+					case "001":
+					case "002":
+					case "003":
+						Logger.Log("{0}: {1}", LogLevel.Irc, true, line.Sender, line.FinalArgument);
+						break;
+					case "332":
+						Logger.Log("Topic for {0}: {1}", LogLevel.Irc, true, line.Arguments[1], line.FinalArgument);
+						break;
+					case "333": // Ignore names list
+					case "366":
+						break;
+					case "MODE":
+						if (line.FinalArgument != null) {
+							Logger.Log("{0} sets mode {1} for {2}", LogLevel.Irc, true, line.Sender, line.FinalArgument, line.Arguments[0]);
+						} else {
+							Logger.Log("{0} sets mode {1} for {2}", LogLevel.Irc, true, line.Sender, line.Arguments[1], line.Arguments[0]);
+						}
+						break;
+					default:
+						Logger.Log(line.ToString(), LogLevel.Irc);
+						break;
+				}
 			}
 		}
 		internal readonly string[] ignoredCommands = { "004" /*RPL_MYINFO*/, "005" /*RPL_ISUPPORT*/, "251" /*RPL_LUSERCLIENT*/, "254" /*RPL_LUSERCHANNELS*/, "252" /*RPL_LUSEROP*/, "255" /*RPL_LUSERME*/, "265", "266", "250", "375", "376" };

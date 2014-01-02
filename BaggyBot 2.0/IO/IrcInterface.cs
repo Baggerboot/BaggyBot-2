@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using IRCSharp;
+using BaggyBot.DataProcessors;
 
 namespace BaggyBot
 {
@@ -71,6 +72,16 @@ namespace BaggyBot
 		{
 			dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
 			client.SendMessage(target, message);
+		}
+
+		public void SendRaw(string line)
+		{
+			client.SendRaw(line);
+		}
+
+		public void NotifyOperator(string message)
+		{
+			SendMessage(Settings.Instance["operator_nick"], message);
 		}
 
 		public void JoinChannel(string channel)

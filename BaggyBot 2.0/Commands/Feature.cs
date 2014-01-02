@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using BaggyBot.DataProcessors;
+
 namespace BaggyBot.Commands
 {
 	class Feature : ICommand
 	{
-		private IrcInterface ircInterface;
 		private DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Feature(IrcInterface inter, DataFunctionSet df)
+		public Feature(DataFunctionSet df)
 		{
-			ircInterface = inter;
 			dataFunctionSet = df;
 		}
 
@@ -25,7 +25,7 @@ namespace BaggyBot.Commands
 			var searchResults  = dataFunctionSet.FindQuote(search);
 
 			if(searchResults == null){
-				ircInterface.SendMessage(command.Channel, "No such quote found.");
+				command.ReturnMessage("No such quote found.");
 				return;
 			}
 
@@ -49,10 +49,10 @@ namespace BaggyBot.Commands
 
 
 			if (searchResults.Count > 1) {
-				ircInterface.SendMessage(command.Channel, quoteListBuiler.ToString());
+				command.Reply(quoteListBuiler.ToString());
 				return;
 			} else {
-				ircInterface.SendMessage(command.Channel, "The following quote has been featured: \"" + searchResults[0].Quote1 + "\"");
+				command.ReturnMessage("The following quote has been featured: \"" + searchResults[0].Quote1 + "\"");
 				dataFunctionSet.SetVar("featured_quote", searchResults[0].ID);
 			}
 		}

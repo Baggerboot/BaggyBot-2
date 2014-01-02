@@ -10,29 +10,23 @@ namespace BaggyBot.Commands
 {
 	class Remember : ICommand
 	{
-		private IrcInterface ircInterface;
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 		private Dictionary<string, string> RemList = new Dictionary<string, string>();
-
-		public Remember(IrcInterface inter)
-		{
-			ircInterface = inter;
-		}
 
 		public void Use(CommandArgs command)
 		{
 			var key = command.Args[0];
 			if (key.StartsWith("$")) {
-				ircInterface.SendMessage(command.Channel, "You sneaky bastard, you didn't think I was going to allow this, did you?");
+				 command.ReturnMessage("You sneaky bastard, you didn't think I was going to allow this, did you?");
 				return;
 			}
 			var format = command.FullArgument.Substring(key.Length);
 			if (format == string.Empty) {
-				ircInterface.SendMessage(command.Channel, "Usage: -rem <trigger> <response> - Example: -rem hex Hexadecimal value of {0} is (int){0:X8}");
+				command.Reply("Usage: -rem <trigger> <response> - Example: -rem hex Hexadecimal value of {0} is (int){0:X8}");
 				return;
 			}
 			RemList.Add(key, format);
-			ircInterface.SendMessage(command.Channel, "Saved.");
+			command.Reply("Saved.");
 		}
 		public void UseRem(CommandArgs command)
 		{
@@ -76,7 +70,7 @@ namespace BaggyBot.Commands
 				return "{";
 			}));
 			var res = string.Format(format, args);
-			ircInterface.SendMessage(command.Channel, res);
+			command.ReturnMessage(res);
 		}
 	}
 }

@@ -9,7 +9,14 @@ using BaggyBot.Tools;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace BaggyBot
+#if postgresql
+using BaggyBot.Database.PostgreSQL;
+#endif
+#if mssql
+using BaggyBot.Database.MS_SQL;
+#endif
+
+namespace BaggyBot.DataProcessors
 {
 	class StatsHandler
 	{
@@ -33,20 +40,32 @@ namespace BaggyBot
 				Logger.Log("Error in bot settings: invalid value for snag_chance. Default value will be used.");
 			}
 		}
-		public void ProcessMessage(IrcMessage message)
+		public void ProcessMessage(IrcMessage message, int userId)
 		{
 			Logger.Log("Processing message for " + message.Sender.Nick);
-			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
 			List<string> words = WordTools.GetWords(message.Message);
 			words = words.Select(s => s.Replace("'", "''")).ToList();
 
+			//UserStatistics changes = new UserStatistics();
+			//changes.UserId = userId;
+
 			if (message.Action) {
 				dataFunctionSet.IncrementActions(userId);
+				//changes.Actions++;
 			} else {
 				dataFunctionSet.IncrementLineCount(userId);
+				//changes.Lines++;
 			}
 			dataFunctionSet.IncrementWordCount(userId, words.Count);
+			//changes.Words += words.Count;
+			/*foreach (string word in words) {
+				if (WordTools.IsProfanity(word.ToLower())) {
+					changes.Profanities++;
+				}
+			}*/
+			//dataFunctionSet.IncrementUserStatistics(changes);
+
 			dataFunctionSet.IncrementVar("global_line_count");
 			dataFunctionSet.IncrementVar("global_word_count", words.Count);
 			GenerateRandomQuote(message, words, userId);
@@ -55,7 +74,6 @@ namespace BaggyBot
 			foreach (string word in words) {
 				ProcessWord(message, word, userId);
 			}
-			Logger.Log("Done processing message");
 		}
 
 		private void ProcessRandomEvents(IrcMessage message, List<string> words)
@@ -71,10 +89,10 @@ namespace BaggyBot
 			string cword = textOnly.Replace(lword, "");
 			if (word.StartsWith("http://") || word.StartsWith("https://")) {
 				dataFunctionSet.IncrementUrl(word, sender, message.Message.Replace("'", "''"));
-			} else if (WordTools.IsProfanity(lword)) {
-				dataFunctionSet.IncrementProfanities(sender);
 			} else if (!WordTools.IsIgnoredWord(cword) && cword.Length >= 3) {
 				dataFunctionSet.IncrementWord(cword);
+			} else if (WordTools.IsProfanity(lword)) {
+				dataFunctionSet.IncrementProfanities(sender);
 			}
 		}
 

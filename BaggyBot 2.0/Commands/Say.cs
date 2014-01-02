@@ -8,13 +8,14 @@ namespace BaggyBot.Commands
 {
 	class Say : ICommand
 	{
-		private IrcInterface ircInterface;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		private IrcInterface ircInterface;
 
 		public Say(IrcInterface inter)
 		{
 			ircInterface = inter;
 		}
+
 		public void Use(CommandArgs command){
 			string msg = String.Join(" ", command.Args.Skip(1));
 			Logger.Log("Saying: " + msg);

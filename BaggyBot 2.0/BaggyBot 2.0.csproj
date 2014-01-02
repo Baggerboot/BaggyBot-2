@@ -39,6 +39,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -74,7 +75,15 @@
       <HintPath>..\..\..\..\Desktop\lin\DbLinq-0.20.1\build.dbg\DbLinq.PostgreSql.dll</HintPath>
     </Reference>
     <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
+    <Reference Include="IronPython.Modules, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
+    <Reference Include="Mono.CSharp">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Mono-3.2.3\lib\mono\gac\Mono.CSharp\4.0.0.0__0738eb9f132ed756\Mono.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -87,19 +96,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
+    <Compile Include="CodeFormatter.cs" />
+    <Compile Include="Commands\Convert.cs" />
+    <Compile Include="Commands\Cs.cs" />
     <Compile Include="Commands\Html.cs" />
+    <Compile Include="Commands\ProducerConsumerStream.cs" />
     <Compile Include="Commands\Py.cs" />
+    <Compile Include="Commands\ReadEvaluatePrintCommand.cs" />
     <Compile Include="Commands\Remember.cs" />
     <Compile Include="Commands\ResolveReverse.cs" />
+    <Compile Include="Commands\Uptime.cs" />
     <Compile Include="Commands\WolframAlpha.cs" />
     <Compile Include="DataProcessors\CommandHandler.cs" />
     <Compile Include="Commands\Approve.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
     <Compile Include="Commands\Crash.cs" />
     <Compile Include="Commands\Disapprove.cs" />
-    <Compile Include="Commands\Elycool.cs" />
     <Compile Include="Commands\Example.cs" />
-    <Compile Include="Commands\ExceptionDetails.cs" />
     <Compile Include="Commands\Feature.cs" />
     <Compile Include="Commands\Get.cs" />
     <Compile Include="Commands\Help.cs" />
@@ -138,9 +151,12 @@
     <Compile Include="IO\Logger.cs" />
     <Compile Include="IO\LogLevel.cs" />
     <Compile Include="IO\Messages.cs" />
-    <Compile Include="IO\PerfLogger.cs" />
+    <Compile Include="IO\Diagnostics\PerformanceLogger.cs" />
     <Compile Include="Bot.cs" />
+    <Compile Include="IO\Diagnostics\PerformanceObject.cs" />
+    <Compile Include="IrcReportPrinter.cs" />
     <Compile Include="LockObject.cs" />
+    <Compile Include="OutputHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -178,8 +194,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="BaggyBot 2.0_TemporaryKey.pfx" />
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram2.cd" />
     <None Include="Database\MS_SQL\StatsBot.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>StatsBot.designer.cs</LastGenOutput>

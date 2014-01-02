@@ -10,14 +10,11 @@ namespace BaggyBot.Commands
 {
 	class Shutdown : ICommand
 	{
-		private IrcInterface ircInterface;
 		private Bot program;
-
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Shutdown(IrcInterface inter, Bot prg)
+		public Shutdown(Bot prg)
 		{
-			ircInterface = inter;
 			program = prg;
 		}
 

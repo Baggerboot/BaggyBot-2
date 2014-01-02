@@ -10,14 +10,7 @@ namespace BaggyBot.Commands
 {
 	class Snag : ICommand
 	{
-		private IrcInterface ircInterface;
-
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
-
-		public Snag(IrcInterface inter)
-		{
-			ircInterface = inter;
-		}
 
 		public void Use(CommandArgs command)
 		{
@@ -29,7 +22,7 @@ namespace BaggyBot.Commands
 					ControlVariables.SnagNextLineBy = command.Args[0];
 					break;
 				default:
-					ircInterface.SendMessage(command.Channel, "Usage: -snag [nickname]");
+					command.Reply("Usage: -snag [nickname]");
 					break;
 			}
 		}

@@ -14,7 +14,7 @@ using BaggyBot.Database.PostgreSQL;
 using BaggyBot.Database.MS_SQL;
 #endif
 
-namespace BaggyBot
+namespace BaggyBot.DataProcessors
 {
 	/// <summary>
 	/// Provides an abstraction layer for commonly used database interactions.
@@ -656,6 +656,20 @@ namespace BaggyBot
 			}
 			Lock.LockMessage = "None";
 			return ret;
+		}
+
+		internal void IncrementUserStatistics(UserStatistics changes)
+		{
+			var matches = from stat in sqlConnector.UserStats
+						  where stat.UserId == changes.UserId
+						  select stat;
+			var match = matches.First();
+			match.Actions += changes.Actions;
+			match.Lines += changes.Lines;
+			match.Profanities += changes.Profanities;
+			match.Words += changes.Words;
+			SubmitChanges();
+			Logger.Log("Userstats incremented for user #{0}: {1} action(s), {2} line(s), {3} word(s), {4} swear(s)", LogLevel.Debug, true, changes.UserId, changes.Actions, changes.Lines, changes.Words, changes.Profanities);
 		}
 	}
 }

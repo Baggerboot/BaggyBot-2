@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using BaggyBot.DataProcessors;
+
 namespace BaggyBot.Commands
 {
 	class Crash : ICommand
 	{
-		private IrcInterface ircInterface;
 		private DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Crash(IrcInterface inter, DataFunctionSet df)
+		public Crash(DataFunctionSet df)
 		{
-			ircInterface = inter;
 			dataFunctionSet = df;
 		}
 
