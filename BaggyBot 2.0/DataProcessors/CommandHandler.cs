@@ -23,7 +23,6 @@ namespace BaggyBot.DataProcessors
 			commands = new Dictionary<string, ICommand>()
 			{
 				{"convert", new BaggyBot.Commands.Convert()},
-				{"crash", new Crash(dataFunctionSet)},
 				{"cs", new Cs(ircInterface)},
 				{"feature", new Feature(dataFunctionSet)},
 				{"get", new Get(dataFunctionSet)},

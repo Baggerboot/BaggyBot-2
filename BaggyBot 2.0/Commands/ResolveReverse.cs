@@ -29,7 +29,7 @@ namespace BaggyBot.Commands
 			try {
 				hostEntry = Dns.GetHostEntry(hostIPAddress);
 			} catch (ArgumentException) {
-				command.ReturnMessage("I can't do a lookup on 0.0.0.0  ::0");
+				command.ReturnMessage("I can't do a lookup on 0.0.0.0 or ::0");
 				return;
 			} catch (System.Net.Sockets.SocketException) {
 				command.ReturnMessage("Unable to do a lookup on " + hostIPAddress.ToString() + ". Most likely a reverse DNS entry does not exist for this address.");

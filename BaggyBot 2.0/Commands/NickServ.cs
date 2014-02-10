@@ -41,9 +41,9 @@ namespace BaggyBot.Commands
 				command.ReturnMessage("Sending a NickServ call");
 				string username = ircInterface.DoNickservCall(command.Sender.Nick);
 				if (username == null) {
-					command.Reply("You don't appear to be registered with NickServ");
+					command.Reply("you don't appear to have registered with NickServ");
 				} else {
-					command.Reply("Your NickServ username is " + username);
+					command.Reply("your NickServ username is " + username);
 					return;
 				}
 			} else if (command.Args.Length != 0) {
@@ -52,9 +52,9 @@ namespace BaggyBot.Commands
 			} 
 			string ns = dataFunctionSet.GetNickserv(dataFunctionSet.GetIdFromUser(command.Sender));
 			if (ns == null) {
-				command.ReturnMessage("You don't appear to be identified with NickServ.");
+				command.Reply("you don't appear to be identified with NickServ.");
 			} else {
-				command.Reply("Your NickServ username is " + ns);
+				command.Reply("your NickServ username is " + ns);
 			}
 		}
 	}

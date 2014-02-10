@@ -72,7 +72,7 @@ namespace BaggyBot.Commands
 
 				decimal amount = decimal.Parse(fromAmount);
 				decimal rate = decimal.Parse(jsonObj.rate.ToString());
-				command.Reply("{0}, {1} {2} = {3} {4}", command.Sender.Nick, amount, jsonObj.from.ToString().ToUpper(), amount * rate, jsonObj.to.ToString().ToUpper());
+				command.Reply("{1} {2} = {3} {4}", amount, jsonObj.from.ToString().ToUpper(), amount * rate, jsonObj.to.ToString().ToUpper());
 			}
 		}
 	}

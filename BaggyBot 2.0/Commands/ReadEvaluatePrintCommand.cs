@@ -10,7 +10,7 @@ namespace BaggyBot.Commands
 	{
 		protected int threadId = 0;
 		protected IrcInterface ircInterface;
-		protected InterpreterSecurity security = InterpreterSecurity.Block;
+		protected InterpreterSecurity security = InterpreterSecurity.Notify;
 		protected enum InterpreterSecurity
 		{
 			Allow,

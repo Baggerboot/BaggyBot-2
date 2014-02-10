@@ -110,7 +110,6 @@
     <Compile Include="DataProcessors\CommandHandler.cs" />
     <Compile Include="Commands\Approve.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
-    <Compile Include="Commands\Crash.cs" />
     <Compile Include="Commands\Disapprove.cs" />
     <Compile Include="Commands\Example.cs" />
     <Compile Include="Commands\Feature.cs" />

@@ -27,7 +27,7 @@ namespace BaggyBot.Commands
 			var args = "regenerate_graphs.sh";
 			System.Diagnostics.Process.Start("sh", args);
 			lastUsage = DateTime.Now;
-			command.Reply("I have regenerated the graphs on the stats page.");
+			command.ReturnMessage("I have regenerated the graphs on the stats page.");
 		}
 	}
 }
