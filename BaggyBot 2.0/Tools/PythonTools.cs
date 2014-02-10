@@ -18,7 +18,7 @@ namespace BaggyBot.Tools
 			this.ircInterface = ircInterface;
 		}
 
-		public string Plot(IEnumerable<object> data, string x = "Index", string y = "Value")
+		public string plot(IEnumerable<object> data, string x = "Index", string y = "Value")
 		{
 			string filename;
 			int num;
@@ -32,6 +32,20 @@ namespace BaggyBot.Tools
 			}
 			Process p = Process.Start("R", string.Format("-f /var/www/html/usercontent/plots/generate-plot.R --args /var/www/html/usercontent/plots/{0} /var/www/html/usercontent/plots/{1:X4}.png {2} {3}", filename, num, x, y));
 			return string.Format(" http://jgeluk.net/usercontent/plots/{0:X4}.png ", num); 		
+		}
+
+		public string plot(params object[] data)
+		{
+			return plot(data, "Index", "Value");
+		}
+		public string plotfunction(Func<object, object> function, int resolution = 50, string x = "Index", string y = "Value")
+		{
+			List<object> values = new List<object>();
+
+			for (float f = 0; f < resolution; f+= 0.1f) {
+				values.Add(function(f));
+			}
+			return plot(values, x, y);
 		}
 	}
 }
