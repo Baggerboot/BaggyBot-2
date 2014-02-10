@@ -35,7 +35,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any change that's made only to fix bugs within bot's system without adding new features is seen as a bugfix.
-		public const string Version = "3.25.5";
+		public const string Version = "3.25.6";
 
 		public static DateTime LastUpdate
 		{
@@ -136,17 +136,23 @@ namespace BaggyBot
 		private void HandleConnectionLoss()
 		{
 			Logger.Log("Connection lost. Attempting to reconnect...", LogLevel.Warning);
+
+			var channels = client.GetChannels();
+
 			bool reconnected = false;
 			do {
-				// Wait a while before attempting to reconnect. This prevents the bot from flooding the IRC server with connection requests
-				// in case the connection request fails.
-				System.Threading.Thread.Sleep(2000);
 				try {
 					client.Reconnect();
-					client.JoinChannel(Settings.Instance["irc_initial_channel"]);
+					foreach(var channel in channels){
+						client.JoinChannel(channel.Name, true);
+					}
 					reconnected = true;
+					Logger.Log("Reconnected to the IRC server after a connection loss", LogLevel.Warning);
 				} catch (System.Net.Sockets.SocketException) {
 					Logger.Log("Failed to reconnect. Retrying in 2 seconds.", LogLevel.Info);
+					// Wait a while before attempting to reconnect. This prevents the bot from flooding the IRC server with connection requests
+					// in case the connection request fails.
+					System.Threading.Thread.Sleep(2000);
 				}
 			} while (!reconnected);
 		}
