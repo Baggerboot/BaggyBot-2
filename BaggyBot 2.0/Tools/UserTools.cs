@@ -5,17 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 using IRCSharp;
+using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Tools
 {
 	/// <summary>
 	/// For all Tools classes goes: they must be static, and they may not change any state.
 	/// </summary>
-	internal static class UserTools
+	public static class UserTools
 	{
-		private static Settings settings = Settings.Instance;
-
-		internal static DataFunctionSet DataFunctionSet
+		public static DataFunctionSet DataFunctionSet
 		{
 			set;
 			private get; // restrict access to the DataFunctionSet class to only this class
@@ -27,16 +26,16 @@ namespace BaggyBot.Tools
 		/// <param name="user"></param>
 		/// <returns></returns>
 		delegate bool match(string input, string reference);
-		internal static bool Validate(IrcUser user)
+		public static bool Validate(IrcUser user)
 		{
 			match match = (input, reference) => {
 				return (reference.Equals("*") || input.Equals(reference));
 			};
 
-			string nick = settings["operator_nick"];
-			string ident = settings["operator_ident"];
-			string host = settings["operator_host"];
-			string uid = settings["operator_uid"];
+			string nick = Settings.Instance["operator_nick"];
+			string ident = Settings.Instance["operator_ident"];
+			string host = Settings.Instance["operator_host"];
+			string uid = Settings.Instance["operator_uid"];
 
 			int[] uids = DataFunctionSet.GetUids(user);
 			if (uids.Length > 1) {

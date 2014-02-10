@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="stats_bot" Class="StatsBotDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=JOHAN-DESKTOP;Initial Catalog=stats_bot;Integrated Security=True" SettingsObjectName="BaggyBot.Properties.Settings" SettingsPropertyName="stats_botConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.usercreds" Member="UserCredentials">
+    <Type Name="UserCredentials">
+      <Column Name="id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="nick" Type="System.String" DbType="NVarChar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="ident" Type="System.String" DbType="NVarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="hostmask" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="ns_login" Type="System.String" DbType="NVarChar(45)" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.userstats" Member="UserStatistics">
+    <Type Name="UserStatistics">
+      <Column Name="user_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="lines" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="words" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="actions" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="profanities" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.words" Member="Words">
+    <Type Name="Word">
+      <Column Name="id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="word" Member="word1" Type="System.String" DbType="NVarChar(220) NOT NULL" CanBeNull="false" />
+      <Column Name="uses" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.emoticons" Member="Emoticons">
+    <Type Name="Emoticon">
+      <Column Name="id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="emoticon" Member="emoticon1" Type="System.String" DbType="NVarChar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="uses" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="last_used_by" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.names" Member="Names">
+    <Type Name="Name">
+      <Column Name="user_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="name" Member="name1" Type="System.String" DbType="NVarChar(90) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.quotes" Member="Quotes">
+    <Type Name="Quote">
+      <Column Name="id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="quote" Member="quote1" Type="System.String" DbType="Text NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+    </Type>
+  </Table>
+  <Table Name="dbo.urls" Member="Urls">
+    <Type Name="Url">
+      <Column Name="id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="url" Member="url1" Type="System.String" DbType="NVarChar(220) NOT NULL" CanBeNull="false" />
+      <Column Name="uses" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="last_used_by" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="last_usage" Type="System.String" DbType="Text NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+    </Type>
+  </Table>
+  <Table Name="dbo.[var]" Member="KeyValuePairs">
+    <Type Name="KeyValuePair">
+      <Column Name="id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="[key]" Member="key" Type="System.String" DbType="NVarChar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="value" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+</Database>

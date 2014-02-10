@@ -4,26 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using BaggyBot.Database;
+
 namespace BaggyBot.Commands
 {
 	class Shutdown : ICommand
 	{
-		private IrcInterface ircInterface;
-		private SqlConnector sqlConnector;
+		private Bot program;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Shutdown(IrcInterface inter, SqlConnector sc)
+		public Shutdown(Bot prg)
 		{
-			ircInterface = inter;
-			sqlConnector = sc;
+			program = prg;
 		}
 
 		public void Use(CommandArgs command)
 		{
-			ircInterface.Disconnect("Shutting down");
-			sqlConnector.CloseConnection();
-			sqlConnector.Dispose();
-			Logger.Dispose();
+			program.Shutdown();
 		}
 	}
 }

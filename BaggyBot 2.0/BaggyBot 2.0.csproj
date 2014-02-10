@@ -35,10 +35,11 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;postgresql</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -69,15 +70,24 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IRCSharp">
-      <HintPath>..\..\IRCSharp\IRCSharp\bin\Debug\IRCSharp.dll</HintPath>
+    <Reference Include="DbLinq.PostgreSql, Version=0.20.0.0, Culture=neutral, PublicKeyToken=61e015a67077348b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\lin\DbLinq-0.20.1\build.dbg\DbLinq.PostgreSql.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.6.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <Private>True</Private>
+    <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
+    <Reference Include="IronPython.Modules, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
+    <Reference Include="Mono.CSharp">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Mono-3.2.3\lib\mono\gac\Mono.CSharp\4.0.0.0__0738eb9f132ed756\Mono.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -85,37 +95,78 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandHandler.cs" />
+    <Compile Include="BotDiagnostics.cs" />
+    <Compile Include="CodeFormatter.cs" />
+    <Compile Include="Commands\Convert.cs" />
+    <Compile Include="Commands\Cs.cs" />
+    <Compile Include="Commands\Html.cs" />
+    <Compile Include="Commands\ProducerConsumerStream.cs" />
+    <Compile Include="Commands\Py.cs" />
+    <Compile Include="Commands\ReadEvaluatePrintCommand.cs" />
+    <Compile Include="Commands\Remember.cs" />
+    <Compile Include="Commands\ResolveReverse.cs" />
+    <Compile Include="Commands\Uptime.cs" />
+    <Compile Include="Commands\WolframAlpha.cs" />
+    <Compile Include="DataProcessors\CommandHandler.cs" />
+    <Compile Include="Commands\Approve.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
-    <Compile Include="Commands\Crash.cs" />
-    <Compile Include="Commands\Elycool.cs" />
+    <Compile Include="Commands\Disapprove.cs" />
     <Compile Include="Commands\Example.cs" />
+    <Compile Include="Commands\Feature.cs" />
     <Compile Include="Commands\Get.cs" />
     <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\NickServ.cs" />
+    <Compile Include="Commands\Part.cs" />
     <Compile Include="Commands\PermissionLevel.cs" />
     <Compile Include="Commands\Ping.cs" />
-    <Compile Include="Commands\Query.cs" />
+    <Compile Include="Commands\RegenerateGraphs.cs" />
     <Compile Include="Commands\Resolve.cs" />
+    <Compile Include="Commands\Say.cs" />
     <Compile Include="Commands\Set.cs" />
     <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Snag.cs" />
-    <Compile Include="Commands\Update.cs" />
+    <Compile Include="Commands\Stats.cs" />
+    <Compile Include="Commands\Version.cs" />
     <Compile Include="ControlVariables.cs" />
-    <Compile Include="DataFunctionSet.cs" />
-    <Compile Include="Emoticons.cs" />
-    <Compile Include="IrcInterface.cs" />
-    <Compile Include="Logger.cs" />
-    <Compile Include="LogLevel.cs" />
-    <Compile Include="Messages.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Database\EntityProvider\EntityProviderFactory.cs" />
+    <Compile Include="Database\EntityProvider\AbstractEntityProvider.cs" />
+    <Compile Include="Database\MS_SQL\MsEntityProvider.cs" />
+    <Compile Include="Database\MS_SQL\StatsBot.cs">
+      <DependentUpon>StatsBot.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\MS_SQL\StatsBot.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StatsBot.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="Database\PostgreSQL\DataAccess.cs" />
+    <Compile Include="Database\PostgreSQL\PgEntityProvider.cs" />
+    <Compile Include="DataProcessors\DataFunctionSet.cs" />
+    <Compile Include="IO\Emoticons.cs" />
+    <Compile Include="DataProcessors\IrcEventHandler.cs" />
+    <Compile Include="IO\IrcInterface.cs" />
+    <Compile Include="IO\Logger.cs" />
+    <Compile Include="IO\LogLevel.cs" />
+    <Compile Include="IO\Messages.cs" />
+    <Compile Include="IO\Diagnostics\PerformanceLogger.cs" />
+    <Compile Include="Bot.cs" />
+    <Compile Include="IO\Diagnostics\PerformanceObject.cs" />
+    <Compile Include="IrcReportPrinter.cs" />
+    <Compile Include="LockObject.cs" />
+    <Compile Include="OutputHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecordNullException.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="SqlConnector.cs" />
-    <Compile Include="StatsHandler.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="IO\Settings.cs" />
+    <Compile Include="Database\SqlConnector.cs" />
+    <Compile Include="DataProcessors\StatsHandler.cs" />
+    <Compile Include="Tools\MiscTools.cs" />
+    <Compile Include="Tools\PythonTools.cs" />
     <Compile Include="Tools\UserTools.cs" />
     <Compile Include="Tools\WordTools.cs" />
   </ItemGroup>
@@ -140,8 +191,40 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="BaggyBot 2.0_TemporaryKey.pfx" />
-    <None Include="Properties\app.manifest" />
+    <None Include="Database\MS_SQL\StatsBot.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>StatsBot.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+      <CustomToolNamespace>BaggyBot.Database.MS_SQL</CustomToolNamespace>
+    </None>
+    <None Include="Properties\app.manifest">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Database\MS_SQL\StatsBot.dbml.layout">
+      <DependentUpon>StatsBot.dbml</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\IRCSharp\IRCSharp\IRCSharp.csproj">
+      <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
+      <Name>IRCSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DbLinq\DbLinq.csproj">
+      <Project>{7950197d-4122-49cb-9fd7-45e666bafec2}</Project>
+      <Name>DbLinq</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

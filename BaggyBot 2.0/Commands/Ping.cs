@@ -8,17 +8,11 @@ namespace BaggyBot.Commands
 {
 	class Ping : ICommand
 	{
-		private IrcInterface ircInterface;
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
-
-		public Ping(IrcInterface inter)
-		{
-			ircInterface = inter;
-		}
 
 		public void Use(CommandArgs command)
 		{
-			ircInterface.SendMessage(command.Channel, "Pong!");
+			command.ReturnMessage("Pong!");
 		}
 	}
 }
