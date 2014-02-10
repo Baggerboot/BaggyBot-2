@@ -25,28 +25,34 @@ namespace BaggyBot.DataProcessors
 
 		internal void ProcessMessage(IrcMessage message)
 		{
-			Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
+			try {
+				Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
 
-			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
+				int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
-			if (message.Action) {
-				Logger.Log("Adding action message to the IRC log");
-				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, "*" + message.Sender.Nick + " " + message.Message + "*");
-			} else {
-				Logger.Log("Adding regular IRC message to the IRC log");
-				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
-			}
+				if (message.Action) {
+					Logger.Log("Adding action message to the IRC log");
+					dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, "*" + message.Sender.Nick + " " + message.Message + "*");
+				} else {
+					Logger.Log("Adding regular IRC message to the IRC log");
+					dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
+				}
 
-			if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py")) {
-				Logger.Log("Processing Query Console python command");
-				message.Message = "-py " + message.Message;
-				commandHandler.ProcessCommand(message);
-				return;
-			}
-			if (message.Message.StartsWith(Bot.commandIdentifier)) {
-				commandHandler.ProcessCommand(message);
-			} else {
-				statsHandler.ProcessMessage(message, userId);
+				if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py")) {
+					Logger.Log("Processing Query Console python command");
+					message.Message = "-py " + message.Message;
+					commandHandler.ProcessCommand(message);
+					return;
+				}
+				if (message.Message.StartsWith(Bot.commandIdentifier)) {
+					commandHandler.ProcessCommand(message);
+				} else {
+					statsHandler.ProcessMessage(message, userId);
+				}
+			} catch (ArgumentOutOfRangeException e) {
+				Logger.Log("\r\nArgumentOutOfRangeException occurred while attempting to process a message", LogLevel.Error);
+				Logger.Log("The message contained the following bytes of data: {" + string.Join(", ", message.Message.ToCharArray().Select(c => string.Format("0x{0:X2}", (byte) c))) + "}", LogLevel.Error);
+				Logger.Log("This message has been discarded.", LogLevel.Warning);
 			}
 		}
 		internal void ProcessNotice(IrcUser sender, string notice)
@@ -65,11 +71,9 @@ namespace BaggyBot.DataProcessors
 					nick = nick.Substring(0, nick.IndexOf(' ') - 1);
 					Logger.Log("'{0}' does not appear to be registered with NickServ.", LogLevel.Debug, true, nick);
 					ircInterface.AddNickserv(nick.ToLower(), null);
-				} else {
-					Logger.Log("Received an unexpected NickServ response: " + notice, LogLevel.Warning);
 				}
 			} else if (sender.Ident.Equals("NickServ")) {
-				//Logger.Log("Recieved an unexpected NickServ message: " + notice, LogLevel.Warning);
+				Logger.Log("Received an unexpected NickServ response: " + notice, LogLevel.Warning);
 			}
 		}
 		/// <summary>

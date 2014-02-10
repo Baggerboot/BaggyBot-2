@@ -37,6 +37,15 @@ namespace BaggyBot
 
 		public void AddNickserv(string nick, string nickserv)
 		{
+			if (nickservCallResults.ContainsKey(nick)) {
+				if (nickservCallResults[nick] == nickserv) {
+					Logger.Log(string.Format("Dropped NickServ reply for {0}:{1} as an entry already exists.", nick, nickserv), LogLevel.Warning);
+				} else {
+					Logger.Log(string.Format("Invalid NickServ reply stored for {0}:{1}. The stored value was {2}.", nick, nickserv, nickservCallResults[nick]), LogLevel.Error);
+					nickservCallResults[nick] = nick;
+				}
+				return;
+			}
 			nickservCallResults.Add(nick, nickserv);
 		}
 
@@ -68,10 +77,27 @@ namespace BaggyBot
 			return nickservCallResults[nick];
 		}
 
-		public void SendMessage(string target, string message)
+		private void SendMessageChunk(string target, string message, int recursionDepth)
 		{
+			if (recursionDepth >= int.Parse(Settings.Instance["irc_flood_limit"])) {
+				client.SendMessage(target, "Flood limit triggered. The remaining part of the message has been discarded.");
+				return;
+			}
+			string cutoff = null;
+			if (message.Length > 450) {
+				cutoff = message.Substring(450);
+				message = message.Substring(0, 450);
+			}
 			dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
 			client.SendMessage(target, message);
+			if (cutoff != null) {
+				SendMessageChunk(target, cutoff, ++recursionDepth);
+			}
+		}
+
+		public void SendMessage(string target, string message)
+		{
+			SendMessageChunk(target, message, 0);
 		}
 
 		public void SendRaw(string line)
