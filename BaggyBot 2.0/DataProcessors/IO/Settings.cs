@@ -31,6 +31,7 @@ namespace BaggyBot
 				try {
 					return settings[key];
 				} catch (KeyNotFoundException) {
+					// TODO: This should be null, not string.Empty. Figure out if changing this to null breaks anything.
 					return string.Empty;
 				}
 			}

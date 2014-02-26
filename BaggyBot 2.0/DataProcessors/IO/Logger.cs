@@ -7,6 +7,16 @@ using System.Threading.Tasks;
 using System.IO;
 namespace BaggyBot
 {
+	public enum LogLevel
+	{
+		Debug,
+		Info,
+		Message,
+		Irc,
+		Warning,
+		Error
+	}
+
 	public delegate void LogEvent(string message, LogLevel level);
 
 	public static class Logger

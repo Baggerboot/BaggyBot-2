@@ -6,13 +6,5 @@ using System.Threading.Tasks;
 
 namespace BaggyBot
 {
-	public enum LogLevel
-	{
-		Debug,
-		Info,
-		Message,
-		Irc,
-		Warning,
-		Error
-	}
+
 }
