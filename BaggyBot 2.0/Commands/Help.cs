@@ -33,8 +33,6 @@ namespace BaggyBot.Commands
 							return "Does a reverse IP lookup on the given IP address. Usage: -resolve <IP>";
 						case "ns":
 							return "Returns your NickServ username, provided that you have registered a NickServ username, and that you have identified your nickname. Mainly used for debugging purposes, although certain individuals have expressed great pleasure in repeatedly executing this particular command. Usage: -ns";
-						case "crash":
-							return "Yes, this does exactly what you think it does.";
 						case "join":
 							return "Join a channel. Usage: -join <channel>";
 						case "part":
@@ -45,8 +43,6 @@ namespace BaggyBot.Commands
 							return "Regenerate the graphs on the stats page. Since these aren't automatically generated yet, you have to trigger a regen manually using this command.";
 						case "snag":
 							return "Snag a quote. If nickname isn't specified, the first received message will be snagged. Usage: -snag [nickname]";
-						case "query":
-							return "Execute an SQL query. Usage: -query <SQL query>";
 						case "shutdown":
 							return "Cleanly disconnects and shuts down the bot. Usage: -shutdown";
 						case "update":
@@ -61,6 +57,8 @@ namespace BaggyBot.Commands
 							return "Feature a quote, so it appears in the 'Featured Quote' box on the stats page. Usage: -feature <part of quote contents>";
 						case "say":
 							return "Make the bot say something. Usage: -say <message>";
+						case "wa":
+							return "Queries Wolfram Alpha and returns the result. Usage: -wa <query>";
 						default:
 							return defaultReply;
 					}
