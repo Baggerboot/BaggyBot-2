@@ -15,7 +15,7 @@ namespace BaggyBot.Commands
 		public IrcUser Sender;
 		public string Channel;
 		public string FullArgument;
-		public Action<string, string> ReplyCallback;
+		private Action<string, string> ReplyCallback;
 
 		public CommandArgs(string command, string[] args, IrcUser sender, string channel, string fullArgument, Action<string, string> replyCallback)
 		{
@@ -28,7 +28,8 @@ namespace BaggyBot.Commands
 		}
 		public void Reply(string format, params object[] args)
 		{
-			ReplyCallback(Channel, Sender.Nick + ", " + string.Format(format, args));
+			string message = Sender.Nick + ", " + string.Format(format, args);
+			ReplyCallback(Channel, message);
 		}
 		public void ReturnMessage(string format, params object[] args)
 		{

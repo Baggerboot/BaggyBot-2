@@ -26,7 +26,8 @@ namespace BaggyBot
 		private IrcEventHandler ircEventHandler;
 		// Collects performance statistics
 		private BotDiagnostics botDiagnostics;
-		
+		// Writes the local port and requested ident to an ident file
+		private IdentWriter identWriter;
 
 		// Any message prefixed with this character will be interpreted as a command
 		public const string commandIdentifier = "-";
@@ -35,7 +36,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any change that's made only to fix bugs within bot's system without adding new features is seen as a bugfix.
-		public const string Version = "3.25.6";
+		public const string Version = "3.26.8";
 
 		public static DateTime LastUpdate
 		{
@@ -51,11 +52,15 @@ namespace BaggyBot
 		// If the bot is not started in update mode, the value of this field remains null.
 		private string previousVersion = null;
 
-		public Bot(string previousVersion = null)
+		public Bot()
 		{
-			this.previousVersion = previousVersion;
+			previousVersion = Settings.Instance["version"];
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
 			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
+			if (previousVersion != Version) {
+				Logger.Log("Updated from version {0} to version {1}", LogLevel.Info, true, previousVersion, Version);
+			}
+			Settings.Instance["version"] = Version;
 
 			// Create various data processors and I/O handlers
 			sqlConnector = new SqlConnector();
@@ -68,18 +73,19 @@ namespace BaggyBot
 			botDiagnostics = new BotDiagnostics(ircInterface);
 			commandHandler = new CommandHandler(ircInterface, dataFunctionSet, this, botDiagnostics);
 			ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, commandHandler, statsHandler);
+			identWriter = new IdentWriter();
 
 			// Hook up IRC events
+			client.OnLocalPortKnown += port => identWriter.Write(port, Settings.Instance["irc_ident"]);
 			client.OnNickChanged += dataFunctionSet.HandleNickChange;
 			client.OnMessageReceived += ircEventHandler.ProcessMessage;
 			client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
 			//client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;
-			client.OnDisconnect += () => { Logger.Log("Disconnected.", LogLevel.Debug); };
-			client.OnConnectionLost += HandleConnectionLoss;
-			client.OnKicked += (channel) => { Logger.Log("I was kicked from " + channel, LogLevel.Warning); };
-			client.OnDebugLog += (message) => { MiscTools.ConsoleWriteLine("[ILB]\t" + message, ConsoleColor.DarkCyan); };
-			client.OnNetLibDebugLog += (message) => { MiscTools.ConsoleWriteLine("[NET]\t" + message, ConsoleColor.Cyan); };
+			client.OnDisconnect += HandleDisconnect;
+			client.OnKicked += channel => Logger.Log("I was kicked from " + channel, LogLevel.Warning);
+			client.OnDebugLog += message => MiscTools.ConsoleWriteLine("[ILB]\t" + message, ConsoleColor.DarkCyan);
+			client.OnNetLibDebugLog += message => MiscTools.ConsoleWriteLine("[NET]\t" + message, ConsoleColor.Cyan);
 			client.OnJoinChannel += ircEventHandler.HandleJoin;
 			client.OnPartChannel += ircEventHandler.HandlePart;
 			client.OnKick += ircEventHandler.HandleKick;
@@ -121,8 +127,6 @@ namespace BaggyBot
 
 			if (previousVersion != null && previousVersion != Version) {
 				ircInterface.NotifyOperator("Succesfully updated from version " + previousVersion + " to version " + Version);
-			} else if (previousVersion != null) {
-				ircInterface.NotifyOperator("Failed to update: No newer version available. Previous version: " + previousVersion);
 			}
 			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
 			Logger.OnLogEvent += (message, level) =>
@@ -133,21 +137,31 @@ namespace BaggyBot
 			};
 		}
 
-		private void HandleConnectionLoss()
+		private void Reconnect(DisconnectReason reason)
 		{
-			Logger.Log("Connection lost. Attempting to reconnect...", LogLevel.Warning);
-
 			var channels = client.GetChannels();
 
 			bool reconnected = false;
 			do {
 				try {
+					client.Quit();
 					client.Reconnect();
-					foreach(var channel in channels){
+					foreach (var channel in channels) {
 						client.JoinChannel(channel.Name, true);
 					}
 					reconnected = true;
-					Logger.Log("Reconnected to the IRC server after a connection loss", LogLevel.Warning);
+
+					switch (reason) {
+						case DisconnectReason.ServerDisconnect:
+							Logger.Log("Reconnected to the IRC server after a connection loss", LogLevel.Warning);
+							break;
+						case DisconnectReason.PingTimeout:
+							Logger.Log("Reconnected to the IRC server after a ping timeout", LogLevel.Warning);
+							break;
+						default:
+							Logger.Log("Reconnected to the IRC server after a connection loss ({0})", LogLevel.Warning, true, reason.ToString());
+							break;
+					}
 				} catch (System.Net.Sockets.SocketException) {
 					Logger.Log("Failed to reconnect. Retrying in 2 seconds.", LogLevel.Info);
 					// Wait a while before attempting to reconnect. This prevents the bot from flooding the IRC server with connection requests
@@ -155,6 +169,16 @@ namespace BaggyBot
 					System.Threading.Thread.Sleep(2000);
 				}
 			} while (!reconnected);
+		}
+
+		private void HandleDisconnect(DisconnectReason reason)
+		{
+			if (reason == DisconnectReason.DisconnectOnRequest) {
+				Logger.Log("Disconnected.", LogLevel.Debug);
+			} else {
+				Logger.Log("Connection lost ({0}) Attempting to reconnect...", LogLevel.Warning, true, reason.ToString());
+				Reconnect(reason);
+			}
 		}
 
 		/// <summary>
@@ -186,19 +210,15 @@ namespace BaggyBot
 
 		static void Main(string[] args)
 		{
-			string previousVersion = null;
-			for (int i = 0; i < args.Length; i++) {
-				switch (args[i]) {
-					case "-pv":
-						previousVersion = args[i + 1];
-						i++;
-						break;
-				}
-			}
 			Logger.ClearLog();
 
-			Bot p = new Bot(previousVersion);
+			Bot p = new Bot();
 			p.Connect();
+		}
+
+		void IDisposable.Dispose()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
