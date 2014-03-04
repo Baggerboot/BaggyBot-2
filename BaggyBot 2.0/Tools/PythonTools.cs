@@ -42,7 +42,7 @@ namespace BaggyBot.Tools
 		{
 			List<object> values = new List<object>();
 
-			for (float f = 0; f < resolution; f+= 0.1f) {
+			for (float f = 0; f < resolution; f++) {
 				values.Add(function(f));
 			}
 			return plot(values, x, y);

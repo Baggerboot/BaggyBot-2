@@ -6,6 +6,7 @@ using IRCSharp;
 using BaggyBot.Database;
 using BaggyBot.Tools;
 using BaggyBot.DataProcessors;
+using System.Threading.Tasks;
 
 namespace BaggyBot
 {
@@ -36,7 +37,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any change that's made only to fix bugs within bot's system without adding new features is seen as a bugfix.
-		public const string Version = "3.26.14";
+		public const string Version = "3.26.15";
 
 		public static DateTime LastUpdate
 		{
@@ -98,7 +99,7 @@ namespace BaggyBot
 			client.OnQuit += ircEventHandler.HandleQuit;
 		}
 
-		public void ConnectDatabase()
+		private void ConnectDatabase()
 		{
 			Logger.Log("Connecting to the database", LogLevel.Info);
 			sqlConnector.OpenConnection();
@@ -108,7 +109,7 @@ namespace BaggyBot
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
-		public void ConnectIrc()
+		private void ConnectIrc()
 		{
 			Settings s = Settings.Instance;
 			string server = s["irc_server"];
@@ -116,17 +117,12 @@ namespace BaggyBot
 			string nick = s["irc_nick"];
 			string ident = s["irc_ident"];
 			string realname = s["irc_realname"];
-			string firstChannel = s["irc_initial_channel"];
 			try {
 				client.Connect(server, port, nick, ident, realname);
-				// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
-				JoinChannels(firstChannel);
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return;
 			}
-			Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
-			OnPostConnect();
 		}
 
 		public void Reconnect(string[] channels)
@@ -255,8 +251,20 @@ namespace BaggyBot
 			Logger.ClearLog();
 
 			Bot p = new Bot();
-			p.ConnectDatabase();
-			p.ConnectIrc();
+			p.Connect();
+		}
+
+		public void Connect()
+		{
+			Task dbConTask = Task.Run(() => ConnectDatabase());
+			Task ircConTask = Task.Run(() => ConnectIrc());
+			Task.WaitAll(dbConTask, ircConTask);
+
+			string firstChannel = Settings.Instance["irc_initial_channel"];
+			// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
+			JoinChannels(firstChannel);
+			Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
+			OnPostConnect();
 		}
 
 		void IDisposable.Dispose()
