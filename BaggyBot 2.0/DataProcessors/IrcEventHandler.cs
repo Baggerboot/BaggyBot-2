@@ -49,7 +49,7 @@ namespace BaggyBot.DataProcessors
 				} else {
 					statsHandler.ProcessMessage(message, userId);
 				}
-			} catch (ArgumentOutOfRangeException e) {
+			} catch (ArgumentOutOfRangeException) {
 				Logger.Log("\r\nArgumentOutOfRangeException occurred while attempting to process a message", LogLevel.Error);
 				Logger.Log("The message contained the following bytes of data: {" + string.Join(", ", message.Message.ToCharArray().Select(c => string.Format("0x{0:X2}", (byte) c))) + "}", LogLevel.Error);
 				Logger.Log("This message has been discarded.", LogLevel.Warning);

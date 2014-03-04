@@ -31,7 +31,6 @@ namespace BaggyBot.Database.PostgreSQL
 			context.Connection.Open();
 			return true;
 		}
-
 		public override void SubmitChanges()
 		{
 			context.SubmitChanges();

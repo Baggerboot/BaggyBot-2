@@ -35,7 +35,6 @@ namespace BaggyBot.Database.MS_SQL
 			context = new StatsBotDataContext(connection);
 			return true;
 		}
-
 		public override void SubmitChanges()
 		{
 			context.SubmitChanges();

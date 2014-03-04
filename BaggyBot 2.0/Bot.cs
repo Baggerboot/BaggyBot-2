@@ -36,7 +36,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any change that's made only to fix bugs within bot's system without adding new features is seen as a bugfix.
-		public const string Version = "3.26.12";
+		public const string Version = "3.26.14";
 
 		public static DateTime LastUpdate
 		{
@@ -75,7 +75,12 @@ namespace BaggyBot
 			ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, commandHandler, statsHandler);
 			identWriter = new IdentWriter();
 
-			// Hook up IRC events
+			HookupIrcEvents();
+		}
+
+
+		private void HookupIrcEvents()
+		{
 			client.OnLocalPortKnown += port => identWriter.Write(port, Settings.Instance["irc_ident"]);
 			client.OnNickChanged += dataFunctionSet.HandleNickChange;
 			client.OnMessageReceived += ircEventHandler.ProcessMessage;
@@ -91,7 +96,10 @@ namespace BaggyBot
 			client.OnKick += ircEventHandler.HandleKick;
 			client.OnNickChanged += ircEventHandler.HandleNickChange;
 			client.OnQuit += ircEventHandler.HandleQuit;
+		}
 
+		public void ConnectDatabase()
+		{
 			Logger.Log("Connecting to the database", LogLevel.Info);
 			sqlConnector.OpenConnection();
 			Logger.Log("Database connection established", LogLevel.Info);
@@ -100,7 +108,7 @@ namespace BaggyBot
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
-		public void Connect()
+		public void ConnectIrc()
 		{
 			Settings s = Settings.Instance;
 			string server = s["irc_server"];
@@ -112,13 +120,43 @@ namespace BaggyBot
 			try {
 				client.Connect(server, port, nick, ident, realname);
 				// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
-				client.JoinChannel(firstChannel);
+				JoinChannels(firstChannel);
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return;
 			}
 			Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
 			OnPostConnect();
+		}
+
+		public void Reconnect(string[] channels)
+		{
+			Settings s = Settings.Instance;
+			string server = s["irc_server"];
+			int port = int.Parse(s["irc_port"]);
+			string nick = s["irc_nick"];
+			string ident = s["irc_ident"];
+			string realname = s["irc_realname"];
+			string firstChannel = s["irc_initial_channel"];
+			try {
+				client.Connect(server, port, nick, ident, realname);
+				// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
+				// If this is the case, IRCSharp will continue trying to join until it succeeds, blocking the call in the meantime.
+				JoinChannels(channels);
+			} catch (System.Net.Sockets.SocketException e) {
+				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
+				return;
+				
+			}
+		}
+
+		public void JoinChannels(params string[] channels)
+		{
+			// TODO: Parallelize channel joins
+			foreach (var c in channels) {
+				client.JoinChannel(c);
+			}
+			
 		}
 
 		public void OnPostConnect()
@@ -140,14 +178,16 @@ namespace BaggyBot
 		private void Reconnect(DisconnectReason reason)
 		{
 			var channels = client.GetChannels();
+			var connectionInfo = client.GetConnectionInfo();
 
 			bool reconnected = false;
 			do {
 				try {
-					client.Reconnect();
-					foreach (var channel in channels) {
-						client.JoinChannel(channel.Name, true);
-					}
+
+					client = new IrcClient();
+					HookupIrcEvents();
+					Reconnect(channels.Select((chan) => chan.Name).ToArray());
+
 					reconnected = true;
 
 					switch (reason) {
@@ -209,10 +249,14 @@ namespace BaggyBot
 
 		static void Main(string[] args)
 		{
+			AppDomain.CurrentDomain.ProcessExit += (sender, eventargs) => {
+				Console.WriteLine("Exiting");
+			};
 			Logger.ClearLog();
 
 			Bot p = new Bot();
-			p.Connect();
+			p.ConnectDatabase();
+			p.ConnectIrc();
 		}
 
 		void IDisposable.Dispose()
