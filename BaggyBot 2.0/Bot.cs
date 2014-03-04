@@ -36,7 +36,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any change that's made only to fix bugs within bot's system without adding new features is seen as a bugfix.
-		public const string Version = "3.26.9";
+		public const string Version = "3.26.12";
 
 		public static DateTime LastUpdate
 		{
@@ -144,7 +144,6 @@ namespace BaggyBot
 			bool reconnected = false;
 			do {
 				try {
-					client.Quit();
 					client.Reconnect();
 					foreach (var channel in channels) {
 						client.JoinChannel(channel.Name, true);

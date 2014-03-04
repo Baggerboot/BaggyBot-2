@@ -105,7 +105,6 @@ namespace BaggyBot.DataProcessors
 				line.Nick = nick;
 				line.Message = message;
 
-				Lock.LockMessage = Tools.MiscTools.GetCurrentMethod();
 				sqlConnector.IrcLog.InsertOnSubmit(line);
 				SubmitChanges();
 			}
