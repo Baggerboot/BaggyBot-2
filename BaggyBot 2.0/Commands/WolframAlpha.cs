@@ -47,10 +47,13 @@ namespace BaggyBot.Commands
 				return;
 			}
 
+			var replace = new Func<string,string>((s) => s.Replace("\n", " -- "));
+			
 			var input = queryresult.FirstChild;
-			var result = input.NextSibling;
+			var title = replace(input.Attributes["title"].Value);
+			var result = replace(input.NextSibling.InnerText);
 
-			command.Reply("({0}: {1}): {2}", input.Attributes["title"].Value, input.InnerText, result.InnerText.Replace("\n", " -- "));
+			command.Reply("({0}: {1}): {2}", title, replace(input.InnerText), result);
 		}
 	}
 }
