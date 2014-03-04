@@ -88,8 +88,10 @@ namespace BaggyBot
 				cutoff = message.Substring(450);
 				message = message.Substring(0, 450);
 			}
-			dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
-			client.SendMessage(target, message);
+			var result = client.SendMessage(target, message);
+			if (result) {
+				dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+			}
 			if (cutoff != null) {
 				SendMessageChunk(target, cutoff, ++recursionDepth);
 			}
