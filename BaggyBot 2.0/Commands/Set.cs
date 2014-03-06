@@ -51,7 +51,6 @@ namespace BaggyBot.Commands
 					} else {
 						command.ReturnMessage("New key \"{0}\" created. Value set to {1}", command.Args[1], data);
 					}
-					
 					break;
 				default:
 					command.ReturnMessage("The property \"{0}\" does not exist.", command.Args[0]);
