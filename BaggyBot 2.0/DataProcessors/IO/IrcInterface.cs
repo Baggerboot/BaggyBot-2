@@ -44,7 +44,7 @@ namespace BaggyBot
 
 		public void Reconnect()
 		{
-			Client.GeneratePingTimeout();
+			Client.DisconnectWithPingTimeout();
 		}
 
 		public void DisableNickservCalls()

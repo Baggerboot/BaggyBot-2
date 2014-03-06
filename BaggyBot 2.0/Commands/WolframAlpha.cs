@@ -88,7 +88,7 @@ namespace BaggyBot.Commands
 				if (error == "false") {
 					command.Reply("Unable to compute the answer.");
 					var didyoumeans = GetDidYouMeans(xmd.GetElementsByTagName("didyoumean"));
-					if (didyoumeans != null) {
+					if (!string.IsNullOrEmpty(didyoumeans)) {
 						command.ReturnMessage("Did you mean: " + didyoumeans + "?");
 					}
 				} else {
