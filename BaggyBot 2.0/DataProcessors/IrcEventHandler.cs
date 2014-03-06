@@ -26,7 +26,12 @@ namespace BaggyBot.DataProcessors
 		internal void ProcessMessage(IrcMessage message)
 		{
 			try {
-				Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
+				if (message.Action) {
+					Logger.Log("*{0} {1}*", LogLevel.Message, true, message.Sender.Nick, message.Message);
+				} else {
+					Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
+				}
+				
 
 				int userId = dataFunctionSet.GetIdFromUser(message.Sender);
 
