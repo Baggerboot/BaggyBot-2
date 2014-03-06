@@ -6,6 +6,7 @@ using IRCSharp;
 using BaggyBot.Database;
 using BaggyBot.Tools;
 using BaggyBot.DataProcessors;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BaggyBot
@@ -36,8 +37,10 @@ namespace BaggyBot
 		// often coupled with a change in the environment that the bot functions in. Example: changing the way the database is structured,
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
-		// Any change that's made only to fix bugs within bot's system without adding new features is seen as a bugfix.
-		public const string Version = "3.26.15";
+		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
+		public const string Version = "3.26.25";
+
+		private bool quitRequested = false;
 
 		public static DateTime LastUpdate
 		{
@@ -139,10 +142,11 @@ namespace BaggyBot
 				// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
 				// If this is the case, IRCSharp will continue trying to join until it succeeds, blocking the call in the meantime.
 				JoinChannels(channels);
+				ircInterface.Client = client;
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return;
-				
+
 			}
 		}
 
@@ -152,7 +156,7 @@ namespace BaggyBot
 			foreach (var c in channels) {
 				client.JoinChannel(c);
 			}
-			
+
 		}
 
 		public void OnPostConnect()
@@ -182,7 +186,7 @@ namespace BaggyBot
 
 					client = new IrcClient();
 					HookupIrcEvents();
-					Reconnect(channels.Select((chan) => chan.Name).ToArray());
+					Reconnect(channels.Select(c => c.Name).ToArray());
 
 					reconnected = true;
 
@@ -209,7 +213,8 @@ namespace BaggyBot
 		private void HandleDisconnect(DisconnectReason reason)
 		{
 			if (reason == DisconnectReason.DisconnectOnRequest) {
-				Logger.Log("Disconnected.", LogLevel.Debug);
+				Logger.Log("Disconnected from IRC server.", LogLevel.Info);
+				quitRequested = true;
 			} else {
 				Logger.Log("Connection lost ({0}) Attempting to reconnect...", LogLevel.Warning, true, reason.ToString());
 				Reconnect(reason);
@@ -221,20 +226,7 @@ namespace BaggyBot
 		/// </summary>
 		public void Shutdown()
 		{
-			// HACK: Why a thread? There was a reason for this but I forgot about it. Maybe figure it out or something.
-			var t = new System.Threading.Thread(() =>
-			{
-				Logger.Log("Preparing to shut down", LogLevel.Info);
-				ircInterface.Disconnect("Shutting down");
-				Logger.Log("Disconnected from IRC server", LogLevel.Info);
-				sqlConnector.CloseConnection();
-				Logger.Log("Closed SQL server connection", LogLevel.Info);
-				sqlConnector.Dispose();
-				Logger.Log("Disposed SQL server connection object", LogLevel.Info);
-				Logger.Dispose();
-				Console.ReadKey();
-			});
-			t.Start();
+			quitRequested = true;
 		}
 
 		public void Dispose()
@@ -245,11 +237,7 @@ namespace BaggyBot
 
 		static void Main(string[] args)
 		{
-			AppDomain.CurrentDomain.ProcessExit += (sender, eventargs) => {
-				Console.WriteLine("Exiting");
-			};
 			Logger.ClearLog();
-
 			Bot p = new Bot();
 			p.Connect();
 		}
@@ -265,6 +253,18 @@ namespace BaggyBot
 			JoinChannels(firstChannel);
 			Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
 			OnPostConnect();
+
+			while (!quitRequested) {
+				Thread.Sleep(1000);
+			}
+			Logger.Log("Preparing to shut down", LogLevel.Info);
+			ircInterface.Disconnect("Shutting down");
+			sqlConnector.CloseConnection();
+			Logger.Log("Closed SQL server connection", LogLevel.Info);
+			sqlConnector.Dispose();
+			Logger.Log("Disposed SQL server connection object", LogLevel.Info);
+			Logger.Dispose();
+			Console.WriteLine("Goodbye.");
 		}
 
 		void IDisposable.Dispose()
