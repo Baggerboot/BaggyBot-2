@@ -33,7 +33,7 @@ namespace BaggyBot.DataProcessors
 				{"part", new Part(ircInterface)},
 				{"ping", new Ping()},
 				{"py", new Py(ircInterface, dataFunctionSet)},
-				{"reconnect", new Reconnect()},
+				{"reconnect", new Reconnect(ircInterface)},
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
 				{"rem", new Remember()},

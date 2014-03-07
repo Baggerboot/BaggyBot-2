@@ -8,11 +8,17 @@ namespace BaggyBot.Commands
 {
 	class Reconnect : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		private IrcInterface ircInterface;
+
+		public Reconnect(IrcInterface ircInterface)
+		{
+			this.ircInterface = ircInterface;
+		}
 
 		public void Use(CommandArgs command)
 		{
-			command.ReturnMessage("I cannot do that right now");
+			ircInterface.Reconnect();
 		}
 	}
 }
