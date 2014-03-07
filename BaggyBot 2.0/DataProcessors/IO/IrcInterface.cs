@@ -17,6 +17,8 @@ namespace BaggyBot
 
 		private IrcClient client;
 
+		private const int messageLengthLimit = 510;
+
 		private List<string> whoisCalls = new List<string>();
 		private List<string> nickservCalls = new List<string>(); // Holds information about which users are currently being looked up
 		private bool CanDoNickservCall = true;
@@ -94,6 +96,24 @@ namespace BaggyBot
 			return nickservCallResults[nick];
 		}
 
+		private int CalculateMessageLength(string target, string message)
+		{
+			return CalculatePrefixLength(target) + message.Length;
+		}
+		private int CalculatePrefixLength(string target)
+		{
+			var prefix = string.Format(":{0}!{1}@{2} PRIVMSG {3} :", client.Nick, client.Ident, client.LocalHost, target);
+			return prefix.Length;
+		}
+		private int GetMaxMessageLength(string target)
+		{
+			return messageLengthLimit - CalculatePrefixLength(target);
+		}
+		private string GenerateFullMessage(string target, string message)
+		{
+			return string.Format(":{0}!{1}@{2} PRIVMSG {3} :{4}", client.Nick, client.Ident, client.LocalHost, target, message);
+		}
+
 		private void SendMessageChunk(string target, string message, int recursionDepth)
 		{
 			if (recursionDepth >= int.Parse(Settings.Instance["irc_flood_limit"])) {
@@ -101,10 +121,17 @@ namespace BaggyBot
 				return;
 			}
 			string cutoff = null;
-			if (message.Length > 450) {
-				cutoff = message.Substring(450);
-				message = message.Substring(0, 450);
+			if (CalculateMessageLength(target, message) > messageLengthLimit) {
+				cutoff = message.Substring(GetMaxMessageLength(target));
+				message = message.Substring(0, GetMaxMessageLength(target));
 			}
+
+			string fullMsg = GenerateFullMessage(target, message);
+
+			if (fullMsg.Length > messageLengthLimit) {
+				Logger.Log("Message prototype exceeds maximum allowed message length! Message prototype: " + fullMsg, LogLevel.Warning);
+			}
+
 			var result = client.SendMessage(target, message);
 			if (result) {
 				dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
@@ -117,6 +144,18 @@ namespace BaggyBot
 		public void SendMessage(string target, string message)
 		{
 			SendMessageChunk(target, message, 0);
+		}
+
+		/// <summary>
+		/// Sends a message directly to the IRC client, without trying to make sure the message is sent in chunks.
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="message"></param>
+		public void SendMessageDirectly(string target, string message)
+		{
+			if(client.SendMessage(target, message)){
+				dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+			}
 		}
 
 		public void SendRaw(string line)
