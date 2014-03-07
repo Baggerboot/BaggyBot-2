@@ -120,6 +120,9 @@ namespace BaggyBot.Commands
 			if (result == string.Empty) {
 				result = ShowMore();
 			}
+			if (result.Length < 100) {
+				result += " -- " + ShowMore();
+			}
 
 			command.Reply("({0}: {1}): {2}", title, ReplaceNewlines(input.InnerText), ReplaceNewlines(result));
 		}
