@@ -142,7 +142,7 @@ namespace BaggyBot
 				// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
 				// If this is the case, IRCSharp will continue trying to join until it succeeds, blocking the call in the meantime.
 				JoinChannels(channels);
-				ircInterface.Client = client;
+				ircInterface.ChangeClient(client);
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return;
@@ -170,7 +170,9 @@ namespace BaggyBot
 			Logger.OnLogEvent += (message, level) =>
 			{
 				if (level == LogLevel.Error || level == LogLevel.Warning) {
-					ircInterface.NotifyOperator("LOG WARNING: " + message);
+					if (ircInterface.Connected) {
+						ircInterface.NotifyOperator("LOG WARNING: " + message);
+					}
 				}
 			};
 		}
