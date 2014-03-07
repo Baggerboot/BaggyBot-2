@@ -38,7 +38,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.26.27";
+		public const string Version = "3.26.28";
 
 		private bool quitRequested = false;
 
@@ -92,7 +92,7 @@ namespace BaggyBot
 			//client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;
 			client.OnDisconnect += HandleDisconnect;
-			client.OnKicked += channel => Logger.Log("I was kicked from " + channel, LogLevel.Warning);
+			client.OnKicked += (channel, reason, kicker) => Logger.Log("I was kicked from {0} by {1} ({2})", LogLevel.Warning, true, channel, kicker.Nick, reason);
 			client.OnDebugLog += message => MiscTools.ConsoleWriteLine("[ILB]\t" + message, ConsoleColor.DarkCyan);
 			client.OnNetLibDebugLog += message => MiscTools.ConsoleWriteLine("[NET]\t" + message, ConsoleColor.Cyan);
 			client.OnJoinChannel += ircEventHandler.HandleJoin;

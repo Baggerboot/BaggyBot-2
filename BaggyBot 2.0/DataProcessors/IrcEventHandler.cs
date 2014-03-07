@@ -134,9 +134,9 @@ namespace BaggyBot.DataProcessors
 			string message = user.ToString() + " has left " + channel;
 			DisplayEvent(message);
 		}
-		internal void HandleKick(string user, string channel)
+		internal void HandleKick(string user, string channel, string reason, IrcUser sender)
 		{
-			string message = user + " was kicked from " + channel;
+			string message = user + " was kicked by " + sender.Nick + " from " + channel + " (" + reason + ")";
 			DisplayEvent(message);
 		}
 		internal void HandleNickChange(IrcUser user, string newNick)
