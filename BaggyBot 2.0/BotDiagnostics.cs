@@ -37,8 +37,6 @@ namespace BaggyBot
 
 		public BotDiagnostics(IrcInterface ircInterface)
 		{
-			// TODO: Figure out wheter to remove this or put this back
-			//AppDomain.CurrentDomain.UnhandledException += HandleException;
 			this.ircInterface = ircInterface;
 
 			selfProc = Process.GetCurrentProcess();

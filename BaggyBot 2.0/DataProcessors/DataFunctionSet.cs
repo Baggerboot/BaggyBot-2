@@ -111,15 +111,26 @@ namespace BaggyBot.DataProcessors
 			Lock.LockMessage = "None";
 		}
 
-		public List<IrcLog> FindLine(string search)
+		public List<IrcLog> FindLine(string search, string username = null)
 		{
+
 			List<IrcLog> ret;
 			lock (Lock) {
 				Lock.LockMessage = Tools.MiscTools.GetCurrentMethod();
-				var matches =
-					from line in sqlConnector.IrcLog
-					where line.Message.ToLower().Contains(search.ToLower())
-					select line;
+				IQueryable<IrcLog> matches;
+				if (username == null) {
+					matches =
+						from line in sqlConnector.IrcLog
+						where line.Message.ToLower().Contains(search.ToLower())
+						select line;
+				} else {
+					int uid = GetIdFromNick(username);
+					matches =
+						from line in sqlConnector.IrcLog
+						where line.Message.ToLower().Contains(search.ToLower())
+						&& line.Sender == uid
+						select line;
+				}
 				ret = matches.ToList();
 			}
 			Lock.LockMessage = "None";
@@ -345,21 +356,23 @@ namespace BaggyBot.DataProcessors
 			lock (Lock) {
 				Lock.LockMessage = Tools.MiscTools.GetCurrentMethod();
 				var results = (from n in sqlConnector.UserNames
-							   where n.Name1 == nick
+							   where n.Name1.ToLower() == nick.ToLower()
 							   select n.UserId);
 
 				int count = results.Count();
 
 				if (count == 1) ret = results.First();
-				else if (count > 1) ret = -1;
-				else {
+				else if (count > 1) {
+					ret = -1;
+				} else {
 					results = (from c in sqlConnector.UserCreds
-							   where c.Nick == nick
+							   where c.Nick.ToLower() == nick.ToLower()
 							   select c.UserId);
 
 					if (count == 1) ret = results.First();
-					else if (count > 1) ret = -1;
-					else ret = -2;
+					else if (count > 1) {
+						ret = -1;
+					} else ret = -2;
 				}
 			}
 			Lock.LockMessage = "None";
@@ -669,6 +682,100 @@ namespace BaggyBot.DataProcessors
 			match.Words += changes.Words;
 			SubmitChanges();
 			Logger.Log("Userstats incremented for user #{0}: {1} action(s), {2} line(s), {3} word(s), {4} swear(s)", LogLevel.Debug, true, changes.UserId, changes.Actions, changes.Lines, changes.Words, changes.Profanities);
+		}
+
+		internal IOrderedEnumerable<Topic>FindTopics(int userId, string channel)
+		{
+			Logger.Log("finding words");
+			var words = from word in sqlConnector.Words
+						where word.Uses > 1
+					   select word;
+			Logger.Log("building dictionary");
+			var globalWordCount = words.ToDictionary((word) => word.Word1, (word) => word.Uses);
+
+			Logger.Log("finding sentences");
+			var userSentencesQuery = (from sentence in sqlConnector.IrcLog
+								where sentence.Sender == userId
+								&& sentence.Channel == channel
+								select sentence.Message).ToList();
+
+			if (userSentencesQuery.Count == 0) {
+				return null;
+			}
+
+			Logger.Log("filtering commands");
+			List<string> userSentences = userSentencesQuery.ToList().Where(s => !s.StartsWith("-")).ToList();
+
+			Logger.Log("finding user words");
+			IEnumerable<string> userWords = new List<string>();
+			foreach (var sentence in userSentences) {
+				userWords = userWords.Concat(sentence.Split(' '));
+			}
+
+			Logger.Log("grouping user words");
+			var userWordCount = userWords.GroupBy(word => word).Select(group => Tuple.Create(group.Key, group.Count()));
+
+			var topics = new List<Topic>();
+
+			Logger.Log("calculating usage difference of " + userWordCount.Count() + " words");
+
+			foreach (var pair in userWordCount) {
+				if(globalWordCount.ContainsKey(pair.Item1)){
+					int userCount = pair.Item2;
+					int globalCount = globalWordCount[pair.Item1];
+
+					if (userCount > globalCount) {
+						continue;
+					}
+
+					topics.Add(new Topic(pair.Item1, userCount, globalCount, (double)userCount / (double)globalCount));
+				}
+			}
+
+			Logger.Log("\ncalculating average usage difference");
+			var avgDifference = topics.Average(topic => topic.Score);
+			var maxGlobalCount = globalWordCount.Max(pair => pair.Value);
+			var avgMultiplier = 1 / avgDifference;
+
+			Logger.Log("multiplying difference with multiplier");
+			foreach (var topic in topics) {
+				topic.Normalize(avgMultiplier);
+				topic.ScoreByOccurrence(maxGlobalCount);
+			}
+
+			return topics.OrderByDescending(pair => pair.Score);
+		}
+	}
+	class Topic
+	{
+		public string Name;
+		public int UserCount;
+		public int GlobalCount;
+		public double Score;
+
+		public void Normalize(double multiplier)
+		{
+			Score = Score * multiplier;
+		}
+		public void ScoreByOccurrence(int maxGlobalCount)
+		{
+
+			double maxGlobalPart =  (GlobalCount / (double)maxGlobalCount);
+
+			Score = Score + (maxGlobalPart * 4);
+
+			if (UserCount != GlobalCount && GlobalCount < (maxGlobalCount / 2.0)) {
+				Score += 1.5;
+			}
+			
+		}
+
+		public Topic(string name, int userCount, int globalCount, double difference)
+		{
+			Name = name;
+			UserCount = userCount;
+			GlobalCount = globalCount;
+			Score = difference;
 		}
 	}
 }

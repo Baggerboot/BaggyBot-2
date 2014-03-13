@@ -28,9 +28,9 @@ namespace BaggyBot
 		{
 			get
 			{
-				try {
+				if (settings.ContainsKey(key)) {
 					return settings[key];
-				} catch (KeyNotFoundException) {
+				} else {
 					// TODO: This should be null, not string.Empty. Figure out if changing this to null breaks anything.
 					return string.Empty;
 				}

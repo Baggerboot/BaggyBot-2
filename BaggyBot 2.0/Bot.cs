@@ -38,9 +38,14 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.26.28";
+		public const string Version = "3.28.2";
 
-		private bool quitRequested = false;
+		public bool QuitRequested
+		{
+			get;
+			private set;
+		}
+		public event Action<string> UpdateRequested;
 
 		public static DateTime LastUpdate
 		{
@@ -55,11 +60,12 @@ namespace BaggyBot
 		// To determine this, the previous version is stored in here.
 		// If the bot is not started in update mode, the value of this field remains null.
 		private string previousVersion = null;
-
+		
 		public Bot()
 		{
 			previousVersion = Settings.Instance["version"];
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
+			Logger.ClearLog();
 			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
 			if (previousVersion != Version) {
 				Logger.Log("Updated from version {0} to version {1}", LogLevel.Info, true, previousVersion, Version);
@@ -82,10 +88,14 @@ namespace BaggyBot
 			HookupIrcEvents();
 		}
 
+		~Bot()
+		{
+			Console.WriteLine("Shutting down bot instance (version {0})", Version);
+		}
+
 
 		private void HookupIrcEvents()
 		{
-			client.OnLocalPortKnown += port => identWriter.Write(port, Settings.Instance["irc_ident"]);
 			client.OnNickChanged += dataFunctionSet.HandleNickChange;
 			client.OnMessageReceived += ircEventHandler.ProcessMessage;
 			client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
@@ -112,7 +122,7 @@ namespace BaggyBot
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
-		private void ConnectIrc()
+		private void ConnectIrc(CsNetLib2.NetLibClient client = null)
 		{
 			Settings s = Settings.Instance;
 			string server = s["irc_server"];
@@ -121,11 +131,19 @@ namespace BaggyBot
 			string ident = s["irc_ident"];
 			string realname = s["irc_realname"];
 			try {
-				client.Connect(server, port, nick, ident, realname);
+				this.client.AddOrCreateClient(client);
+				this.client.OnLocalPortKnown += HandleLocalPortKnown;
+				this.client.Connect(server, port, nick, ident, realname, true);
+				
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return;
 			}
+		}
+
+		private void HandleLocalPortKnown(int localPort)
+		{
+			identWriter.Write(localPort, Settings.Instance["irc_ident"]);
 		}
 
 		public void Reconnect(string[] channels)
@@ -156,16 +174,12 @@ namespace BaggyBot
 			foreach (var c in channels) {
 				client.JoinChannel(c);
 			}
-
 		}
 
 		public void OnPostConnect()
 		{
 			botDiagnostics.StartPerformanceLogging();
 
-			if (previousVersion != null && previousVersion != Version) {
-				ircInterface.NotifyOperator("Succesfully updated from version " + previousVersion + " to version " + Version);
-			}
 			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
 			Logger.OnLogEvent += (message, level) =>
 			{
@@ -185,7 +199,6 @@ namespace BaggyBot
 			bool reconnected = false;
 			do {
 				try {
-
 					client = new IrcClient();
 					HookupIrcEvents();
 					Reconnect(channels.Select(c => c.Name).ToArray());
@@ -216,7 +229,7 @@ namespace BaggyBot
 		{
 			if (reason == DisconnectReason.DisconnectOnRequest) {
 				Logger.Log("Disconnected from IRC server.", LogLevel.Info);
-				quitRequested = true;
+				QuitRequested = true;
 			} else {
 				Logger.Log("Connection lost ({0}) Attempting to reconnect...", LogLevel.Warning, true, reason.ToString());
 				Reconnect(reason);
@@ -228,7 +241,7 @@ namespace BaggyBot
 		/// </summary>
 		public void Shutdown()
 		{
-			quitRequested = true;
+			QuitRequested = true;
 		}
 
 		public void Dispose()
@@ -237,11 +250,45 @@ namespace BaggyBot
 			sqlConnector.Dispose();
 		}
 
-		static void Main(string[] args)
+		public void Attach(CsNetLib2.NetLibClient client, Dictionary<string, IrcChannel> channels, string mainChannel)
 		{
-			Logger.ClearLog();
-			Bot p = new Bot();
-			p.Connect();
+			ConnectDatabase();
+			OnPostConnect();
+
+			this.client.Attach(client, channels);
+
+			if (previousVersion != null && previousVersion != Version) {
+				ircInterface.SendMessage(mainChannel, "Succesfully updated from version " + previousVersion + " to version " + Version);
+			} else {
+				ircInterface.SendMessage(mainChannel, "Failed to update: no newer version available (current version: " + Version + ")");
+			}
+		}
+
+		public void Connect(CsNetLib2.NetLibClient client)
+		{
+			Task dbConTask = Task.Run(() => ConnectDatabase());
+			Task ircConTask = Task.Run(() => ConnectIrc(client));
+			Task.WaitAll(dbConTask, ircConTask);
+
+			JoinInitialChannel();
+			OnPostConnect();
+		}
+
+		private void JoinInitialChannel()
+		{
+			string firstChannel = Settings.Instance["irc_initial_channel"];
+			// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
+			JoinChannels(firstChannel);
+			Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
+		}
+
+		public Dictionary<string, IrcChannel> Detach()
+		{
+			var channels = client.Detach();
+			sqlConnector.Dispose();
+			Logger.Dispose();
+			botDiagnostics.Dispose();
+			return channels;
 		}
 
 		public void Connect()
@@ -250,13 +297,14 @@ namespace BaggyBot
 			Task ircConTask = Task.Run(() => ConnectIrc());
 			Task.WaitAll(dbConTask, ircConTask);
 
-			string firstChannel = Settings.Instance["irc_initial_channel"];
-			// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
-			JoinChannels(firstChannel);
-			Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
+			JoinInitialChannel();
 			OnPostConnect();
 
-			while (!quitRequested) {
+			if (previousVersion != null && previousVersion != Version) {
+				ircInterface.NotifyOperator("Succesfully updated from version " + previousVersion + " to version " + Version);
+			}
+
+			while (!QuitRequested) {
 				Thread.Sleep(1000);
 			}
 			Logger.Log("Preparing to shut down", LogLevel.Info);
@@ -269,9 +317,15 @@ namespace BaggyBot
 			Console.WriteLine("Goodbye.");
 		}
 
+
 		void IDisposable.Dispose()
 		{
 			throw new NotImplementedException();
+		}
+
+		internal void RequestUpdate(string channel)
+		{
+			UpdateRequested(channel);
 		}
 	}
 }

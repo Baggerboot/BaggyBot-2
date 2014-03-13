@@ -135,9 +135,8 @@ namespace BaggyBot.Commands
 				return;
 			}
 			var source = engine.CreateScriptSourceFromString(code, SourceCodeKind.SingleStatement);
+			threads.Add(System.Threading.Thread.CurrentThread);
 			try {
-				System.Threading.Thread.CurrentThread.Name = "PYTHON_THREAD_#" + threadId;
-				threads.Add(System.Threading.Thread.CurrentThread);
 				source.Execute(scope);
 
 				string line = outputStreamReader.ReadLine();

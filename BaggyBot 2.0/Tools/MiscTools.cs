@@ -50,6 +50,19 @@ namespace BaggyBot.Tools
 			return prefix + "/" + filename;
 		}
 
+		public static double NthRoot(double baseValue, int N)
+		{
+			if (N == 1)
+				return baseValue;
+			double deltaX;
+			double x = 0.1;
+			do {
+				deltaX = (baseValue / Math.Pow(x, N - 1) - x) / N;
+				x = x + deltaX;
+			} while (Math.Abs(deltaX) > 0);
+			return x;
+		}
+
 		public static DateTime RetrieveLinkerTimestamp()
 		{
 			string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;

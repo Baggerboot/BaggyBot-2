@@ -14,12 +14,10 @@ namespace BaggyBot.DataProcessors
 		// Maps command strings to command objects
 		private Dictionary<string, ICommand> commands;
 		private IrcInterface ircInterface;
-		private BotDiagnostics botDiagnostics;
 
-		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot program, BotDiagnostics botDiagnostics)
+		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot, BotDiagnostics botDiagnostics)
 		{
 			this.ircInterface = ircInterface;
-			this.botDiagnostics = botDiagnostics;
 			commands = new Dictionary<string, ICommand>()
 			{
 				{"convert", new BaggyBot.Commands.Convert()},
@@ -40,11 +38,14 @@ namespace BaggyBot.DataProcessors
 				{"resolve", new Resolve()},
 				{"say", new Say(ircInterface)},
 				{"set", new Set(dataFunctionSet)},
-				{"shutdown", new Shutdown(program)},
+				{"shutdown", new Shutdown(bot)},
 				{"snag", new Snag()},
+				{"update", new Update(bot)},
 				{"uptime", new Uptime()},
 				{"version", new Commands.Version()},
-				{"wa", new WolframAlpha()}
+				{"wa", new WolframAlpha()},
+				{"wiki", new Wikipedia()},
+				{"topic", new Topics(dataFunctionSet)}
 			};
 		}
 
@@ -78,7 +79,7 @@ namespace BaggyBot.DataProcessors
 						ircInterface.SendMessage(message.Channel, exceptionMessage);
 					}
 				} else {
-					commands[command].Use(cmd);
+						commands[command].Use(cmd);
 				}
 			} else {
 				ircInterface.SendMessage(message.Channel, Messages.CMD_NOT_AUTHORIZED);

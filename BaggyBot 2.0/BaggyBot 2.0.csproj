@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{82D7AE98-082C-4E8B-86A1-ADE631720E55}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BaggyBot</RootNamespace>
     <AssemblyName>BaggyBot20</AssemblyName>
@@ -30,16 +30,17 @@
     <BootstrapperEnabled>false</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Bin\</OutputPath>
     <DefineConstants>TRACE;DEBUG;postgresql</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>true</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -63,11 +64,12 @@
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DbLinq.PostgreSql, Version=0.20.0.0, Culture=neutral, PublicKeyToken=61e015a67077348b, processorArchitecture=MSIL">
@@ -78,7 +80,11 @@
     <Reference Include="IronPython.Modules, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="Mono.CSharp">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Mono-3.0.3\lib\mono\4.5\Mono.CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Mono-3.2.3\lib\mono\4.5\Mono.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Mono-3.2.3\lib\mono\2.0\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -101,17 +107,21 @@
     <Compile Include="Commands\Convert.cs" />
     <Compile Include="Commands\Cs.cs" />
     <Compile Include="Commands\Html.cs" />
+    <Compile Include="Commands\NewCommand.cs" />
     <Compile Include="Commands\ProducerConsumerStream.cs" />
     <Compile Include="Commands\Py.cs" />
     <Compile Include="Commands\ReadEvaluatePrintCommand.cs" />
     <Compile Include="Commands\Reconnect.cs" />
     <Compile Include="Commands\Remember.cs" />
     <Compile Include="Commands\ResolveReverse.cs" />
+    <Compile Include="Commands\Topics.cs" />
+    <Compile Include="Commands\Update.cs" />
     <Compile Include="Commands\Uptime.cs" />
+    <Compile Include="Commands\Wikipedia.cs" />
     <Compile Include="Commands\WolframAlpha.cs" />
     <Compile Include="DataProcessors\CommandHandler.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
-    <Compile Include="Commands\Example.cs" />
+    <None Include="Commands\Example.cs" />
     <Compile Include="Commands\Feature.cs" />
     <Compile Include="Commands\Get.cs" />
     <Compile Include="Commands\Help.cs" />
