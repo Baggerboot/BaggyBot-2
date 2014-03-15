@@ -39,7 +39,7 @@ namespace BaggyBotHost
 
 		private void UpdateBinaries()
 		{
-			Console.WriteLine("Deleting assemblies");	
+			Console.WriteLine("Deleting assemblies");
 			File.Delete("BaggyBot20.dll");
 			File.Delete("CsNetLib2.dll");
 			Console.WriteLine("Moving assemblies");
@@ -54,17 +54,60 @@ namespace BaggyBotHost
 
 			bool quitRequested = false;
 			while (!quitRequested) {
-				lock (baggyBot) 
-				{
+				lock (baggyBot) {
 					quitRequested = baggyBot.QuitRequested;
 				}
 				System.Threading.Thread.Sleep(1000);
 			}
 		}
 
+		private static string EscapeCode(int color)
+		{
+			return "\x1b[38;5;" + color + "m";
+		}
+
 		static void Main(string[] args)
 		{
-			new BaggyBotHost();
+			Console.WriteLine("Main called 2");
+
+			if (args.Length == 1 && args[0] == "--colortest") {
+
+				Console.WriteLine("Beginning color test");
+
+				int i = 0;
+
+				Console.WriteLine("System colors:");
+				for (; i < 16; i++) {
+					Console.Write(EscapeCode(i) + "█");
+					if (i == 7) {
+						Console.WriteLine();
+					}
+				}
+				Console.WriteLine();
+				Console.WriteLine("Color cube, 6x6x6:");
+				for (int green = 0; green < 6; green++) {
+					for (int red = 0; red < 6; red++) {
+						for (int blue = 0; blue < 6; blue++) {
+							int color = 16 + (red * 36) + (green * 6) + blue;
+							Console.Write("{0}█{1:000}█", EscapeCode(color), color);
+						}
+						Console.Write("\x1b[0m ");
+					}
+					Console.Write("\n");
+				}
+
+
+				Console.WriteLine();
+				Console.WriteLine("Grayscale ramp:");
+				for (i = 232; i < 256; i++) {
+					Console.Write(EscapeCode(i) + "█");
+				}
+				Console.WriteLine();
+				Console.WriteLine("Done.");
+
+			} else {
+				new BaggyBotHost();
+			}
 		}
 	}
 }
