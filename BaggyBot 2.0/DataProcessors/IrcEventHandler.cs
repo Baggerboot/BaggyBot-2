@@ -23,6 +23,17 @@ namespace BaggyBot.DataProcessors
 			this.statsHandler = statsHandler;
 		}
 
+		private void AddMessageToIrcLog(IrcMessage message, int userId)
+		{
+			if (message.Action) {
+				Logger.Log("Adding action message to the IRC log");
+				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, "*" + message.Sender.Nick + " " + message.Message + "*");
+			} else {
+				Logger.Log("Adding regular IRC message to the IRC log");
+				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
+			}
+		}
+
 		internal void ProcessMessage(IrcMessage message)
 		{
 			try {
@@ -31,16 +42,10 @@ namespace BaggyBot.DataProcessors
 				} else {
 					Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
 				}
-				
-
-				int userId = dataFunctionSet.GetIdFromUser(message.Sender);
-
-				if (message.Action) {
-					Logger.Log("Adding action message to the IRC log");
-					dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, "*" + message.Sender.Nick + " " + message.Message + "*");
-				} else {
-					Logger.Log("Adding regular IRC message to the IRC log");
-					dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
+				int userId = 0;
+				if (dataFunctionSet.ConnectionState != System.Data.ConnectionState.Closed) {
+					userId = dataFunctionSet.GetIdFromUser(message.Sender);
+					AddMessageToIrcLog(message, userId);
 				}
 
 				if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py")) {

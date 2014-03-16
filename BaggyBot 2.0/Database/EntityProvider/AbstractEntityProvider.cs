@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Data;
 using System.Data.SqlClient;
 using System.Data.Linq;
 using System.Data.Common;
@@ -27,6 +28,7 @@ namespace BaggyBot.Database.EntityProvider
 		public abstract void SubmitChanges();
 		public abstract bool OpenConnection();
 		public abstract void Dispose();
+		public ConnectionState ConnectionState { get { return connection.State; } }
 
 		public void Reconnect()
 		{

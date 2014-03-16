@@ -28,7 +28,7 @@ namespace BaggyBot.Commands
 			evaluator.WaitOnTask = true;
 			bool resultSet;
 			object result;
-			string res = evaluator.Evaluate("using System; using System.Linq; using System.Collections.Generic; using System.Collections; using System.Text;", out result, out resultSet);
+			string res = evaluator.Evaluate("using System; using System.Linq; using System.Collections.Generic; using System.Text;", out result, out resultSet);
 		}
 
 		protected override void Abort(CommandArgs command)

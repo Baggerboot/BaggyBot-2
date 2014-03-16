@@ -35,16 +35,30 @@ namespace BaggyBot.DataProcessors
 			ircInterface = inter;
 			rand = new Random();
 
+
+			// It might seem confusing that we're creating a variable (snagChance) here without actually using it.
+			// The reason for this is that we don't actually need it right now.
+			// The value of snag_chance will be read from the Settings class each time it is required, so that, when it updates,
+			// the updated value will be used right away.
+			// This requires us to parse the variable each time it is read.
+			// However, we do not want to log an error every time the parsing fails. For this reason, we parse it initially,
+			// and, should a parse error occur, log the error.
+			// The downside to this approach is that, if the variable is assigned an incorrect value at runtime,
+			// the parser will fail silently, without logging its fallback to the default value.
 			double snagChance;
 			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance)) {
-				Logger.Log("Error in bot settings: invalid value for snag_chance. Default value will be used.");
+				Logger.Log("Invalid settings value for snag_chance. Default value will be used.", LogLevel.Warning);
 			}
 		}
 		public void ProcessMessage(IrcMessage message, int userId)
 		{
+			if (dataFunctionSet.ConnectionState == System.Data.ConnectionState.Closed) return;
+
 			Logger.Log("Processing message for " + message.Sender.Nick);
 
 			List<string> words = WordTools.GetWords(message.Message);
+
+			// FIXME: Is this necessary?
 			words = words.Select(s => s.Replace("'", "''")).ToList();
 
 			//UserStatistics changes = new UserStatistics();

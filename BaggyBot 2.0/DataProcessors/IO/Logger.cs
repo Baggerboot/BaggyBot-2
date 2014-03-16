@@ -21,7 +21,7 @@ namespace BaggyBot
 
 	public static class Logger
 	{
-		private static string filename = "baggybot.log";
+		public const string LogFileName = "baggybot.log";
 		private static bool disposed = false;
 		private static string prefix = string.Empty;
 
@@ -33,7 +33,7 @@ namespace BaggyBot
 		}
 		private static void LoadLogFile()
 		{
-			textWriter = new StreamWriter(filename, true);
+			textWriter = new StreamWriter(LogFileName, true);
 		}
 
 		private static TextWriter textWriter;
@@ -85,7 +85,7 @@ namespace BaggyBot
 			lineBuilder.Append(prefix);
 			lineBuilder.Append(message);
 
-			WriteToConsole(lineColor, level, writeLine, lineBuilder);
+			WriteToConsole(lineColor, level, lineBuilder);
 
 			if ((level == LogLevel.Error || level == LogLevel.Warning) && OnLogEvent != null) {
 				OnLogEvent(lineBuilder.ToString(), level);
@@ -105,17 +105,22 @@ namespace BaggyBot
 			}
 		}
 
-		private static void WriteToConsole(ConsoleColor lineColor, LogLevel level, bool writeLine, StringBuilder lineBuilder)
+		private static void WriteToConsole(ConsoleColor lineColor, LogLevel level, StringBuilder lineBuilder)
 		{
-			bool writeDebug = false;
-			bool.TryParse(Settings.Instance["show_debug_log"], out writeDebug);
 			var prevColor = Console.ForegroundColor;
 			Console.ForegroundColor = lineColor;
-			if (level != LogLevel.Debug || writeDebug) {
-				if (writeLine)
+			if (level == LogLevel.Debug) {
+				bool writeDebug = false;
+				if (bool.TryParse(Settings.Instance["show_debug_log"], out writeDebug)) {
+					if (writeDebug) {
+						Console.WriteLine(lineBuilder.ToString());
+					}
+				} else {
+					Logger.Log("Unable to parse settings value for show_debug_log into a boolean.", LogLevel.Warning);
 					Console.WriteLine(lineBuilder.ToString());
-				else
-					Console.Write(lineBuilder.ToString());
+				}
+			} else {
+				Console.WriteLine(lineBuilder.ToString());
 			}
 			Console.ForegroundColor = prevColor;
 		}
@@ -123,7 +128,7 @@ namespace BaggyBot
 		public static void ClearLog()
 		{
 			textWriter.Close();
-			File.Delete(filename);
+			File.Delete(LogFileName);
 			LoadLogFile();
 		}
 		public static void Dispose()

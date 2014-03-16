@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using System.Data;
 using IRCSharp;
 using BaggyBot.Database;
 using System.Data.Linq;
@@ -24,6 +25,7 @@ namespace BaggyBot.DataProcessors
 		private SqlConnector sqlConnector;
 		private IrcInterface ircInterface;
 		private LockObject Lock;
+		public ConnectionState ConnectionState { get { return sqlConnector.ConnectionState; } }
 
 		public DataFunctionSet(SqlConnector sqlConnector, IrcInterface inter)
 		{

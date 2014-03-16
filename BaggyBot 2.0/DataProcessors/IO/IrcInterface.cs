@@ -116,7 +116,11 @@ namespace BaggyBot
 
 		private void SendMessageChunk(string target, string message, int recursionDepth)
 		{
-			if (recursionDepth >= int.Parse(Settings.Instance["irc_flood_limit"])) {
+			int floodLimit;
+			if (!int.TryParse(Settings.Instance["irc_flood_limit"], out floodLimit))
+				floodLimit = 4;
+
+			if (recursionDepth >= floodLimit) {
 				client.SendMessage(target, "Flood limit triggered. The remaining part of the message has been discarded.");
 				return;
 			}
@@ -133,7 +137,7 @@ namespace BaggyBot
 			}
 
 			var result = client.SendMessage(target, message);
-			if (result) {
+			if (result && dataFunctionSet.ConnectionState != System.Data.ConnectionState.Closed) {
 				dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
 			}
 			if (cutoff != null) {

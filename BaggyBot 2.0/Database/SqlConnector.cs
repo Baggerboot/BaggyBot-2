@@ -24,6 +24,17 @@ namespace BaggyBot.Database
 	public class SqlConnector : IDisposable
 	{
 		private AbstractEntityProvider provider;
+		public ConnectionState ConnectionState
+		{
+			get
+			{
+				if (provider == null) {
+					return ConnectionState.Closed;
+				} else {
+					return provider.ConnectionState;
+				}
+			}
+		}
 
 #if postgresql
 		public Table<PostgreSQL.UserCredentials> UserCreds;
@@ -51,16 +62,15 @@ namespace BaggyBot.Database
 		{
 			provider.SubmitChanges();
 		}
-
-		public SqlConnector()
-		{
-			bool useDbLinq = false;
-			bool.TryParse(Settings.Instance["sql_use_dblinq"], out useDbLinq);
-			provider = new EntityProviderFactory().CreateEntityProvider(useDbLinq ? SupportedDatabases.PostgreSQL : SupportedDatabases.MsSql);
-		}
-
 		public bool OpenConnection()
 		{
+			bool useDbLinq = false;
+			if (bool.TryParse(Settings.Instance["sql_use_dblinq"], out useDbLinq)) {
+				provider = new EntityProviderFactory().CreateEntityProvider(useDbLinq ? SupportedDatabases.PostgreSQL : SupportedDatabases.MsSql);
+			} else {
+				Logger.Log("Unable to connect to the SQL database: settings value for sql_use_dblinq not set.", LogLevel.Error);
+				return false;
+			}
 			bool result = provider.OpenConnection();
 
 #if postgresql
@@ -105,9 +115,9 @@ namespace BaggyBot.Database
 
 		protected virtual void Dispose(bool cleanAll)
 		{
-			if (cleanAll) {
+			if (provider != null) {
+				provider.Dispose();
 			}
-			provider.Dispose();
 		}
 
 		~SqlConnector()

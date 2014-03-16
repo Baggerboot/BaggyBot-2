@@ -54,7 +54,7 @@ namespace BaggyBot.Commands
 		public void Use(CommandArgs command)
 		{
 			if (string.IsNullOrWhiteSpace(command.FullArgument)) {
-				command.Reply("Usage: '-wa <WolframAlpha query>' -- Additionally, you can use the command '-wa more' to display additional information about the last subject");
+				command.Reply("Usage: '-wa <WolframAlpha query>' -- Displays information acquired from http://www.wolframalpha.com. In addition to this, you can use the command '-wa more' to display additional information about the last subject");
 				return;
 			}
 
@@ -74,7 +74,9 @@ namespace BaggyBot.Commands
 
 			lastDisplayedResult = null;
 
-			var uri = new Uri(string.Format("http://api.wolframalpha.com/v2/query?appid=QK2T79-JX9QTVP5RE&input={0}&ip={1}&format=plaintext&units=metric", command.FullArgument, command.Sender.Hostmask));
+			string appid = Settings.Instance["wolfram_alpha_appid"];
+
+			var uri = new Uri(string.Format("http://api.wolframalpha.com/v2/query?appid={0}&input={1}&ip={2}&format=plaintext&units=metric",  appid, command.FullArgument, command.Sender.Hostmask));
 
 			var rq = HttpWebRequest.Create(uri);
 			var response = rq.GetResponse();

@@ -38,7 +38,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.28.2";
+		public const string Version = "3.29";
 
 		public bool QuitRequested
 		{
@@ -60,14 +60,16 @@ namespace BaggyBot
 		// To determine this, the previous version is stored in here.
 		// If the bot is not started in update mode, the value of this field remains null.
 		private string previousVersion = null;
-		
+
 		public Bot()
 		{
+			Logger.ClearLog();
+			CheckSettingsFile();
+
 			previousVersion = Settings.Instance["version"];
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
-			Logger.ClearLog();
 			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
-			if (previousVersion != Version) {
+			if (previousVersion != null && previousVersion != Version) {
 				Logger.Log("Updated from version {0} to version {1}", LogLevel.Info, true, previousVersion, Version);
 			}
 			Settings.Instance["version"] = Version;
@@ -86,6 +88,16 @@ namespace BaggyBot
 			identWriter = new IdentWriter();
 
 			HookupIrcEvents();
+		}
+
+		private void CheckSettingsFile()
+		{
+			var s = Settings.Instance;
+			if (s.NewFileCreated) {
+				s.FillDefault();
+				Logger.Log("New settings file created ({0}). Please fill it with the correct data, then start the bot again. BaggyBot will now exit.", LogLevel.Info, true, Logger.LogFileName);
+				Environment.Exit(0);
+			}
 		}
 
 		~Bot()
@@ -115,29 +127,39 @@ namespace BaggyBot
 		private void ConnectDatabase()
 		{
 			Logger.Log("Connecting to the database", LogLevel.Info);
-			sqlConnector.OpenConnection();
-			Logger.Log("Database connection established", LogLevel.Info);
+			if (sqlConnector.OpenConnection())
+				Logger.Log("Database connection established", LogLevel.Info);
+			else
+				Logger.Log("Database connection not established. Bot functionality will be very limited.", LogLevel.Warning);
 		}
 
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
-		private void ConnectIrc(CsNetLib2.NetLibClient client = null)
+		private bool ConnectIrc(CsNetLib2.NetLibClient netClient = null)
 		{
 			Settings s = Settings.Instance;
 			string server = s["irc_server"];
-			int port = int.Parse(s["irc_port"]);
+			int port;
+			if (!int.TryParse(s["irc_port"], out port)) {
+				Logger.Log("Settings value for irc_port cannot be parsed as an integer", LogLevel.Error);
+				return false;
+			}
 			string nick = s["irc_nick"];
 			string ident = s["irc_ident"];
 			string realname = s["irc_realname"];
+
+			this.client.AddOrCreateClient(netClient);
+			this.client.OnLocalPortKnown += HandleLocalPortKnown;
 			try {
-				this.client.AddOrCreateClient(client);
-				this.client.OnLocalPortKnown += HandleLocalPortKnown;
 				this.client.Connect(server, port, nick, ident, realname, true);
-				
+				return true;
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
-				return;
+				return false;
+			} catch (ArgumentException e) {
+				Logger.Log("Failed to connect to the IRC server: The settings file does not contain a value for \"{0}\"", LogLevel.Error, true, e.ParamName);
+				return false;
 			}
 		}
 
@@ -146,7 +168,7 @@ namespace BaggyBot
 			identWriter.Write(localPort, Settings.Instance["irc_ident"]);
 		}
 
-		public void Reconnect(string[] channels)
+		public void Reconnect(IEnumerable<string> channels)
 		{
 			Settings s = Settings.Instance;
 			string server = s["irc_server"];
@@ -164,15 +186,25 @@ namespace BaggyBot
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return;
-
 			}
 		}
 
 		public void JoinChannels(params string[] channels)
 		{
-			// TODO: Parallelize channel joins
+			JoinChannels(channels.AsEnumerable());
+		}
+		public void JoinChannels(IEnumerable<string> channels)
+		{
+			var joins = new Task[channels.Count()];
+
+			int i = 0;
 			foreach (var c in channels) {
-				client.JoinChannel(c);
+				joins[i] = (Task.Run(() => client.JoinChannel(c)));
+				i++;
+			}
+			if (!Task.WaitAll(joins, 30000)) {
+				var failedJoins = joins.Where((join) => !join.IsCompleted);
+				Logger.Log("Join timeout: failed to join {0}", LogLevel.Warning, true, string.Join(", ", failedJoins));
 			}
 		}
 
@@ -185,7 +217,7 @@ namespace BaggyBot
 			{
 				if (level == LogLevel.Error || level == LogLevel.Warning) {
 					if (ircInterface.Connected) {
-						ircInterface.NotifyOperator("LOG WARNING: " + message);
+						ircInterface.NotifyOperator("LOG WARNING/ERROR: " + message);
 					}
 				}
 			};
@@ -201,7 +233,7 @@ namespace BaggyBot
 				try {
 					client = new IrcClient();
 					HookupIrcEvents();
-					Reconnect(channels.Select(c => c.Name).ToArray());
+					Reconnect(channels.Select(c => c.Name));
 
 					reconnected = true;
 
@@ -236,9 +268,6 @@ namespace BaggyBot
 			}
 		}
 
-		/// <summary>
-		/// This kills the bot
-		/// </summary>
 		public void Shutdown()
 		{
 			QuitRequested = true;
@@ -266,20 +295,43 @@ namespace BaggyBot
 
 		public void Connect(CsNetLib2.NetLibClient client)
 		{
-			Task dbConTask = Task.Run(() => ConnectDatabase());
-			Task ircConTask = Task.Run(() => ConnectIrc(client));
-			Task.WaitAll(dbConTask, ircConTask);
+			bool deployed;
+			bool.TryParse(Settings.Instance["deployed"], out deployed);
 
+			// When debugging, connect synchronously, to allow the debugger to break on exceptions.
+			// Otherwise, connect asynchronously, to maximize performance.
+			if (deployed) {
+				Task dbConTask = Task.Run(() => ConnectDatabase());
+				Task ircConTask = Task.Run(() => {
+					TryConnectIrc(client);
+				});
+				Task.WaitAll(dbConTask, ircConTask);
+			} else {
+				ConnectDatabase();
+				TryConnectIrc(client);
+			}
 			JoinInitialChannel();
 			OnPostConnect();
+		}
+
+		private void TryConnectIrc(CsNetLib2.NetLibClient client)
+		{
+			if (!ConnectIrc(client)) {
+				Logger.Log("FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
+				Environment.Exit(1);
+			}
 		}
 
 		private void JoinInitialChannel()
 		{
 			string firstChannel = Settings.Instance["irc_initial_channel"];
 			// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
-			JoinChannels(firstChannel);
-			Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
+			if (string.IsNullOrWhiteSpace(firstChannel)) {
+				Logger.Log("Unable to join the initial channel: settings value for irc_initial_channel not set.", LogLevel.Error);
+			}else{
+				JoinChannels(firstChannel);
+				Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
+			}
 		}
 
 		public Dictionary<string, IrcChannel> Detach()
