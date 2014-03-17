@@ -44,6 +44,9 @@ namespace BaggyBot
 			pc.CounterName = "Working Set - Private";
 			pc.InstanceName = selfProc.ProcessName;
 
+			AppDomain.CurrentDomain.UnhandledException += HandleException;
+			
+
 			taskScheduler = new Timer();
 			taskScheduler.Interval = 2000;
 		}

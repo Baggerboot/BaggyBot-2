@@ -38,14 +38,13 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.29";
+		public const string Version = "3.29.2";
 
 		public bool QuitRequested
 		{
 			get;
 			private set;
 		}
-		public event Action<string> UpdateRequested;
 
 		public static DateTime LastUpdate
 		{
@@ -76,7 +75,7 @@ namespace BaggyBot
 
 			// Create various data processors and I/O handlers
 			sqlConnector = new SqlConnector();
-			client = new IrcClient();
+			client = new IrcClient(Settings.Instance["deployed"] == "false");
 			ircInterface = new IrcInterface(client);
 			dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
 			ircInterface.dataFunctionSet = dataFunctionSet;
@@ -136,23 +135,17 @@ namespace BaggyBot
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
-		private bool ConnectIrc(CsNetLib2.NetLibClient netClient = null)
+		private bool ConnectIrc()
 		{
 			Settings s = Settings.Instance;
-			string server = s["irc_server"];
-			int port;
-			if (!int.TryParse(s["irc_port"], out port)) {
-				Logger.Log("Settings value for irc_port cannot be parsed as an integer", LogLevel.Error);
-				return false;
-			}
 			string nick = s["irc_nick"];
 			string ident = s["irc_ident"];
 			string realname = s["irc_realname"];
 
-			this.client.AddOrCreateClient(netClient);
+			this.client.AddOrCreateClient(null);
 			this.client.OnLocalPortKnown += HandleLocalPortKnown;
 			try {
-				this.client.Connect(server, port, nick, ident, realname, true);
+				this.client.Connect("localhost", 6667, nick, ident, realname, true);
 				return true;
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
@@ -223,10 +216,9 @@ namespace BaggyBot
 			};
 		}
 
-		private void Reconnect(DisconnectReason reason)
+		/*private void Reconnect(int previousExitCode, string channels)
 		{
-			var channels = client.GetChannels();
-			var connectionInfo = client.GetConnectionInfo();
+
 
 			bool reconnected = false;
 			do {
@@ -255,7 +247,7 @@ namespace BaggyBot
 					System.Threading.Thread.Sleep(2000);
 				}
 			} while (!reconnected);
-		}
+		}*/
 
 		private void HandleDisconnect(DisconnectReason reason)
 		{
@@ -264,7 +256,7 @@ namespace BaggyBot
 				QuitRequested = true;
 			} else {
 				Logger.Log("Connection lost ({0}) Attempting to reconnect...", LogLevel.Warning, true, reason.ToString());
-				Reconnect(reason);
+				Environment.Exit(50);
 			}
 		}
 
@@ -279,44 +271,47 @@ namespace BaggyBot
 			sqlConnector.Dispose();
 		}
 
-		public void Attach(CsNetLib2.NetLibClient client, Dictionary<string, IrcChannel> channels, string mainChannel)
+		public void Attach(int exitCode, IEnumerable<string> channels)
 		{
 			ConnectDatabase();
 			OnPostConnect();
 
-			this.client.Attach(client, channels);
+			this.client.Attach(channels);
+			string mainChannel = channels.First();
 
-			if (previousVersion != null && previousVersion != Version) {
-				ircInterface.SendMessage(mainChannel, "Succesfully updated from version " + previousVersion + " to version " + Version);
-			} else {
-				ircInterface.SendMessage(mainChannel, "Failed to update: no newer version available (current version: " + Version + ")");
+			if (exitCode == 100) {
+				if (previousVersion != null && previousVersion != Version) {
+					ircInterface.SendMessage(mainChannel, "Succesfully updated from version " + previousVersion + " to version " + Version);
+				} else {
+					ircInterface.SendMessage(mainChannel, "Failed to update: no newer version available (current version: " + Version + ")");
+				}
+			} else if(exitCode == 200){
+				ircInterface.SendMessage(channels.First(), "Restarted successfully.");
+			}else{
+				ircInterface.NotifyOperator("Reconnected to the IRC server after a connection loss.");
 			}
+			EnterMainLoop();
 		}
 
-		public void Connect(CsNetLib2.NetLibClient client)
+		private void EnterMainLoop()
 		{
-			bool deployed;
-			bool.TryParse(Settings.Instance["deployed"], out deployed);
-
-			// When debugging, connect synchronously, to allow the debugger to break on exceptions.
-			// Otherwise, connect asynchronously, to maximize performance.
-			if (deployed) {
-				Task dbConTask = Task.Run(() => ConnectDatabase());
-				Task ircConTask = Task.Run(() => {
-					TryConnectIrc(client);
-				});
-				Task.WaitAll(dbConTask, ircConTask);
-			} else {
-				ConnectDatabase();
-				TryConnectIrc(client);
+			while (!QuitRequested) {
+				Thread.Sleep(1000);
 			}
-			JoinInitialChannel();
-			OnPostConnect();
+			Logger.Log("Preparing to shut down", LogLevel.Info);
+			ircInterface.Disconnect("Shutting down");
+			sqlConnector.CloseConnection();
+			Logger.Log("Closed SQL server connection", LogLevel.Info);
+			sqlConnector.Dispose();
+			Logger.Log("Disposed SQL server connection object", LogLevel.Info);
+			Logger.Dispose();
+			Console.WriteLine("Goodbye.");
+			Environment.Exit(0);
 		}
 
-		private void TryConnectIrc(CsNetLib2.NetLibClient client)
+		private void TryConnectIrc()
 		{
-			if (!ConnectIrc(client)) {
+			if (!ConnectIrc()) {
 				Logger.Log("FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
 				Environment.Exit(1);
 			}
@@ -355,18 +350,7 @@ namespace BaggyBot
 			if (previousVersion != null && previousVersion != Version) {
 				ircInterface.NotifyOperator("Succesfully updated from version " + previousVersion + " to version " + Version);
 			}
-
-			while (!QuitRequested) {
-				Thread.Sleep(1000);
-			}
-			Logger.Log("Preparing to shut down", LogLevel.Info);
-			ircInterface.Disconnect("Shutting down");
-			sqlConnector.CloseConnection();
-			Logger.Log("Closed SQL server connection", LogLevel.Info);
-			sqlConnector.Dispose();
-			Logger.Log("Disposed SQL server connection object", LogLevel.Info);
-			Logger.Dispose();
-			Console.WriteLine("Goodbye.");
+			EnterMainLoop();
 		}
 
 
@@ -375,9 +359,35 @@ namespace BaggyBot
 			throw new NotImplementedException();
 		}
 
-		internal void RequestUpdate(string channel)
+		internal void RequestUpdate(string channel, bool updateFiles)
 		{
-			UpdateRequested(channel);
+			var commandClient = new CsNetLib2.NetLibClient(CsNetLib2.TransferProtocolType.Delimited, System.Text.Encoding.UTF8);
+			commandClient.Connect("localhost", 6668);
+	
+			var channels = client.GetChannels().Select((c) => c.Name).Where((c) => c != channel);
+
+			commandClient.Send("UPDATE " + channel + " " + string.Join(" ", channel));
+
+			if (updateFiles) {
+				Environment.Exit(100);
+			} else {
+				Environment.Exit(200);
+			}
+		}
+
+		public static void Main(string[] args)
+		{
+			if (args.Length > 1) {
+				using (Bot bot = new Bot()) {
+					bot.Attach(int.Parse(args[0]), args.Skip(1));
+				}
+			} else {
+				using (Bot bot = new Bot()) {
+					bot.Connect();
+				}
+			}
+
+
 		}
 	}
 }

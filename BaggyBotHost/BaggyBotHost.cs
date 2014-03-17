@@ -1,61 +1,157 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using System.Reflection;
+using System.Threading;
+using System.Net;
+using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 
 using CsNetLib2;
 
 namespace BaggyBotHost
 {
 	/// <summary>
-	/// This executable will host BaggyBot and CsNetLib separately.
-	/// This will allow us to unload BaggBot and IRCSharp, replace their binaries with a newer version,
-	/// restart the newer versions, and hook them back up to CsNetLib, while
-	/// queueing any messages coming from CsNetLib in the meanwhile.
+	/// This executable serves as a proxy between BaggyBot and an IRC server,
+	/// allowing the BaggyBot executable to  while keeping the BaggyBot IRC user
+	/// connected to the IRC server.
 	/// </summary>
 	class BaggyBotHost
 	{
-		private NetLibClient netClient;
-		// We use a dynamic object to make sure that we can instantiate a newer version of BaggyBot and store it in the same field
-		private dynamic baggyBot;
+		private NetLibClient ircClient;
+		private NetLibServer botServer;
+		private NetLibServer commandServer;
+		private Process botProcess;
+		private bool connecting;
+		private string[] channelsToRejoin;
+		private long botClientId;
 
 		public BaggyBotHost()
 		{
-			netClient = new NetLibClient(TransferProtocolType.Delimited, Encoding.UTF8);
-			baggyBot = new BaggyBot.Bot();
+			Console.WriteLine("Starting BaggyBot Host application!");
+			ircClient = new NetLibClient(TransferProtocolType.Delimited, Encoding.UTF8);
+			ircClient.OnDataAvailable += HandleClientData;
+			botServer = new NetLibServer(IPAddress.Loopback, 6667, TransferProtocolType.Delimited, Encoding.UTF8);
+			botServer.OnDataAvailable += HandleBotData;
+			botServer.OnClientConnected += HandleBotConnect;
+			botServer.StartListening();
+			commandServer = new NetLibServer(IPAddress.Loopback, 6668, TransferProtocolType.Delimited, Encoding.UTF8);
+			commandServer.OnDataAvailable += HandleCommandData;
+			commandServer.StartListening();
 			StartBaggyBot();
-			baggyBot.UpdateRequested += new Action<string>(OnUpdateRequested);
+
+			while (true) {
+				Thread.Sleep(1000);
+			}
 		}
 
-		private void OnUpdateRequested(string requestChannel)
+		private void HandleCommandData(string data, long client)
 		{
-			dynamic channels = baggyBot.Detach();
-			UpdateBinaries();
-
-			baggyBot.Attach(netClient, channels, requestChannel);
+			string[] args = data.Split(' ');
+			switch (args[0].ToUpper()) {
+				case "UPDATE":
+					channelsToRejoin = args.Skip(1).ToArray();
+					break;
+				default:
+					Console.WriteLine("WARNING: Unknown command sent by BaggyBot: " + args[0]);
+					break;
+			}
+		}
+		private void HandleBotConnect(long client)
+		{
+			botClientId = client;
+			if (!ircClient.Connected){
+				string hostname = Settings.Instance["irc_server"];
+				int port;
+				if (!int.TryParse(Settings.Instance["irc_port"], out port)) {
+					Console.WriteLine("Unable to parse the settings value for irc_port. Please make sure that it is a valid integer.");
+					botProcess.Close();
+					Environment.Exit(1);
+				}
+				connecting = true;
+				ircClient.Connect(hostname, port);
+				connecting = false;
+			}
+		}
+		private void HandleBotData(string data, long sender)
+		{
+			while (connecting) {
+				Thread.Sleep(20);
+			}
+			var prev = Console.ForegroundColor;
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine(">> " + data);
+			Console.ForegroundColor = prev;
+			ircClient.Send(data);
+		}
+		private void HandleClientData(string data, long sender)
+		{
+			var prev = Console.ForegroundColor;
+			Console.ForegroundColor = ConsoleColor.Blue;
+			Console.WriteLine("<< " + data);
+			Console.ForegroundColor = prev;
+			botServer.Send(data, botClientId);
 		}
 
 		private void UpdateBinaries()
 		{
-			Console.WriteLine("Deleting assemblies");
-			File.Delete("BaggyBot20.dll");
+			Console.WriteLine("Deleting old assemblies");
+			File.Delete("BaggyBot20.exe");
 			File.Delete("CsNetLib2.dll");
-			Console.WriteLine("Moving assemblies");
-			File.Move("BaggyBot20.dll.new", "BaggyBot20.dll");
+			Console.WriteLine("Moving new assemblies");
+			File.Move("BaggyBot20.exe.new", "BaggyBot20.exe");
 			File.Move("CsNetLib2.dll.new", "CsNetLib2.dll");
 		}
 
-		private void StartBaggyBot()
+		/// <summary>
+		/// Starts a new BaggyBot instance.
+		/// </summary>
+		/// <param name="PreviousExitCode">The exit code returned by the previous instance. 
+		/// The default value of zero may be passed if this is the first instance to run.</param>
+		private void StartBaggyBot(int PreviousExitCode = 0)
 		{
-			baggyBot.Connect(netClient);
-			baggyBot.UpdateRequested += (Action<string>)OnUpdateRequested;
-
-			bool quitRequested = false;
-			while (!quitRequested) {
-				lock (baggyBot) {
-					quitRequested = baggyBot.QuitRequested;
+			Console.WriteLine("Starting BaggyBot Child Process...");
+			if (PreviousExitCode != 0) {
+				if (channelsToRejoin == null || channelsToRejoin.Length == 0) {
+					channelsToRejoin = new string[] { Settings.Instance["irc_initial_channel"] };
 				}
-				System.Threading.Thread.Sleep(1000);
+				string arguments = PreviousExitCode.ToString() + " " + string.Join(" ", channelsToRejoin);
+				if (Environment.OSVersion.Platform.ToString().ToLower() == "unix") {
+					botProcess = Process.Start("mono", "BaggyBot20.exe " + arguments);
+				} else {
+					botProcess = Process.Start("BaggyBot20.exe", arguments);
+				}
+			} else {
+				if (Environment.OSVersion.Platform.ToString().ToLower() == "unix") {
+					botProcess = Process.Start("mono", "BaggyBot20.exe " + PreviousExitCode.ToString());
+				} else {
+					botProcess = Process.Start("BaggyBot20.exe", PreviousExitCode.ToString());
+				}
+				
+			}
+
+			
+			botProcess.EnableRaisingEvents = true;
+			botProcess.Exited += HandleBotExit;
+			channelsToRejoin = null;
+		}
+
+		private void HandleBotExit(object sender, EventArgs e)
+		{
+			int exitCode = botProcess.ExitCode;
+
+			switch (exitCode) {
+				case 0:
+					Console.WriteLine("Bot process has exited cleanly. Shutting down host..");
+					Environment.Exit(0);
+					break;
+				case 100:
+					UpdateBinaries();
+					StartBaggyBot(exitCode);
+					break;
+				default:
+					StartBaggyBot(exitCode);
+					break;
 			}
 		}
 

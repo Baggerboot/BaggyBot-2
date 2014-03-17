@@ -21,19 +21,26 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
+			Logger.Log("Preparing to update");
 			requestChannel = command.Channel;
 
-			var proc = new Process();
-			proc.StartInfo = new ProcessStartInfo
-			{
-				FileName = "sh",
-				Arguments = "autoupdate.sh"
-			};
-			proc.Start();
-			command.ReturnMessage("Downloading update...");
-			proc.WaitForExit();
-			Logger.Log("Requesting an update", LogLevel.Info);
-			bot.RequestUpdate(requestChannel);
+			if (command.Args.Length == 1 && command.Args[0] == "--no-dl") {
+				Logger.Log("Requesting a restart", LogLevel.Info);
+				bot.RequestUpdate(requestChannel, false);
+			} else {
+				Logger.Log("bleh");
+				var proc = new Process();
+				proc.StartInfo = new ProcessStartInfo
+				{
+					FileName = "sh",
+					Arguments = "autoupdate.sh"
+				};
+				proc.Start();
+				command.ReturnMessage("Downloading update...");
+				proc.WaitForExit();
+				Logger.Log("Requesting an update", LogLevel.Info);
+				bot.RequestUpdate(requestChannel, true);
+			}
 		}
 	}
 }
