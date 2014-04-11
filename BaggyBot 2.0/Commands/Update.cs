@@ -28,7 +28,6 @@ namespace BaggyBot.Commands
 				Logger.Log("Requesting a restart", LogLevel.Info);
 				bot.RequestUpdate(requestChannel, false);
 			} else {
-				Logger.Log("bleh");
 				var proc = new Process();
 				proc.StartInfo = new ProcessStartInfo
 				{

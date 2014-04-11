@@ -154,7 +154,6 @@
     <Compile Include="Database\PostgreSQL\PgEntityProvider.cs" />
     <Compile Include="DataProcessors\DataFunctionSet.cs" />
     <Compile Include="DataProcessors\IO\Emoticons.cs" />
-    <Compile Include="DataProcessors\IO\IdentWriter.cs" />
     <Compile Include="DataProcessors\IrcEventHandler.cs" />
     <Compile Include="DataProcessors\IO\IrcInterface.cs" />
     <Compile Include="DataProcessors\IO\Logger.cs" />

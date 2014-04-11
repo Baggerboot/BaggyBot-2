@@ -122,6 +122,10 @@ namespace BaggyBot.Commands
 					ircInterface.SendMessage(command.Channel, ">>>");
 					return;
 				}
+				if (command.FullArgument == "import antigravity") {
+					command.ReturnMessage("--> https://xkcd.com/353/");
+					return;
+				}
 			}
 
 			string code;

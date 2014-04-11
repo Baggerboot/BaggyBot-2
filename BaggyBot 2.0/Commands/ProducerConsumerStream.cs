@@ -66,7 +66,7 @@ namespace BaggyBot.Commands
 
 		public override void SetLength(long value)
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedException("SetLength");
 		}
 
 		public override void Write(byte[] buffer, int offset, int count)

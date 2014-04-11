@@ -43,7 +43,7 @@ namespace BaggyBot.Commands
 
 		protected override void Threads(CommandArgs command)
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedException("Cs.Threads");
 		}
 
 		private bool RestrictionsCheck(CommandArgs command)

@@ -11,11 +11,13 @@ namespace BaggyBot.Commands
 	class Get : ICommand
 	{
 		private DataFunctionSet dataFunctionSet;
+		private IrcInterface ircInterface;
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 
-		public Get(DataFunctionSet df)
+		public Get(DataFunctionSet df, IrcInterface ircInterface )
 		{
 			dataFunctionSet = df;
+			this.ircInterface = ircInterface;
 		}
 
 		public void Use(CommandArgs command)
@@ -40,6 +42,17 @@ namespace BaggyBot.Commands
 					string nick = command.Args.Length > 1 ? command.Args[1] : command.Sender.Nick;
 					int uid = dataFunctionSet.GetIdFromNick(nick);
 					command.Reply("Your user Id is " + uid);
+					break;
+				case "users":
+					if (command.Args.Length != 2) {
+						command.Reply("usage: -get users <#channel>");
+					} else {
+						if (ircInterface.InChannel(command.Args[1])) {
+							command.Reply("users in {0}: {1}", command.Args[1], string.Join(", ", ircInterface.GetUsers(command.Args[1])));
+						} else {
+							command.Reply("I am not in that channel");
+						}
+					}
 					break;
 				default:
 					command.ReturnMessage("That is not a valid property.");

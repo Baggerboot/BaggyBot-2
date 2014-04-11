@@ -24,7 +24,7 @@ namespace BaggyBot.Database.MS_SQL
 		public override IQueryable Words { get { return context.Words; } }
 		public override IQueryable IrcLog
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new NotImplementedException("IRClog has not been implemented for the MS Entity provider"); }
 		}
 
 		public override bool OpenConnection()

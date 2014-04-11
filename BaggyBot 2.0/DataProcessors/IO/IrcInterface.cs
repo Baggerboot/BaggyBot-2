@@ -37,6 +37,12 @@ namespace BaggyBot
 				client.ReplyToPings = value;
 			}
 		}
+		public bool InChannel(string channel)
+		{
+			return client.InChannel(channel);
+		}
+
+
 		public int TotalUserCount { get { return client.TotalUserCount; } }
 
 		public IrcInterface(IrcClient client)
@@ -217,6 +223,11 @@ namespace BaggyBot
 		internal void ChangeClient(IrcClient client)
 		{
 			this.client = client;
+		}
+
+		internal List<string> GetUsers(string channel)
+		{
+			return client.GetUsers(channel);
 		}
 	}
 }

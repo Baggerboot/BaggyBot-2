@@ -23,7 +23,7 @@ namespace BaggyBot.DataProcessors
 				{"convert", new BaggyBot.Commands.Convert()},
 				{"cs", new Cs(ircInterface)},
 				{"feature", new Feature(dataFunctionSet)},
-				{"get", new Get(dataFunctionSet)},
+				{"get", new Get(dataFunctionSet, ircInterface)},
 				{"html", new Html()},
 				{"help", new Help()},
 				{"join", new Join(ircInterface, dataFunctionSet)},

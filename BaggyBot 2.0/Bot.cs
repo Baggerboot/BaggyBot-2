@@ -28,8 +28,6 @@ namespace BaggyBot
 		private IrcEventHandler ircEventHandler;
 		// Collects performance statistics
 		private BotDiagnostics botDiagnostics;
-		// Writes the local port and requested ident to an ident file
-		private IdentWriter identWriter;
 
 		// Any message prefixed with this character will be interpreted as a command
 		public const string commandIdentifier = "-";
@@ -38,7 +36,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.29.2";
+		public const string Version = "3.29.6";
 
 		public bool QuitRequested
 		{
@@ -84,7 +82,6 @@ namespace BaggyBot
 			botDiagnostics = new BotDiagnostics(ircInterface);
 			commandHandler = new CommandHandler(ircInterface, dataFunctionSet, this, botDiagnostics);
 			ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, commandHandler, statsHandler);
-			identWriter = new IdentWriter();
 
 			HookupIrcEvents();
 		}
@@ -141,11 +138,19 @@ namespace BaggyBot
 			string nick = s["irc_nick"];
 			string ident = s["irc_ident"];
 			string realname = s["irc_realname"];
+			string host = "localhost";
+			int port = 6667;
 
 			this.client.AddOrCreateClient(null);
-			this.client.OnLocalPortKnown += HandleLocalPortKnown;
+
+			Logger.Log("Connecting to the IRC server..");
+			Logger.Log("\tNick\t" + nick);
+			Logger.Log("\tIdent\t" + ident);
+			Logger.Log("\tName\t" + realname);
+			Logger.Log("\tHost\t" + host);
+			Logger.Log("\tPort\t" + port);
 			try {
-				this.client.Connect("localhost", 6667, nick, ident, realname, true);
+				this.client.Connect(host, port, nick, ident, realname, true);
 				return true;
 			} catch (System.Net.Sockets.SocketException e) {
 				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
@@ -154,11 +159,6 @@ namespace BaggyBot
 				Logger.Log("Failed to connect to the IRC server: The settings file does not contain a value for \"{0}\"", LogLevel.Error, true, e.ParamName);
 				return false;
 			}
-		}
-
-		private void HandleLocalPortKnown(int localPort)
-		{
-			identWriter.Write(localPort, Settings.Instance["irc_ident"]);
 		}
 
 		public void Reconnect(IEnumerable<string> channels)
@@ -218,8 +218,6 @@ namespace BaggyBot
 
 		/*private void Reconnect(int previousExitCode, string channels)
 		{
-
-
 			bool reconnected = false;
 			do {
 				try {
@@ -271,13 +269,14 @@ namespace BaggyBot
 			sqlConnector.Dispose();
 		}
 
-		public void Attach(int exitCode, IEnumerable<string> channels)
+		public void Attach(int exitCode, string mainChannel, string serializedClientState)
 		{
 			ConnectDatabase();
 			OnPostConnect();
 
-			this.client.Attach(channels);
-			string mainChannel = channels.First();
+			ClientState state = (ClientState) Tools.MiscTools.DeserializeObject(serializedClientState);
+
+			this.client.Attach(state);
 
 			if (exitCode == 100) {
 				if (previousVersion != null && previousVersion != Version) {
@@ -286,7 +285,7 @@ namespace BaggyBot
 					ircInterface.SendMessage(mainChannel, "Failed to update: no newer version available (current version: " + Version + ")");
 				}
 			} else if(exitCode == 200){
-				ircInterface.SendMessage(channels.First(), "Restarted successfully.");
+				ircInterface.SendMessage(mainChannel, "Restarted successfully.");
 			}else{
 				ircInterface.NotifyOperator("Reconnected to the IRC server after a connection loss.");
 			}
@@ -356,17 +355,24 @@ namespace BaggyBot
 
 		void IDisposable.Dispose()
 		{
-			throw new NotImplementedException();
+			Logger.Log("Disposing");
 		}
 
 		internal void RequestUpdate(string channel, bool updateFiles)
 		{
 			var commandClient = new CsNetLib2.NetLibClient(CsNetLib2.TransferProtocolType.Delimited, System.Text.Encoding.UTF8);
 			commandClient.Connect("localhost", 6668);
-	
-			var channels = client.GetChannels().Select((c) => c.Name).Where((c) => c != channel);
 
-			commandClient.Send("UPDATE " + channel + " " + string.Join(" ", channel));
+			var state = client.GetClientState();
+			
+			string data = Tools.MiscTools.SerializeObject(state);
+
+			if(data == null){
+				Logger.Log("Unable to serialize client state: Client state not marked as serializable.", LogLevel.Error);
+				return;
+			}
+
+			commandClient.Send("UPDATE " + channel + " " + data);
 
 			if (updateFiles) {
 				Environment.Exit(100);
@@ -377,12 +383,14 @@ namespace BaggyBot
 
 		public static void Main(string[] args)
 		{
-			if (args.Length > 1) {
+			if (args.Length == 3) {
 				using (Bot bot = new Bot()) {
-					bot.Attach(int.Parse(args[0]), args.Skip(1));
+					Logger.Log("Reattaching to host...");
+					bot.Attach(int.Parse(args[0]), args[1], args[2]);
 				}
 			} else {
 				using (Bot bot = new Bot()) {
+					Logger.Log("Starting new bot instance...");
 					bot.Connect();
 				}
 			}
