@@ -23,15 +23,22 @@ namespace BaggyBotHost
 		private NetLibServer commandServer;
 		private Process botProcess;
 		private bool connecting;
-		private string[] channelsToRejoin;
+		private string mainChannel;
+		private string serializedClientData;
 		private long botClientId;
+		private IdentWriter identWriter;
 
 		public BaggyBotHost()
 		{
-			Console.WriteLine("Starting BaggyBot Host application!");
+			Logger.Log("Starting BaggyBot Host application");
 			ircClient = new NetLibClient(TransferProtocolType.Delimited, Encoding.UTF8);
+			ircClient.OnLocalPortKnown += (port) =>
+			{
+				Logger.Log("Local port: " + port);
+				identWriter.Write(port, Settings.Instance["irc_ident"]);
+			};
 			ircClient.OnDataAvailable += HandleClientData;
-			botServer = new NetLibServer(IPAddress.Loopback, 6667, TransferProtocolType.Delimited, Encoding.UTF8);
+			botServer = new NetLibServer(IPAddress.Any, 6667, TransferProtocolType.Delimited, Encoding.UTF8);
 			botServer.OnDataAvailable += HandleBotData;
 			botServer.OnClientConnected += HandleBotConnect;
 			botServer.StartListening();
@@ -50,21 +57,23 @@ namespace BaggyBotHost
 			string[] args = data.Split(' ');
 			switch (args[0].ToUpper()) {
 				case "UPDATE":
-					channelsToRejoin = args.Skip(1).ToArray();
+					mainChannel = args[1];
+					serializedClientData = args[2];
 					break;
 				default:
-					Console.WriteLine("WARNING: Unknown command sent by BaggyBot: " + args[0]);
+					Logger.Log("WARNING: Unknown command sent by BaggyBot: " + args[0]);
 					break;
 			}
 		}
-		private void HandleBotConnect(long client)
+		private void HandleBotConnect(long clientId)
 		{
-			botClientId = client;
-			if (!ircClient.Connected){
+			Logger.Log("Bot #{0} connected", clientId);
+			botClientId = clientId;
+			if (!ircClient.Connected) {
 				string hostname = Settings.Instance["irc_server"];
 				int port;
 				if (!int.TryParse(Settings.Instance["irc_port"], out port)) {
-					Console.WriteLine("Unable to parse the settings value for irc_port. Please make sure that it is a valid integer.");
+					Logger.Log("Unable to parse the settings value for irc_port. Please make sure that it is a valid integer.");
 					botProcess.Close();
 					Environment.Exit(1);
 				}
@@ -79,17 +88,17 @@ namespace BaggyBotHost
 				Thread.Sleep(20);
 			}
 			var prev = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.Green;
+			/*Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine(">> " + data);
-			Console.ForegroundColor = prev;
+			Console.ForegroundColor = prev;*/
 			ircClient.Send(data);
 		}
 		private void HandleClientData(string data, long sender)
 		{
 			var prev = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.Blue;
+			/*Console.ForegroundColor = ConsoleColor.Blue;
 			Console.WriteLine("<< " + data);
-			Console.ForegroundColor = prev;
+			Console.ForegroundColor = prev;*/
 			botServer.Send(data, botClientId);
 		}
 
@@ -103,6 +112,16 @@ namespace BaggyBotHost
 			File.Move("CsNetLib2.dll.new", "CsNetLib2.dll");
 		}
 
+		private void StartBaggyBotProcessOsIndependent(string arguments)
+		{
+			if (Environment.OSVersion.Platform.ToString().ToLower() == "unix") {
+				botProcess = Process.Start("mono", "BaggyBot20.exe " + arguments);
+			} else {
+				Logger.Log("Starting baggybot with arguments \"{0}\"", arguments);
+				botProcess = Process.Start("BaggyBot20.exe", arguments);
+			}
+		}
+
 		/// <summary>
 		/// Starts a new BaggyBot instance.
 		/// </summary>
@@ -110,30 +129,19 @@ namespace BaggyBotHost
 		/// The default value of zero may be passed if this is the first instance to run.</param>
 		private void StartBaggyBot(int PreviousExitCode = 0)
 		{
-			Console.WriteLine("Starting BaggyBot Child Process...");
+			Logger.Log("Starting BaggyBot Child Process...");
 			if (PreviousExitCode != 0) {
-				if (channelsToRejoin == null || channelsToRejoin.Length == 0) {
-					channelsToRejoin = new string[] { Settings.Instance["irc_initial_channel"] };
+				if (mainChannel == null || mainChannel.Length == 0) {
+					mainChannel = Settings.Instance["irc_initial_channel"];
 				}
-				string arguments = PreviousExitCode.ToString() + " " + string.Join(" ", channelsToRejoin);
-				if (Environment.OSVersion.Platform.ToString().ToLower() == "unix") {
-					botProcess = Process.Start("mono", "BaggyBot20.exe " + arguments);
-				} else {
-					botProcess = Process.Start("BaggyBot20.exe", arguments);
-				}
+				string arguments = PreviousExitCode.ToString() + " " + mainChannel + " " + serializedClientData;
+				StartBaggyBotProcessOsIndependent(arguments);
 			} else {
-				if (Environment.OSVersion.Platform.ToString().ToLower() == "unix") {
-					botProcess = Process.Start("mono", "BaggyBot20.exe " + PreviousExitCode.ToString());
-				} else {
-					botProcess = Process.Start("BaggyBot20.exe", PreviousExitCode.ToString());
-				}
-				
+				StartBaggyBotProcessOsIndependent(PreviousExitCode.ToString());
 			}
-
-			
 			botProcess.EnableRaisingEvents = true;
 			botProcess.Exited += HandleBotExit;
-			channelsToRejoin = null;
+			mainChannel = null;
 		}
 
 		private void HandleBotExit(object sender, EventArgs e)
@@ -142,7 +150,7 @@ namespace BaggyBotHost
 
 			switch (exitCode) {
 				case 0:
-					Console.WriteLine("Bot process has exited cleanly. Shutting down host..");
+					Logger.Log("Bot process has exited cleanly. Shutting down host..");
 					Environment.Exit(0);
 					break;
 				case 100:
@@ -162,21 +170,19 @@ namespace BaggyBotHost
 
 		static void Main(string[] args)
 		{
-			if (args.Length == 1 && args[0] == "--colortest") {
+			/*if (args.Length == 1 && args[0] == "--colortest") {
 
-				Console.WriteLine("Beginning color test");
+				Logger.Log("Beginning color test");
 
 				int i = 0;
 
-				Console.WriteLine("System colors:");
+				Logger.Log("System colors:");
 				for (; i < 16; i++) {
 					Console.Write(EscapeCode(i) + "█");
 					if (i == 7) {
-						Console.WriteLine();
 					}
 				}
-				Console.WriteLine();
-				Console.WriteLine("Color cube, 6x6x6:");
+				Logger.Log("Color cube, 6x6x6:");
 				for (int green = 0; green < 6; green++) {
 					for (int red = 0; red < 6; red++) {
 						for (int blue = 0; blue < 6; blue++) {
@@ -188,18 +194,16 @@ namespace BaggyBotHost
 					Console.Write("\n");
 				}
 
-
-				Console.WriteLine();
-				Console.WriteLine("Grayscale ramp:");
+				Logger.Log("Grayscale ramp:");
 				for (i = 232; i < 256; i++) {
 					Console.Write(EscapeCode(i) + "█");
 				}
-				Console.WriteLine();
-				Console.WriteLine("Done.");
+				Logger.Log("Done.");
 
-			} else {
-				new BaggyBotHost();
-			}
+			} else {*/
+
+			new BaggyBotHost();
+
 		}
 	}
 }
