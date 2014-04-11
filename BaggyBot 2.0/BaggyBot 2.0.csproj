@@ -13,7 +13,6 @@
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
-    <PublishUrl>C:\Xampp\htdocs\files\baggybot20\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -28,6 +27,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>false</BootstrapperEnabled>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -39,7 +40,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>true</Prefer32Bit>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -68,9 +68,6 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DbLinq.PostgreSql, Version=0.20.0.0, Culture=neutral, PublicKeyToken=61e015a67077348b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -86,10 +83,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Mono-3.2.3\lib\mono\2.0\Mono.Security.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Lib\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -100,6 +93,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\Lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
@@ -201,7 +197,6 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="BaggyBot 2.0_TemporaryKey.pfx" />
     <None Include="Database\MS_SQL\StatsBot.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
@@ -228,21 +223,20 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CsNetLib2\CsNetLib2\CsNetLib2.csproj">
-      <Project>{68170802-5de7-4f66-99c7-136b3c7dd93c}</Project>
+      <Project>{68170802-5DE7-4F66-99C7-136B3C7DD93C}</Project>
       <Name>CsNetLib2</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\IRCSharp\IRCSharp\IRCSharp.csproj">
-      <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
+      <Project>{06A69CBB-6E8E-4974-B99D-77221FEC4A33}</Project>
       <Name>IRCSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\DbLinq\DbLinq.csproj">
-      <Project>{7950197d-4122-49cb-9fd7-45e666bafec2}</Project>
+      <Project>{7950197D-4122-49CB-9FD7-45E666BAFEC2}</Project>
       <Name>DbLinq</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)" C:\Xampp\htdocs\files\baggybot20\</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

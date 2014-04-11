@@ -1,8 +1,8 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BaggyBot 2.0\Commands\Ping.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="BaggyBot 2.0/Bot.cs">
     <Files>
-      <File FileName="BaggyBot 2.0\Commands\Ping.cs" Line="3" Column="19" />
+      <File FileName="BaggyBot 2.0/Bot.cs" Line="193" Column="14" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

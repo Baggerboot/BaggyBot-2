@@ -195,9 +195,17 @@ namespace BaggyBot
 				joins[i] = (Task.Run(() => client.JoinChannel(c)));
 				i++;
 			}
-			if (!Task.WaitAll(joins, 30000)) {
-				var failedJoins = joins.Where((join) => !join.IsCompleted);
-				Logger.Log("Join timeout: failed to join {0}", LogLevel.Warning, true, string.Join(", ", failedJoins));
+			try{
+				if (!Task.WaitAll(joins, 30000)) {
+					var failedJoins = joins.Where((join) => !join.IsCompleted);
+					Logger.Log("Join timeout: failed to join {0}", LogLevel.Warning, true, string.Join(", ", failedJoins));
+				}
+			}catch(AggregateException e){
+				Logger.Log("One or more exceptions occurred while trying to join the following channel(s): {0}", LogLevel.Error, true, string.Join(", ", channels));
+				foreach (var exception in e.InnerExceptions) {
+					Logger.Log (" - {0}: \"{1}\" in {2}; stacktrace: {3}", LogLevel.Error, true, exception.GetType ().Name, exception.Message, exception.TargetSite, exception.StackTrace);
+				}
+				Logger.Log ("[End of exception list]", LogLevel.Error);
 			}
 		}
 

@@ -34,17 +34,13 @@ namespace BaggyBotHost
 				message = String.Format(message, format);
 			}
 			StringBuilder lineBuilder = new StringBuilder();
-			ConsoleColor lineColor = ConsoleColor.Gray;
 
 			lineBuilder.Append("[HST]\t");
-			lineColor = ConsoleColor.DarkYellow;
 
 			lineBuilder.Append(prefix);
 			lineBuilder.Append(message);
 
-			WriteToConsole(lineColor, lineBuilder);
-
-			lineBuilder.Insert(0, DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff]\t"));
+			WriteToConsole(ConsoleColor.DarkYellow, lineBuilder);
 		}
 
 		private static void WriteToConsole(ConsoleColor lineColor, StringBuilder lineBuilder)

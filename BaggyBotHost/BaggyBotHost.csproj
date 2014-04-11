@@ -11,6 +11,8 @@
     <AssemblyName>BaggyBotHost</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -22,6 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -55,16 +58,15 @@
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CsNetLib2\CsNetLib2\CsNetLib2.csproj">
-      <Project>{68170802-5de7-4f66-99c7-136b3c7dd93c}</Project>
+      <Project>{68170802-5DE7-4F66-99C7-136B3C7DD93C}</Project>
       <Name>CsNetLib2</Name>
     </ProjectReference>
     <ProjectReference Include="..\BaggyBot 2.0\BaggyBot 2.0.csproj">
-      <Project>{82d7ae98-082c-4e8b-86a1-ade631720e55}</Project>
+      <Project>{82D7AE98-082C-4E8B-86A1-ADE631720E55}</Project>
       <Name>BaggyBot 2.0</Name>
     </ProjectReference>
   </ItemGroup>
