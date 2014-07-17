@@ -36,7 +36,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.29.6";
+		public const string Version = "3.31";
 
 		public bool QuitRequested
 		{
@@ -132,14 +132,12 @@ namespace BaggyBot
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
-		private bool ConnectIrc()
+		private bool ConnectIrc(string host, int port)
 		{
 			Settings s = Settings.Instance;
 			string nick = s["irc_nick"];
 			string ident = s["irc_ident"];
 			string realname = s["irc_realname"];
-			string host = "localhost";
-			int port = 6667;
 
 			this.client.AddOrCreateClient(null);
 
@@ -224,37 +222,6 @@ namespace BaggyBot
 			};
 		}
 
-		/*private void Reconnect(int previousExitCode, string channels)
-		{
-			bool reconnected = false;
-			do {
-				try {
-					client = new IrcClient();
-					HookupIrcEvents();
-					Reconnect(channels.Select(c => c.Name));
-
-					reconnected = true;
-
-					switch (reason) {
-						case DisconnectReason.ServerDisconnect:
-							Logger.Log("Reconnected to the IRC server after a connection loss", LogLevel.Warning);
-							break;
-						case DisconnectReason.PingTimeout:
-							Logger.Log("Reconnected to the IRC server after a ping timeout", LogLevel.Warning);
-							break;
-						default:
-							Logger.Log("Reconnected to the IRC server after a connection loss ({0})", LogLevel.Warning, true, reason.ToString());
-							break;
-					}
-				} catch (System.Net.Sockets.SocketException) {
-					Logger.Log("Failed to reconnect. Retrying in 2 seconds.", LogLevel.Info);
-					// Wait a while before attempting to reconnect. This prevents the bot from flooding the IRC server with connection requests
-					// in case the connection request fails.
-					System.Threading.Thread.Sleep(2000);
-				}
-			} while (!reconnected);
-		}*/
-
 		private void HandleDisconnect(DisconnectReason reason)
 		{
 			if (reason == DisconnectReason.DisconnectOnRequest) {
@@ -316,9 +283,9 @@ namespace BaggyBot
 			Environment.Exit(0);
 		}
 
-		private void TryConnectIrc()
+		private void TryConnectIrc(string host, int port)
 		{
-			if (!ConnectIrc()) {
+			if (!ConnectIrc(host, port)) {
 				Logger.Log("FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
 				Environment.Exit(1);
 			}
@@ -345,10 +312,10 @@ namespace BaggyBot
 			return channels;
 		}
 
-		public void Connect()
+		public void Connect(string host, int port)
 		{
 			Task dbConTask = Task.Run(() => ConnectDatabase());
-			Task ircConTask = Task.Run(() => ConnectIrc());
+			Task ircConTask = Task.Run(() => ConnectIrc(host, port));
 			Task.WaitAll(dbConTask, ircConTask);
 
 			JoinInitialChannel();
@@ -396,14 +363,17 @@ namespace BaggyBot
 					Logger.Log("Reattaching to host...");
 					bot.Attach(int.Parse(args[0]), args[1], args[2]);
 				}
+			} else if (args.Length == 1 && args[0] == "-standalone") {
+				using (Bot bot = new Bot()) {
+					Logger.Log("Starting new bot instance...");
+					bot.Connect(Settings.Instance["irc_server"], int.Parse(Settings.Instance["irc_port"]));
+				}
 			} else {
 				using (Bot bot = new Bot()) {
 					Logger.Log("Starting new bot instance...");
-					bot.Connect();
+					bot.Connect("localhost", 6667);
 				}
 			}
-
-
 		}
 	}
 }
