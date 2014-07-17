@@ -31,13 +31,17 @@ namespace BaggyBotHost
 		public BaggyBotHost()
 		{
 			Logger.Log("Starting BaggyBot Host application");
-			ircClient = new NetLibClient(TransferProtocolType.Delimited, Encoding.UTF8);
-			ircClient.OnLocalPortKnown += (port) =>
-			{
-				Logger.Log("Local port: " + port);
-				identWriter.Write(port, Settings.Instance["irc_ident"]);
-			};
-			ircClient.OnDataAvailable += HandleClientData;
+
+			IPEndPoint endpoint;
+			IPAddress addr;
+			if (IPAddress.TryParse(Settings.Instance["irc_local_endpoint"], out addr)) {
+				Logger.Log("Binding to " + addr.ToString());
+				endpoint = new IPEndPoint(addr, 0);
+			} else {
+				endpoint = null;
+			}
+			CreateIrcClient(endpoint);
+
 			botServer = new NetLibServer(IPAddress.Any, 6667, TransferProtocolType.Delimited, Encoding.UTF8);
 			botServer.OnDataAvailable += HandleBotData;
 			botServer.OnClientConnected += HandleBotConnect;
@@ -50,6 +54,36 @@ namespace BaggyBotHost
 			while (true) {
 				Thread.Sleep(1000);
 			}
+		}
+
+		private void CreateIrcClient(IPEndPoint localEndPoint)
+		{
+			ircClient = new NetLibClient(TransferProtocolType.Delimited, Encoding.UTF8, localEndPoint);
+			ircClient.OnLocalPortKnown += (port) =>
+			{
+				Logger.Log("Local port: " + port);
+				identWriter.Write(port, Settings.Instance["irc_ident"]);
+			};
+			ircClient.OnDataAvailable += HandleClientData;
+			ircClient.OnDisconnect += () =>
+			{
+				Logger.Log("IRC Connection lost! Reconnecting.");
+				CreateIrcClient(localEndPoint);
+				ConnectIrcClient();
+			};
+		}
+		private void ConnectIrcClient()
+		{
+			string hostname = Settings.Instance["irc_server"];
+			int port;
+			if (!int.TryParse(Settings.Instance["irc_port"], out port)) {
+				Logger.Log("Unable to parse the settings value for irc_port. Please make sure that it is a valid integer.");
+				botProcess.Close();
+				Environment.Exit(1);
+			}
+			connecting = true;
+			ircClient.Connect(hostname, port);
+			connecting = false;
 		}
 
 		private void HandleCommandData(string data, long client)
@@ -70,16 +104,7 @@ namespace BaggyBotHost
 			Logger.Log("Bot #{0} connected", clientId);
 			botClientId = clientId;
 			if (!ircClient.Connected) {
-				string hostname = Settings.Instance["irc_server"];
-				int port;
-				if (!int.TryParse(Settings.Instance["irc_port"], out port)) {
-					Logger.Log("Unable to parse the settings value for irc_port. Please make sure that it is a valid integer.");
-					botProcess.Close();
-					Environment.Exit(1);
-				}
-				connecting = true;
-				ircClient.Connect(hostname, port);
-				connecting = false;
+				ConnectIrcClient();
 			}
 		}
 		private void HandleBotData(string data, long sender)
@@ -119,6 +144,7 @@ namespace BaggyBotHost
 			} else {
 				Logger.Log("Starting baggybot with arguments \"{0}\"", arguments);
 				botProcess = Process.Start("BaggyBot20.exe", arguments);
+				Process.Start("vsjitdebugger.exe", "-p " + botProcess.Id);
 			}
 		}
 
