@@ -105,6 +105,7 @@
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
     <Compile Include="CodeFormatter.cs" />
+    <Compile Include="Commands\Bf.cs" />
     <Compile Include="Commands\Convert.cs" />
     <Compile Include="Commands\Cs.cs" />
     <Compile Include="Commands\Html.cs" />
@@ -252,7 +253,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Database\MongoDB\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

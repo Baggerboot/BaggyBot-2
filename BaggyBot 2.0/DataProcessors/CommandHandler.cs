@@ -20,6 +20,7 @@ namespace BaggyBot.DataProcessors
 			this.ircInterface = ircInterface;
 			commands = new Dictionary<string, ICommand>()
 			{
+				{"bf", new Bf()},
 				{"convert", new BaggyBot.Commands.Convert()},
 				{"cs", new Cs(ircInterface)},
 				{"feature", new Feature(dataFunctionSet)},
