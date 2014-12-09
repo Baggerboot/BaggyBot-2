@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BaggyBot.Commands
 {
@@ -15,13 +13,11 @@ namespace BaggyBot.Commands
 			{
 				get
 				{
-					if (next == null) {
-						next = new MemoryCell();
-						next.Previous = this;
-					}
+					if (next != null) return next;
+					next = new MemoryCell {Previous = this};
 					return next;
 				}
-				set
+				private set
 				{
 					next = value;
 				}
@@ -31,18 +27,16 @@ namespace BaggyBot.Commands
 			{
 				get
 				{
-					if (previous == null) {
-						previous = new MemoryCell();
-						previous.Next = this;
-					}
+					if (previous != null) return previous;
+					previous = new MemoryCell {Next = this};
 					return previous;
 				}
-				set
+				private set
 				{
 					previous = value;
 				}
 			}
-			public byte Value = 0;
+			public byte Value;
 			public override string ToString()
 			{
 				return Previous.Value + " - " + Value + " - " + Next.Value;
@@ -67,7 +61,7 @@ namespace BaggyBot.Commands
 			byte register = 0;
 			var pointer = new MemoryCell();
 			try {
-				string output = ProcessCodeBlock(pointer, code, ref register);
+				var output = ProcessCodeBlock(pointer, code, ref register);
 				return output;
 			} catch (ArgumentException e) {
 				return e.Message;
@@ -76,9 +70,9 @@ namespace BaggyBot.Commands
 
 		private string ProcessCodeBlock(MemoryCell pointer, string code, ref byte register)
 		{
-			StringBuilder outputBuilder = new StringBuilder();
+			var outputBuilder = new StringBuilder();
 
-			for (int i = 0; i < code.Length; i++) {
+			for (var i = 0; i < code.Length; i++) {
 				switch (code[i]) {
 					case '>':
 						pointer = pointer.Next;
@@ -99,9 +93,9 @@ namespace BaggyBot.Commands
 						pointer.Value = register;
 						break;
 					case '[':
-						int depth = 0;
-						int length = -1;
-						for (int j = i; j < code.Length; j++) {
+						var depth = 0;
+						var length = -1;
+						for (var j = i; j < code.Length; j++) {
 							if (code[j] == '[') {
 								depth++;
 							} else if (code[j] == ']') {
@@ -118,7 +112,7 @@ namespace BaggyBot.Commands
 						}
 
 						while (pointer.Value != 0) {
-							string codeBlock = code.Substring(i + 1, length - 1);
+							var codeBlock = code.Substring(i + 1, length - 1);
 							outputBuilder.Append(ProcessCodeBlock(pointer, codeBlock, ref register));
 						}
 						i += length;

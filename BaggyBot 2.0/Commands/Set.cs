@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.Linq;
 using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
 	class Set : ICommand
 	{
-		private DataFunctionSet dataFunctionSet;
+		private readonly DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
 		public Set(DataFunctionSet df)

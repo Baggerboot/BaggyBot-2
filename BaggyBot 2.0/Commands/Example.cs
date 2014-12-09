@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-// NOTE: This is not an actual command, just a template for quickly adding a new command
+﻿// NOTE: This is not an actual command, just a template for quickly adding a new command
 
 namespace BaggyBot.Commands
 {

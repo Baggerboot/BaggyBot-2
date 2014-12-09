@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using System.Data;
+using System.Threading;
 using IRCSharp;
 using BaggyBot.DataProcessors;
+using IRCSharp.IRC;
 
 namespace BaggyBot
 {
 	public class IrcInterface
 	{
-		private Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
-		private Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
+		private readonly Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
+		private readonly Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
 		public DataFunctionSet dataFunctionSet { private get; set; }
 
 		private IrcClient client;
 
 		private const int messageLengthLimit = 510;
 
-		private List<string> whoisCalls = new List<string>();
-		private List<string> nickservCalls = new List<string>(); // Holds information about which users are currently being looked up
+		private readonly List<string> whoisCalls = new List<string>();
+		private readonly List<string> nickservCalls = new List<string>(); // Holds information about which users are currently being looked up
 		private bool CanDoNickservCall = true;
 		public bool HasNickservCall { get { return nickservCalls.Count > 0; } }
 		public bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
@@ -46,6 +45,11 @@ namespace BaggyBot
 		public int TotalUserCount { get { return client.TotalUserCount; } }
 
 		public IrcInterface(IrcClient client)
+		{
+			this.client = client;
+		}
+
+		public void UpdateClient(IrcClient client)
 		{
 			this.client = client;
 		}
@@ -90,9 +94,9 @@ namespace BaggyBot
 			nick = nick.ToLower();
 
 
-			int waitTime = 0;
+			var waitTime = 0;
 			while (!nickservCallResults.ContainsKey(nick)) {
-				System.Threading.Thread.Sleep(20);
+				Thread.Sleep(20);
 				waitTime += 20;
 				if (waitTime == 6000) {
 					Logger.Log("No nickserv reply received for {0} after 6 seconds", LogLevel.Warning, true, nick);
@@ -136,14 +140,14 @@ namespace BaggyBot
 				message = message.Substring(0, GetMaxMessageLength(target));
 			}
 
-			string fullMsg = GenerateFullMessage(target, message);
+			var fullMsg = GenerateFullMessage(target, message);
 
 			if (fullMsg.Length > messageLengthLimit) {
 				Logger.Log("Message prototype exceeds maximum allowed message length! Message prototype: " + fullMsg, LogLevel.Warning);
 			}
 
 			var result = client.SendMessage(target, message);
-			if (result && dataFunctionSet.ConnectionState != System.Data.ConnectionState.Closed) {
+			if (result && dataFunctionSet.ConnectionState != ConnectionState.Closed) {
 				dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
 			}
 			if (cutoff != null) {
@@ -178,9 +182,9 @@ namespace BaggyBot
 			SendMessage(Settings.Instance["operator_nick"], message);
 		}
 
-		public void JoinChannel(string channel)
+		public bool JoinChannel(string channel)
 		{
-			client.JoinChannel(channel);
+			return client.JoinChannel(channel);
 		}
 
 		public void TestNickServ()
@@ -191,14 +195,14 @@ namespace BaggyBot
 		public IrcUser DoWhoisCall(string nick)
 		{
 			whoisCalls.Add(nick);
-			var t = new System.Threading.Thread(() => client.SendRaw("WHOIS " + nick));
+			var t = new Thread(() => client.SendRaw("WHOIS " + nick));
 			t.Start();
 
 			while (!whoisCallResults.ContainsKey(nick)) {
-				System.Threading.Thread.Sleep(20);
+				Thread.Sleep(20);
 			}
 			whoisCalls.Remove(nick);
-			IrcUser result = whoisCallResults[nick];
+			var result = whoisCallResults[nick];
 			whoisCallResults.Remove(nick);
 			return result;
 		}

@@ -1,32 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using IRCSharp;
 using BaggyBot.Tools;
 using System.Text.RegularExpressions;
-using System.Threading;
-
 #if postgresql
-using BaggyBot.Database.PostgreSQL;
+
 #endif
 #if mssql
 using BaggyBot.Database.MS_SQL;
 #endif
+using IRCSharp.IRC;
 
 namespace BaggyBot.DataProcessors
 {
 	class StatsHandler
 	{
-		private DataFunctionSet dataFunctionSet;
-		private IrcInterface ircInterface;
-		private Random rand;
+		private readonly DataFunctionSet dataFunctionSet;
+		private readonly IrcInterface ircInterface;
+		private readonly Random rand;
 
 		// Non-exhaustive list of shared idents that are commonly used by multiple people, often because they are standard values for their respective IRC clients.
+/*
 		private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
-		private string[] snagMessages = { "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
+*/
+		private readonly string[] snagMessages = { "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
 
 
 		public StatsHandler(DataFunctionSet dm, IrcInterface inter)
@@ -52,11 +51,11 @@ namespace BaggyBot.DataProcessors
 		}
 		public void ProcessMessage(IrcMessage message, int userId)
 		{
-			if (dataFunctionSet.ConnectionState == System.Data.ConnectionState.Closed) return;
+			if (dataFunctionSet.ConnectionState == ConnectionState.Closed) return;
 
 			Logger.Log("Processing message for " + message.Sender.Nick);
 
-			List<string> words = WordTools.GetWords(message.Message);
+			var words = WordTools.GetWords(message.Message);
 
 			// FIXME: Is this necessary?
 			words = words.Select(s => s.Replace("'", "''")).ToList();
@@ -83,14 +82,14 @@ namespace BaggyBot.DataProcessors
 			dataFunctionSet.IncrementVar("global_line_count");
 			dataFunctionSet.IncrementVar("global_word_count", words.Count);
 			GenerateRandomQuote(message, words, userId);
-			ProcessRandomEvents(message, words);
+			ProcessRandomEvents(message);
 			GetEmoticons(userId, words);
-			foreach (string word in words) {
+			foreach (var word in words) {
 				ProcessWord(message, word, userId);
 			}
 		}
 
-		private void ProcessRandomEvents(IrcMessage message, List<string> words)
+		private void ProcessRandomEvents(IrcMessage message)
 		{
 			if (message.Sender.Nick == "Ralph" && message.Message.ToLower().Contains("baggybot")) {
 				ircInterface.SendMessage(message.Channel, "Shut up you fool");
@@ -99,8 +98,8 @@ namespace BaggyBot.DataProcessors
 
 		private void ProcessWord(IrcMessage message, string word, int sender)
 		{
-			string lword = word.ToLower();
-			string cword = textOnly.Replace(lword, "");
+			var lword = word.ToLower();
+			var cword = textOnly.Replace(lword, "");
 			if (word.StartsWith("http://") || word.StartsWith("https://")) {
 				dataFunctionSet.IncrementUrl(word, sender, message.Message.Replace("'", "''"));
 			} else if (!WordTools.IsIgnoredWord(cword) && cword.Length >= 3) {
@@ -110,11 +109,11 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		Regex textOnly = new Regex("[^a-z]");
+		readonly Regex textOnly = new Regex("[^a-z]");
 
-		private void GetEmoticons(int userId, List<string> words)
+		private void GetEmoticons(int userId, IEnumerable<string> words)
 		{
-			foreach (string word in words) {
+			foreach (var word in words) {
 				if (Emoticons.List.Contains(word)) {
 					dataFunctionSet.IncrementEmoticon(word, userId);
 				}
@@ -131,7 +130,8 @@ namespace BaggyBot.DataProcessors
 				dataFunctionSet.Snag(message);
 				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
 				return;
-			} else if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nick) {
+			}
+			if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nick) {
 				ControlVariables.SnagNextLineBy = null;
 				dataFunctionSet.Snag(message);
 				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
@@ -143,7 +143,7 @@ namespace BaggyBot.DataProcessors
 
 		private void PerformSnagLogic(IrcMessage message, List<string> words, int userId)
 		{
-			DateTime? last = dataFunctionSet.GetLastSnaggedLine(userId);
+			var last = dataFunctionSet.GetLastSnaggedLine(userId);
 			if (last.HasValue) {
 				if ((DateTime.Now - last.Value).Hours < int.Parse(Settings.Instance["snag_min_wait"])) {
 					Logger.Log("Dropped a snag as this user has recently been snagged already");
@@ -168,12 +168,12 @@ namespace BaggyBot.DataProcessors
 				if (rand.NextDouble() <= snagChance) {
 					bool allowSnagMessage;
 					bool.TryParse(Settings.Instance["display_snag_message"], out allowSnagMessage);
-					bool hideSnagMessage = rand.NextDouble() <= silenceChance;
+					var hideSnagMessage = rand.NextDouble() <= silenceChance;
 					if (!allowSnagMessage || hideSnagMessage) { // Check if snag message should be displayed
 						Logger.Log("Silently snagging this message");
 						dataFunctionSet.Snag(message);
 					} else {
-						int randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
+						var randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
 						if (randint < snagMessages.Length) {
 							SnagMessage(message, snagMessages[randint]);
 						} else {

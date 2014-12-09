@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Data.Linq;
-using System.Data.SqlClient;
+﻿using System.Linq;
 using BaggyBot.Database.EntityProvider;
 
 namespace BaggyBot.Database.PostgreSQL
@@ -26,16 +19,15 @@ namespace BaggyBot.Database.PostgreSQL
 
 		public override bool OpenConnection()
 		{
-			string connectionString = Settings.Instance["sql_connection_string"];
+			var connectionString = Settings.Instance["sql_connection_string"];
 			if (string.IsNullOrWhiteSpace(connectionString)) {
 				Logger.Log("Unable to connect to the SQL database: No connection specified.", LogLevel.Error);
 				return false;
-			} else {
-				context = new BaggyBoT(connectionString);
-				base.connection = context.Connection;
-				context.Connection.Open();
-				return true;
 			}
+			context = new BaggyBoT(connectionString);
+			base.connection = context.Connection;
+			context.Connection.Open();
+			return true;
 		}
 		public override void SubmitChanges()
 		{

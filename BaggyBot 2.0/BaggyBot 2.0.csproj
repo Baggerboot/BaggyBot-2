@@ -116,6 +116,7 @@
     <Compile Include="Commands\Reconnect.cs" />
     <Compile Include="Commands\Remember.cs" />
     <Compile Include="Commands\ResolveReverse.cs" />
+    <Compile Include="Commands\Sql.cs" />
     <Compile Include="Commands\Topics.cs" />
     <Compile Include="Commands\Update.cs" />
     <Compile Include="Commands\Uptime.cs" />
@@ -159,7 +160,6 @@
     <Compile Include="DataProcessors\IrcEventHandler.cs" />
     <Compile Include="DataProcessors\IO\IrcInterface.cs" />
     <Compile Include="DataProcessors\IO\Logger.cs" />
-    <Compile Include="DataProcessors\IO\LogLevel.cs" />
     <Compile Include="DataProcessors\IO\Messages.cs" />
     <Compile Include="DataProcessors\IO\Diagnostics\PerformanceLogger.cs" />
     <Compile Include="Bot.cs" />
@@ -178,6 +178,7 @@
     <Compile Include="Database\SqlConnector.cs" />
     <Compile Include="DataProcessors\StatsHandler.cs" />
     <Compile Include="Tools\MiscTools.cs" />
+    <Compile Include="Tools\PythonFunction.cs" />
     <Compile Include="Tools\PythonTools.cs" />
     <Compile Include="Tools\UserTools.cs" />
     <Compile Include="Tools\WordTools.cs" />

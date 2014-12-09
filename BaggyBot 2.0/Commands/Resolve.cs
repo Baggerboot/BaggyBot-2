@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using System.Net;
 
 namespace BaggyBot.Commands
@@ -28,7 +23,7 @@ namespace BaggyBot.Commands
 
 
 			if (hostEntry.AddressList.Length > 0) {
-				string addr = "";
+				var addr = "";
 				foreach (var address in hostEntry.AddressList) {
 					addr += ", " + address;
 				}

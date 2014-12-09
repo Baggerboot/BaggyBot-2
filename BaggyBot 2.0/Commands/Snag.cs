@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using BaggyBot.Tools;
-
-namespace BaggyBot.Commands
+﻿namespace BaggyBot.Commands
 {
 	class Snag : ICommand
 	{

@@ -4,14 +4,10 @@
 //BaggyBot.Database.PostgreSQL
 
 using System;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Data;
-using System.Data.SqlClient;
 using System.Collections.Generic;
-using System.Configuration;
 using BaggyBot.Database.EntityProvider;
-
+using BaggyBot.Database.PostgreSQL;
 #if postgresql
 using DbLinq.Data.Linq;
 #endif
@@ -30,22 +26,21 @@ namespace BaggyBot.Database
 			{
 				if (provider == null) {
 					return ConnectionState.Closed;
-				} else {
-					return provider.ConnectionState;
 				}
+				return provider.ConnectionState;
 			}
 		}
 
 #if postgresql
-		public Table<PostgreSQL.UserCredentials> UserCreds;
-		public Table<PostgreSQL.Quote> Quotes;
-		public Table<PostgreSQL.UserStatistics> UserStats;
-		public Table<PostgreSQL.Emoticon> Emoticons;
-		public Table<PostgreSQL.KeyValuePair> KeyValuePairs;
-		public Table<PostgreSQL.Url> Urls;
-		public Table<PostgreSQL.Name> UserNames;
-		public Table<PostgreSQL.Word> Words;
-		public Table<PostgreSQL.IrcLog> IrcLog;
+		public Table<UserCredentials> UserCreds;
+		public Table<Quote> Quotes;
+		public Table<UserStatistics> UserStats;
+		public Table<Emoticon> Emoticons;
+		public Table<KeyValuePair> KeyValuePairs;
+		public Table<Url> Urls;
+		public Table<Name> UserNames;
+		public Table<Word> Words;
+		public Table<IrcLog> IrcLog;
 #endif
 #if mssql
 		public Table<MS_SQL.UserCredentials> UserCreds;
@@ -64,25 +59,25 @@ namespace BaggyBot.Database
 		}
 		public bool OpenConnection()
 		{
-			bool useDbLinq = false;
+			var useDbLinq = false;
 			if (bool.TryParse(Settings.Instance["sql_use_dblinq"], out useDbLinq)) {
 				provider = new EntityProviderFactory().CreateEntityProvider(useDbLinq ? SupportedDatabases.PostgreSQL : SupportedDatabases.MsSql);
 			} else {
 				Logger.Log("Unable to connect to the SQL database: settings value for sql_use_dblinq not set.", LogLevel.Error);
 				return false;
 			}
-			bool result = provider.OpenConnection();
+			var result = provider.OpenConnection();
 
 #if postgresql
-			UserCreds = (Table<PostgreSQL.UserCredentials>)provider.UserCreds;
-			Quotes = (Table<PostgreSQL.Quote>)provider.Quotes;
-			UserStats = (Table<PostgreSQL.UserStatistics>)provider.UserStats;
-			Emoticons = (Table<PostgreSQL.Emoticon>)provider.Emoticons;
-			KeyValuePairs = (Table<PostgreSQL.KeyValuePair>)provider.KeyValuePairs;
-			Urls = (Table<PostgreSQL.Url>)provider.Urls;
-			UserNames = (Table<PostgreSQL.Name>)provider.UserNames;
-			Words = (Table<PostgreSQL.Word>)provider.Words;
-			IrcLog = (Table<PostgreSQL.IrcLog>)provider.IrcLog;
+			UserCreds = (Table<UserCredentials>)provider.UserCreds;
+			Quotes = (Table<Quote>)provider.Quotes;
+			UserStats = (Table<UserStatistics>)provider.UserStats;
+			Emoticons = (Table<Emoticon>)provider.Emoticons;
+			KeyValuePairs = (Table<KeyValuePair>)provider.KeyValuePairs;
+			Urls = (Table<Url>)provider.Urls;
+			UserNames = (Table<Name>)provider.UserNames;
+			Words = (Table<Word>)provider.Words;
+			IrcLog = (Table<IrcLog>)provider.IrcLog;
 #endif
 #if mssql
 			UserCreds = (Table<MS_SQL.UserCredentials>) provider.UserCreds;

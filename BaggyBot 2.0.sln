@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRCSharp", "..\IRCSharp\IRC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsNetLib2", "..\CsNetLib2\CsNetLib2\CsNetLib2.csproj", "{68170802-5DE7-4F66-99C7-136B3C7DD93C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaggyBotHost", "BaggyBotHost\BaggyBotHost.csproj", "{659AFE27-D1B3-45EE-B0E7-4BDBDA983E69}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug - Mono Strict|Any CPU = Debug - Mono Strict|Any CPU
@@ -18,41 +16,35 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug|Any CPU
-		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug - Mono Strict|Any CPU.Build.0 = Debug|Any CPU
-		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Release|Any CPU.Build.0 = Release|Any CPU
-		{659AFE27-D1B3-45EE-B0E7-4BDBDA983E69}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug|Any CPU
-		{659AFE27-D1B3-45EE-B0E7-4BDBDA983E69}.Debug - Mono Strict|Any CPU.Build.0 = Debug|Any CPU
-		{659AFE27-D1B3-45EE-B0E7-4BDBDA983E69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{659AFE27-D1B3-45EE-B0E7-4BDBDA983E69}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{659AFE27-D1B3-45EE-B0E7-4BDBDA983E69}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{659AFE27-D1B3-45EE-B0E7-4BDBDA983E69}.Release|Any CPU.Build.0 = Release|Any CPU
-		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug|Any CPU
-		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug - Mono Strict|Any CPU.Build.0 = Debug|Any CPU
-		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug - Mono Strict|Any CPU
-		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug - Mono Strict|Any CPU.Build.0 = Debug - Mono Strict|Any CPU
-		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{82D7AE98-082C-4E8B-86A1-ADE631720E55}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug|Any CPU
 		{82D7AE98-082C-4E8B-86A1-ADE631720E55}.Debug - Mono Strict|Any CPU.Build.0 = Debug|Any CPU
 		{82D7AE98-082C-4E8B-86A1-ADE631720E55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{82D7AE98-082C-4E8B-86A1-ADE631720E55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82D7AE98-082C-4E8B-86A1-ADE631720E55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82D7AE98-082C-4E8B-86A1-ADE631720E55}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = BaggyBotHost\BaggyBotHost.csproj
+		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug - Mono Strict|Any CPU
+		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug - Mono Strict|Any CPU.Build.0 = Debug - Mono Strict|Any CPU
+		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7950197D-4122-49CB-9FD7-45E666BAFEC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug|Any CPU
+		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug - Mono Strict|Any CPU.Build.0 = Debug|Any CPU
+		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06A69CBB-6E8E-4974-B99D-77221FEC4A33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug - Mono Strict|Any CPU.ActiveCfg = Debug|Any CPU
+		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug - Mono Strict|Any CPU.Build.0 = Debug|Any CPU
+		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68170802-5DE7-4F66-99C7-136B3C7DD93C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = BaggyBotHost\BaggyBotHost.csproj
 	EndGlobalSection
 EndGlobal

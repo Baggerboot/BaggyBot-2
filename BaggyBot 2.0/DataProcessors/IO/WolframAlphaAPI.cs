@@ -15,10 +15,7 @@
 namespace BaggyBot.IO.WolframAlpha
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Data.Services.Client;
-	using System.Net;
-	using System.IO;
 
 
 	public partial class DefaultPodEntity

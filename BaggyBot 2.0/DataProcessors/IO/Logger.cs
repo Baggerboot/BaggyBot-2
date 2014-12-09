@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
 using System.IO;
 namespace BaggyBot
 {
@@ -22,7 +18,7 @@ namespace BaggyBot
 	public static class Logger
 	{
 		public const string LogFileName = "baggybot.log";
-		private static bool disposed = false;
+		private static bool disposed;
 		private static string prefix = string.Empty;
 
 		public static event LogEvent OnLogEvent;
@@ -45,7 +41,7 @@ namespace BaggyBot
 
 		public static void ClearPrefix()
 		{
-			Logger.prefix = string.Empty;
+			prefix = string.Empty;
 		}
 
 		public static void Log(string message, LogLevel level = LogLevel.Debug, bool writeLine = true, params object[] format)
@@ -53,8 +49,8 @@ namespace BaggyBot
 			if (format.Length != 0) {
 				message = String.Format(message, format);
 			}
-			StringBuilder lineBuilder = new StringBuilder();
-			ConsoleColor lineColor = ConsoleColor.Gray;
+			var lineBuilder = new StringBuilder();
+			var lineColor = ConsoleColor.Gray;
 
 			switch (level) {
 				case LogLevel.Debug:
@@ -110,13 +106,13 @@ namespace BaggyBot
 			var prevColor = Console.ForegroundColor;
 			Console.ForegroundColor = lineColor;
 			if (level == LogLevel.Debug) {
-				bool writeDebug = false;
+				var writeDebug = false;
 				if (bool.TryParse(Settings.Instance["show_debug_log"], out writeDebug)) {
 					if (writeDebug) {
 						Console.WriteLine(lineBuilder.ToString());
 					}
 				} else {
-					Logger.Log("Unable to parse settings value for show_debug_log into a boolean.", LogLevel.Warning);
+					Log("Unable to parse settings value for show_debug_log into a boolean.", LogLevel.Warning);
 					Console.WriteLine(lineBuilder.ToString());
 				}
 			} else {

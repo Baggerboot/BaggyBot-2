@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using BaggyBot.Tools;
-using BaggyBot.DataProcessors;
+﻿using BaggyBot.DataProcessors;
 
 
 namespace BaggyBot.Commands
 {
 	class Join : ICommand
 	{
-		private IrcInterface ircInterface;
+		private readonly IrcInterface ircInterface;
 		private DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
@@ -25,7 +18,10 @@ namespace BaggyBot.Commands
 		public void Use(CommandArgs command)
 		{
 			if (command.Args.Length == 1) {
-				ircInterface.JoinChannel(command.Args[0]);
+				command.Reply("Joining {0}", command.Args[0]);
+				if (!ircInterface.JoinChannel(command.Args[0])) {
+					command.ReturnMessage("Failed to join the channel");
+				}
 			} else {
 				command.Reply("Usage: -join <channel>");
 			}

@@ -8,9 +8,13 @@
 // Auto-generated from baggybot on 2013-11-15 02:50:57Z.
 // Please visit http://code.google.com/p/dblinq2007/ for more information.
 //
+
+// ReSharper disable All
+
 using System;
 using System.ComponentModel;
 using System.Data;
+using DbLinq.PostgreSql;
 #if MONO_STRICT
 	using System.Data.Linq;
 #else   // MONO_STRICT
@@ -34,26 +38,26 @@ namespace BaggyBot.Database.PostgreSQL
 		public BaggyBoT(string connectionString) :
 			base(connectionString)
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		public BaggyBoT(string connection, MappingSource mappingSource) :
 			base(connection, mappingSource)
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		public BaggyBoT(IDbConnection connection, MappingSource mappingSource) :
 			base(connection, mappingSource)
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		public Table<Emoticon> EmOtIcons
 		{
 			get
 			{
-				return this.GetTable<Emoticon>();
+				return GetTable<Emoticon>();
 			}
 		}
 
@@ -61,7 +65,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<IrcLog>();
+				return GetTable<IrcLog>();
 			}
 		}
 
@@ -69,7 +73,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<KeyValuePair>();
+				return GetTable<KeyValuePair>();
 			}
 		}
 
@@ -77,7 +81,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<Name>();
+				return GetTable<Name>();
 			}
 		}
 
@@ -85,7 +89,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<Quote>();
+				return GetTable<Quote>();
 			}
 		}
 
@@ -93,7 +97,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<Url>();
+				return GetTable<Url>();
 			}
 		}
 
@@ -101,7 +105,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<UserCredentials>();
+				return GetTable<UserCredentials>();
 			}
 		}
 
@@ -109,7 +113,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<UserStatistics>();
+				return GetTable<UserStatistics>();
 			}
 		}
 
@@ -117,7 +121,7 @@ namespace BaggyBot.Database.PostgreSQL
 		{
 			get
 			{
-				return this.GetTable<Word>();
+				return GetTable<Word>();
 			}
 		}
 	}
@@ -142,21 +146,21 @@ public partial class BaggyBoT
 	{
 
 		public BaggyBoT(IDbConnection connection) :
-			base(connection, new DbLinq.PostgreSql.PgsqlVendor())
+			base(connection, new PgsqlVendor())
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		public BaggyBoT(IDbConnection connection, IVendor sqlDialect) :
 			base(connection, sqlDialect)
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		public BaggyBoT(IDbConnection connection, MappingSource mappingSource, IVendor sqlDialect) :
 			base(connection, mappingSource, sqlDialect)
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 	}
 	#region End Not MONO_STRICT
@@ -165,10 +169,10 @@ public partial class BaggyBoT
 	#endregion
 
 	[Table(Name = "dbo.emoticons")]
-	public partial class Emoticon : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class Emoticon : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private string _emOticOn;
 
@@ -201,7 +205,7 @@ public partial class BaggyBoT
 
 		public Emoticon()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		[Column(Storage = "_emOticOn", Name = "emoticon", DbType = "character varying(16)", AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -210,17 +214,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._emOticOn;
+				return _emOticOn;
 			}
 			set
 			{
 				if (((_emOticOn == value)
 							== false)) {
-					this.OnEmOticOnChanging(value);
-					this.SendPropertyChanging();
-					this._emOticOn = value;
-					this.SendPropertyChanged("EmOticOn");
-					this.OnEmOticOnChanged();
+					OnEmOticOnChanging(value);
+					SendPropertyChanging();
+					_emOticOn = value;
+					SendPropertyChanged("EmOticOn");
+					OnEmOticOnChanged();
 				}
 			}
 		}
@@ -232,16 +236,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
@@ -252,16 +256,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._lastUsedBy;
+				return _lastUsedBy;
 			}
 			set
 			{
 				if ((_lastUsedBy != value)) {
-					this.OnLastUsedByChanging(value);
-					this.SendPropertyChanging();
-					this._lastUsedBy = value;
-					this.SendPropertyChanged("LastUsedBy");
-					this.OnLastUsedByChanged();
+					OnLastUsedByChanging(value);
+					SendPropertyChanging();
+					_lastUsedBy = value;
+					SendPropertyChanged("LastUsedBy");
+					OnLastUsedByChanged();
 				}
 			}
 		}
@@ -272,27 +276,27 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._uses;
+				return _uses;
 			}
 			set
 			{
 				if ((_uses != value)) {
-					this.OnUsesChanging(value);
-					this.SendPropertyChanging();
-					this._uses = value;
-					this.SendPropertyChanged("Uses");
-					this.OnUsesChanged();
+					OnUsesChanging(value);
+					SendPropertyChanging();
+					_uses = value;
+					SendPropertyChanged("Uses");
+					OnUsesChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -300,9 +304,9 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
@@ -310,7 +314,7 @@ public partial class BaggyBoT
 	[Table(Name = "dbo.irclog")]
 	public partial class IrcLog
 	{
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private string _channel;
 
@@ -320,9 +324,9 @@ public partial class BaggyBoT
 
 		private string _nick;
 
-		private System.Nullable<int> _sender;
+		private Nullable<int> _sender;
 
-		private System.DateTime _time;
+		private DateTime _time;
 
 		#region Extensibility Method Declarations
 		partial void OnCreated();
@@ -345,17 +349,17 @@ public partial class BaggyBoT
 
 		partial void OnSenderChanged();
 
-		partial void OnSenderChanging(System.Nullable<int> value);
+		partial void OnSenderChanging(Nullable<int> value);
 
 		partial void OnTimeChanged();
 
-		partial void OnTimeChanging(System.DateTime value);
+		partial void OnTimeChanging(DateTime value);
 		#endregion
 
 
 		public IrcLog()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		[Column(Storage = "_channel", Name = "channel", DbType = "character varying(64)", AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -364,17 +368,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._channel;
+				return _channel;
 			}
 			set
 			{
 				if (((_channel == value)
 							== false)) {
-					this.OnChannelChanging(value);
-					this.SendPropertyChanging();
-					this._channel = value;
-					this.SendPropertyChanged("Channel");
-					this.OnChannelChanged();
+					OnChannelChanging(value);
+					SendPropertyChanging();
+					_channel = value;
+					SendPropertyChanged("Channel");
+					OnChannelChanged();
 				}
 			}
 		}
@@ -385,14 +389,14 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this._id = value;
-					this.OnIDChanged();
+					OnIDChanging(value);
+					_id = value;
+					OnIDChanged();
 				}
 			}
 		}
@@ -403,15 +407,15 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._message;
+				return _message;
 			}
 			set
 			{
 				if (((_message == value)
 							== false)) {
-					this.OnMessageChanging(value);
-					this._message = value;
-					this.OnMessageChanged();
+					OnMessageChanging(value);
+					_message = value;
+					OnMessageChanged();
 				}
 			}
 		}
@@ -422,62 +426,62 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._nick;
+				return _nick;
 			}
 			set
 			{
 				if (((_nick == value)
 							== false)) {
-					this.OnNickChanging(value);
-					this._nick = value;
-					this.OnNickChanged();
+					OnNickChanging(value);
+					_nick = value;
+					OnNickChanged();
 				}
 			}
 		}
 
 		[Column(Storage = "_sender", Name = "sender", DbType = "integer(32,0)", AutoSync = AutoSync.Never)]
 		[DebuggerNonUserCode()]
-		public System.Nullable<int> Sender
+		public Nullable<int> Sender
 		{
 			get
 			{
-				return this._sender;
+				return _sender;
 			}
 			set
 			{
 				if ((_sender != value)) {
-					this.OnSenderChanging(value);
-					this._sender = value;
-					this.OnSenderChanged();
+					OnSenderChanging(value);
+					_sender = value;
+					OnSenderChanged();
 				}
 			}
 		}
 
 		[Column(Storage = "_time", Name = "time", DbType = "timestamp without time zone", AutoSync = AutoSync.Never, CanBeNull = false)]
 		[DebuggerNonUserCode()]
-		public System.DateTime Time
+		public DateTime Time
 		{
 			get
 			{
-				return this._time;
+				return _time;
 			}
 			set
 			{
 				if ((_time != value)) {
-					this.OnTimeChanging(value);
-					this._time = value;
-					this.OnTimeChanged();
+					OnTimeChanging(value);
+					_time = value;
+					OnTimeChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -485,18 +489,18 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
 
 	[Table(Name = "dbo.keyvaluepairs")]
-	public partial class KeyValuePair : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class KeyValuePair : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private int _id;
 
@@ -523,7 +527,7 @@ public partial class BaggyBoT
 
 		public KeyValuePair()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		//[Column(Storage = "_id", Name = "id", DbType = "integer(32,0)", IsPrimaryKey = true, AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -533,16 +537,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
@@ -553,17 +557,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._key;
+				return _key;
 			}
 			set
 			{
 				if (((_key == value)
 							== false)) {
-					this.OnKeyChanging(value);
-					this.SendPropertyChanging();
-					this._key = value;
-					this.SendPropertyChanged("Key");
-					this.OnKeyChanged();
+					OnKeyChanging(value);
+					SendPropertyChanging();
+					_key = value;
+					SendPropertyChanged("Key");
+					OnKeyChanged();
 				}
 			}
 		}
@@ -574,27 +578,27 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._value;
+				return _value;
 			}
 			set
 			{
 				if ((_value != value)) {
-					this.OnValueChanging(value);
-					this.SendPropertyChanging();
-					this._value = value;
-					this.SendPropertyChanged("Value");
-					this.OnValueChanged();
+					OnValueChanging(value);
+					SendPropertyChanging();
+					_value = value;
+					SendPropertyChanged("Value");
+					OnValueChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -602,17 +606,17 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
 
 	[Table(Name = "dbo.names")]
-	public partial class Name : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class Name : INotifyPropertyChanging, INotifyPropertyChanged
 	{
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private int _id;
 
@@ -643,23 +647,23 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
 
 		public Name()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		[Column(Storage = "_name1", Name = "name1", DbType = "character varying(90)", AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -668,17 +672,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._name1;
+				return _name1;
 			}
 			set
 			{
 				if (((_name1 == value)
 							== false)) {
-					this.OnName1Changing(value);
-					this.SendPropertyChanging();
-					this._name1 = value;
-					this.SendPropertyChanged("Name1");
-					this.OnName1Changed();
+					OnName1Changing(value);
+					SendPropertyChanging();
+					_name1 = value;
+					SendPropertyChanged("Name1");
+					OnName1Changed();
 				}
 			}
 		}
@@ -689,27 +693,27 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._userID;
+				return _userID;
 			}
 			set
 			{
 				if ((_userID != value)) {
-					this.OnUserIDChanging(value);
-					this.SendPropertyChanging();
-					this._userID = value;
-					this.SendPropertyChanged("UserID");
-					this.OnUserIDChanged();
+					OnUserIDChanging(value);
+					SendPropertyChanging();
+					_userID = value;
+					SendPropertyChanged("UserID");
+					OnUserIDChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -717,24 +721,24 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
 
 	[Table(Name = "dbo.quotes")]
-	public partial class Quote : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class Quote : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private int _id;
 
 		private string _quote1;
 
-		private System.Nullable<System.DateTime> _snagGedAt;
+		private Nullable<DateTime> _snagGedAt;
 
 		private int _userID;
 
@@ -751,7 +755,7 @@ public partial class BaggyBoT
 
 		partial void OnSnagGedAtChanged();
 
-		partial void OnSnagGedAtChanging(System.Nullable<System.DateTime> value);
+		partial void OnSnagGedAtChanging(Nullable<DateTime> value);
 
 		partial void OnUserIDChanged();
 
@@ -761,7 +765,7 @@ public partial class BaggyBoT
 
 		public Quote()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		//[Column(Storage = "_id", Name = "id", DbType = "integer(32,0)", IsPrimaryKey = true, AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -771,16 +775,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
@@ -791,36 +795,36 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._quote1;
+				return _quote1;
 			}
 			set
 			{
 				if (((_quote1 == value)
 							== false)) {
-					this.OnQuote1Changing(value);
-					this.SendPropertyChanging();
-					this._quote1 = value;
-					this.SendPropertyChanged("Quote1");
-					this.OnQuote1Changed();
+					OnQuote1Changing(value);
+					SendPropertyChanging();
+					_quote1 = value;
+					SendPropertyChanged("Quote1");
+					OnQuote1Changed();
 				}
 			}
 		}
 		[Column(Storage = "_snagGedAt", Name = "snagged_at", DbType = "timestamp without time zone", AutoSync = AutoSync.Never, CanBeNull = true)]
 		[DebuggerNonUserCode()]
-		public System.Nullable<System.DateTime> SnaggedAt
+		public Nullable<DateTime> SnaggedAt
 		{
 			get
 			{
-				return this._snagGedAt;
+				return _snagGedAt;
 			}
 			set
 			{
 				if ((_snagGedAt != value)) {
-					this.OnSnagGedAtChanging(value);
-					this.SendPropertyChanging();
-					this._snagGedAt = value;
-					this.SendPropertyChanged("SnagGedAt");
-					this.OnSnagGedAtChanged();
+					OnSnagGedAtChanging(value);
+					SendPropertyChanging();
+					_snagGedAt = value;
+					SendPropertyChanged("SnagGedAt");
+					OnSnagGedAtChanged();
 				}
 			}
 		}
@@ -831,27 +835,27 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._userID;
+				return _userID;
 			}
 			set
 			{
 				if ((_userID != value)) {
-					this.OnUserIDChanging(value);
-					this.SendPropertyChanging();
-					this._userID = value;
-					this.SendPropertyChanged("UserID");
-					this.OnUserIDChanged();
+					OnUserIDChanging(value);
+					SendPropertyChanging();
+					_userID = value;
+					SendPropertyChanged("UserID");
+					OnUserIDChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -859,18 +863,18 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
 
 	[Table(Name = "dbo.urls")]
-	public partial class Url : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class Url : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private int _id;
 
@@ -909,7 +913,7 @@ public partial class BaggyBoT
 
 		public Url()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		//[Column(Storage = "_id", Name = "id", DbType = "integer(32,0)", IsPrimaryKey = true, AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -919,16 +923,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
@@ -939,17 +943,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._lastUsage;
+				return _lastUsage;
 			}
 			set
 			{
 				if (((_lastUsage == value)
 							== false)) {
-					this.OnLastUsageChanging(value);
-					this.SendPropertyChanging();
-					this._lastUsage = value;
-					this.SendPropertyChanged("LastUsage");
-					this.OnLastUsageChanged();
+					OnLastUsageChanging(value);
+					SendPropertyChanging();
+					_lastUsage = value;
+					SendPropertyChanged("LastUsage");
+					OnLastUsageChanged();
 				}
 			}
 		}
@@ -960,16 +964,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._lastUsedBy;
+				return _lastUsedBy;
 			}
 			set
 			{
 				if ((_lastUsedBy != value)) {
-					this.OnLastUsedByChanging(value);
-					this.SendPropertyChanging();
-					this._lastUsedBy = value;
-					this.SendPropertyChanged("LastUsedBy");
-					this.OnLastUsedByChanged();
+					OnLastUsedByChanging(value);
+					SendPropertyChanging();
+					_lastUsedBy = value;
+					SendPropertyChanged("LastUsedBy");
+					OnLastUsedByChanged();
 				}
 			}
 		}
@@ -980,17 +984,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._url;
+				return _url;
 			}
 			set
 			{
 				if (((_url == value)
 							== false)) {
-					this.OnURLChanging(value);
-					this.SendPropertyChanging();
-					this._url = value;
-					this.SendPropertyChanged("URL");
-					this.OnURLChanged();
+					OnURLChanging(value);
+					SendPropertyChanging();
+					_url = value;
+					SendPropertyChanged("URL");
+					OnURLChanged();
 				}
 			}
 		}
@@ -1001,27 +1005,27 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._uses;
+				return _uses;
 			}
 			set
 			{
 				if ((_uses != value)) {
-					this.OnUsesChanging(value);
-					this.SendPropertyChanging();
-					this._uses = value;
-					this.SendPropertyChanged("Uses");
-					this.OnUsesChanged();
+					OnUsesChanging(value);
+					SendPropertyChanging();
+					_uses = value;
+					SendPropertyChanged("Uses");
+					OnUsesChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -1029,18 +1033,18 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
 
 	[Table(Name = "dbo.usercreds")]
-	public partial class UserCredentials : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class UserCredentials : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private string _hostMask;
 
@@ -1085,7 +1089,7 @@ public partial class BaggyBoT
 
 		public UserCredentials()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		[Column(Storage = "_hostMask", Name = "hostmask", DbType = "character varying(128)", AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -1094,17 +1098,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._hostMask;
+				return _hostMask;
 			}
 			set
 			{
 				if (((_hostMask == value)
 							== false)) {
-					this.OnHostMaskChanging(value);
-					this.SendPropertyChanging();
-					this._hostMask = value;
-					this.SendPropertyChanged("HostMask");
-					this.OnHostMaskChanged();
+					OnHostMaskChanging(value);
+					SendPropertyChanging();
+					_hostMask = value;
+					SendPropertyChanged("HostMask");
+					OnHostMaskChanged();
 				}
 			}
 		}
@@ -1116,16 +1120,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
@@ -1136,17 +1140,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._idEnt;
+				return _idEnt;
 			}
 			set
 			{
 				if (((_idEnt == value)
 							== false)) {
-					this.OnIDentChanging(value);
-					this.SendPropertyChanging();
-					this._idEnt = value;
-					this.SendPropertyChanged("IDent");
-					this.OnIDentChanged();
+					OnIDentChanging(value);
+					SendPropertyChanging();
+					_idEnt = value;
+					SendPropertyChanged("IDent");
+					OnIDentChanged();
 				}
 			}
 		}
@@ -1157,17 +1161,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._nick;
+				return _nick;
 			}
 			set
 			{
 				if (((_nick == value)
 							== false)) {
-					this.OnNickChanging(value);
-					this.SendPropertyChanging();
-					this._nick = value;
-					this.SendPropertyChanged("Nick");
-					this.OnNickChanged();
+					OnNickChanging(value);
+					SendPropertyChanging();
+					_nick = value;
+					SendPropertyChanged("Nick");
+					OnNickChanged();
 				}
 			}
 		}
@@ -1178,17 +1182,17 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._nslOgin;
+				return _nslOgin;
 			}
 			set
 			{
 				if (((_nslOgin == value)
 							== false)) {
-					this.OnNSLoginChanging(value);
-					this.SendPropertyChanging();
-					this._nslOgin = value;
-					this.SendPropertyChanged("NSLogin");
-					this.OnNSLoginChanged();
+					OnNSLoginChanging(value);
+					SendPropertyChanging();
+					_nslOgin = value;
+					SendPropertyChanged("NSLogin");
+					OnNSLoginChanged();
 				}
 			}
 		}
@@ -1199,27 +1203,27 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._userID;
+				return _userID;
 			}
 			set
 			{
 				if ((_userID != value)) {
-					this.OnUserIDChanging(value);
-					this.SendPropertyChanging();
-					this._userID = value;
-					this.SendPropertyChanged("UserID");
-					this.OnUserIDChanged();
+					OnUserIDChanging(value);
+					SendPropertyChanging();
+					_userID = value;
+					SendPropertyChanged("UserID");
+					OnUserIDChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -1227,17 +1231,17 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
 
 	[Table(Name = "dbo.userstatistics")]
-	public partial class UserStatistics : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class UserStatistics : INotifyPropertyChanging, INotifyPropertyChanged
 	{
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private int _actions;
 
@@ -1282,7 +1286,7 @@ public partial class BaggyBoT
 
 		public UserStatistics()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		[Column(Storage = "_actions", Name = "actions", DbType = "integer(32,0)", AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -1291,16 +1295,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._actions;
+				return _actions;
 			}
 			set
 			{
 				if ((_actions != value)) {
-					this.OnActionsChanging(value);
-					this.SendPropertyChanging();
-					this._actions = value;
-					this.SendPropertyChanged("Actions");
-					this.OnActionsChanged();
+					OnActionsChanging(value);
+					SendPropertyChanging();
+					_actions = value;
+					SendPropertyChanged("Actions");
+					OnActionsChanged();
 				}
 			}
 		}
@@ -1312,16 +1316,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
@@ -1332,16 +1336,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._lines;
+				return _lines;
 			}
 			set
 			{
 				if ((_lines != value)) {
-					this.OnLinesChanging(value);
-					this.SendPropertyChanging();
-					this._lines = value;
-					this.SendPropertyChanged("Lines");
-					this.OnLinesChanged();
+					OnLinesChanging(value);
+					SendPropertyChanging();
+					_lines = value;
+					SendPropertyChanged("Lines");
+					OnLinesChanged();
 				}
 			}
 		}
@@ -1352,16 +1356,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._profAnItIes;
+				return _profAnItIes;
 			}
 			set
 			{
 				if ((_profAnItIes != value)) {
-					this.OnProfAnITiesChanging(value);
-					this.SendPropertyChanging();
-					this._profAnItIes = value;
-					this.SendPropertyChanged("Profanities");
-					this.OnProfAnITiesChanged();
+					OnProfAnITiesChanging(value);
+					SendPropertyChanging();
+					_profAnItIes = value;
+					SendPropertyChanged("Profanities");
+					OnProfAnITiesChanged();
 				}
 			}
 		}
@@ -1372,14 +1376,14 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._userID;
+				return _userID;
 			}
 			set
 			{
 				if ((_userID != value)) {
-					this.OnUserIDChanging(value);
-					this._userID = value;
-					this.OnUserIDChanged();
+					OnUserIDChanging(value);
+					_userID = value;
+					OnUserIDChanged();
 				}
 			}
 		}
@@ -1390,27 +1394,27 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._words;
+				return _words;
 			}
 			set
 			{
 				if ((_words != value)) {
-					this.OnWordsChanging(value);
-					this.SendPropertyChanging();
-					this._words = value;
-					this.SendPropertyChanged("Words");
-					this.OnWordsChanged();
+					OnWordsChanging(value);
+					SendPropertyChanging();
+					_words = value;
+					SendPropertyChanged("Words");
+					OnWordsChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -1418,18 +1422,18 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}
 
 	[Table(Name = "dbo.words")]
-	public partial class Word : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	public partial class Word : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 
-		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		private static readonly PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
 
 		private int _id;
 
@@ -1456,7 +1460,7 @@ public partial class BaggyBoT
 
 		public Word()
 		{
-			this.OnCreated();
+			OnCreated();
 		}
 
 		//[Column(Storage = "_id", Name = "id", DbType = "integer(32,0)", IsPrimaryKey = true, AutoSync = AutoSync.Never, CanBeNull = false)]
@@ -1466,16 +1470,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._id;
+				return _id;
 			}
 			set
 			{
 				if ((_id != value)) {
-					this.OnIDChanging(value);
-					this.SendPropertyChanging();
-					this._id = value;
-					this.SendPropertyChanged("ID");
-					this.OnIDChanged();
+					OnIDChanging(value);
+					SendPropertyChanging();
+					_id = value;
+					SendPropertyChanged("ID");
+					OnIDChanged();
 				}
 			}
 		}
@@ -1486,16 +1490,16 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._uses;
+				return _uses;
 			}
 			set
 			{
 				if ((_uses != value)) {
-					this.OnUsesChanging(value);
-					this.SendPropertyChanging();
-					this._uses = value;
-					this.SendPropertyChanged("Uses");
-					this.OnUsesChanged();
+					OnUsesChanging(value);
+					SendPropertyChanging();
+					_uses = value;
+					SendPropertyChanged("Uses");
+					OnUsesChanged();
 				}
 			}
 		}
@@ -1506,28 +1510,28 @@ public partial class BaggyBoT
 		{
 			get
 			{
-				return this._word1;
+				return _word1;
 			}
 			set
 			{
 				if (((_word1 == value)
 							== false)) {
-					this.OnWordChanging(value);
-					this.SendPropertyChanging();
-					this._word1 = value;
-					this.SendPropertyChanged("Word");
-					this.OnWordChanged();
+					OnWordChanging(value);
+					SendPropertyChanging();
+					_word1 = value;
+					SendPropertyChanged("Word");
+					OnWordChanged();
 				}
 			}
 		}
 
-		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		public event PropertyChangingEventHandler PropertyChanging;
 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void SendPropertyChanging()
 		{
-			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			var h = PropertyChanging;
 			if ((h != null)) {
 				h(this, emptyChangingEventArgs);
 			}
@@ -1535,9 +1539,9 @@ public partial class BaggyBoT
 
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			var h = PropertyChanged;
 			if ((h != null)) {
-				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+				h(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}

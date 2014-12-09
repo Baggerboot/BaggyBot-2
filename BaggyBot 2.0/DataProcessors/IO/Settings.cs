@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
-
 using System.IO;
 
 namespace BaggyBot
 {
 	public class Settings
 	{
-		private Dictionary<string, string> settings = new Dictionary<string, string>();
+		private readonly Dictionary<string, string> settings = new Dictionary<string, string>();
 
 		private const string filename = "baggybot.settings";
 
@@ -33,9 +29,8 @@ namespace BaggyBot
 			{
 				if (settings.ContainsKey(key)) {
 					return settings[key];
-				} else {
-					return null;
 				}
+				return null;
 			}
 			set
 			{

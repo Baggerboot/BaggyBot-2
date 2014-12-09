@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using IRCSharp;
 using BaggyBot.DataProcessors;
+using IRCSharp.IRC;
 
 namespace BaggyBot.Tools
 {
@@ -23,32 +19,33 @@ namespace BaggyBot.Tools
 		/// <summary>
 		/// Checks whether the specified user has operator permissions
 		/// </summary>
-		/// <param name="user"></param>
 		/// <returns></returns>
-		delegate bool match(string input, string reference);
+		delegate bool Match(string input, string reference);
 		public static bool Validate(IrcUser user)
 		{
-			match match = (input, reference) => {
+			Logger.Log("Validating user");
+			Match match = (input, reference) => {
 				return (reference.Equals("*") || input.Equals(reference));
 			};
 
-			string nick = Settings.Instance["operator_nick"];
-			string ident = Settings.Instance["operator_ident"];
-			string host = Settings.Instance["operator_host"];
-			string uid = Settings.Instance["operator_uid"];
+			var nick = Settings.Instance["operator_nick"];
+			var ident = Settings.Instance["operator_ident"];
+			var host = Settings.Instance["operator_host"];
+			var uid = Settings.Instance["operator_uid"];
+			var uids = DataFunctionSet.GetUids(user);
 
-			int[] uids = DataFunctionSet.GetUids(user);
 			if (uids.Length > 1) {
 				Logger.Log(String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned more than one user ID.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
 				return false;
-			} else if(uids.Length == 0){
+			}
+			if(uids.Length == 0){
 				Logger.Log(String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned no user IDs.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
 				return false;
 			}
-			bool nickM = match(user.Nick, nick);
-			bool identM = match(user.Ident, ident);
-			bool hostM = match(user.Hostmask, host);
-			bool uidM = match(uids[0].ToString(), uid);
+			var nickM = match(user.Nick, nick);
+			var identM = match(user.Ident, ident);
+			var hostM = match(user.Hostmask, host);
+			var uidM = match(uids[0].ToString(), uid);
 
 			return (nickM && identM && hostM && uidM);
 		}

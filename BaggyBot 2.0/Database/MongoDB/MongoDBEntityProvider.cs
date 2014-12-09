@@ -1,14 +1,7 @@
-using System;
-using MongoDB.Bson;
-using MongoDB.Driver;
-
-namespace BaggyBot
+namespace BaggyBot.Database.MongoDB
 {
-	public class MongoDBEntityProvider
+	public class MongoDbEntityProvider
 	{
-		public MongoDBEntityProvider ()
-		{
-		}
 	}
 }
 

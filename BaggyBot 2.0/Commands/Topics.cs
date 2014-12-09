@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
@@ -12,7 +8,7 @@ namespace BaggyBot.Commands
 	{
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 
-		private DataFunctionSet dataFunctionSet;
+		private readonly DataFunctionSet dataFunctionSet;
 
 		public Topics(DataFunctionSet df)
 		{
@@ -22,11 +18,11 @@ namespace BaggyBot.Commands
 		private void ShowTopics(string nick, string channel, Action<string, object[]> replyCallback, bool showDebugInfo)
 		{
 			Logger.Log("Showing topics for " + nick);
-			int userId = dataFunctionSet.GetIdFromNick(nick);
+			var userId = dataFunctionSet.GetIdFromNick(nick);
 			var topics = dataFunctionSet.FindTopics(userId, channel);
 
 			if (topics == null) {
-				replyCallback("Could not find any IRC data by {0}. Did you spell their name correctly?", new [] { nick });
+				replyCallback("Could not find any IRC data by {0}. Did you spell their name correctly?", new object[] { nick });
 				return;
 			}
 
@@ -40,12 +36,12 @@ namespace BaggyBot.Commands
 
 			
 
-			replyCallback("Words associated with {0}: {1}", new [] {nick, topicString });
+			replyCallback("Words associated with {0}: {1}", new object[] {nick, topicString });
 		}
 
 		public void Use(CommandArgs command)
 		{
-			bool showDebugInfo = false;
+			var showDebugInfo = false;
 			if (command.Args[0] == "-d") {
 				command.Args = command.Args.Skip(1).ToArray();
 				showDebugInfo = true;

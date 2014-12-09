@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.IO;
+﻿using System.IO;
+using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
@@ -16,10 +11,11 @@ namespace BaggyBot.Commands
 		{
 			if (string.IsNullOrEmpty(command.FullArgument)) {
 				command.Reply("Usage: html [-h] <html code> - Use the -h switch to automatically add a doctype decoration, and opening and closing HTML and body tags");
+				return;
 			}
 			//string prefix = ".";
 
-			bool wrapBoilerplate = false;
+			var wrapBoilerplate = false;
 
 			if (command.Args.Length > 0 && command.Args[0] == "-h") {
 				wrapBoilerplate = true;
@@ -28,7 +24,7 @@ namespace BaggyBot.Commands
 
 			string filename;
 			int fileId;
-			using (StreamWriter sw = new StreamWriter(Tools.MiscTools.GetContentName(out filename, out fileId, "html", ".html", 4))) {
+			using (var sw = new StreamWriter(MiscTools.GetContentName(out filename, out fileId, "html", ".html", 4))) {
 				sw.WriteLine((wrapBoilerplate ? "<!DOCTYPE html><html><body>" : "") + command.FullArgument.Replace("<?php", "") + (wrapBoilerplate ? "</body></html>" : ""));
 			}
 			command.Reply("http://jgeluk.net/usercontent/html/{0}", filename);

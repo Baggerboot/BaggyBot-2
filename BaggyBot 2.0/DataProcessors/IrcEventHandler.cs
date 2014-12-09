@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using IRCSharp;
+using IRCSharp.IRC;
 
 namespace BaggyBot.DataProcessors
 {
 	class IrcEventHandler
 	{
-		private DataFunctionSet dataFunctionSet;
-		private CommandHandler commandHandler;
-		private IrcInterface ircInterface;
-		private StatsHandler statsHandler;
+		private readonly DataFunctionSet dataFunctionSet;
+		private readonly CommandHandler commandHandler;
+		private readonly IrcInterface ircInterface;
+		private readonly StatsHandler statsHandler;
 
 		public IrcEventHandler(DataFunctionSet dataFunctionSet, IrcInterface ircInterface, CommandHandler commandHandler, StatsHandler statsHandler)
 		{
@@ -42,8 +40,8 @@ namespace BaggyBot.DataProcessors
 				} else {
 					Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
 				}
-				int userId = 0;
-				if (dataFunctionSet.ConnectionState != System.Data.ConnectionState.Closed) {
+				var userId = 0;
+				if (dataFunctionSet.ConnectionState != ConnectionState.Closed) {
 					userId = dataFunctionSet.GetIdFromUser(message.Sender);
 					AddMessageToIrcLog(message, userId);
 				}
@@ -54,7 +52,7 @@ namespace BaggyBot.DataProcessors
 					commandHandler.ProcessCommand(message);
 					return;
 				}
-				if (message.Message.StartsWith(Bot.commandIdentifier)) {
+				if (message.Message.StartsWith(Bot.CommandIdentifier)) {
 					commandHandler.ProcessCommand(message);
 				} else {
 					statsHandler.ProcessMessage(message, userId);
@@ -71,13 +69,13 @@ namespace BaggyBot.DataProcessors
 				Logger.Log("Received NickServ reply");
 				if (notice.StartsWith("Information on")) {
 					Logger.Log("User is registered. Processing reply");
-					string data = notice.Substring("Information on  ".Length);
-					string nick = data.Substring(0, data.IndexOf(" ") - 1);
+					var data = notice.Substring("Information on  ".Length);
+					var nick = data.Substring(0, data.IndexOf(" ") - 1);
 					data = data.Substring(nick.Length + 2 + "(account  ".Length);
-					string nickserv = data.Substring(0, data.Length - 3);
+					var nickserv = data.Substring(0, data.Length - 3);
 					ircInterface.AddNickserv(nick.ToLower(), nickserv);
 				} else if (notice.EndsWith("is not registered.")) {
-					string nick = notice.Substring(1, notice.Length - 2);
+					var nick = notice.Substring(1, notice.Length - 2);
 					nick = nick.Substring(0, nick.IndexOf(' ') - 1);
 					Logger.Log("'{0}' does not appear to be registered with NickServ.", LogLevel.Debug, true, nick);
 					ircInterface.AddNickserv(nick.ToLower(), null);
@@ -97,11 +95,16 @@ namespace BaggyBot.DataProcessors
 				ircInterface.DisableNickservCalls();
 				// Proess reply to WHOIS call.
 			} else if (line.Command.Equals("311") && ircInterface.HasWhoisCall) {
-				IrcUser user = new IrcUser(line.Arguments[1], line.Arguments[2], line.Arguments[3]);
+				var user = new IrcUser(line.Arguments[1], line.Arguments[2], line.Arguments[3]);
 				ircInterface.AddUser(user.Nick, user);
+			} else if (line.Command.Equals("464")) {
+				Logger.Log("Password required by server.", LogLevel.Info);
+				var msg = "PASS " + Settings.Instance["irc_password"];
+				Logger.Log("Replying with " + msg, LogLevel.Info);
+				ircInterface.SendRaw(msg);
 			}
 			//
-			if (!ignoredCommands.Contains(line.Command)) {
+			if (!IgnoredCommands.Contains(line.Command)) {
 				switch (line.Command) {
 					case "001":
 					case "002":
@@ -127,26 +130,26 @@ namespace BaggyBot.DataProcessors
 				}
 			}
 		}
-		internal readonly string[] ignoredCommands = { "004" /*RPL_MYINFO*/, "005" /*RPL_ISUPPORT*/, "251" /*RPL_LUSERCLIENT*/, "254" /*RPL_LUSERCHANNELS*/, "252" /*RPL_LUSEROP*/, "255" /*RPL_LUSERME*/, "265", "266", "250", "375", "376" };
+		internal readonly string[] IgnoredCommands = { "004" /*RPL_MYINFO*/, "005" /*RPL_ISUPPORT*/, "251" /*RPL_LUSERCLIENT*/, "254" /*RPL_LUSERCHANNELS*/, "252" /*RPL_LUSEROP*/, "255" /*RPL_LUSERME*/, "265", "266", "250", "375", "376" };
 
 		internal void HandleJoin(IrcUser user, string channel)
 		{
-			string message = user.ToString() + " has joined " + channel;
+			var message = user + " has joined " + channel;
 			DisplayEvent(message);
 		}
 		internal void HandlePart(IrcUser user, string channel)
 		{
-			string message = user.ToString() + " has left " + channel;
+			var message = user + " has left " + channel;
 			DisplayEvent(message);
 		}
 		internal void HandleKick(string user, string channel, string reason, IrcUser sender)
 		{
-			string message = user + " was kicked by " + sender.Nick + " from " + channel + " (" + reason + ")";
+			var message = user + " was kicked by " + sender.Nick + " from " + channel + " (" + reason + ")";
 			DisplayEvent(message);
 		}
 		internal void HandleNickChange(IrcUser user, string newNick)
 		{
-			string message = user.Nick + " is now known as " + newNick;
+			var message = user.Nick + " is now known as " + newNick;
 			DisplayEvent(message);
 		}
 		internal void DisplayEvent(string message)
@@ -162,7 +165,7 @@ namespace BaggyBot.DataProcessors
 
 		internal void HandleQuit(IrcUser user, string reason)
 		{
-			DisplayEvent(user.ToString() + " has quit (" + reason + ")"); 
+			DisplayEvent(user + " has quit (" + reason + ")"); 
 		}
 	}
 }

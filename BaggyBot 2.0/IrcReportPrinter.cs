@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.Collections.Generic;
 using Mono.CSharp;
 
 namespace BaggyBot
 {
 	class IrcReportPrinter : ReportPrinter
 	{
-		private Queue<AbstractMessage> UnreadMessages = new Queue<AbstractMessage>();
+		private readonly Queue<AbstractMessage> UnreadMessages = new Queue<AbstractMessage>();
 
 		public bool HasMessage
 		{

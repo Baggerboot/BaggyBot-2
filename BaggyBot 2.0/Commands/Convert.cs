@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.IO;
+﻿using System.IO;
 using System.Net;
+using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
@@ -56,21 +51,21 @@ namespace BaggyBot.Commands
 			}
 			
 
-			WebRequest rq = WebRequest.Create(string.Format("http://rate-exchange.appspot.com/currency?from={0}&to={1}", fromCurrency, toCurrency));
+			var rq = WebRequest.Create(string.Format("http://rate-exchange.appspot.com/currency?from={0}&to={1}", fromCurrency, toCurrency));
 			var response = rq.GetResponse();
 
-			using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
+			using (var sr = new StreamReader(response.GetResponseStream())) {
 				dynamic jsonObj = JObject.Parse(sr.ReadToEnd());
 				try {
 					if (jsonObj.to.ToString().ToUpper() != toCurrency.ToUpper() || jsonObj.from.ToString().ToUpper() != fromCurrency.ToUpper()) {
 						command.ReturnMessage("Warning: currency mismatch between {0} to {1} and {2} to {3}", fromCurrency, toCurrency, jsonObj.from.ToString(), jsonObj.to.ToString());
 					}
-				} catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException) {
+				} catch (RuntimeBinderException) {
 					command.ReturnMessage("Unable to convert between {0} and {1}. Are you sure these are valid currency codes?", fromCurrency, toCurrency);
 					return;
 				}
 
-				decimal amount = decimal.Parse(fromAmount);
+				var amount = decimal.Parse(fromAmount);
 				decimal rate = decimal.Parse(jsonObj.rate.ToString());
 				command.Reply("{1} {2} = {3} {4}", amount, jsonObj.from.ToString().ToUpper(), amount * rate, jsonObj.to.ToString().ToUpper());
 			}

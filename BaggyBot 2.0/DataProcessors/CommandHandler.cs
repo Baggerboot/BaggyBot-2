@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
 using System.Diagnostics;
 using BaggyBot.Commands;
-using BaggyBot.Database;
+using BaggyBot.Tools;
+using IRCSharp;
+using IRCSharp.IRC;
+using Convert = BaggyBot.Commands.Convert;
+using Version = BaggyBot.Commands.Version;
 
 namespace BaggyBot.DataProcessors
 {
 	class CommandHandler
 	{
-		// Maps command strings to command objects
-		private Dictionary<string, ICommand> commands;
-		private IrcInterface ircInterface;
+		private readonly Dictionary<string, ICommand> commands;
+		private readonly IrcInterface ircInterface;
 
-		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot, BotDiagnostics botDiagnostics)
+		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
 		{
 			this.ircInterface = ircInterface;
 			commands = new Dictionary<string, ICommand>()
 			{
 				{"bf", new Bf()},
-				{"convert", new BaggyBot.Commands.Convert()},
+				{"convert", new Convert()},
 				{"cs", new Cs(ircInterface)},
 				{"feature", new Feature(dataFunctionSet)},
 				{"get", new Get(dataFunctionSet, ircInterface)},
@@ -43,47 +44,53 @@ namespace BaggyBot.DataProcessors
 				{"snag", new Snag()},
 				{"update", new Update(bot)},
 				{"uptime", new Uptime()},
-				{"version", new Commands.Version()},
+				{"version", new Version()},
 				{"wa", new WolframAlpha()},
 				{"wiki", new Wikipedia()},
 				{"topic", new Topics(dataFunctionSet)}
 			};
 		}
 
-		public void ProcessCommand(IRCSharp.IrcMessage message)
+		public void ProcessCommand(IrcMessage message)
 		{
 			Logger.Log("Processing command: " + message.Message);
-			if(message.Message.Equals(Bot.commandIdentifier)) return;
+			if (message.Message.Equals(Bot.CommandIdentifier)) return;
 
-			string line = message.Message.Substring(1);
+            var line = message.Message.Substring(1);
+
+            // Inject bot information, but do not return.
 			if (new string[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1))) {
-				ircInterface.SendMessage(message.Channel, "BaggyBot " + Bot.Version + " -- Stats page: http://www.jgeluk.net/stats -- Made by baggerboot. For help, try the -help command.");
+				ircInterface.SendMessage(message.Channel, Messages.CmdGeneralInfo, Bot.Version);
 			}
-			string[] args = line.Split(' ');
-			string command = args[0];
+
+			var args = line.Split(' ');
+			var command = args[0];
 			args = args.Skip(1).ToArray();
 
-			int cmdIndex = line.IndexOf(' ');
-			CommandArgs cmd = new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex+1), ircInterface.SendMessage);
+			var cmdIndex = line.IndexOf(' ');
+			var cmd = new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ircInterface.SendMessage);
 
 			if (!commands.ContainsKey(command)) {
+				Logger.Log("Dropped command \"{0}\"; I do not recognize this command.", LogLevel.Info, true, message.Message);
+                // Try to use it as a rem instead
 				((Remember)commands["rem"]).UseRem(cmd);
 				return;
 			}
 
-			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && Tools.UserTools.Validate(message.Sender)) {
+			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender)) {
+                // Don't bother with validation when debugging
 				if (Settings.Instance["deployed"] == "true") {
 					try {
 						commands[command].Use(cmd);
 					} catch (Exception e) {
-						string exceptionMessage = string.Format("An unhandled exception (type: {0}) occurred while trying to process your command! Exception message: \"{1}\", Occurred at line {2}", e.GetType().ToString(), e.Message, new StackTrace(e, true).GetFrame(0).GetFileLineNumber());
+						var exceptionMessage = string.Format("An unhandled exception (type: {0}) occurred while trying to process your command! Exception message: \"{1}\", Occurred at line {2}", e.GetType(), e.Message, new StackTrace(e, true).GetFrame(0).GetFileLineNumber());
 						ircInterface.SendMessage(message.Channel, exceptionMessage);
 					}
 				} else {
-						commands[command].Use(cmd);
+					commands[command].Use(cmd);
 				}
 			} else {
-				ircInterface.SendMessage(message.Channel, Messages.CMD_NOT_AUTHORIZED);
+				ircInterface.SendMessage(message.Channel, Messages.CmdNotAuthorized);
 			}
 		}
 	}

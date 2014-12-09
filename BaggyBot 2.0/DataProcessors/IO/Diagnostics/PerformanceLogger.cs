@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using System.IO;
 
 namespace BaggyBot
 {
 	class PerformanceLogger : IDisposable
 	{
-		private StreamWriter sw;
+		private readonly StreamWriter sw;
 		public List<PerformanceObject> PerformanceLog
 		{
 			get;

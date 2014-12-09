@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 using System.IO;
@@ -18,29 +15,29 @@ namespace BaggyBot.Tools
 	{
 		public static void ConsoleWriteLine(string line, ConsoleColor color = ConsoleColor.Gray)
 		{
-			var prev = Console.ForegroundColor;
-			Console.ForegroundColor = color;
+			//var prev = Console.ForegroundColor;
+			//Console.ForegroundColor = color;
 			Console.WriteLine(line);
-			Console.ForegroundColor = prev;
+			//Console.ForegroundColor = prev;
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static string GetCurrentMethod()
 		{
-			StackTrace st = new StackTrace();
-			StackFrame sf = st.GetFrame(1);
+			var st = new StackTrace();
+			var sf = st.GetFrame(1);
 
 			return sf.GetMethod().Name;
 		}
 
 		public static string GetContentName(out string filename, out int num, string dirname, string extension, int depth)
 		{
-			string prefix = "/var/www/html/usercontent/" + dirname;
+			var prefix = "/var/www/html/usercontent/" + dirname;
 
 			var files = Directory.GetFiles(prefix).Where(s => s.EndsWith(extension)).OrderBy(s => s);
 			num = 1;
 			if (files.Count() != 0) {
-				string name = files.Last();
+				var name = files.Last();
 
 				name = name.Split('/').Last();
 				name = name.Substring(0, depth);
@@ -56,7 +53,7 @@ namespace BaggyBot.Tools
 			if (N == 1)
 				return baseValue;
 			double deltaX;
-			double x = 0.1;
+			var x = 0.1;
 			do {
 				deltaX = (baseValue / Math.Pow(x, N - 1) - x) / N;
 				x = x + deltaX;
@@ -66,14 +63,14 @@ namespace BaggyBot.Tools
 
 		public static DateTime RetrieveLinkerTimestamp()
 		{
-			string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
+			var filePath = Assembly.GetCallingAssembly().Location;
 			const int c_PeHeaderOffset = 60;
 			const int c_LinkerTimestampOffset = 8;
-			byte[] b = new byte[2048];
-			System.IO.Stream s = null;
+			var b = new byte[2048];
+			Stream s = null;
 
 			try {
-				s = new System.IO.FileStream(filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				s = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 				s.Read(b, 0, 2048);
 			} finally {
 				if (s != null) {
@@ -81,9 +78,9 @@ namespace BaggyBot.Tools
 				}
 			}
 
-			int i = System.BitConverter.ToInt32(b, c_PeHeaderOffset);
-			int secondsSince1970 = System.BitConverter.ToInt32(b, i + c_LinkerTimestampOffset);
-			DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0);
+			var i = BitConverter.ToInt32(b, c_PeHeaderOffset);
+			var secondsSince1970 = BitConverter.ToInt32(b, i + c_LinkerTimestampOffset);
+			var dt = new DateTime(1970, 1, 1, 0, 0, 0);
 			dt = dt.AddSeconds(secondsSince1970);
 			dt = dt.AddHours(TimeZone.CurrentTimeZone.GetUtcOffset(dt).Hours);
 			return dt;
@@ -96,7 +93,7 @@ namespace BaggyBot.Tools
 				return null;
 			}
 
-			using (MemoryStream stream = new MemoryStream())
+			using (var stream = new MemoryStream())
 			{
 				new BinaryFormatter().Serialize(stream, o);
 				return Convert.ToBase64String(stream.ToArray());
@@ -104,9 +101,9 @@ namespace BaggyBot.Tools
 		}
 		public static object DeserializeObject(string str)
 		{
-			byte[] bytes = Convert.FromBase64String(str);
+			var bytes = Convert.FromBase64String(str);
 
-			using (MemoryStream stream = new MemoryStream(bytes))
+			using (var stream = new MemoryStream(bytes))
 			{
 				return new BinaryFormatter().Deserialize(stream);
 			}

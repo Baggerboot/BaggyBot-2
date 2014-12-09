@@ -26,27 +26,16 @@ namespace BaggyBotHost
 		private string mainChannel;
 		private string serializedClientData;
 		private long botClientId;
-		private IdentWriter identWriter;
 
 		public BaggyBotHost()
 		{
 			Logger.Log("Starting BaggyBot Host application");
 
-			IPEndPoint endpoint;
-			IPAddress addr;
-			if (IPAddress.TryParse(Settings.Instance["irc_local_endpoint"], out addr)) {
-				Logger.Log("Binding to " + addr.ToString());
-				endpoint = new IPEndPoint(addr, 0);
-			} else {
-				endpoint = null;
-			}
-			CreateIrcClient(endpoint);
-
-			botServer = new NetLibServer(IPAddress.Any, 6667, TransferProtocolType.Delimited, Encoding.UTF8);
+			botServer = new NetLibServer(IPAddress.Any, 5000, TransferProtocolType.Delimited, Encoding.UTF8);
 			botServer.OnDataAvailable += HandleBotData;
 			botServer.OnClientConnected += HandleBotConnect;
 			botServer.StartListening();
-			commandServer = new NetLibServer(IPAddress.Loopback, 6668, TransferProtocolType.Delimited, Encoding.UTF8);
+			commandServer = new NetLibServer(IPAddress.Any, 6668, TransferProtocolType.Delimited, Encoding.UTF8);
 			commandServer.OnDataAvailable += HandleCommandData;
 			commandServer.StartListening();
 			StartBaggyBot();
@@ -56,22 +45,17 @@ namespace BaggyBotHost
 			}
 		}
 
-		private void CreateIrcClient(IPEndPoint localEndPoint)
+		private void CreateIrcClient()
 		{
-			ircClient = new NetLibClient(TransferProtocolType.Delimited, Encoding.UTF8, localEndPoint);
-			ircClient.OnLocalPortKnown += (port) =>
-			{
-				Logger.Log("Local port: " + port);
-				identWriter.Write(port, Settings.Instance["irc_ident"]);
-			};
+			ircClient = new NetLibClient(TransferProtocolType.Delimited, Encoding.UTF8);
 			ircClient.OnDataAvailable += HandleClientData;
 			ircClient.OnDisconnect += () =>
 			{
-				Logger.Log("IRC Connection lost! Reconnecting.");
-				CreateIrcClient(localEndPoint);
-				ConnectIrcClient();
+				Logger.Log("IRC Connection lost!");
+				botServer.CloseClientConnection(botClientId);
 			};
 		}
+
 		private void ConnectIrcClient()
 		{
 			string hostname = Settings.Instance["irc_server"];
@@ -81,8 +65,12 @@ namespace BaggyBotHost
 				botProcess.Close();
 				Environment.Exit(1);
 			}
+			Logger.Log("Attaching host to {0}:{1}", hostname, port);
 			connecting = true;
 			ircClient.Connect(hostname, port);
+			Logger.Log("Sending test data");
+			ircClient.Send("NICK BaggyBotTest");
+			Logger.Log("Sent test data");
 			connecting = false;
 		}
 
@@ -103,12 +91,14 @@ namespace BaggyBotHost
 		{
 			Logger.Log("Bot #{0} connected", clientId);
 			botClientId = clientId;
-			if (!ircClient.Connected) {
+			if (ircClient == null) {
+				CreateIrcClient();
 				ConnectIrcClient();
 			}
 		}
 		private void HandleBotData(string data, long sender)
 		{
+			Console.WriteLine( sender + "DATA: " + data);
 			while (connecting) {
 				Thread.Sleep(20);
 			}
@@ -125,16 +115,6 @@ namespace BaggyBotHost
 			Console.WriteLine("<< " + data);
 			Console.ForegroundColor = prev;*/
 			botServer.Send(data, botClientId);
-		}
-
-		private void UpdateBinaries()
-		{
-			Console.WriteLine("Deleting old assemblies");
-			File.Delete("BaggyBot20.exe");
-			File.Delete("CsNetLib2.dll");
-			Console.WriteLine("Moving new assemblies");
-			File.Move("BaggyBot20.exe.new", "BaggyBot20.exe");
-			File.Move("CsNetLib2.dll.new", "CsNetLib2.dll");
 		}
 
 		private void StartBaggyBotProcessOsIndependent(string arguments)
@@ -187,6 +167,16 @@ namespace BaggyBotHost
 					StartBaggyBot(exitCode);
 					break;
 			}
+		}
+
+		private void UpdateBinaries()
+		{
+			Console.WriteLine("Deleting old assemblies");
+			File.Delete("BaggyBot20.exe");
+			File.Delete("CsNetLib2.dll");
+			Console.WriteLine("Moving new assemblies");
+			File.Move("BaggyBot20.exe.new", "BaggyBot20.exe");
+			File.Move("CsNetLib2.dll.new", "CsNetLib2.dll");
 		}
 
 		private static string EscapeCode(int color)

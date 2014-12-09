@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using System.Data;
 using System.Data.SqlClient;
-using System.Data.Linq;
 using System.Data.Common;
 
 namespace BaggyBot.Database.EntityProvider
@@ -53,7 +49,7 @@ namespace BaggyBot.Database.EntityProvider
 		{
 			Logger.Log("Manually executing an SQL statement.");
 			int result;
-			using (DbCommand cmd = connection.CreateCommand()) {
+			using (var cmd = connection.CreateCommand()) {
 				cmd.CommandText = statement;
 				result = cmd.ExecuteNonQuery();
 			}
@@ -62,9 +58,9 @@ namespace BaggyBot.Database.EntityProvider
 
 		public List<object> ExecuteQuery(string query)
 		{
-			List<object> data = new List<object>();
+			var data = new List<object>();
 			Logger.Log("Manually executing an SQL query.");
-			using (DbCommand cmd = connection.CreateCommand()) {
+			using (var cmd = connection.CreateCommand()) {
 				cmd.CommandText = query;
 				var reader = cmd.ExecuteReader();
 				while (reader.Read()) {

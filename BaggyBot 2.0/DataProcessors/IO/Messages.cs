@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BaggyBot
+﻿namespace BaggyBot
 {
 	public class Messages
 	{
-		public const string CMD_NOT_AUTHORIZED = "You are not authorized to use this command.";
+		public const string CmdNotAuthorized = "You are not authorized to use this command.";
+        public const string CmdGeneralInfo = "BaggyBot {0} -- Stats page: http://www.jgeluk.net/stats -- Made by baggerboot. For help, try the -help command.";
 	}
 }

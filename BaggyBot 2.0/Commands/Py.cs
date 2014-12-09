@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
+using System.Threading;
+using BaggyBot.Tools;
+using IronPython.Runtime;
+using IronPython.Runtime.Exceptions;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using IronPython.Hosting;
@@ -15,55 +17,52 @@ namespace BaggyBot.Commands
 	class Py : ReadEvaluatePrintCommand, ICommand
 	{
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
-		private ScriptEngine engine;
-		private ScriptScope scope;
-		private ProducerConsumerStream outputStream;
-		private StreamWriter outputStreamWriter;
-		private StreamReader outputStreamReader;
+		private readonly ScriptEngine engine;
+		private readonly ScriptScope scope;
+		private readonly StreamReader outputStreamReader;
 
-		private List<System.Threading.Thread> threads = new List<System.Threading.Thread>();
+		private readonly List<Thread> threads = new List<Thread>();
 
-		private StringBuilder commandBuilder = new StringBuilder();
+		private readonly StringBuilder commandBuilder = new StringBuilder();
 
 		public Py(IrcInterface inter, DataFunctionSet df)
 		{
-			ircInterface = inter;
+			IrcInterface = inter;
 
 			engine = Python.CreateEngine();
 			scope = engine.CreateScope();
-			scope.SetVariable("ircInterface", ircInterface);
+			scope.SetVariable("ircInterface", IrcInterface);
 			scope.SetVariable("dataFunctionSet", df);
-			scope.SetVariable("tools", new Tools.PythonTools(ircInterface));
-			outputStream = new ProducerConsumerStream();
-			outputStreamWriter = new StreamWriter(outputStream);
+			scope.SetVariable("tools", new PythonTools());
+			var outputStream = new ProducerConsumerStream();
+			var outputStreamWriter = new StreamWriter(outputStream);
 			outputStreamReader = new StreamReader(outputStream);
 			engine.Runtime.IO.SetOutput(outputStream, outputStreamWriter);
-			//engine.Runtime.IO.SetErrorOutput(outputStream, outputStreamWriter);
 		}
 
 		protected override void Abort(CommandArgs command)
 		{
-			security = InterpreterSecurity.Block;
+			Security = InterpreterSecurity.Block;
 			commandBuilder.Clear();
 			foreach (var thread in threads) {
 				thread.Abort();
 			}
-			ircInterface.SendMessage(command.Channel, string.Format("Done. {0} running threads have been aborted.", threads.Count));
+			IrcInterface.SendMessage(command.Channel, string.Format("Done. {0} running threads have been aborted.", threads.Count));
 			threads.Clear();
 		}
 		protected override void Threads(CommandArgs command)
 		{
-			string result = string.Join(", ", threads.Select(t => t.Name));
+			var result = string.Join(", ", threads.Select(t => t.Name));
 			if (result.Length == 0) {
-				ircInterface.SendMessage(command.Channel, "Active threads: " + threads);
+				IrcInterface.SendMessage(command.Channel, "Active threads: " + threads);
 			} else {
-				ircInterface.SendMessage(command.Channel, "No Python threads running right now.");
+				IrcInterface.SendMessage(command.Channel, "No Python threads running right now.");
 			}
 		}
 
 		protected override void GetBuffer(CommandArgs command)
 		{
-			ircInterface.SendMessage(command.Channel, string.Format("{0}, \"{1}\"", command.Sender.Nick, commandBuilder.ToString()));
+			IrcInterface.SendMessage(command.Channel, string.Format("{0}, \"{1}\"", command.Sender.Nick, commandBuilder));
 		}
 
 		/// <summary>
@@ -74,39 +73,39 @@ namespace BaggyBot.Commands
 		private bool RestrictionsCheck(CommandArgs command)
 		{
 			if (!command.Channel.StartsWith("#")) {
-				ircInterface.SendMessage(command.Channel, "Only the bot operator is allowed to execute Python code in non-channels");
+				IrcInterface.SendMessage(command.Channel, "Only the bot operator is allowed to execute Python code in non-channels");
 				return false;
 			}
-			if (security == InterpreterSecurity.Block) {
-				ircInterface.SendMessage(command.Channel, "For security reasons, the interactive Python interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
+			if (Security == InterpreterSecurity.Block) {
+				IrcInterface.SendMessage(command.Channel, "For security reasons, the interactive Python interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
 				return false;
 			}
-			if (security == InterpreterSecurity.Notify) {
+			if (Security == InterpreterSecurity.Notify) {
 				// Do not return anything yet, but do notify the bot operator.
-				ircInterface.NotifyOperator("-py used by " + command.Sender.Nick + ": " + command.FullArgument);
+				IrcInterface.NotifyOperator("-py used by " + command.Sender.Nick + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset"))) {
-				ircInterface.SendMessage(command.Channel, "Access to my guts is restricted to the operator.");
+				IrcInterface.SendMessage(command.Channel, "Access to my guts is restricted to the operator.");
 				return false;
 			} if (command.FullArgument != null && (command.FullArgument.Contains("System.Diagnostics.Process"))) {
-				ircInterface.SendMessage(command.Channel, "Process control is restricted to the operator.");
+				IrcInterface.SendMessage(command.Channel, "Process control is restricted to the operator.");
 				return false;
 			} if (command.FullArgument != null && (command.FullArgument.Contains("GetMethod"))) {
-				ircInterface.SendMessage(command.Channel, "Method invocation trough reflection is restricted to the operator.");
+				IrcInterface.SendMessage(command.Channel, "Method invocation trough reflection is restricted to the operator.");
 				return false;
 			} if (command.FullArgument != null && (command.FullArgument.Contains("import posix"))) {
-				ircInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
+				IrcInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
 				return false;
 			} if (command.FullArgument != null && ((command.FullArgument.Contains("putenv") || command.FullArgument.Contains("listdir") || command.FullArgument.Contains("mkdir") || command.FullArgument.Contains("makedirs") || command.FullArgument.Contains("remove") || command.FullArgument.Contains("rename") || command.FullArgument.Contains("rmdir") || command.FullArgument.Contains("exit"))&& command.FullArgument.Contains("os"))) {
-				ircInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
+				IrcInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
 				return false;
 			}
 			return true;
 		}
 		public void Use(CommandArgs command)
 		{
-			threadId++;
-			bool isOperator = Tools.UserTools.Validate(command.Sender);
+			ThreadId++;
+			var isOperator = UserTools.Validate(command.Sender);
 
 			if (!(isOperator || RestrictionsCheck(command))) {
 				return;
@@ -119,7 +118,7 @@ namespace BaggyBot.Commands
 				}
 				if (command.FullArgument.EndsWith(":") || command.FullArgument.StartsWith("    ")) {
 					commandBuilder.AppendLine(command.FullArgument);
-					ircInterface.SendMessage(command.Channel, ">>>");
+					IrcInterface.SendMessage(command.Channel, ">>>");
 					return;
 				}
 				if (command.FullArgument == "import antigravity") {
@@ -139,43 +138,43 @@ namespace BaggyBot.Commands
 				return;
 			}
 			var source = engine.CreateScriptSourceFromString(code, SourceCodeKind.SingleStatement);
-			threads.Add(System.Threading.Thread.CurrentThread);
+			threads.Add(Thread.CurrentThread);
 			try {
 				source.Execute(scope);
 
-				string line = outputStreamReader.ReadLine();
+				var line = outputStreamReader.ReadLine();
 				if (line == null) {
-					ircInterface.SendMessage(command.Channel, "Done (No result)");
+					IrcInterface.SendMessage(command.Channel, "Done (No result)");
 				} else {
-					for (int i = 0; line != null; i++) {
+					for (var i = 0; line != null; i++) {
 						if (i > 3 && !isOperator) { // i starts at 0, so when i=4, that would be the 5th line
-							ircInterface.SendMessage(command.Channel, "Spam prevention triggered. Sending more than 4 lines is not allowed.");
+							IrcInterface.SendMessage(command.Channel, "Spam prevention triggered. Sending more than 4 lines is not allowed.");
 							outputStreamReader.ReadToEnd();
 							break;
 						}
-						ircInterface.SendMessage(command.Channel, "--> " + line);
+						IrcInterface.SendMessage(command.Channel, "--> " + line);
 						line = outputStreamReader.ReadLine();
 						if (line != null && line.Contains("connection_string")) {
 							line = outputStreamReader.ReadLine();
 						}
-						System.Threading.Thread.Sleep(250); // make sure we don't spam the receiving end too much
+						Thread.Sleep(250); // make sure we don't spam the receiving end too much
 					}
 				}
 
-			} catch (IronPython.Runtime.UnboundNameException e) {
-				ircInterface.SendMessage(command.Channel, "Error: " + e.Message);
+			} catch (UnboundNameException e) {
+				IrcInterface.SendMessage(command.Channel, "Error: " + e.Message);
 			} catch (SyntaxErrorException e) {
-				ircInterface.SendMessage(command.Channel, "Syntax Error: " + e.Message);
-			} catch (IronPython.Runtime.Exceptions.ImportException e) {
-				ircInterface.SendMessage(command.Channel, "Import Error: " + e.Message);
+				IrcInterface.SendMessage(command.Channel, "Syntax Error: " + e.Message);
+			} catch (ImportException e) {
+				IrcInterface.SendMessage(command.Channel, "Import Error: " + e.Message);
 			} catch (MissingMemberException e) {
-				ircInterface.SendMessage(command.Channel, "Missing member: " + e.Message);
+				IrcInterface.SendMessage(command.Channel, "Missing member: " + e.Message);
 			} catch (DivideByZeroException) {
-				ircInterface.SendMessage(command.Channel, "A DivideByZeroException occurred");
+				IrcInterface.SendMessage(command.Channel, "A DivideByZeroException occurred");
 			} catch (Exception e) {
-				ircInterface.SendMessage(command.Channel, "Unhandled exception: " + e.GetType().ToString() + ": " + e.Message);
+				IrcInterface.SendMessage(command.Channel, "Unhandled exception: " + e.GetType() + ": " + e.Message);
 			}
-			threads.Remove(System.Threading.Thread.CurrentThread);
+			threads.Remove(Thread.CurrentThread);
 		}
 	}
 }

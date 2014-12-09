@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using System.Net;
+using System.Net.Sockets;
 
 namespace BaggyBot.Commands
 {
@@ -31,25 +27,25 @@ namespace BaggyBot.Commands
 			} catch (ArgumentException) {
 				command.ReturnMessage("I can't do a lookup on 0.0.0.0 or ::0");
 				return;
-			} catch (System.Net.Sockets.SocketException) {
-				command.ReturnMessage("Unable to do a lookup on " + hostIPAddress.ToString() + ". Most likely a reverse DNS entry does not exist for this address.");
+			} catch (SocketException) {
+				command.ReturnMessage("Unable to do a lookup on " + hostIPAddress + ". Most likely a reverse DNS entry does not exist for this address.");
 				return;
 			}
 			// Get the IP address list that resolves to the host names contained in 
 			// the Alias property.
-			IPAddress[] address = hostEntry.AddressList;
+			var address = hostEntry.AddressList;
 			// Get the alias names of the addresses in the IP address list.
-			String[] alias = hostEntry.Aliases;
+			var alias = hostEntry.Aliases;
 
 			Console.WriteLine("Host name : " + hostEntry.HostName);
 			command.Reply(String.Format("{0} resolves to {1}", command.Args[0], hostEntry.HostName));
 
 			Console.WriteLine("\nAliases :");
-			for (int index = 0; index < alias.Length; index++) {
+			for (var index = 0; index < alias.Length; index++) {
 				Console.WriteLine(alias[index]);
 			}
 			Console.WriteLine("\nIP address list : ");
-			for (int index = 0; index < address.Length; index++) {
+			for (var index = 0; index < address.Length; index++) {
 				Console.WriteLine(address[index]);
 			}
 		}

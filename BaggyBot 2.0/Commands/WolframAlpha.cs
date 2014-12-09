@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using System.Xml;
 using System.Net;
 
@@ -74,11 +72,11 @@ namespace BaggyBot.Commands
 
 			lastDisplayedResult = null;
 
-			string appid = Settings.Instance["wolfram_alpha_appid"];
+			var appid = Settings.Instance["wolfram_alpha_appid"];
 
 			var uri = new Uri(string.Format("http://api.wolframalpha.com/v2/query?appid={0}&input={1}&ip={2}&format=plaintext&units=metric",  appid, command.FullArgument, command.Sender.Hostmask));
 
-			var rq = HttpWebRequest.Create(uri);
+			var rq = WebRequest.Create(uri);
 			var response = rq.GetResponse();
 			
 			var xmd = new XmlDocument();
@@ -104,12 +102,12 @@ namespace BaggyBot.Commands
 			if (queryresult.FirstChild.Name == "assumptions") {
 				var options = queryresult.FirstChild.FirstChild.ChildNodes;
 				var descriptions = new List<string>();
-				for (int i = 0; i < options.Count; i++) {
+				for (var i = 0; i < options.Count; i++) {
 					var node = options[i];
 					descriptions.Add("\"" + node.Attributes["desc"].Value + "\"");
 				}
 
-				string first = string.Join(", ", descriptions.Take(descriptions.Count - 1));
+				var first = string.Join(", ", descriptions.Take(descriptions.Count - 1));
 
 				command.Reply("Ambiguity between {0} and {1}. Please try again.", first, descriptions.Last());
 				return;
@@ -135,9 +133,9 @@ namespace BaggyBot.Commands
 			if (nodes.Count == 0) 
 				return null;
 
-			nodes.OrderByDescending((node) => double.Parse(node.Attributes["score"].Value, System.Globalization.CultureInfo.InvariantCulture));
+			nodes.OrderByDescending(node => double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture));
 			var didyoumeans = nodes.Select(node => string.Format("\"{0}\" (score: {1}%)", node.InnerText, 
-				Math.Round(double.Parse(node.Attributes["score"].Value, System.Globalization.CultureInfo.InvariantCulture) * 100)
+				Math.Round(double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture) * 100)
 			));
 
 			var firstItems = string.Join(", ", didyoumeans.Take(didyoumeans.Count() - 1));

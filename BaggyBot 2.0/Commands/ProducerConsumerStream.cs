@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using System.IO;
 
 namespace BaggyBot.Commands
@@ -52,7 +47,7 @@ namespace BaggyBot.Commands
 		{
 			lock (innerStream) {
 				innerStream.Position = readPosition;
-				int red = innerStream.Read(buffer, offset, count);
+				var red = innerStream.Read(buffer, offset, count);
 				readPosition = innerStream.Position;
 
 				return red;

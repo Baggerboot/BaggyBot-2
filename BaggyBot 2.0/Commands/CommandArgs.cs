@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using IRCSharp;
+using IRCSharp.IRC;
 
 namespace BaggyBot.Commands
 {
@@ -15,7 +11,7 @@ namespace BaggyBot.Commands
 		public IrcUser Sender;
 		public string Channel;
 		public string FullArgument;
-		private Action<string, string> ReplyCallback;
+		private readonly Action<string, string> replyCallback;
 
 		public CommandArgs(string command, string[] args, IrcUser sender, string channel, string fullArgument, Action<string, string> replyCallback)
 		{
@@ -24,16 +20,16 @@ namespace BaggyBot.Commands
 			Sender = sender;
 			Channel = channel;
 			FullArgument = fullArgument;
-			ReplyCallback = replyCallback;
+			this.replyCallback = replyCallback;
 		}
 		public void Reply(string format, params object[] args)
 		{
-			string message = Sender.Nick + ", " + string.Format(format, args);
-			ReplyCallback(Channel, message);
+			var message = Sender.Nick + ", " + string.Format(format, args);
+			replyCallback(Channel, message);
 		}
 		public void ReturnMessage(string format, params object[] args)
 		{
-			ReplyCallback(Channel, string.Format(format, args));
+			replyCallback(Channel, string.Format(format, args));
 		}
 	}
 }

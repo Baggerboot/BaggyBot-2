@@ -45,10 +45,10 @@ namespace BaggyBotHost
 
 		private static void WriteToConsole(ConsoleColor lineColor, StringBuilder lineBuilder)
 		{
-			var prevColor = Console.ForegroundColor;
-			Console.ForegroundColor = lineColor;
+			//var prevColor = Console.ForegroundColor;
+			//Console.ForegroundColor = lineColor;
 			Console.WriteLine(lineBuilder.ToString());
-			Console.ForegroundColor = prevColor;
+			//Console.ForegroundColor = prevColor;
 		}
 	}
 }

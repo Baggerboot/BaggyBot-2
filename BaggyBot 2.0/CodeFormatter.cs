@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BaggyBot
 {
@@ -11,7 +9,7 @@ namespace BaggyBot
 
 		private bool WorksAsEnumerable(object obj)
 		{
-			System.Collections.IEnumerable enumerable = obj as System.Collections.IEnumerable;
+			var enumerable = obj as IEnumerable;
 			if (enumerable != null) {
 				try {
 					enumerable.GetEnumerator();
@@ -30,18 +28,18 @@ namespace BaggyBot
 
 		public string PrettyPrint(object result)
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			if (result == null) {
 				sb.Append("null");
 				return sb.ToString();
 			}
 
 			if (result is Array) {
-				Array a = (Array)result;
+				var a = (Array)result;
 
 				sb.Append("{ ");
-				int top = a.GetUpperBound(0);
-				for (int i = a.GetLowerBound(0); i <= top; i++) {
+				var top = a.GetUpperBound(0);
+				for (var i = a.GetLowerBound(0); i <= top; i++) {
 					sb.Append(PrettyPrint(a.GetValue(i)));
 					if (i != top)
 						sb.Append(", ");
@@ -54,12 +52,12 @@ namespace BaggyBot
 					sb.Append("false");
 			} else if (result is string) {
 				sb.Append(String.Format("\"{0}\"", EscapeString((string)result)));
-			} else if (result is System.Collections.IDictionary) {
-				System.Collections.IDictionary dict = (System.Collections.IDictionary)result;
+			} else if (result is IDictionary) {
+				var dict = (IDictionary)result;
 				int top = dict.Count, count = 0;
 
 				sb.Append("{");
-				foreach (System.Collections.DictionaryEntry entry in dict) {
+				foreach (DictionaryEntry entry in dict) {
 					count++;
 					sb.Append("{ ");
 					sb.Append(PrettyPrint(entry.Key));
@@ -72,9 +70,9 @@ namespace BaggyBot
 				}
 				sb.Append("}");
 			} else if (WorksAsEnumerable(result)) {
-				int i = 0;
+				var i = 0;
 				sb.Append("{ ");
-				foreach (object item in (System.Collections.IEnumerable)result) {
+				foreach (var item in (IEnumerable)result) {
 					if (i++ != 0)
 						sb.Append(", ");
 
@@ -84,7 +82,7 @@ namespace BaggyBot
 			} else if (result is char) {
 				sb.Append(EscapeChar((char)result));
 			} else {
-				sb.Append(result.ToString());
+				sb.Append(result);
 			}
 			return sb.ToString();
 		}

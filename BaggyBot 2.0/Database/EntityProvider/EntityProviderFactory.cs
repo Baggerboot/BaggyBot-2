@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BaggyBot.Database.MS_SQL;
+using BaggyBot.Database.PostgreSQL;
 
 namespace BaggyBot.Database.EntityProvider
 {
@@ -18,9 +16,9 @@ namespace BaggyBot.Database.EntityProvider
 		{
 			switch (dbType) {
 				case SupportedDatabases.MsSql:
-					return new MS_SQL.MsEntityProvider();
+					return new MsEntityProvider();
 				case SupportedDatabases.PostgreSQL:
-					return new PostgreSQL.PgEntityProvider();
+					return new PgEntityProvider();
 				default:
 					throw new ArgumentException("Invalid database type supplied. This database type is not supported.");
 			}

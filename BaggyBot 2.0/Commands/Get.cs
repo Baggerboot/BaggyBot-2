@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using BaggyBot.DataProcessors;
+﻿using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
 	class Get : ICommand
 	{
-		private DataFunctionSet dataFunctionSet;
-		private IrcInterface ircInterface;
+		private readonly DataFunctionSet dataFunctionSet;
+		private readonly IrcInterface ircInterface;
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 
 		public Get(DataFunctionSet df, IrcInterface ircInterface )
@@ -39,8 +33,8 @@ namespace BaggyBot.Commands
 			}
 			switch (command.Args[0]) {
 				case "uid":
-					string nick = command.Args.Length > 1 ? command.Args[1] : command.Sender.Nick;
-					int uid = dataFunctionSet.GetIdFromNick(nick);
+					var nick = command.Args.Length > 1 ? command.Args[1] : command.Sender.Nick;
+					var uid = dataFunctionSet.GetIdFromNick(nick);
 					command.Reply("Your user Id is " + uid);
 					break;
 				case "users":

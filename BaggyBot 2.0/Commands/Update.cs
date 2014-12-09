@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.IO;
 
 namespace BaggyBot.Commands
 {
 	class Update : ICommand
 	{
-		private Bot bot;
+		private readonly Bot bot;
 		public Update(Bot bot)
 		{
 			this.bot = bot;
@@ -37,7 +32,13 @@ namespace BaggyBot.Commands
 				proc.Start();
 				command.ReturnMessage("Downloading update...");
 				proc.WaitForExit();
-				Logger.Log("Requesting an update", LogLevel.Info);
+				if (proc.ExitCode != 0) {
+					command.ReturnMessage("Downloader exited with code {0}. Update process aborted. No files were changed.", proc.ExitCode);
+					return;
+				}
+				File.Replace("BaggyBot20.exe.new", "BaggyBot20.exe", null);
+				File.Replace("CsNetLib2.dll.new", "CsNetLib2.dll", null);
+				Logger.Log("Requesting a restart", LogLevel.Info);
 				bot.RequestUpdate(requestChannel, true);
 			}
 		}
