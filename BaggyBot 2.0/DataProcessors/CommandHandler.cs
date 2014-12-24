@@ -60,7 +60,7 @@ namespace BaggyBot.DataProcessors
 
             // Inject bot information, but do not return.
 			if (new string[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1))) {
-				ircInterface.SendMessage(message.Channel, Messages.CmdGeneralInfo, Bot.Version);
+				ircInterface.SendMessage(message.Channel, string.Format(Messages.CmdGeneralInfo, Bot.Version));
 			}
 
 			var args = line.Split(' ');
