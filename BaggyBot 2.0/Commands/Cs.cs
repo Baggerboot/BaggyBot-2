@@ -112,8 +112,11 @@ namespace BaggyBot.Commands
 					commandBuilders[command.Sender.Nick].Clear();
 				} else if (input == null) {
 					if (reportPrinter.HasMessage) {
-						var message = reportPrinter.GetNextMessage();
-						IrcInterface.SendMessage(command.Channel, string.Format("{0} at column {1}: {2}", message.MessageType, message.Location.Column, message.Text));
+                        while (reportPrinter.HasMessage)
+                        {
+                            var message = reportPrinter.GetNextMessage();
+                            IrcInterface.SendMessage(command.Channel, string.Format("{0} at column {1}: {2}", message.MessageType, message.Location.Column, message.Text));
+                        }
 					} else {
 						IrcInterface.SendMessage(command.Channel, "Done (No result)");
 					}
