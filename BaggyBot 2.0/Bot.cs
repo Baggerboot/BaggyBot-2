@@ -33,7 +33,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.34.1";
+		public const string Version = "3.34.4";
 
 		public bool QuitRequested
 		{
@@ -41,15 +41,12 @@ namespace BaggyBot
 			private set;
 		}
 
-		public static DateTime LastUpdate
-		{
-			get
-			{
-				return MiscTools.RetrieveLinkerTimestamp();
-			}
-		}
+	    public static DateTime LastUpdate
+	    {
+	        get { return MiscTools.RetrieveLinkerTimestamp(); }
+	    }
 
-		// If the bot is started in update mode, a previous version has to be specified.
+	    // If the bot is started in update mode, a previous version has to be specified.
 		// The bot will then announce whether the update was a success or a failure.
 		// To determine this, the previous version is stored in here.
 		// If the bot is not started in update mode, the value of this field remains null.
@@ -108,8 +105,8 @@ namespace BaggyBot
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;
 			client.OnDisconnect += HandleDisconnect;
 			client.OnKicked += (channel, reason, kicker) => Logger.Log("I was kicked from {0} by {1} ({2})", LogLevel.Warning, true, channel, kicker.Nick, reason);
-			client.OnDebugLog += message => MiscTools.ConsoleWriteLine("[ILB]\t" + message, ConsoleColor.DarkCyan);
-			client.OnNetLibDebugLog += message => MiscTools.ConsoleWriteLine("[NET]\t" + message, ConsoleColor.Cyan);
+		    client.OnDebugLog += message => Logger.Log("[IC#]" + message, LogLevel.Info);
+            client.OnNetLibDebugLog += message => Logger.Log("[NL#]" + message, LogLevel.Info);
 			client.OnJoinChannel += ircEventHandler.HandleJoin;
 			client.OnPartChannel += ircEventHandler.HandlePart;
 			client.OnKick += ircEventHandler.HandleKick;

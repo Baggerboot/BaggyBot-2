@@ -44,38 +44,49 @@ namespace BaggyBot
 			prefix = string.Empty;
 		}
 
+        private const string KNRM = "\x1B[0m";
+        private const string KRED = "\x1B[31m";
+        private const string KGRN = "\x1B[32m";
+        private const string KYEL = "\x1B[33m";
+        private const string KBLU = "\x1B[34m";
+        private const string KMAG = "\x1B[35m";
+        private const string KCYN = "\x1B[36m";
+        private const string KWHT = "\x1B[37m";
+        private const string RESET = "\x33[0m";
+
 		public static void Log(string message, LogLevel level = LogLevel.Debug, bool writeLine = true, params object[] format)
 		{
 			if (format.Length != 0) {
 				message = String.Format(message, format);
 			}
 			var lineBuilder = new StringBuilder();
-			var lineColor = ConsoleColor.Gray;
+			//var lineColor = ConsoleColor.Gray;
+		    var lineColor = "";
 
 			switch (level) {
 				case LogLevel.Debug:
 					lineBuilder.Append("[DEB]\t");
-					lineColor = ConsoleColor.Gray;
+			        lineColor = KWHT;
 					break;
 				case LogLevel.Info:
 					lineBuilder.Append("[INF]\t");
-					lineColor = ConsoleColor.Green;
+			        lineColor = KGRN;
 					break;
 				case LogLevel.Message:
 					lineBuilder.Append("[MSG]\t");
-					lineColor = ConsoleColor.DarkGreen;
+			        lineColor = KBLU;
 					break;
 				case LogLevel.Irc:
 					lineBuilder.Append("[IRC]\t");
-					lineColor = ConsoleColor.White;
+			        lineColor = KNRM;
 					break;
 				case LogLevel.Warning:
 					lineBuilder.Append("[WRN]\t");
-					lineColor = ConsoleColor.Yellow;
+			        lineColor = KYEL;
 					break;
 				case LogLevel.Error:
 					lineBuilder.Append("[ERR]\t");
-					lineColor = ConsoleColor.DarkRed;
+			        lineColor = KRED;
 					break;
 			}
 			lineBuilder.Append(prefix);
@@ -101,10 +112,13 @@ namespace BaggyBot
 			}
 		}
 
-		private static void WriteToConsole(ConsoleColor lineColor, LogLevel level, StringBuilder lineBuilder)
+        private static void WriteToConsole(string lineColor, LogLevel level, StringBuilder lineBuilder)
+		//private static void WriteToConsole(ConsoleColor lineColor, LogLevel level, StringBuilder lineBuilder)
 		{
-			var prevColor = Console.ForegroundColor;
-			Console.ForegroundColor = lineColor;
+			//var prevColor = Console.ForegroundColor;
+			//Console.ForegroundColor = lineColor;
+            Console.Write(lineColor);
+
 			if (level == LogLevel.Debug) {
 				var writeDebug = false;
 				if (bool.TryParse(Settings.Instance["show_debug_log"], out writeDebug)) {
@@ -118,7 +132,8 @@ namespace BaggyBot
 			} else {
 				Console.WriteLine(lineBuilder.ToString());
 			}
-			Console.ForegroundColor = prevColor;
+            //Console.Write(RESET);
+			//Console.ForegroundColor = prevColor;
 		}
 
 		public static void ClearLog()

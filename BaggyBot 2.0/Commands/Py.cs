@@ -34,6 +34,7 @@ namespace BaggyBot.Commands
 			scope.SetVariable("ircInterface", IrcInterface);
 			scope.SetVariable("dataFunctionSet", df);
 			scope.SetVariable("tools", new PythonTools());
+            scope.SetVariable("find", new Action<string>((msg) => df.FindLine(msg)));
 			var outputStream = new ProducerConsumerStream();
 			var outputStreamWriter = new StreamWriter(outputStream);
 			outputStreamReader = new StreamReader(outputStream);

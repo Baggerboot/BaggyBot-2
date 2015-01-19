@@ -36,6 +36,7 @@ namespace BaggyBot.Commands
 					command.ReturnMessage("Downloader exited with code {0}. Update process aborted. No files were changed.", proc.ExitCode);
 					return;
 				}
+                Logger.Log("Replacing files");
 				File.Replace("BaggyBot20.exe.new", "BaggyBot20.exe", null);
 				File.Replace("CsNetLib2.dll.new", "CsNetLib2.dll", null);
 				Logger.Log("Requesting a restart", LogLevel.Info);

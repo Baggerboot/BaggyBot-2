@@ -89,7 +89,7 @@ namespace BaggyBot.DataProcessors
                     AddMessageToIrcLog(message, userId);
                 }
 
-                var rgx = new Regex(@"s\/(.*)\/(.*)", RegexOptions.IgnoreCase);
+                var rgx = new Regex(@"^s\/([^\/]{1,})\/([^\/]*)", RegexOptions.IgnoreCase);
                 Match match;
                 if ((match = rgx.Match(message.Message)).Success)
                 {

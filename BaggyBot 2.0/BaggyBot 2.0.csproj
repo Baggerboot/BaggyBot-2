@@ -110,6 +110,7 @@
     <Compile Include="Commands\Reconnect.cs" />
     <Compile Include="Commands\Remember.cs" />
     <Compile Include="Commands\ResolveReverse.cs" />
+    <Compile Include="Commands\Search.cs" />
     <Compile Include="Commands\Sql.cs" />
     <Compile Include="Commands\Topics.cs" />
     <Compile Include="Commands\Update.cs" />
