@@ -40,7 +40,10 @@ namespace BaggyBot.Database.PostgreSQL
 
 		public override void Dispose()
 		{
-			context.Dispose();
+            if (context != null)
+            {
+                context.Dispose();
+            }
 			if(connection != null) connection.Dispose();
 		}
 	}
