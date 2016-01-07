@@ -1,11 +1,6 @@
 ﻿<Properties StartupItem="BaggyBot 2.0/BaggyBot 2.0.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BaggyBot 2.0/Commands/Get.cs">
-    <Files>
-      <File FileName="BaggyBot 2.0/Commands/Feature.cs" Line="11" Column="3" />
-      <File FileName="BaggyBot 2.0/Commands/Get.cs" Line="14" Column="21" />
-    </Files>
-  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
