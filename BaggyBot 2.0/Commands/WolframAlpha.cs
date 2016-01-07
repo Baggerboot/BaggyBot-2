@@ -74,7 +74,8 @@ namespace BaggyBot.Commands
 
 			var appid = Settings.Instance["wolfram_alpha_appid"];
 
-			var uri = new Uri(string.Format("http://api.wolframalpha.com/v2/query?appid={0}&input={1}&ip={2}&format=plaintext&units=metric",  appid, command.FullArgument, command.Sender.Hostmask));
+			var uri = string.Format("http://api.wolframalpha.com/v2/query?appid={0}&input={1}&ip={2}&format=plaintext&units=metric",  appid, Uri.EscapeDataString(command.FullArgument), command.Sender.Hostmask);
+            //var escaped = Uri.EscapeDataString(uri);
 
 			var rq = WebRequest.Create(uri);
 			var response = rq.GetResponse();
