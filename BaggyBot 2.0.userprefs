@@ -1,12 +1,19 @@
-﻿<Properties>
+﻿<Properties StartupItem="BaggyBot 2.0/BaggyBot 2.0.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BaggyBot 2.0/Bot.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="BaggyBot 2.0/Commands/Py.cs">
     <Files>
-      <File FileName="BaggyBot 2.0/Bot.cs" Line="193" Column="14" />
+      <File FileName="BaggyBot 2.0/Bot.cs" Line="1" Column="1" />
+      <File FileName="BaggyBot 2.0/Commands/Py.cs" Line="12" Column="17" />
+      <File FileName="BaggyBot 2.0/Database/PostgreSQL/DataAccess.cs" Line="141" Column="25" />
+      <File FileName="../../../../../usr/lib/mono/4.5/Microsoft.Common.targets" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <DisabledProjects>
+    <String>../../../../Source/Repos/IRCNext/IRCNext/CsNetLib2/CsNetLib2.csproj</String>
+    <String>../../../../Source/Repos/IRCNext/IRCNext/IRCSharp/IRCSharp.csproj</String>
+  </DisabledProjects>
 </Properties>
