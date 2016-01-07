@@ -7,14 +7,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaggyBot 2.0", "BaggyBot 2.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbLinq", "DbLinq\DbLinq.csproj", "{7950197D-4122-49CB-9FD7-45E666BAFEC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsNetLib2", "..\CsNetLib2\CsNetLib2.csproj", "{68170802-5DE7-4F66-99C7-136B3C7DD93C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRCSharp", "..\IRCSharp\IRCSharp.csproj", "{06A69CBB-6E8E-4974-B99D-77221FEC4A33}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8FA16268-9410-45DC-A9E0-ADF3A14EEACE}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsNetLib2", "..\CSNetLib2\CsNetLib2\CsNetLib2.csproj", "{68170802-5DE7-4F66-99C7-136B3C7DD93C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRCSharp", "..\IRCSharp\IRCSharp\IRCSharp.csproj", "{06A69CBB-6E8E-4974-B99D-77221FEC4A33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
