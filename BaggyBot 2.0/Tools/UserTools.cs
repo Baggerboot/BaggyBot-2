@@ -23,7 +23,7 @@ namespace BaggyBot.Tools
 		delegate bool Match(string input, string reference);
 		public static bool Validate(IrcUser user)
 		{
-			Logger.Log("Validating user");
+			Logger.Log(null, "Validating user");
 			Match match = (input, reference) => {
 				return (reference.Equals("*") || input.Equals(reference));
 			};
@@ -35,11 +35,11 @@ namespace BaggyBot.Tools
 			var uids = DataFunctionSet.GetUids(user);
 
 			if (uids.Length > 1) {
-				Logger.Log(String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned more than one user ID.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
+				Logger.Log(null, String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned more than one user ID.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
 				return false;
 			}
 			if(uids.Length == 0){
-				Logger.Log(String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned no user IDs.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
+				Logger.Log(null, String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned no user IDs.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
 				return false;
 			}
 			var nickM = match(user.Nick, nick);

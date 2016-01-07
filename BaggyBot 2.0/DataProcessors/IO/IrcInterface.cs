@@ -68,9 +68,9 @@ namespace BaggyBot
 		{
 			if (nickservCallResults.ContainsKey(nick)) {
 				if (nickservCallResults[nick] == nickserv) {
-					Logger.Log(string.Format("Dropped NickServ reply for {0}:{1} as an entry already exists.", nick, nickserv), LogLevel.Warning);
+					Logger.Log(this, string.Format("Dropped NickServ reply for {0}:{1} as an entry already exists.", nick, nickserv), LogLevel.Warning);
 				} else {
-					Logger.Log(string.Format("Invalid NickServ reply stored for {0}:{1}. The stored value was {2}.", nick, nickserv, nickservCallResults[nick]), LogLevel.Error);
+					Logger.Log(this, string.Format("Invalid NickServ reply stored for {0}:{1}. The stored value was {2}.", nick, nickserv, nickservCallResults[nick]), LogLevel.Error);
 					nickservCallResults[nick] = nick;
 				}
 				return;
@@ -82,14 +82,14 @@ namespace BaggyBot
 		{
 			if (!CanDoNickservCall) return null;
 
-			Logger.Log("Nickserv call requested for " + nick, LogLevel.Debug);
+			Logger.Log(this, "Nickserv call requested for " + nick, LogLevel.Debug);
 
 			if (!nickservCalls.Contains(nick)) {
 				nickservCalls.Add(nick);
-				Logger.Log("Calling NickServ for " + nick, LogLevel.Info);
+				Logger.Log(this, "Calling NickServ for " + nick, LogLevel.Info);
 				SendMessage("NickServ", "INFO " + nick);
 			} else {
-				Logger.Log("An entry already exists for " + nick, LogLevel.Debug);
+				Logger.Log(this, "An entry already exists for " + nick, LogLevel.Debug);
 			}
 			nick = nick.ToLower();
 
@@ -99,7 +99,7 @@ namespace BaggyBot
 				Thread.Sleep(20);
 				waitTime += 20;
 				if (waitTime == 6000) {
-					Logger.Log("No nickserv reply received for {0} after 6 seconds", LogLevel.Warning, true, nick);
+					Logger.Log(this, "No nickserv reply received for {0} after 6 seconds", LogLevel.Warning, true, nick);
 				}
 			}
 			nickservCalls.Remove(nick);
@@ -143,7 +143,7 @@ namespace BaggyBot
 			var fullMsg = GenerateFullMessage(target, message);
 
 			if (fullMsg.Length > messageLengthLimit) {
-				Logger.Log("Message prototype exceeds maximum allowed message length! Message prototype: " + fullMsg, LogLevel.Warning);
+				Logger.Log(this, "Message prototype exceeds maximum allowed message length! Message prototype: " + fullMsg, LogLevel.Warning);
 			}
 
 			var result = client.SendMessage(target, message);

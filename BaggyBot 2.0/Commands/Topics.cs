@@ -17,7 +17,7 @@ namespace BaggyBot.Commands
 
 		private void ShowTopics(string nick, string channel, Action<string, object[]> replyCallback, bool showDebugInfo)
 		{
-			Logger.Log("Showing topics for " + nick);
+			Logger.Log(this, "Showing topics for " + nick);
 			var userId = dataFunctionSet.GetIdFromNick(nick);
 			var topics = dataFunctionSet.FindTopics(userId, channel);
 

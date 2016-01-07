@@ -58,16 +58,15 @@ namespace BaggyBot.DataProcessors
         {
             if (message.Action)
             {
-                Logger.Log("Adding action message to the IRC log");
+                Logger.Log(this, "Adding action message to the IRC log");
                 dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, "*" + message.Sender.Nick + " " + message.Message + "*");
             }
             else
             {
-                Logger.Log("Adding regular IRC message to the IRC log");
+                Logger.Log(this, "Adding regular IRC message to the IRC log");
                 dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
             }
         }
-
         internal void ProcessMessage(IrcMessage message)
         {
             try
@@ -76,11 +75,11 @@ namespace BaggyBot.DataProcessors
 
                 if (message.Action)
                 {
-                    Logger.Log("*{0} {1}*", LogLevel.Message, true, message.Sender.Nick, message.Message);
+                    Logger.Log(this, "*{0} {1}*", LogLevel.Message, true, message.Sender.Nick, message.Message);
                 }
                 else
                 {
-                    Logger.Log(message.Sender.Nick + ": " + message.Message, LogLevel.Message);
+                    Logger.Log(this, message.Sender.Nick + ": " + message.Message, LogLevel.Message);
                 }
                 var userId = 0;
                 if (dataFunctionSet.ConnectionState != ConnectionState.Closed)
@@ -104,7 +103,7 @@ namespace BaggyBot.DataProcessors
 
                 if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py"))
                 {
-                    Logger.Log("Processing Query Console python command");
+                    Logger.Log(this, "Processing Query Console python command");
                     message.Message = "-py " + message.Message;
                     commandHandler.ProcessCommand(message);
                     return;
@@ -120,19 +119,19 @@ namespace BaggyBot.DataProcessors
             }
             catch (ArgumentOutOfRangeException)
             {
-                Logger.Log("\r\nArgumentOutOfRangeException occurred while attempting to process a message", LogLevel.Error);
-                Logger.Log("The message contained the following bytes of data: {" + string.Join(", ", message.Message.ToCharArray().Select(c => string.Format("0x{0:X2}", (byte)c))) + "}", LogLevel.Error);
-                Logger.Log("This message has been discarded.", LogLevel.Warning);
+                Logger.Log(this, "\r\nArgumentOutOfRangeException occurred while attempting to process a message", LogLevel.Error);
+                Logger.Log(this, "The message contained the following bytes of data: {" + string.Join(", ", message.Message.ToCharArray().Select(c => string.Format("0x{0:X2}", (byte)c))) + "}", LogLevel.Error);
+                Logger.Log(this, "This message has been discarded.", LogLevel.Warning);
             }
         }
         internal void ProcessNotice(IrcUser sender, string notice)
         {
             if (ircInterface.HasNickservCall && sender.Ident.Equals("NickServ"))
             {
-                Logger.Log("Received NickServ reply");
+                Logger.Log(this, "Received NickServ reply");
                 if (notice.StartsWith("Information on"))
                 {
-                    Logger.Log("User is registered. Processing reply");
+                    Logger.Log(this, "User is registered. Processing reply");
                     var data = notice.Substring("Information on  ".Length);
                     var nick = data.Substring(0, data.IndexOf(" ") - 1);
                     data = data.Substring(nick.Length + 2 + "(account  ".Length);
@@ -143,13 +142,13 @@ namespace BaggyBot.DataProcessors
                 {
                     var nick = notice.Substring(1, notice.Length - 2);
                     nick = nick.Substring(0, nick.IndexOf(' ') - 1);
-                    Logger.Log("'{0}' does not appear to be registered with NickServ.", LogLevel.Debug, true, nick);
+                    Logger.Log(this, "'{0}' does not appear to be registered with NickServ.", LogLevel.Debug, true, nick);
                     ircInterface.AddNickserv(nick.ToLower(), null);
                 }
             }
             else if (sender.Ident.Equals("NickServ"))
             {
-                Logger.Log("Received an unexpected NickServ response: " + notice, LogLevel.Warning);
+                Logger.Log(this, "Received an unexpected NickServ response: " + notice, LogLevel.Warning);
             }
         }
         /// <summary>
@@ -171,9 +170,9 @@ namespace BaggyBot.DataProcessors
             }
             else if (line.Command.Equals("464"))
             {
-                Logger.Log("Password required by server.", LogLevel.Info);
+                Logger.Log(this, "Password required by server.", LogLevel.Info);
                 var msg = "PASS " + Settings.Instance["irc_password"];
-                Logger.Log("Replying with " + msg, LogLevel.Info);
+                Logger.Log(this, "Replying with " + msg, LogLevel.Info);
                 ircInterface.SendRaw(msg);
             }
             //
@@ -184,10 +183,10 @@ namespace BaggyBot.DataProcessors
                     case "001":
                     case "002":
                     case "003":
-                        Logger.Log("{0}: {1}", LogLevel.Irc, true, line.Sender, line.FinalArgument);
+                        Logger.Log(this, "{0}: {1}", LogLevel.Irc, true, line.Sender, line.FinalArgument);
                         break;
                     case "332":
-                        Logger.Log("Topic for {0}: {1}", LogLevel.Irc, true, line.Arguments[1], line.FinalArgument);
+                        Logger.Log(this, "Topic for {0}: {1}", LogLevel.Irc, true, line.Arguments[1], line.FinalArgument);
                         break;
                     case "333": // Ignore names list
                     case "366":
@@ -195,15 +194,15 @@ namespace BaggyBot.DataProcessors
                     case "MODE":
                         if (line.FinalArgument != null)
                         {
-                            Logger.Log("{0} sets mode {1} for {2}", LogLevel.Irc, true, line.Sender, line.FinalArgument, line.Arguments[0]);
+                            Logger.Log(this, "{0} sets mode {1} for {2}", LogLevel.Irc, true, line.Sender, line.FinalArgument, line.Arguments[0]);
                         }
                         else
                         {
-                            Logger.Log("{0} sets mode {1} for {2}", LogLevel.Irc, true, line.Sender, line.Arguments[1], line.Arguments[0]);
+                            Logger.Log(this, "{0} sets mode {1} for {2}", LogLevel.Irc, true, line.Sender, line.Arguments[1], line.Arguments[0]);
                         }
                         break;
                     default:
-                        Logger.Log(line.ToString(), LogLevel.Irc);
+                        Logger.Log(this, line.ToString(), LogLevel.Irc);
                         break;
                 }
             }
@@ -232,13 +231,13 @@ namespace BaggyBot.DataProcessors
         }
         internal void DisplayEvent(string message)
         {
-            Logger.Log(message, LogLevel.Irc);
+            Logger.Log(this, message, LogLevel.Irc);
             dataFunctionSet.AddIrcMessage(DateTime.Now, null, "ALL", "NOTICE", message);
         }
 
         internal void ProcessRawLine(string line)
         {
-            Logger.Log("--" + line, LogLevel.Irc);
+            Logger.Log(this, "--" + line, LogLevel.Irc);
         }
 
         internal void HandleQuit(IrcUser user, string reason)

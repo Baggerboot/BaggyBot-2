@@ -28,7 +28,7 @@ namespace BaggyBot.Database.EntityProvider
 
 		public void Reconnect()
 		{
-			Logger.Log("Attempting to reconnect to the SQL database.");
+			Logger.Log(this, "Attempting to reconnect to the SQL database.");
 			connection.Close();
 			connection.Dispose();
 			connection = null;
@@ -37,17 +37,16 @@ namespace BaggyBot.Database.EntityProvider
 		public bool CloseConnection()
 		{
 			try {
-				Logger.Log("Closing SQL server connection", LogLevel.Info);
+				Logger.Log(this, "Closing SQL server connection", LogLevel.Info);
 				connection.Close();
 				return true;
 			} catch (SqlException ex) {
-				Logger.Log("Failed to close the connection to the SQL Database.MS_SQL. Error mesage: " + ex.Message, LogLevel.Error);
+				Logger.Log(this, "Failed to close the connection to the SQL Database.MS_SQL. Error mesage: " + ex.Message, LogLevel.Error);
 				return false;
 			}
 		}
 		public int ExecuteStatement(string statement)
 		{
-			Logger.Log("Manually executing an SQL statement.");
 			int result;
 			using (var cmd = connection.CreateCommand()) {
 				cmd.CommandText = statement;
@@ -59,7 +58,7 @@ namespace BaggyBot.Database.EntityProvider
 		public List<object> ExecuteQuery(string query)
 		{
 			var data = new List<object>();
-			Logger.Log("Manually executing an SQL query.");
+			Logger.Log(this, "Manually executing an SQL query.");
 			using (var cmd = connection.CreateCommand()) {
 				cmd.CommandText = query;
 				var reader = cmd.ExecuteReader();

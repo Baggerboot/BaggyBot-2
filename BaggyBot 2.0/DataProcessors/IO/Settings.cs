@@ -53,13 +53,13 @@ namespace BaggyBot
 		private Settings()
 		{
 			if (!File.Exists(filename)) {
-				Logger.Log("No settings file found. Creating a new one.", LogLevel.Info);
+				Logger.Log(this, "No settings file found. Creating a new one.", LogLevel.Info);
 				try {
 					var stream = File.Create(filename);
 					stream.Close();
 					NewFileCreated = true;
 				} catch (IOException e) {
-					Logger.Log("Unable to create a new settings file, an exception ({0}) occurred: \"{1}\"", LogLevel.Error, true, e.GetType().Name, e.Message);
+					Logger.Log(this, "Unable to create a new settings file, an exception ({0}) occurred: \"{1}\"", LogLevel.Error, true, e.GetType().Name, e.Message);
 					return;
 				}
 			}

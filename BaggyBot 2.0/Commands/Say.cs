@@ -15,7 +15,7 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command){
 			var msg = String.Join(" ", command.Args.Skip(1));
-			Logger.Log("Saying: " + msg);
+			Logger.Log(this, "Saying: " + msg);
 
 			ircInterface.SendMessage(command.Args[0], msg);
 		}

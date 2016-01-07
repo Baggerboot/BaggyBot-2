@@ -16,11 +16,11 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			Logger.Log("Preparing to update");
+			Logger.Log(this, "Preparing to update");
 			requestChannel = command.Channel;
 
 			if (command.Args.Length == 1 && command.Args[0] == "--no-dl") {
-				Logger.Log("Requesting a restart", LogLevel.Info);
+				Logger.Log(this, "Requesting a restart", LogLevel.Info);
 				bot.RequestUpdate(requestChannel, false);
 			} else {
 				var proc = new Process();
@@ -36,10 +36,10 @@ namespace BaggyBot.Commands
 					command.ReturnMessage("Downloader exited with code {0}. Update process aborted. No files were changed.", proc.ExitCode);
 					return;
 				}
-                Logger.Log("Replacing files");
+                Logger.Log(this, "Replacing files");
 				File.Replace("BaggyBot20.exe.new", "BaggyBot20.exe", null);
 				File.Replace("CsNetLib2.dll.new", "CsNetLib2.dll", null);
-				Logger.Log("Requesting a restart", LogLevel.Info);
+				Logger.Log(this, "Requesting a restart", LogLevel.Info);
 				bot.RequestUpdate(requestChannel, true);
 			}
 		}

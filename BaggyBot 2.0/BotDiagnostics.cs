@@ -54,12 +54,12 @@ namespace BaggyBot
 			var message = "A fatal unhandled exception occured: " + e.GetType().Name + " - " + e.Message + " - in file: " + bottomFrame.GetFileName() + ":" + bottomFrame.GetFileLineNumber();
 
 			ircInterface.NotifyOperator(message);
-			Logger.Log(message, LogLevel.Error);
+			Logger.Log(this, message, LogLevel.Error);
 		}
 
 		internal void StartPerformanceLogging()
 		{
-			Logger.Log("Logging performance statistics to " + PerfLogFile, LogLevel.Info);
+			Logger.Log(this, "Logging performance statistics to " + PerfLogFile, LogLevel.Info);
 			taskScheduler.Start();
 			taskScheduler.Elapsed += (source, eventArgs) =>
 			{

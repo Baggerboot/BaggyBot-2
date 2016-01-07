@@ -33,7 +33,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.34.4";
+		public const string Version = "3.37";
 
 		public bool QuitRequested
 		{
@@ -59,9 +59,9 @@ namespace BaggyBot
 
 			previousVersion = Settings.Instance["version"];
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
-			Logger.Log("Starting BaggyBot version " + Version, LogLevel.Info);
+			Logger.Log(this, "Starting BaggyBot version " + Version, LogLevel.Info);
 			if (previousVersion != null && previousVersion != Version) {
-				Logger.Log("Updated from version {0} to version {1}", LogLevel.Info, true, previousVersion, Version);
+				Logger.Log(this, "Updated from version {0} to version {1}", LogLevel.Info, true, previousVersion, Version);
 			}
 			Settings.Instance["version"] = Version;
 
@@ -85,7 +85,7 @@ namespace BaggyBot
 			var s = Settings.Instance;
 			if (s.NewFileCreated) {
 				s.FillDefault();
-				Logger.Log("New settings file created ({0}). Please fill it with the correct data, then start the bot again. BaggyBot will now exit.", LogLevel.Info, true, Logger.LogFileName);
+				Logger.Log(this, "New settings file created ({0}). Please fill it with the correct data, then start the bot again. BaggyBot will now exit.", LogLevel.Info, true, Logger.LogFileName);
 				Environment.Exit(0);
 			}
 		}
@@ -103,10 +103,10 @@ namespace BaggyBot
 			client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
 			//client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;
-			client.OnDisconnect += HandleDisconnect;
-			client.OnKicked += (channel, reason, kicker) => Logger.Log("I was kicked from {0} by {1} ({2})", LogLevel.Warning, true, channel, kicker.Nick, reason);
-		    client.OnDebugLog += message => Logger.Log("[IC#]" + message, LogLevel.Info);
-            client.OnNetLibDebugLog += message => Logger.Log("[NL#]" + message, LogLevel.Info);
+			client.OnDisconnect += (reason, exception) => HandleDisconnect(client, reason, exception);
+			client.OnKicked += (channel, reason, kicker) => Logger.Log(this, "I was kicked from {0} by {1} ({2})", LogLevel.Warning, true, channel, kicker.Nick, reason);
+		    client.OnDebugLog += (sender, message) => Logger.Log(sender, "[IC#]" + message, LogLevel.Info);
+            client.OnNetLibDebugLog += (sender, message) => Logger.Log(sender, "[NL#]" + message, LogLevel.Info);
 			client.OnJoinChannel += ircEventHandler.HandleJoin;
 			client.OnPartChannel += ircEventHandler.HandlePart;
 			client.OnKick += ircEventHandler.HandleKick;
@@ -115,11 +115,19 @@ namespace BaggyBot
 
 		private void ConnectDatabase()
 		{
-			Logger.Log("Connecting to the database", LogLevel.Info);
-			if (sqlConnector.OpenConnection())
-				Logger.Log("Database connection established", LogLevel.Info);
-			else
-				Logger.Log("Database connection not established. Bot functionality will be very limited.", LogLevel.Warning);
+			Logger.Log(this, "Connecting to the database", LogLevel.Info);
+		    try
+		    {
+		        if (sqlConnector.OpenConnection())
+		            Logger.Log(this, "Database connection established", LogLevel.Info);
+		        else
+		            Logger.Log(this, "Database connection not established. Bot functionality will be very limited.",
+		                LogLevel.Warning);
+		    }
+		    catch (Exception e)
+		    {
+		        Logger.Log(this, "An exception occurred while trying to connect to the database: {0}:{1}", LogLevel.Error, true, e.GetType().Name, e.Message);
+		    }
 		}
 
 		/// <summary>
@@ -132,23 +140,23 @@ namespace BaggyBot
 			var ident = s["irc_ident"];
 			var realname = s["irc_realname"];
 
-			Logger.Log("Connecting to the IRC server..");
-			Logger.Log("\tNick\t" + nick);
-			Logger.Log("\tIdent\t" + ident);
-			Logger.Log("\tName\t" + realname);
-			Logger.Log("\tHost\t" + host);
-			Logger.Log("\tPort\t" + port);
+			Logger.Log(this, "Connecting to the IRC server..");
+			Logger.Log(this, "\tNick\t" + nick);
+			Logger.Log(this, "\tIdent\t" + ident);
+			Logger.Log(this, "\tName\t" + realname);
+			Logger.Log(this, "\tHost\t" + host);
+			Logger.Log(this, "\tPort\t" + port);
 			try {
 				client.Connect(host, port, nick, ident, realname);
 				return true;
 			} catch (SocketException e) {
-				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
+				Logger.Log(this, "Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return false;
 			} catch (ArgumentException e) {
-				Logger.Log("Failed to connect to the IRC server: The settings file does not contain a value for \"{0}\"", LogLevel.Error, true, e.ParamName);
+				Logger.Log(this, "Failed to connect to the IRC server: The settings file does not contain a value for \"{0}\"", LogLevel.Error, true, e.ParamName);
 				return false;
 			} catch (Exception e) {
-				Logger.Log("Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
+				Logger.Log(this, "Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return false;
 			}
 		}
@@ -167,16 +175,16 @@ namespace BaggyBot
 			};
 		}
 
-		private void HandleDisconnect(DisconnectReason reason, Exception ex)
+		private void HandleDisconnect(object source, DisconnectReason reason, Exception ex)
 		{
 			if (reason == DisconnectReason.DisconnectOnRequest) {
-				Logger.Log("Disconnected from IRC server.", LogLevel.Info);
+				Logger.Log(this, "Disconnected from IRC server.", LogLevel.Info);
 				QuitRequested = true;
 			} else {
 				if (reason == DisconnectReason.Other) {
-					Logger.Log("Connection lost ({0}: {1}) Attempting to reconnect...", LogLevel.Error, true, ex.GetType().Name, ex.Message);
+					Logger.Log(source, "Connection lost ({0}: {1}) Attempting to reconnect...", LogLevel.Error, true, ex.GetType().Name, ex.Message);
 				} else {
-					Logger.Log("Connection lost ({0}) Attempting to reconnect...", LogLevel.Warning, true, reason.ToString());
+					Logger.Log(source, "Connection lost ({0}) Attempting to reconnect...", LogLevel.Warning, true, reason.ToString());
 				}
 				var state = client.GetClientState();
 
@@ -189,15 +197,15 @@ namespace BaggyBot
 
 					success = ConnectIrc(state.RemoteHost, state.RemotePort);
 					if (success) continue;
-					Logger.Log("Reconnection attempt failed. Retrying in 5 seconds.", LogLevel.Warning, true, reason.ToString());
+					Logger.Log(this, "Reconnection attempt failed. Retrying in 5 seconds.", LogLevel.Warning, true, reason.ToString());
 					Thread.Sleep(5000);
 				} while (!success);
 
-				Logger.Log("Successfully reconnected to the server!", LogLevel.Warning, true, reason.ToString());
+				Logger.Log(this, "Successfully reconnected to the server!", LogLevel.Warning, true, reason.ToString());
 				
 				foreach (var channel in state.Channels.Where(channel => !client.JoinChannel(channel.Key)))
 				{
-					Logger.Log("Failed to rejoin {0}! Skipping this channel.", LogLevel.Error, true, channel.Key);
+					Logger.Log(this, "Failed to rejoin {0}! Skipping this channel.", LogLevel.Error, true, channel.Key);
 				}
 			}
 		}
@@ -218,7 +226,7 @@ namespace BaggyBot
 			var state = (ClientState)MiscTools.DeserializeObject(serializedClientState);
 			if (state.Channels == null)
 			{
-				Logger.Log("Unable to read the channel list. I will not be able to rejoin my previous channels.", LogLevel.Error);
+				Logger.Log(this, "Unable to read the channel list. I will not be able to rejoin my previous channels.", LogLevel.Error);
 			}
 			else
 			{
@@ -226,7 +234,7 @@ namespace BaggyBot
 				{
 					if (!client.JoinChannel(channel.Key))
 					{
-						Logger.Log("Failed to rejoin {0}! Skipping this channel.", LogLevel.Error, true, channel.Key);
+						Logger.Log(this, "Failed to rejoin {0}! Skipping this channel.", LogLevel.Error, true, channel.Key);
 					}
 				}
 			}
@@ -243,12 +251,12 @@ namespace BaggyBot
 			while (!QuitRequested) {
 				Thread.Sleep(1000);
 			}
-			Logger.Log("Preparing to shut down", LogLevel.Info);
+			Logger.Log(this, "Preparing to shut down", LogLevel.Info);
 			ircInterface.Disconnect("Shutting down");
 			sqlConnector.CloseConnection();
-			Logger.Log("Closed SQL server connection", LogLevel.Info);
+			Logger.Log(this, "Closed SQL server connection", LogLevel.Info);
 			sqlConnector.Dispose();
-			Logger.Log("Disposed SQL server connection object", LogLevel.Info);
+			Logger.Log(this, "Disposed SQL server connection object", LogLevel.Info);
 			Logger.Dispose();
 			Console.WriteLine("Goodbye.");
 			Environment.Exit(0);
@@ -257,7 +265,7 @@ namespace BaggyBot
 		private void TryConnectIrc(string host, int port)
 		{
 			if (ConnectIrc(host, port)) return;
-			Logger.Log("FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
+			Logger.Log(this, "FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
 			Environment.Exit(1);
 		}
 
@@ -266,10 +274,10 @@ namespace BaggyBot
 			var firstChannel = Settings.Instance["irc_initial_channel"];
 			// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
 			if (string.IsNullOrWhiteSpace(firstChannel)) {
-				Logger.Log("Unable to join the initial channel: settings value for irc_initial_channel not set.", LogLevel.Error);
+				Logger.Log(this, "Unable to join the initial channel: settings value for irc_initial_channel not set.", LogLevel.Error);
 			} else {
 				ircInterface.JoinChannel(firstChannel);
-				Logger.Log("Ready to collect statistics in " + firstChannel, LogLevel.Info);
+				Logger.Log(this, "Ready to collect statistics in " + firstChannel, LogLevel.Info);
 			}
 		}
 
@@ -291,7 +299,7 @@ namespace BaggyBot
 
 		void IDisposable.Dispose()
 		{
-			Logger.Log("Disposing");
+			Logger.Log(this, "Disposing");
 		}
 
 		internal void RequestUpdate(string channel, bool updateFiles)
@@ -299,7 +307,7 @@ namespace BaggyBot
 			var state = client.GetClientState();
 			var data = MiscTools.SerializeObject(state);
 			if (string.IsNullOrWhiteSpace(data)) {
-				Logger.Log("Unable to serialize client state: Client state not marked as serializable.", LogLevel.Error);
+				Logger.Log(this, "Unable to serialize client state: Client state not marked as serializable.", LogLevel.Error);
 				return;
 			}
 			ircInterface.Disconnect("Updating...");

@@ -63,7 +63,7 @@ namespace BaggyBot.Database
 			if (bool.TryParse(Settings.Instance["sql_use_dblinq"], out useDbLinq)) {
 				provider = new EntityProviderFactory().CreateEntityProvider(useDbLinq ? SupportedDatabases.PostgreSQL : SupportedDatabases.MsSql);
 			} else {
-				Logger.Log("Unable to connect to the SQL database: settings value for sql_use_dblinq not set.", LogLevel.Error);
+				Logger.Log(this, "Unable to connect to the SQL database: settings value for sql_use_dblinq not set.", LogLevel.Error);
 				return false;
 			}
 			var result = provider.OpenConnection();

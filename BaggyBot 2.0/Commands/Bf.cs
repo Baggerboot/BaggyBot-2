@@ -107,7 +107,7 @@ namespace BaggyBot.Commands
 							}
 						}
 						if (length == -1) {
-							Logger.Log(depth + "");
+							Logger.Log(this, depth + "");
 							throw new ArgumentException("Syntax Error: '[' and ']' do not match up.");
 						}
 

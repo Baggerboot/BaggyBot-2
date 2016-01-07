@@ -46,12 +46,12 @@ namespace BaggyBot.DataProcessors
 				if (matches.Count() != 0) {
 					var match = matches.First();
 					match.Lines++;
-					Logger.Log("Incremented lines for " + uid + ".");
+					Logger.Log(this, "Incremented lines for " + uid + ".");
 					SubmitChanges();
 				} else {
 					var nstat = new UserStatistics {UserId = uid, Lines = 1};
 					sqlConnector.UserStats.InsertOnSubmit(nstat);
-					Logger.Log("Created new stats row for " + uid + ".");
+					Logger.Log(this, "Created new stats row for " + uid + ".");
 					SubmitChanges();
 				}
 			}
@@ -86,7 +86,7 @@ namespace BaggyBot.DataProcessors
 				int originalWords = match.Words;
 				match.Words += words;
 
-				Logger.Log("Incremented words for " + uid + ".");
+				Logger.Log(this, "Incremented words for " + uid + ".");
 				SubmitChanges();*/
 			}
 			Lock.LockMessage = "None";
@@ -168,7 +168,7 @@ namespace BaggyBot.DataProcessors
 				q.SnaggedAt = DateTime.Now;
 
 				sqlConnector.Quotes.InsertOnSubmit(q);
-				Logger.Log("Added quote for " + message.Sender.Nick + ".");
+				Logger.Log(this, "Added quote for " + message.Sender.Nick + ".");
 				SubmitChanges();
 			}
 			Lock.LockMessage = "None";
@@ -230,7 +230,7 @@ namespace BaggyBot.DataProcessors
 				cred.UserId = uid;
 
 				sqlConnector.UserCreds.InsertOnSubmit(cred);
-				Logger.Log("Addecd credentials row for " + user.Nick + ".");
+				Logger.Log(this, "Addecd credentials row for " + user.Nick + ".");
 				SubmitChanges();
 
 				if ((from n in sqlConnector.UserNames
@@ -243,7 +243,7 @@ namespace BaggyBot.DataProcessors
 					name.Name1 = user.Nick;
 
 					sqlConnector.UserNames.InsertOnSubmit(name);
-					Logger.Log("Added name row for " + user.Nick + ".");
+					Logger.Log(this, "Added name row for " + user.Nick + ".");
 					SubmitChanges();
 
 					ret = uid;
@@ -297,7 +297,7 @@ namespace BaggyBot.DataProcessors
 					n.Name1 = name;
 					sqlConnector.UserNames.InsertOnSubmit(n);
 				}
-				Logger.Log("Changed name for " + uid + ".");
+				Logger.Log(this, "Changed name for " + uid + ".");
 				SubmitChanges();
 			}
 			Lock.LockMessage = "None";
@@ -436,7 +436,7 @@ namespace BaggyBot.DataProcessors
 				{
 					var res = GetMatchesFirstLevel(user);
 					if (res.Length == 1) {
-						Logger.Log("Found user id match at level 1 with user id " + res[0]);
+						Logger.Log(this, "Found user id match at level 1 with user id " + res[0]);
 						return res[0];
 					}
 					if (res.Length == 0) return l2();
@@ -466,7 +466,7 @@ namespace BaggyBot.DataProcessors
 					matches.First().Uses++;
 					matches.First().LastUsedBy = user;
 				}
-				Logger.Log("Incremented emoticon count with emoticon: " + emoticon + ".");
+				Logger.Log(this, "Incremented emoticon count with emoticon: " + emoticon + ".");
 				SubmitChanges();
 			}
 			Lock.LockMessage = "None";
@@ -485,10 +485,10 @@ namespace BaggyBot.DataProcessors
 					p.Key = key;
 					p.Value = amount;
 					sqlConnector.KeyValuePairs.InsertOnSubmit(p);
-					Logger.Log("Inserted keyvaluepair with key: " + key + ".");
+					Logger.Log(this, "Inserted keyvaluepair with key: " + key + ".");
 				} else {
 					matches.First().Value = amount;
-					Logger.Log("Changed keyvaluepair with key: " + key + ".");
+					Logger.Log(this, "Changed keyvaluepair with key: " + key + ".");
 				}
 				SubmitChanges();
 			}
@@ -508,10 +508,10 @@ namespace BaggyBot.DataProcessors
 					p.Key = key;
 					p.Value = amount;
 					sqlConnector.KeyValuePairs.InsertOnSubmit(p);
-					Logger.Log("Inserted keyvaluepair with key: " + key + ".");
+					Logger.Log(this, "Inserted keyvaluepair with key: " + key + ".");
 				} else {
 					matches.First().Value += amount;
-					Logger.Log("Incremented keyvaluepair with key: " + key + ".");
+					//Logger.Log(this, "Incremented keyvaluepair with key: " + key + ".");
 				}
 				SubmitChanges();
 			}
@@ -537,20 +537,20 @@ namespace BaggyBot.DataProcessors
 
 				// Multiple credentials rows were returned for the new user. This is most likely an error.
 				if (count > 1) {
-					Logger.Log(String.Format("Multiple credentials found for combination: nick={0}, ident={1}, hostmask={2}", newNick, user.Ident, user.Hostmask), LogLevel.Warning);
+					Logger.Log(this, String.Format("Multiple credentials found for combination: nick={0}, ident={1}, hostmask={2}", newNick, user.Ident, user.Hostmask), LogLevel.Warning);
 				} else if (count == 0) {
 					var uids = GetUids(user);
 					// It looks like this user does not have a database entry yet, so we can ignore them.
 					if (uids.Length == 0) {
-						Logger.Log("Dropped nick change event for " + user.Nick + " to " + newNick + " - they do not have a database entry yet.");
+						Logger.Log(this, "Dropped nick change event for " + user.Nick + " to " + newNick + " - they do not have a database entry yet.");
 					} else if (uids.Length > 1) {
-						Logger.Log("Unable to handle nick change for " + user.Nick + " to " + newNick + ": Invalid amount of Uids received: " + uids.Length, LogLevel.Warning);
+						Logger.Log(this, "Unable to handle nick change for " + user.Nick + " to " + newNick + ": Invalid amount of Uids received: " + uids.Length, LogLevel.Warning);
 					} else {
 						var nickserv = GetNickserv(uids[0]);
 						AddCredCombination(new IrcUser(newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
 					}
 				} else if (count == 1) {
-					Logger.Log("Nick change event for " + user.Nick + " to " + newNick + " ignored - they already have a database entry");
+					Logger.Log(this, "Nick change event for " + user.Nick + " to " + newNick + " ignored - they already have a database entry");
 				}
 			}
 			Lock.LockMessage = "None";
@@ -576,7 +576,7 @@ namespace BaggyBot.DataProcessors
 					matches.First().LastUsage = usage;
 					matches.First().LastUsedBy = user;
 				}
-				Logger.Log("Incremented URL count with URL: " + url + ".");
+				Logger.Log(this, "Incremented URL count with URL: " + url + ".");
 				SubmitChanges();
 			}
 			Lock.LockMessage = "None";
@@ -590,7 +590,7 @@ namespace BaggyBot.DataProcessors
 				var statement = "UPDATE dbo.words SET uses = uses + 1 WHERE word = '" + word + "'; INSERT INTO dbo.words (word, uses) SELECT '" + word + "', 1 WHERE NOT EXISTS (SELECT 1 FROM dbo.words WHERE word = '" + word + "');";
 
 				sqlConnector.ExecuteStatement(statement);
-				Logger.Log("Incremented word count for word: " + word + ".");
+				//Logger.Log(this, "Incremented word count for word: " + word + ".");
 
 				/*var matches = from tWord in sqlConnector.Words
 							  where tWord.Word1 == word
@@ -604,7 +604,7 @@ namespace BaggyBot.DataProcessors
 				} else {
 					matches.First().Uses++;
 				}
-				Logger.Log("Incremented word count for word: " + word + ".");
+				Logger.Log(this, "Incremented word count for word: " + word + ".");
 				SubmitChanges();*/
 			}
 			Lock.LockMessage = "None";
@@ -618,7 +618,7 @@ namespace BaggyBot.DataProcessors
 				 where s.UserId == sender
 				 select s).First().Profanities++;
 
-				Logger.Log("Incremented profanities for " + sender + ".");
+				Logger.Log(this, "Incremented profanities for " + sender + ".");
 				SubmitChanges();
 			}
 			Lock.LockMessage = "None";
@@ -632,7 +632,7 @@ namespace BaggyBot.DataProcessors
 				 where s.UserId == sender
 				 select s).First().Actions++;
 
-				Logger.Log("Incremented actions for " + sender + ".");
+				Logger.Log(this, "Incremented actions for " + sender + ".");
 				SubmitChanges();
 			}
 			Lock.LockMessage = "None";
@@ -665,7 +665,7 @@ namespace BaggyBot.DataProcessors
 					var item = data.Last();
 					ret = item.SnaggedAt;
 				} else {
-					Logger.Log("No last snagged line available for user #" + userId);
+					Logger.Log(this, "No last snagged line available for user #" + userId);
 					ret = null;
 				}
 			}
@@ -684,19 +684,19 @@ namespace BaggyBot.DataProcessors
 			match.Profanities += changes.Profanities;
 			match.Words += changes.Words;
 			SubmitChanges();
-			Logger.Log("Userstats incremented for user #{0}: {1} action(s), {2} line(s), {3} word(s), {4} swear(s)", LogLevel.Debug, true, changes.UserId, changes.Actions, changes.Lines, changes.Words, changes.Profanities);
+			Logger.Log(this, "Userstats incremented for user #{0}: {1} action(s), {2} line(s), {3} word(s), {4} swear(s)", LogLevel.Debug, true, changes.UserId, changes.Actions, changes.Lines, changes.Words, changes.Profanities);
 		}
 
 		internal IOrderedEnumerable<Topic>FindTopics(int userId, string channel)
 		{
-			Logger.Log("finding words");
+			Logger.Log(this, "finding words");
 			var words = from word in sqlConnector.Words
 						where word.Uses > 1
 					   select word;
-			Logger.Log("building dictionary");
+			Logger.Log(this, "building dictionary");
 			var globalWordCount = words.ToDictionary(word => word.Word1, word => word.Uses);
 
-			Logger.Log("finding sentences");
+			Logger.Log(this, "finding sentences");
 			var userSentencesQuery = (from sentence in sqlConnector.IrcLog
 								where sentence.Sender == userId
 								&& sentence.Channel == channel
@@ -706,19 +706,19 @@ namespace BaggyBot.DataProcessors
 				return null;
 			}
 
-			Logger.Log("filtering commands");
+			Logger.Log(this, "filtering commands");
 			var userSentences = userSentencesQuery.ToList().Where(s => !s.StartsWith("-")).ToList();
 
-			Logger.Log("finding user words");
+			Logger.Log(this, "finding user words");
 			IEnumerable<string> userWords = new List<string>();
 			foreach (var sentence in userSentences) {
 				userWords = userWords.Concat(sentence.Split(' '));
 			}
 
-			Logger.Log("grouping user words");
+			Logger.Log(this, "grouping user words");
 			var userWordCount = userWords.GroupBy(word => word).Select(group => Tuple.Create(group.Key, group.Count()));
 
-			Logger.Log("calculating usage difference of " + userWordCount.Count() + " words");
+			Logger.Log(this, "calculating usage difference of " + userWordCount.Count() + " words");
 
 			var topics = (from pair in userWordCount 
 						  where globalWordCount.ContainsKey(pair.Item1) 
@@ -727,12 +727,12 @@ namespace BaggyBot.DataProcessors
 						  where userCount <= globalCount 
 						  select new Topic(pair.Item1, userCount, globalCount, userCount/(double) globalCount)).ToList();
 
-			Logger.Log("\ncalculating average usage difference");
+			Logger.Log(this, "\ncalculating average usage difference");
 			var avgDifference = topics.Average(topic => topic.Score);
 			var maxGlobalCount = globalWordCount.Max(pair => pair.Value);
 			var avgMultiplier = 1 / avgDifference;
 
-			Logger.Log("multiplying difference with multiplier");
+			Logger.Log(this, "multiplying difference with multiplier");
 			foreach (var topic in topics) {
 				topic.Normalize(avgMultiplier);
 				topic.ScoreByOccurrence(maxGlobalCount);

@@ -42,6 +42,7 @@ namespace BaggyBot.DataProcessors
 				{"set", new Set(dataFunctionSet)},
 				{"shutdown", new Shutdown(bot)},
 				{"snag", new Snag()},
+                {"ur", new UrbanDictionary()},
 				{"update", new Update(bot)},
 				{"uptime", new Uptime()},
 				{"version", new Version()},
@@ -53,7 +54,7 @@ namespace BaggyBot.DataProcessors
 
 		public void ProcessCommand(IrcMessage message)
 		{
-			Logger.Log("Processing command: " + message.Message);
+			Logger.Log(this, "Processing command: " + message.Message);
 			if (message.Message.Equals(Bot.CommandIdentifier)) return;
 
             var line = message.Message.Substring(1);
@@ -71,7 +72,7 @@ namespace BaggyBot.DataProcessors
 			var cmd = new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ircInterface.SendMessage);
 
 			if (!commands.ContainsKey(command)) {
-				Logger.Log("Dropped command \"{0}\"; I do not recognize this command.", LogLevel.Info, true, message.Message);
+				Logger.Log(this, "Dropped command \"{0}\"; I do not recognize this command.", LogLevel.Info, true, message.Message);
                 // Try to use it as a rem instead
 				((Remember)commands["rem"]).UseRem(cmd);
 				return;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Text;
 using System.IO;
+using BaggyBot.Tools;
+
 namespace BaggyBot
 {
 	public enum LogLevel
@@ -54,7 +56,7 @@ namespace BaggyBot
         private const string KWHT = "\x1B[37m";
         private const string RESET = "\x33[0m";
 
-		public static void Log(string message, LogLevel level = LogLevel.Debug, bool writeLine = true, params object[] format)
+		public static void Log(object sender, string message, LogLevel level = LogLevel.Debug, bool writeLine = true, params object[] format)
 		{
 			if (format.Length != 0) {
 				message = String.Format(message, format);
@@ -90,6 +92,11 @@ namespace BaggyBot
 					break;
 			}
 			lineBuilder.Append(prefix);
+            if (sender != null)
+            {
+                lineBuilder.Insert(0, string.Format("[{0}-{1:X4}] ", sender.GetType().Name.Truncate(16), sender.GetHashCode()));
+                lineBuilder.Insert(0, DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff]\t"));
+            }
 			lineBuilder.Append(message);
 
 			WriteToConsole(lineColor, level, lineBuilder);
@@ -97,8 +104,7 @@ namespace BaggyBot
 			if ((level == LogLevel.Error || level == LogLevel.Warning) && OnLogEvent != null) {
 				OnLogEvent(lineBuilder.ToString(), level);
 			}
-			lineBuilder.Insert(0, DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff]\t"));
-			WriteToLogFile(lineBuilder, writeLine);
+		    WriteToLogFile(lineBuilder, writeLine);
 		}
 
 		private static void WriteToLogFile(StringBuilder lineBuilder, bool writeLine)
@@ -126,7 +132,7 @@ namespace BaggyBot
 						Console.WriteLine(lineBuilder.ToString());
 					}
 				} else {
-					Log("Unable to parse settings value for show_debug_log into a boolean.", LogLevel.Warning);
+					Log(null, "Unable to parse settings value for show_debug_log into a boolean.", LogLevel.Warning);
 					Console.WriteLine(lineBuilder.ToString());
 				}
 			} else {
@@ -144,7 +150,7 @@ namespace BaggyBot
 		}
 		public static void Dispose()
 		{
-			Log("Shutting down logger", LogLevel.Info);
+			Log(null, "Shutting down logger", LogLevel.Info);
 			textWriter.Close();
 			textWriter.Dispose();
 			disposed = true;

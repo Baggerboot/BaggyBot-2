@@ -46,14 +46,14 @@ namespace BaggyBot.DataProcessors
 			// the parser will fail silently, without logging its fallback to the default value.
 			double snagChance;
 			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance)) {
-				Logger.Log("Invalid settings value for snag_chance. Default value will be used.", LogLevel.Warning);
+				Logger.Log(this, "Invalid settings value for snag_chance. Default value will be used.", LogLevel.Warning);
 			}
 		}
 		public void ProcessMessage(IrcMessage message, int userId)
 		{
 			if (dataFunctionSet.ConnectionState == ConnectionState.Closed) return;
 
-			Logger.Log("Processing message for " + message.Sender.Nick);
+			Logger.Log(this, "Processing message for " + message.Sender.Nick);
 
 			var words = WordTools.GetWords(message.Message);
 
@@ -146,11 +146,11 @@ namespace BaggyBot.DataProcessors
 			var last = dataFunctionSet.GetLastSnaggedLine(userId);
 			if (last.HasValue) {
 				if ((DateTime.Now - last.Value).Hours < int.Parse(Settings.Instance["snag_min_wait"])) {
-					Logger.Log("Dropped a snag as this user has recently been snagged already");
+					Logger.Log(this, "Dropped a snag as this user has recently been snagged already");
 					return;
 				}
 			} else {
-				Logger.Log("This user hasn't been snagged before");
+				Logger.Log(this, "This user hasn't been snagged before");
 			}
 
 			double snagChance;
@@ -170,7 +170,7 @@ namespace BaggyBot.DataProcessors
 					bool.TryParse(Settings.Instance["display_snag_message"], out allowSnagMessage);
 					var hideSnagMessage = rand.NextDouble() <= silenceChance;
 					if (!allowSnagMessage || hideSnagMessage) { // Check if snag message should be displayed
-						Logger.Log("Silently snagging this message");
+						Logger.Log(this, "Silently snagging this message");
 						dataFunctionSet.Snag(message);
 					} else {
 						var randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
