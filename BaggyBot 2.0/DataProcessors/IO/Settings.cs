@@ -44,6 +44,27 @@ namespace BaggyBot
 			return settings.ContainsKey(key);
 		}
 
+
+        /// <summary>
+        /// Tries to parse the value assigned to a key into a boolean.
+        /// If it fails, it returns defaultValue instead, and logs the parse failure.
+        /// </summary>
+        /// <returns></returns>
+        public bool ReadBool(string key, bool defaultValue)
+        {
+            bool result;
+            string value = this[key];
+            if (bool.TryParse(value, out result))
+            {
+                return result;
+            }
+            else
+            {
+                Logger.Log(this, "Parse failure for setting {0}: unable to parse \"{1}\" into a boolean. Default value of {2} was used instead.", LogLevel.Warning, true, key, value, defaultValue);
+                return defaultValue;
+            }
+        }
+
 		public bool NewFileCreated
 		{
 			get;

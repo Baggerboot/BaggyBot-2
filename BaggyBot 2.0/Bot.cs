@@ -140,6 +140,8 @@ namespace BaggyBot
 			var ident = s["irc_ident"];
 			var realname = s["irc_realname"];
             var password = s["irc_password"];
+            var tls = s.ReadBool("irc_use_tls", false);
+            var verify = s.ReadBool("irc_verify_server_certificate", true);
 
 			Logger.Log(this, "Connecting to the IRC server..");
 			Logger.Log(this, "\tNick\t" + nick);
@@ -148,7 +150,16 @@ namespace BaggyBot
 			Logger.Log(this, "\tHost\t" + host);
 			Logger.Log(this, "\tPort\t" + port);
 			try {
-				client.Connect(host, port, nick, ident, password, realname);
+				client.Connect(new ConnectionInfo{
+                    Host = host,
+                    Port = port,
+                    Nick = nick,
+                    Ident = ident,
+                    Password = password,
+                    RealName = realname,
+                    useTLS = tls,
+                    verifyServerCertificate = verify
+                });
 				return true;
 			} catch (SocketException e) {
 				Logger.Log(this, "Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
