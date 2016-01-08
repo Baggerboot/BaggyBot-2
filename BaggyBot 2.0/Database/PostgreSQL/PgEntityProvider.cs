@@ -7,7 +7,7 @@ namespace BaggyBot.Database.PostgreSQL
 {
 	class PgEntityProvider : AbstractEntityProvider
 	{
-		private BaggyBoT context;
+		private dynamic context;
 
 		public override IQueryable UserCreds { get { return context.UserCReds; } }
 		public override IQueryable Quotes { get { return context.Quotes; } }
@@ -26,7 +26,7 @@ namespace BaggyBot.Database.PostgreSQL
 				Logger.Log(this, "Unable to connect to the SQL database: No connection specified.", LogLevel.Error);
 				return false;
 			}
-			context = new BaggyBoT(connectionString);
+			//context = new BaggyBoT(connectionString);
 			base.connection = context.Connection;
             context.Connection.Open();
 

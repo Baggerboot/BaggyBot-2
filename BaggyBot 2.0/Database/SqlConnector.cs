@@ -8,12 +8,7 @@ using System.Data;
 using System.Collections.Generic;
 using BaggyBot.Database.EntityProvider;
 using BaggyBot.Database.PostgreSQL;
-#if postgresql
-using DbLinq.Data.Linq;
-#endif
-#if mssql
-using System.Data.Linq;
-#endif
+
 
 namespace BaggyBot.Database
 {
@@ -32,7 +27,7 @@ namespace BaggyBot.Database
 		}
 
 #if postgresql
-		public Table<UserCredentials> UserCreds;
+		/*public Table<UserCredentials> UserCreds;
 		public Table<Quote> Quotes;
 		public Table<UserStatistics> UserStats;
 		public Table<Emoticon> Emoticons;
@@ -40,7 +35,7 @@ namespace BaggyBot.Database
 		public Table<Url> Urls;
 		public Table<Name> UserNames;
 		public Table<Word> Words;
-		public Table<IrcLog> IrcLog;
+		public Table<IrcLog> IrcLog;*/
 #endif
 #if mssql
 		public Table<MS_SQL.UserCredentials> UserCreds;
@@ -69,7 +64,7 @@ namespace BaggyBot.Database
 			var result = provider.OpenConnection();
 
 #if postgresql
-			UserCreds = (Table<UserCredentials>)provider.UserCreds;
+			/*UserCreds = (Table<UserCredentials>)provider.UserCreds;
 			Quotes = (Table<Quote>)provider.Quotes;
 			UserStats = (Table<UserStatistics>)provider.UserStats;
 			Emoticons = (Table<Emoticon>)provider.Emoticons;
@@ -77,7 +72,7 @@ namespace BaggyBot.Database
 			Urls = (Table<Url>)provider.Urls;
 			UserNames = (Table<Name>)provider.UserNames;
 			Words = (Table<Word>)provider.Words;
-			IrcLog = (Table<IrcLog>)provider.IrcLog;
+			IrcLog = (Table<IrcLog>)provider.IrcLog;*/
 #endif
 #if mssql
 			UserCreds = (Table<MS_SQL.UserCredentials>) provider.UserCreds;
