@@ -32,7 +32,17 @@ namespace BaggyBot.Tools
 			var ident = Settings.Instance["operator_ident"];
 			var host = Settings.Instance["operator_host"];
 			var uid = Settings.Instance["operator_uid"];
-			var uids = DataFunctionSet.GetUids(user);
+            int[] uids;
+            try
+            {
+                uids = DataFunctionSet.GetUids(user);
+            }
+            catch (Exception e)
+            {
+                Logger.Log(null, "Failed to validate {0} ({1}, {2}); An exception occurred while trying to query the database: {3}: \"{4}\"", LogLevel.Warning, true, user.Nick, user.Ident, user.Hostmask, e.GetType().Name, e.Message);
+                uids = new[] { -1 };
+            }
+			
 
 			if (uids.Length > 1) {
 				Logger.Log(null, String.Format("Failed to validate {0} ({1}, {2}); GetUids() returned more than one user ID.", user.Nick, user.Ident, user.Hostmask), LogLevel.Warning);
