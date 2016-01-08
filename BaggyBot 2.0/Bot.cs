@@ -33,7 +33,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "3.37";
+		public const string Version = "3.38";
 
 		public bool QuitRequested
 		{
