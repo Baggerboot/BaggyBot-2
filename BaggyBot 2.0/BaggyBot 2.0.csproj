@@ -175,7 +175,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>StatsBot.dbml</DependentUpon>
     </Compile>
-    <Compile Include="Database\PostgreSQL\DataAccess.cs" />
     <Compile Include="Database\PostgreSQL\PgEntityProvider.cs" />
     <Compile Include="DataProcessors\DataFunctionSet.cs" />
     <Compile Include="DataProcessors\IO\Emoticons.cs" />
@@ -262,10 +261,6 @@
     <ProjectReference Include="..\..\IRCSharp\IRCSharp\IRCSharp.csproj">
       <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
       <Name>IRCSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DbLinq\DbLinq.csproj">
-      <Project>{7950197D-4122-49CB-9FD7-45E666BAFEC2}</Project>
-      <Name>DbLinq</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
