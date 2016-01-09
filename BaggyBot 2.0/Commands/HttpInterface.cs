@@ -29,6 +29,7 @@ namespace BaggyBot.Commands
             string response;
             using (var client = new WebClient())
             {
+				client. Headers. Add("User-Agent", string. Format("BaggyBot/{0} ({1}) IRC stats bot", Bot. Version, Environment. OSVersion));
                 try
                 {
                     if (method == "GET")
