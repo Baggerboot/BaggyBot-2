@@ -125,10 +125,12 @@
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
     <Compile Include="CodeFormatter.cs" />
+    <Compile Include="Commands\Alias.cs" />
     <Compile Include="Commands\Bf.cs" />
     <Compile Include="Commands\Convert.cs" />
     <Compile Include="Commands\Cs.cs" />
     <Compile Include="Commands\Html.cs" />
+    <Compile Include="Commands\HttpInterface.cs" />
     <Compile Include="Commands\NewCommand.cs" />
     <Compile Include="Commands\ProducerConsumerStream.cs" />
     <Compile Include="Commands\Py.cs" />

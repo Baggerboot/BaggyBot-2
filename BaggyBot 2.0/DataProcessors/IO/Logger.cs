@@ -19,6 +19,7 @@ namespace BaggyBot
 
 	public static class Logger
 	{
+        public static bool UseColouredOutput { get; set; }
 		public const string LogFileName = "baggybot.log";
 		private static bool disposed;
 		private static string prefix = string.Empty;
@@ -118,12 +119,15 @@ namespace BaggyBot
 			}
 		}
 
-        private static void WriteToConsole(string lineColor, LogLevel level, StringBuilder lineBuilder)
+		private static void WriteToConsole(string lineColor, LogLevel level, StringBuilder lineBuilder)
 		//private static void WriteToConsole(ConsoleColor lineColor, LogLevel level, StringBuilder lineBuilder)
 		{
 			//var prevColor = Console.ForegroundColor;
 			//Console.ForegroundColor = lineColor;
-            Console.Write(lineColor);
+            if (UseColouredOutput)
+            {
+                Console.Write(lineColor);
+            }
 
 			if (level == LogLevel.Debug) {
 				var writeDebug = false;
@@ -155,5 +159,5 @@ namespace BaggyBot
 			textWriter.Dispose();
 			disposed = true;
 		}
-	}
+    }
 }

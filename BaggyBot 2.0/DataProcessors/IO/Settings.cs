@@ -8,7 +8,7 @@ namespace BaggyBot
 	{
 		private readonly Dictionary<string, string> settings = new Dictionary<string, string>();
 
-		private const string filename = "baggybot.settings";
+        private string filename;
 
 		private static Settings instance;
 		public static Settings Instance
@@ -71,30 +71,38 @@ namespace BaggyBot
 			private set;
 		}
 
-		private Settings()
-		{
-			if (!File.Exists(filename)) {
-				Logger.Log(this, "No settings file found. Creating a new one.", LogLevel.Info);
-				try {
-					var stream = File.Create(filename);
-					stream.Close();
-					NewFileCreated = true;
-				} catch (IOException e) {
-					Logger.Log(this, "Unable to create a new settings file, an exception ({0}) occurred: \"{1}\"", LogLevel.Error, true, e.GetType().Name, e.Message);
-					return;
-				}
-			}
-			using (var sr = new StreamReader(filename, Encoding.UTF8)) {
-				while (!sr.EndOfStream) {
-					var line = sr.ReadLine();
-					if (line == string.Empty || line.StartsWith("#")) continue;
-					var equalsIndex = line.IndexOf('=');
-					var property = line.Substring(0, equalsIndex);
-					var value = line.Substring(equalsIndex + 1);
-					settings.Add(property, value);
-				}
-			}
-		}
+        public void LoadSettingsFile(string name)
+        {
+            filename = name;
+            if (!File.Exists(filename))
+            {
+                Logger.Log(this, "No settings file found. Creating a new one.", LogLevel.Info);
+                try
+                {
+                    var stream = File.Create(filename);
+                    stream.Close();
+                    NewFileCreated = true;
+                }
+                catch (IOException e)
+                {
+                    Logger.Log(this, "Unable to create a new settings file, an exception ({0}) occurred: \"{1}\"", LogLevel.Error, true, e.GetType().Name, e.Message);
+                    return;
+                }
+            }
+            using (var sr = new StreamReader(filename, Encoding.UTF8))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var line = sr.ReadLine();
+                    if (line == string.Empty || line.StartsWith("#")) continue;
+                    var equalsIndex = line.IndexOf('=');
+                    var property = line.Substring(0, equalsIndex);
+                    var value = line.Substring(equalsIndex + 1);
+                    settings.Add(property, value);
+                }
+            }
+        }
+
 		private void SaveSettings()
 		{
 			using (var sw = new StreamWriter(filename)) {

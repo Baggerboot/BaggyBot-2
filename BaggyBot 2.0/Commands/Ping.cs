@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Threading;
 
 namespace BaggyBot.Commands
 {
@@ -39,7 +40,7 @@ namespace BaggyBot.Commands
 				if (reply.Status == IPStatus.Success) {
 					command.ReturnMessage("Reply from {0} in {1}ms{2}", reply.Address.ToString(), Colourise(reply.RoundtripTime) + reply.RoundtripTime, Colour(null));
 				} else {
-					Console.WriteLine(reply.Status);
+					command.ReturnMessage("Ping failed ({0})", reply.Status);
 				}
 			} else if (command.Args.Length == 2) {
 				var target = command.Args[0];
@@ -54,6 +55,10 @@ namespace BaggyBot.Commands
 					if (pings[i].Status == IPStatus.Success) {
 						successCount++;
 						total += pings[i].RoundtripTime;
+                        if (pings[i].RoundtripTime < 500)
+                        {
+                            Thread.Sleep(500 - (int)pings[i].RoundtripTime);
+                        }
 					}
 				}
 
@@ -61,7 +66,9 @@ namespace BaggyBot.Commands
 
 				var raw = string.Join(", ", pings.Select(reply => (reply.Status == IPStatus.Success ? Colourise(reply.RoundtripTime) + reply.RoundtripTime + "ms" + Colour(null) : Colour(4) + "failed" + Colour(null))));
 				var word = successCount == 1 ? "reply" : "replies";
-				command.ReturnMessage("{0} {1} from {2}, averaging {3} ({4})", successCount, word, pings[0].Address.ToString(), Colourise(average) + average + "ms" + Colour(null), raw);
+                var address = pings[0].Address == null ? "Unknown IP Address" : pings[0].Address.ToString();
+                var number = (double.IsNaN(average) ? "NaN " : average.ToString());
+				command.ReturnMessage("{0} {1} from {2}, averaging {3} ({4})", successCount, word, address, Colourise(average) + number + "ms" + Colour(null), raw);
 
 			} else {
 				command.ReturnMessage("Pong!");

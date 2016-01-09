@@ -11,22 +11,24 @@ using Version = BaggyBot.Commands.Version;
 
 namespace BaggyBot.DataProcessors
 {
-	class CommandHandler
-	{
-		private readonly Dictionary<string, ICommand> commands;
-		private readonly IrcInterface ircInterface;
+    class CommandHandler
+    {
+        private readonly Dictionary<string, ICommand> commands;
+        private readonly IrcInterface ircInterface;
 
-		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
-		{
-			this.ircInterface = ircInterface;
-			commands = new Dictionary<string, ICommand>()
+        public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
+        {
+            this.ircInterface = ircInterface;
+            commands = new Dictionary<string, ICommand>()
 			{
+                {"alias", new Alias()},
 				{"bf", new Bf()},
 				{"convert", new Convert()},
 				{"cs", new Cs(ircInterface)},
 				{"feature", new Feature(dataFunctionSet)},
 				{"get", new Get(dataFunctionSet, ircInterface)},
 				{"html", new Html()},
+                {"http", new HttpInterface()},
 				{"help", new Help()},
 				{"join", new Join(ircInterface, dataFunctionSet)},
 				{"ns", new NickServ(dataFunctionSet, ircInterface)},
@@ -50,9 +52,9 @@ namespace BaggyBot.DataProcessors
 				{"wiki", new Wikipedia()},
 				{"topic", new Topics(dataFunctionSet)}
 			};
-		}
+        }
 
-		public void ProcessCommand(IrcMessage message)
+        public void ProcessCommand(IrcMessage message)
 		{
 			Logger.Log(this, "Processing command: " + message.Message);
 			if (message.Message.Equals(Bot.CommandIdentifier)) return;
@@ -73,6 +75,13 @@ namespace BaggyBot.DataProcessors
 
 			if (!commands.ContainsKey(command)) {
 				Logger.Log(this, "Dropped command \"{0}\"; I do not recognize this command.", LogLevel.Info, true, message.Message);
+                // Check if there's an alias for this command
+                if (((Alias)commands["alias"]).Aliases.ContainsKey(command))
+                {
+                    var aliasedCommand = ((Alias)commands["alias"]).Aliases[command];
+                    // Process the aliased command
+                    ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
+                }
                 // Try to use it as a rem instead
 				((Remember)commands["rem"]).UseRem(cmd);
 				return;
@@ -94,5 +103,5 @@ namespace BaggyBot.DataProcessors
 				ircInterface.SendMessage(message.Channel, Messages.CmdNotAuthorized);
 			}
 		}
-	}
+    }
 }
