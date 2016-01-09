@@ -11,6 +11,7 @@ namespace BaggyBot.Commands
 		{
 			if (command.Args.Length != 1) {
 				command.Reply("Usage: -resolve <hostname>");
+				return;
 			}
 			IPHostEntry hostEntry;
 			try {

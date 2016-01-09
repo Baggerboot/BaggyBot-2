@@ -17,7 +17,8 @@ namespace BaggyBot.Commands
 			var response = rq.GetResponse();
 
 			using (var sr = new StreamReader(response.GetResponseStream())) {
-				dynamic jsonObj = JObject.Parse(sr.ReadToEnd());
+                string data = sr.ReadToEnd();
+				dynamic jsonObj = JObject.Parse(data);
 				Console.WriteLine("Title: " + jsonObj.query.pages[0].title);
 			}
 		}

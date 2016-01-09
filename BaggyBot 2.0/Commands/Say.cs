@@ -14,10 +14,10 @@ namespace BaggyBot.Commands
 		}
 
 		public void Use(CommandArgs command){
-			var msg = String.Join(" ", command.Args.Skip(1));
-			Logger.Log(this, "Saying: " + msg);
+			//var msg = String.Join(" ", command.Args.Skip(1));
+			//Logger.Log(this, "Saying: " + msg);
 
-			ircInterface.SendMessage(command.Args[0], msg);
+			command.ReturnMessage(command.FullArgument);
 		}
 	}
 }
