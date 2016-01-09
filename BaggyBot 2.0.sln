@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8FA162
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsNetLib2", "..\CSNetLib2\CsNetLib2\CsNetLib2.csproj", "{68170802-5DE7-4F66-99C7-136B3C7DD93C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsNetLib2", "..\CsNetLib2\CsNetLib2\CsNetLib2.csproj", "{68170802-5DE7-4F66-99C7-136B3C7DD93C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRCSharp", "..\IRCSharp\IRCSharp\IRCSharp.csproj", "{06A69CBB-6E8E-4974-B99D-77221FEC4A33}"
 EndProject
