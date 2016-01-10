@@ -23,6 +23,7 @@ namespace BaggyBot
 		public const string LogFileName = "baggybot.log";
 		private static bool disposed;
 		private static string prefix = string.Empty;
+		private const int prefixLength = 52;
 
 		public static event LogEvent OnLogEvent;
 
@@ -93,12 +94,18 @@ namespace BaggyBot
 					break;
 			}
 			lineBuilder.Append(prefix);
-            if (sender != null)
-            {
-	            var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
-	            var location = string.Format("[{0}-{1:X4}] ", sender.GetType().Name.Truncate(16), sender.GetHashCode());
-                lineBuilder.Insert(0, (time + location).PadRight(52));
-            }
+
+			
+			if (sender != null)
+			{
+				var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
+				var location = string.Format("[{0}-{1:X4}] ", sender.GetType().Name.Truncate(16), sender.GetHashCode());
+				lineBuilder.Insert(0, (time + location).PadRight(prefixLength));
+			}
+			else
+			{
+				lineBuilder.Insert(0, "".PadRight(prefixLength));
+			}
 			lineBuilder.Append(message);
 
 			WriteToConsole(lineColor, level, lineBuilder);
