@@ -3,7 +3,7 @@ using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	public class NickServ : ICommand
+	class NickServ : ICommand
 	{
 		private readonly IrcInterface ircInterface;
 		private readonly DataFunctionSet dataFunctionSet;

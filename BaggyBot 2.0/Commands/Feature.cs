@@ -32,7 +32,7 @@ namespace BaggyBot.Commands
 
 			for(var i = 0; i < max; i++){
 				quoteListBuiler.Append("\"");
-				quoteListBuiler.Append(searchResults[i].Quote1.Substring(0,25));
+				quoteListBuiler.Append(searchResults[i].Text.Substring(0,25));
 				quoteListBuiler.Append("\"");
 				if( i != max -1){
 					quoteListBuiler.Append(", ");
@@ -48,8 +48,8 @@ namespace BaggyBot.Commands
 				command.Reply(quoteListBuiler.ToString());
 				return;
 			}
-			command.ReturnMessage("The following quote has been featured: \"" + searchResults[0].Quote1 + "\"");
-			dataFunctionSet.SetVar("featured_quote", searchResults[0].ID);
+			command.ReturnMessage("The following quote has been featured: \"" + searchResults[0].Text + "\"");
+			dataFunctionSet.SetVar("featured_quote", searchResults[0].Id);
 		}
 	}
 }

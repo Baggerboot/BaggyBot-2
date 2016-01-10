@@ -8,11 +8,11 @@ using IRCSharp.IRC;
 
 namespace BaggyBot
 {
-	public class IrcInterface
+	class IrcInterface
 	{
 		private readonly Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
 		private readonly Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
-		public DataFunctionSet dataFunctionSet { private get; set; }
+		public DataFunctionSet DataFunctionSet { private get; set; }
 
 		private IrcClient client;
 
@@ -20,7 +20,7 @@ namespace BaggyBot
 
 		private readonly List<string> whoisCalls = new List<string>();
 		private readonly List<string> nickservCalls = new List<string>(); // Holds information about which users are currently being looked up
-		private bool CanDoNickservCall = true;
+		private bool canDoNickservCall = true;
 		public bool HasNickservCall { get { return nickservCalls.Count > 0; } }
 		public bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
 
@@ -61,7 +61,7 @@ namespace BaggyBot
 
 		public void DisableNickservCalls()
 		{
-			CanDoNickservCall = false;
+			canDoNickservCall = false;
 		}
 
 		public void AddNickserv(string nick, string nickserv)
@@ -80,7 +80,7 @@ namespace BaggyBot
 
 		public string DoNickservCall(string nick)
 		{
-			if (!CanDoNickservCall) return null;
+			if (!canDoNickservCall) return null;
 
 			Logger.Log(this, "Nickserv call requested for " + nick, LogLevel.Debug);
 
@@ -100,6 +100,7 @@ namespace BaggyBot
 				waitTime += 20;
 				if (waitTime == 6000) {
 					Logger.Log(this, "No nickserv reply received for {0} after 6 seconds", LogLevel.Warning, true, nick);
+					return null;
 				}
 			}
 			nickservCalls.Remove(nick);
@@ -147,8 +148,8 @@ namespace BaggyBot
 			}
 
 			var result = client.SendMessage(target, message);
-			if (result && dataFunctionSet.ConnectionState != ConnectionState.Closed) {
-				dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+			if (result && DataFunctionSet.ConnectionState != ConnectionState.Closed) {
+				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
 			}
 			if (cutoff != null) {
 				SendMessageChunk(target, cutoff, ++recursionDepth);
@@ -168,7 +169,7 @@ namespace BaggyBot
 		public void SendMessageDirectly(string target, string message)
 		{
 			if(client.SendMessage(target, message)){
-				dataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
 			}
 		}
 

@@ -8,7 +8,7 @@ namespace BaggyBot.Tools
 	/// <summary>
 	/// For all Tools classes goes: they must be static, and they may not change any state.
 	/// </summary>
-	public static class UserTools
+	static class UserTools
 	{
 		public static DataFunctionSet DataFunctionSet
 		{
@@ -39,7 +39,7 @@ namespace BaggyBot.Tools
             }
             catch (Exception e)
             {
-                Logger.Log(null, "Failed to validate {0} ({1}, {2}); An exception occurred while trying to query the database: {3}: \"{4}\"", LogLevel.Warning, true, user.Nick, user.Ident, user.Hostmask, e.GetType().Name, e.Message);
+                Logger.Log(null, "Failed to get UID for {0} ({1}, {2}); An exception occurred while trying to query the database: {3}: \"{4}\"", LogLevel.Warning, true, user.Nick, user.Ident, user.Hostmask, e.GetType().Name, e.Message);
                 uids = new[] { -1 };
             }
 			

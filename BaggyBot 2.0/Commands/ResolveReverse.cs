@@ -14,21 +14,21 @@ namespace BaggyBot.Commands
 				command.Reply("Usage: -rdns <ip>");
 				return;
 			}
-			IPAddress hostIPAddress;
+			IPAddress hostIpAddress;
 			try {
-				hostIPAddress = IPAddress.Parse(command.Args[0]);
+				hostIpAddress = IPAddress.Parse(command.Args[0]);
 			} catch (FormatException) {
 				command.ReturnMessage("I was unable to parse the IP address you entered.");
 				return;
 			}
 			IPHostEntry hostEntry;
 			try {
-				hostEntry = Dns.GetHostEntry(hostIPAddress);
+				hostEntry = Dns.GetHostEntry(hostIpAddress);
 			} catch (ArgumentException) {
 				command.ReturnMessage("I can't do a lookup on 0.0.0.0 or ::0");
 				return;
 			} catch (SocketException) {
-				command.ReturnMessage("Unable to do a lookup on " + hostIPAddress + ". Most likely a reverse DNS entry does not exist for this address.");
+				command.ReturnMessage("Unable to do a lookup on " + hostIpAddress + ". Most likely a reverse DNS entry does not exist for this address.");
 				return;
 			}
 			// Get the IP address list that resolves to the host names contained in 
