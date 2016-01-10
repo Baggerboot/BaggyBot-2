@@ -68,27 +68,27 @@ namespace BaggyBot
 
 			switch (level) {
 				case LogLevel.Debug:
-					lineBuilder.Append("[DEB]");
+					lineBuilder.Append("[DEB] ");
 			        lineColor = KWHT;
 					break;
 				case LogLevel.Info:
-					lineBuilder.Append("[INF]");
+					lineBuilder.Append("[INF] ");
 			        lineColor = KGRN;
 					break;
 				case LogLevel.Message:
-					lineBuilder.Append("[MSG]");
+					lineBuilder.Append("[MSG] ");
 			        lineColor = KBLU;
 					break;
 				case LogLevel.Irc:
-					lineBuilder.Append("[IRC]");
+					lineBuilder.Append("[IRC] ");
 			        lineColor = KNRM;
 					break;
 				case LogLevel.Warning:
-					lineBuilder.Append("[WRN]");
+					lineBuilder.Append("[WRN] ");
 			        lineColor = KYEL;
 					break;
 				case LogLevel.Error:
-					lineBuilder.Append("[ERR]");
+					lineBuilder.Append("[ERR] ");
 			        lineColor = KRED;
 					break;
 			}
