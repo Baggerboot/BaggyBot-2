@@ -34,7 +34,14 @@ namespace BaggyBot.Database
 		{
 			get
 			{
-				return provider.Connection.State;
+				if (provider == null)
+				{
+					return ConnectionState.Closed;
+				}
+				else
+				{
+					return provider.Connection.State;
+				}
 			}
 		}
 

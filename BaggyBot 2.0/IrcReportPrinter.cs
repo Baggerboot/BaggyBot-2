@@ -5,27 +5,27 @@ namespace BaggyBot
 {
 	class IrcReportPrinter : ReportPrinter
 	{
-		private readonly Queue<AbstractMessage> UnreadMessages = new Queue<AbstractMessage>();
+		private readonly Queue<AbstractMessage> unreadMessages = new Queue<AbstractMessage>();
 
 		public bool HasMessage
 		{
 			get
 			{
-				return UnreadMessages.Count > 0;
+				return unreadMessages.Count > 0;
 			}
 		}
 
 		public AbstractMessage GetNextMessage()
 		{
-			if (UnreadMessages.Count == 0)
+			if (unreadMessages.Count == 0)
 				return null;
-			return UnreadMessages.Dequeue();
+			return unreadMessages.Dequeue();
 		}
 
 		public override void Print(AbstractMessage msg, bool showFullPath)
 		{
 			base.Print(msg, showFullPath);
-			UnreadMessages.Enqueue(msg);
+			unreadMessages.Enqueue(msg);
 		}
 	}
 }

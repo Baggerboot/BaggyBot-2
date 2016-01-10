@@ -95,8 +95,9 @@ namespace BaggyBot
 			lineBuilder.Append(prefix);
             if (sender != null)
             {
-                lineBuilder.Insert(0, string.Format("[{0}-{1:X4}] ", sender.GetType().Name.Truncate(16), sender.GetHashCode()));
-                lineBuilder.Insert(0, DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff]\t"));
+	            var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
+	            var location = string.Format("[{0}-{1:X4}] ", sender.GetType().Name.Truncate(16), sender.GetHashCode());
+                lineBuilder.Insert(0, (time + location).PadRight(50));
             }
 			lineBuilder.Append(message);
 

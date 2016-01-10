@@ -8,7 +8,6 @@ using BaggyBot.Tools;
 using BaggyBot.DataProcessors;
 using System.Threading;
 using System.Threading.Tasks;
-using IRCSharp.IRC;
 
 namespace BaggyBot
 {
@@ -71,7 +70,7 @@ namespace BaggyBot
             client = new IrcClient(/*Settings.Instance["deployed"] == "false"*/);
             ircInterface = new IrcInterface(client);
             dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
-            ircInterface.dataFunctionSet = dataFunctionSet;
+            ircInterface.DataFunctionSet = dataFunctionSet;
             var statsHandler = new StatsHandler(dataFunctionSet, ircInterface);
             UserTools.DataFunctionSet = dataFunctionSet;
             botDiagnostics = new BotDiagnostics(ircInterface);
