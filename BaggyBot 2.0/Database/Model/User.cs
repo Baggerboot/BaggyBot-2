@@ -7,10 +7,10 @@ using LinqToDB.Mapping;
 
 namespace BaggyBot.Database.Model
 {
-	[Table(Name="user")]
+	[Table(Name = "user")]
 	class User : Poco
 	{
-		[Column(Name="id"), PrimaryKey, Identity]
+		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
 
 		[Column(Name = "name"), NotNull]

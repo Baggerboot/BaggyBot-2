@@ -98,7 +98,7 @@ namespace BaggyBot.DataProcessors
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
 				var line = new IrcLog
 				{
-					Time = time,
+					SentAt = time,
 					SenderId = sender,
 					Channel = channel,
 					Nick = nick,

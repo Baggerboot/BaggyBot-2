@@ -7,6 +7,7 @@ using LinqToDB.Mapping;
 
 namespace BaggyBot.Database.Model
 {
+	[Table(Name = "user_statistic")]
 	class UserStatistic : Poco
 	{
 		[Column(Name="user_id"), PrimaryKey, NotNull]

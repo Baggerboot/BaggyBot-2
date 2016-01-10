@@ -184,14 +184,6 @@
     <Compile Include="Commands\Snag.cs" />
     <Compile Include="Commands\Version.cs" />
     <Compile Include="ControlVariables.cs" />
-    <Compile Include="Database\MS_SQL\StatsBot.cs">
-      <DependentUpon>StatsBot.dbml</DependentUpon>
-    </Compile>
-    <Compile Include="Database\MS_SQL\StatsBot.designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>StatsBot.dbml</DependentUpon>
-    </Compile>
     <Compile Include="DataProcessors\DataFunctionSet.cs" />
     <Compile Include="DataProcessors\IO\Emoticons.cs" />
     <Compile Include="DataProcessors\IrcEventHandler.cs" />
@@ -268,12 +260,6 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Database\MS_SQL\StatsBot.dbml">
-      <Generator>MSLinqToSQLGenerator</Generator>
-      <LastGenOutput>StatsBot.designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-      <CustomToolNamespace>BaggyBot.Database.MS_SQL</CustomToolNamespace>
-    </None>
     <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
     </None>
@@ -285,11 +271,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Database\MS_SQL\StatsBot.dbml.layout">
-      <DependentUpon>StatsBot.dbml</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CSNetLib2\CsNetLib2\CsNetLib2.csproj">
