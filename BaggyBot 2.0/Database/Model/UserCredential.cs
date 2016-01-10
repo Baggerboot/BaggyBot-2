@@ -13,10 +13,10 @@ namespace BaggyBot.Database.Model
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
 
-		[Column(Name = "user"), NotNull]
+		[Column(Name = "user_id"), NotNull]
 		public int UserId { get; set; }
-		[Association(ThisKey = "user", OtherKey = "id")]
-		public User User { get; set; }
+		//[Association(ThisKey = "user", OtherKey = "id")]
+		//public User User { get; set; }
 
 		[Column(Name = "nick"), NotNull]
 		public string Nick { get; set; }
@@ -27,7 +27,7 @@ namespace BaggyBot.Database.Model
 		[Column(Name = "hostmask"), NotNull]
 		public string Hostmask { get; set; }
 
-		[Column(Name = "nickserv_login"), NotNull]
+		[Column(Name = "nickserv_login")]
 		public string NickservLogin { get; set; }
 	}
 }

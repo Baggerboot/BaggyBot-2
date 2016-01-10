@@ -100,6 +100,7 @@ namespace BaggyBot
 				waitTime += 20;
 				if (waitTime == 6000) {
 					Logger.Log(this, "No nickserv reply received for {0} after 6 seconds", LogLevel.Warning, true, nick);
+					return null;
 				}
 			}
 			nickservCalls.Remove(nick);

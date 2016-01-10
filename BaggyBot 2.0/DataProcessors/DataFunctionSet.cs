@@ -6,6 +6,8 @@ using BaggyBot.Tools;
 using BaggyBot.Database;
 using IRCSharp.IRC;
 using BaggyBot.Database.Model;
+using LinqToDB;
+using Mono.CSharp.Linq;
 
 namespace BaggyBot.DataProcessors
 {
@@ -72,9 +74,13 @@ namespace BaggyBot.DataProcessors
 			{
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
 
-				var statement = "UPDATE dbo.UserStatistic SET words = words + 1 WHERE user_id = " + uid + ";";
 
-				sqlConnector.ExecuteStatement(statement);
+
+				//var statement = "UPDATE user_statistic SET words = words + 1 WHERE user_id = " + uid + ";";
+
+				sqlConnector.UserStatistics.Where(stat => stat.UserId == uid).Set(stat => stat.Words, stat => stat.Words + 1).Update();
+
+				//sqlConnector.ExecuteStatement(statement);
 
 				/*var matches =
 					from stat in sqlConnector.UserStatistics
@@ -175,7 +181,7 @@ namespace BaggyBot.DataProcessors
 				var uid = GetIdFromUser(message.Sender);
 				var q = new Quote();
 				q.Text = message.Message;
-				q.UserId = uid;
+				q.AuthorId = uid;
 				q.TakenAt = DateTime.Now;
 
 				sqlConnector.Insert(q);
@@ -658,25 +664,26 @@ namespace BaggyBot.DataProcessors
 			{
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
 
-				var statement = "UPDATE dbo.words SET uses = uses + 1 WHERE word = '" + word + "'; INSERT INTO dbo.words (word, uses) SELECT '" + word + "', 1 WHERE NOT EXISTS (SELECT 1 FROM dbo.words WHERE word = '" + word + "');";
+				//var statement = "UPDATE dbo.words SET uses = uses + 1 WHERE word = '" + word + "'; INSERT INTO dbo.words (word, uses) SELECT '" + word + "', 1 WHERE NOT EXISTS (SELECT 1 FROM dbo.words WHERE word = '" + word + "');";
 
-				sqlConnector.ExecuteStatement(statement);
-				//Logger.Log(this, "Incremented word count for word: " + word + ".");
+				var matches = from usedWord in sqlConnector.Words
+					where usedWord.Word == word
+					select usedWord;
 
-				/*var matches = from tWord in sqlConnector.Words
-							  where tWord.Word == word
-							  select tWord;
-
-				if (matches.Count() == 0) {
-					Word w = new Word();
-					w.Word = word;
-					w.Uses = 1;
-					sqlConnector.Insert(w);
-				} else {
-					matches.First().Uses++;
+				if (matches.Any())
+				{
+					var match = matches.First();
+					match.Uses++;
+					sqlConnector.Update(match);
 				}
-				Logger.Log(this, "Incremented word count for word: " + word + ".");
-				SubmitChanges();*/
+				else
+				{
+					sqlConnector.Insert(new UsedWord
+					{
+						Uses = 1,
+						Word = word
+					});
+				}
 			}
 			Lock.LockMessage = "None";
 		}
@@ -732,7 +739,7 @@ namespace BaggyBot.DataProcessors
 			{
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
 				var data = (from quot in sqlConnector.Quotes
-							where quot.UserId == userId
+							where quot.AuthorId == userId
 							&& quot.TakenAt != null
 							select quot
 				).OrderBy(q => q.TakenAt);

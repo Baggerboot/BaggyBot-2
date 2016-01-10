@@ -33,6 +33,9 @@ namespace BaggyBot
         // Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
         // Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
         public const string Version = "3.38";
+		// Version number of the database. This is checked against the 'version' key in the metadata table. If they do not match,
+		// the DB connection is closed, and the user will be required to update the DB by hand, as automatic updates are not yet supported.
+	    public const string DatabaseVersion = "1.1";
 
         public bool QuitRequested
         {
@@ -100,7 +103,7 @@ namespace BaggyBot
         private void HookupIrcEvents()
         {
             client.OnNickChange += dataFunctionSet.HandleNickChange;
-            client.OnMessageReceived += ircEventHandler.ProcessMessage;
+	        client.OnMessageReceived += (message) =>  Task.Run(() => ircEventHandler.ProcessMessage(message));
             client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
             //client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
             client.OnNoticeReceived += ircEventHandler.ProcessNotice;

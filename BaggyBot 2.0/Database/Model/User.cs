@@ -7,7 +7,7 @@ using LinqToDB.Mapping;
 
 namespace BaggyBot.Database.Model
 {
-	[Table(Name = "user")]
+	[Table(Name = "irc_user")]
 	class User : Poco
 	{
 		[Column(Name = "id"), PrimaryKey, Identity]

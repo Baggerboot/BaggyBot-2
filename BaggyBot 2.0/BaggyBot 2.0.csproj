@@ -154,6 +154,7 @@
     <Compile Include="Commands\UrbanDictionary.cs" />
     <Compile Include="Commands\Wikipedia.cs" />
     <Compile Include="Commands\WolframAlpha.cs" />
+    <Compile Include="Database\Model\Metadata.cs" />
     <Compile Include="Database\Model\Poco.cs" />
     <Compile Include="Database\Model\UsedEmoticon.cs" />
     <Compile Include="Database\Model\IrcLog.cs" />

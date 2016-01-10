@@ -13,8 +13,8 @@ namespace BaggyBot.Database.Model
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
 
-		[Column(Name = "user"), NotNull]
-		public int UserId { get; set; }
+		[Column(Name = "author"), NotNull]
+		public int AuthorId { get; set; }
 
 		[Column(Name = "text"), NotNull]
 		public string Text { get; set; }
