@@ -6,95 +6,87 @@
 using System;
 using System.Data;
 using System.Collections.Generic;
-using BaggyBot.Database.EntityProvider;
-using BaggyBot.Database.PostgreSQL;
+using System.Linq;
+using LinqToDB.Data;
+using LinqToDB.DataProvider.PostgreSQL;
+using BaggyBot.Database.Model;
+using LinqToDB;
 
 
 namespace BaggyBot.Database
 {
-	public class SqlConnector : IDisposable
+	class SqlConnector : IDisposable
 	{
-		private AbstractEntityProvider provider;
+		private DataConnection provider;
+
+		public ITable<LinkedUrl> LinkedUrls;
+		public ITable<User> Users;
+		public ITable<UserCredential> UserCredentials;
+		public ITable<UserStatistic> UserStatistics;
+		public ITable<UsedEmoticon> Emoticons;
+		public ITable<IrcLog> IrcLog;
+		public ITable<KeyValuePair> KeyValuePairs;
+		public ITable<Quote> Quotes;
+		public ITable<LinkedUrl> Urls;
+		public ITable<UsedWord> Words; 
+
 		public ConnectionState ConnectionState
 		{
 			get
 			{
-				if (provider == null) {
-					return ConnectionState.Closed;
-				}
-				return provider.ConnectionState;
+				return provider.Connection.State;
 			}
 		}
 
-#if postgresql
-		/*public Table<UserCredentials> UserCreds;
-		public Table<Quote> Quotes;
-		public Table<UserStatistics> UserStats;
-		public Table<Emoticon> Emoticons;
-		public Table<KeyValuePair> KeyValuePairs;
-		public Table<Url> Urls;
-		public Table<Name> UserNames;
-		public Table<Word> Words;
-		public Table<IrcLog> IrcLog;*/
-#endif
-#if mssql
-		public Table<MS_SQL.UserCredentials> UserCreds;
-		public Table<MS_SQL.Quote> Quotes;
-		public Table<MS_SQL.UserStatistics> UserStats;
-		public Table<MS_SQL.Emoticon> Emoticons;
-		public Table<MS_SQL.KeyValuePair> KeyValuePairs;
-		public Table<MS_SQL.Url> Urls;
-		public Table<MS_SQL.Name> UserNames;
-		public Table<MS_SQL.Word> Words;
-#endif
+		public void Insert(Poco row)
+		{
+			provider.Insert(row);
+		}
 
 		public void SubmitChanges()
 		{
-			provider.SubmitChanges();
+			provider.Insert(new IrcLog
+			{
+				Channel = "test"
+			});
+			
+			// TODO: implement this
+
+			throw new NotImplementedException();
 		}
 		public bool OpenConnection()
 		{
-			var useDbLinq = false;
-			if (bool.TryParse(Settings.Instance["sql_use_dblinq"], out useDbLinq)) {
-				provider = new EntityProviderFactory().CreateEntityProvider(useDbLinq ? SupportedDatabases.PostgreSQL : SupportedDatabases.MsSql);
-			} else {
-				Logger.Log(this, "Unable to connect to the SQL database: settings value for sql_use_dblinq not set.", LogLevel.Error);
+			var connectionString = Settings.Instance["sql_connection_string"];
+			if (string.IsNullOrWhiteSpace(connectionString))
+			{
+				Logger.Log(this, "Unable to connect to the SQL database: No connection specified.", LogLevel.Error);
 				return false;
 			}
-			var result = provider.OpenConnection();
+			provider = PostgreSQLTools.CreateDataConnection(connectionString);
 
-#if postgresql
-			/*UserCreds = (Table<UserCredentials>)provider.UserCreds;
-			Quotes = (Table<Quote>)provider.Quotes;
-			UserStats = (Table<UserStatistics>)provider.UserStats;
-			Emoticons = (Table<Emoticon>)provider.Emoticons;
-			KeyValuePairs = (Table<KeyValuePair>)provider.KeyValuePairs;
-			Urls = (Table<Url>)provider.Urls;
-			UserNames = (Table<Name>)provider.UserNames;
-			Words = (Table<Word>)provider.Words;
-			IrcLog = (Table<IrcLog>)provider.IrcLog;*/
-#endif
-#if mssql
-			UserCreds = (Table<MS_SQL.UserCredentials>) provider.UserCreds;
-			Quotes = (Table<MS_SQL.Quote>) provider.Quotes;
-			UserStats = (Table<MS_SQL.UserStatistics>) provider.UserStats;
-			Emoticons = (Table<MS_SQL.Emoticon>) provider.Emoticons;
-			KeyValuePairs = (Table<MS_SQL.KeyValuePair>) provider.KeyValuePairs;
-			Urls = (Table<MS_SQL.Url>) provider.Urls;
-			UserNames = (Table<MS_SQL.Name>) provider.UserNames;
-			Words = (Table<MS_SQL.Word>) provider.Words;
-#endif
-			return result;
+			UserCredentials = provider.GetTable<UserCredential>();
+			//Quotes = provider.GetTable<Quote>();
+			UserStatistics = provider.GetTable<UserStatistic>();
+			//Emoticons = provider.GetTable<Emoticon>();
+			//KeyValuePairs = provider.GetTable<KeyValuePair>();
+			LinkedUrls = provider.GetTable<LinkedUrl>();
+			Users = provider.GetTable<User>();
+			//Words = provider.GetTable<Word>();
+			//IrcLog = provider.GetTable<IrcLog>();
+
+			return true;
 		}
 
 		public bool CloseConnection()
 		{
-			return provider.CloseConnection();
+			provider.Close();
+			return true;
 		}
 
 		public void Reconnect()
 		{
-			provider.Reconnect();
+			// TODO: implement reconnect
+			throw new NotImplementedException();
 		}
 
 		public void Dispose()
@@ -105,7 +97,8 @@ namespace BaggyBot.Database
 
 		protected virtual void Dispose(bool cleanAll)
 		{
-			if (provider != null) {
+			if (provider != null)
+			{
 				provider.Dispose();
 			}
 		}
@@ -117,12 +110,14 @@ namespace BaggyBot.Database
 
 		internal int ExecuteStatement(string statement)
 		{
-			return provider.ExecuteStatement(statement);
+			return provider.Execute(statement);
 		}
 
 		internal List<object> ExecuteQuery(string query)
 		{
-			return provider.ExecuteQuery(query);
+			//todo: implement query execution
+			throw new NotImplementedException();
+			//return provider.ExecuteReader(query);
 		}
 	}
 }

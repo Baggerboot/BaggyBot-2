@@ -8,7 +8,7 @@ namespace BaggyBot.Tools
 	/// <summary>
 	/// For all Tools classes goes: they must be static, and they may not change any state.
 	/// </summary>
-	public static class UserTools
+	static class UserTools
 	{
 		public static DataFunctionSet DataFunctionSet
 		{

@@ -85,6 +85,10 @@
       <HintPath>..\packages\IronPython.2.7.5\lib\Net45\IronPython.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="linq2db, Version=1.0.7.3, Culture=neutral, PublicKeyToken=f19f8aed7feff67e, processorArchitecture=MSIL">
+      <HintPath>..\packages\linq2db.1.0.7.3\lib\net45\linq2db.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\IronPython.2.7.5\lib\Net45\Microsoft.Dynamic.dll</HintPath>
       <Private>True</Private>
@@ -103,6 +107,10 @@
     </Reference>
     <Reference Include="Mono.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.CSharp.4.0.0.143\lib\4.5\Mono.CSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Npgsql, Version=3.0.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -146,6 +154,16 @@
     <Compile Include="Commands\UrbanDictionary.cs" />
     <Compile Include="Commands\Wikipedia.cs" />
     <Compile Include="Commands\WolframAlpha.cs" />
+    <Compile Include="Database\Model\Poco.cs" />
+    <Compile Include="Database\Model\UsedEmoticon.cs" />
+    <Compile Include="Database\Model\IrcLog.cs" />
+    <Compile Include="Database\Model\KeyValuePair.cs" />
+    <Compile Include="Database\Model\Quote.cs" />
+    <Compile Include="Database\Model\LinkedUrl.cs" />
+    <Compile Include="Database\Model\UsedWord.cs" />
+    <Compile Include="Database\Model\User.cs" />
+    <Compile Include="Database\Model\UserCredential.cs" />
+    <Compile Include="Database\Model\UserStatistic.cs" />
     <Compile Include="DataProcessors\CommandHandler.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
     <None Include="Commands\Example.cs" />
@@ -166,9 +184,6 @@
     <Compile Include="Commands\Snag.cs" />
     <Compile Include="Commands\Version.cs" />
     <Compile Include="ControlVariables.cs" />
-    <Compile Include="Database\EntityProvider\EntityProviderFactory.cs" />
-    <Compile Include="Database\EntityProvider\AbstractEntityProvider.cs" />
-    <Compile Include="Database\MS_SQL\MsEntityProvider.cs" />
     <Compile Include="Database\MS_SQL\StatsBot.cs">
       <DependentUpon>StatsBot.dbml</DependentUpon>
     </Compile>
@@ -177,7 +192,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>StatsBot.dbml</DependentUpon>
     </Compile>
-    <Compile Include="Database\PostgreSQL\PgEntityProvider.cs" />
     <Compile Include="DataProcessors\DataFunctionSet.cs" />
     <Compile Include="DataProcessors\IO\Emoticons.cs" />
     <Compile Include="DataProcessors\IrcEventHandler.cs" />
@@ -206,9 +220,31 @@
     <Compile Include="Tools\PythonTools.cs" />
     <Compile Include="Tools\UserTools.cs" />
     <Compile Include="Tools\WordTools.cs" />
-    <Compile Include="Database\MongoDB\MongoDBEntityProvider.cs" />
     <None Include="Lib\ensurepip\_bundled\pip-1.5.6-py2.py3-none-any.whl" />
     <None Include="Lib\ensurepip\_bundled\setuptools-3.6-py2.py3-none-any.whl" />
+    <None Include="LinqToDB.Templates\DataAnnotations.ttinclude" />
+    <None Include="LinqToDB.Templates\DataModel.ttinclude" />
+    <None Include="LinqToDB.Templates\EditableObject.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.Access.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.DB2.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.Firebird.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.Informix.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.MySql.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.Oracle.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.PostgreSQL.Tools.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.PostgreSQL.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.SqlCe.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.SQLite.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.SqlServer.SqlTypes.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.SqlServer.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.Sybase.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.Tools.ttinclude" />
+    <None Include="LinqToDB.Templates\LinqToDB.ttinclude" />
+    <None Include="LinqToDB.Templates\NotifyPropertyChanged.ttinclude" />
+    <None Include="LinqToDB.Templates\PluralizationService.ttinclude" />
+    <None Include="LinqToDB.Templates\ReadMe.LinqToDB.md" />
+    <None Include="LinqToDB.Templates\T4Model.ttinclude" />
+    <None Include="LinqToDB.Templates\Validation.ttinclude" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -791,5 +827,6 @@
     <Content Include="Lib\_weakrefset.py" />
     <Content Include="Lib\__future__.py" />
     <Content Include="Lib\__phello__.foo.py" />
+    <Content Include="LinqToDB.Templates\CopyMe.PostgreSQL.tt.txt" />
   </ItemGroup>
 </Project>

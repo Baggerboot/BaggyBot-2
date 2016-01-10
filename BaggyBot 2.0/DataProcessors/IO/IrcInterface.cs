@@ -8,7 +8,7 @@ using IRCSharp.IRC;
 
 namespace BaggyBot
 {
-	public class IrcInterface
+	class IrcInterface
 	{
 		private readonly Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
 		private readonly Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();

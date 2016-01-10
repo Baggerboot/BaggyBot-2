@@ -61,7 +61,7 @@ namespace BaggyBot.DataProcessors
 			words = words.Select(s => s.Replace("'", "''")).ToList();
 
 			//UserStatistics changes = new UserStatistics();
-			//changes.UserId = userId;
+			//changes.Id = userId;
 
 			if (message.Action) {
 				dataFunctionSet.IncrementActions(userId);
