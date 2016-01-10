@@ -50,7 +50,8 @@ namespace BaggyBot.Database
 				else
 				{
 					return ConnectionState.Open;
-					return connection.Connection.State;
+					// TODO: Figure out how to determine the connection state correctly
+					//return connection.Connection.State;
 				}
 			}
 		}
@@ -73,8 +74,6 @@ namespace BaggyBot.Database
 				return false;
 			}
 			connection = PostgreSQLTools.CreateDataConnection(connectionString);
-			var schema = connection.DataProvider.GetSchemaProvider().GetSchema(connection);
-
 			metadata = connection.GetTable<Metadata>();
 			try
 			{
@@ -120,7 +119,7 @@ namespace BaggyBot.Database
 					}
 					catch (NpgsqlException f)
 					{
-						Logger.Log(this, "Unable to create a new tableset: An exception occurred({0}: {1}). The database connection will be dropped.", LogLevel.Error, true, e.GetType().Name, e.Message);
+						Logger.Log(this, "Unable to create a new tableset: An exception occurred({0}: {1}). The database connection will be dropped.", LogLevel.Error, true, f.GetType().Name, f.Message);
 						return false;
 					}
 					Logger.Log(this, "The database has been populated. Writing metadata...", LogLevel.Info);
