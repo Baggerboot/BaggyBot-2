@@ -68,27 +68,27 @@ namespace BaggyBot
 
 			switch (level) {
 				case LogLevel.Debug:
-					lineBuilder.Append("[DEB]\t");
+					lineBuilder.Append("[DEB]");
 			        lineColor = KWHT;
 					break;
 				case LogLevel.Info:
-					lineBuilder.Append("[INF]\t");
+					lineBuilder.Append("[INF]");
 			        lineColor = KGRN;
 					break;
 				case LogLevel.Message:
-					lineBuilder.Append("[MSG]\t");
+					lineBuilder.Append("[MSG]");
 			        lineColor = KBLU;
 					break;
 				case LogLevel.Irc:
-					lineBuilder.Append("[IRC]\t");
+					lineBuilder.Append("[IRC]");
 			        lineColor = KNRM;
 					break;
 				case LogLevel.Warning:
-					lineBuilder.Append("[WRN]\t");
+					lineBuilder.Append("[WRN]");
 			        lineColor = KYEL;
 					break;
 				case LogLevel.Error:
-					lineBuilder.Append("[ERR]\t");
+					lineBuilder.Append("[ERR]");
 			        lineColor = KRED;
 					break;
 			}
@@ -97,7 +97,7 @@ namespace BaggyBot
             {
 	            var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
 	            var location = string.Format("[{0}-{1:X4}] ", sender.GetType().Name.Truncate(16), sender.GetHashCode());
-                lineBuilder.Insert(0, (time + location).PadRight(50));
+                lineBuilder.Insert(0, (time + location).PadRight(52));
             }
 			lineBuilder.Append(message);
 
