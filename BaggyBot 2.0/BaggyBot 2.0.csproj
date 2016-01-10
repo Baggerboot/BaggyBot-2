@@ -155,6 +155,7 @@
     <Compile Include="Commands\Wikipedia.cs" />
     <Compile Include="Commands\WolframAlpha.cs" />
     <Compile Include="Database\Model\Metadata.cs" />
+    <Compile Include="Database\Model\MiscData.cs" />
     <Compile Include="Database\Model\Poco.cs" />
     <Compile Include="Database\Model\UsedEmoticon.cs" />
     <Compile Include="Database\Model\IrcLog.cs" />
@@ -165,6 +166,7 @@
     <Compile Include="Database\Model\User.cs" />
     <Compile Include="Database\Model\UserCredential.cs" />
     <Compile Include="Database\Model\UserStatistic.cs" />
+    <Compile Include="Database\Upgrades\DatabaseUpgrader.cs" />
     <Compile Include="DataProcessors\CommandHandler.cs" />
     <Compile Include="Commands\CommandArgs.cs" />
     <None Include="Commands\Example.cs" />

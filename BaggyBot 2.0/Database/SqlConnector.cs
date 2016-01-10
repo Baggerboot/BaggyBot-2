@@ -12,6 +12,7 @@ using System.Linq;
 using LinqToDB.Data;
 using LinqToDB.DataProvider.PostgreSQL;
 using BaggyBot.Database.Model;
+using BaggyBot.Database.Upgrades;
 using LinqToDB;
 using Mono.CSharp.Linq;
 using Npgsql;
@@ -21,7 +22,7 @@ namespace BaggyBot.Database
 {
 	class SqlConnector : IDisposable
 	{
-		private DataConnection provider;
+		private DataConnection connection;
 
 		public ITable<LinkedUrl> LinkedUrls;
 		public ITable<User> Users;
@@ -33,27 +34,30 @@ namespace BaggyBot.Database
 		public ITable<Quote> Quotes;
 		public ITable<LinkedUrl> Urls;
 		public ITable<UsedWord> Words;
-		private ITable<Metadata> Metadata;
+		public ITable<MiscData> MiscData;
+
+		private ITable<Metadata> metadata;
+
 
 		public ConnectionState ConnectionState
 		{
 			get
 			{
-				if (provider == null)
+				if (connection == null)
 				{
 					return ConnectionState.Closed;
 				}
 				else
 				{
 					return ConnectionState.Open;
-					return provider.Connection.State;
+					return connection.Connection.State;
 				}
 			}
 		}
 
 		public void Insert<T>(T row)
 		{
-			provider.Insert(row);
+			connection.Insert(row);
 		}
 
 		public void SubmitChanges()
@@ -68,13 +72,13 @@ namespace BaggyBot.Database
 				Logger.Log(this, "Unable to connect to the SQL database: No connection specified.", LogLevel.Error);
 				return false;
 			}
-			provider = PostgreSQLTools.CreateDataConnection(connectionString);
-			var schema = provider.DataProvider.GetSchemaProvider().GetSchema(provider);
+			connection = PostgreSQLTools.CreateDataConnection(connectionString);
+			var schema = connection.DataProvider.GetSchemaProvider().GetSchema(connection);
 
-			Metadata = provider.GetTable<Metadata>();
+			metadata = connection.GetTable<Metadata>();
 			try
 			{
-				var version = from entry in Metadata
+				var version = from entry in metadata
 							  where entry.Key == "version"
 							  select entry.Value;
 
@@ -87,8 +91,12 @@ namespace BaggyBot.Database
 
 				if (version.First() != Bot.DatabaseVersion)
 				{
-					Logger.Log(this, "Bot and database version do not match (bot is at {0}, database is at {1}). The database connection will be dropped.", LogLevel.Warning, true, Bot.Version, version.First());
-					return false;
+					Logger.Log(this, "Bot and database version do not match (bot is at {0}, database is at {1}). The database will now be upgraded.", LogLevel.Info, true, Bot.DatabaseVersion, version.First());
+					if (!UpgradeDatabase(version.First()))
+					{
+						Logger.Log(this, "Upgrade failed. The database connection will be dropped.", LogLevel.Warning);
+						return false;
+					}
 				}
 			}
 			catch (NpgsqlException e)
@@ -98,16 +106,17 @@ namespace BaggyBot.Database
 					Logger.Log(this, "Metadata table not found. A new tableset will be created.", LogLevel.Warning);
 					try
 					{
-						provider.CreateTable<UserCredential>();
-						provider.CreateTable<Quote>();
-						provider.CreateTable<UserStatistic>();
-						provider.CreateTable<UsedEmoticon>();
-						provider.CreateTable<KeyValuePair>();
-						provider.CreateTable<LinkedUrl>();
-						provider.CreateTable<User>();
-						provider.CreateTable<UsedWord>();
-						provider.CreateTable<IrcLog>();
-						provider.CreateTable<Metadata>();
+						connection.CreateTable<UserCredential>();
+						connection.CreateTable<Quote>();
+						connection.CreateTable<UserStatistic>();
+						connection.CreateTable<UsedEmoticon>();
+						connection.CreateTable<KeyValuePair>();
+						connection.CreateTable<LinkedUrl>();
+						connection.CreateTable<User>();
+						connection.CreateTable<UsedWord>();
+						connection.CreateTable<IrcLog>();
+						connection.CreateTable<Metadata>();
+						connection.CreateTable<MiscData>();
 					}
 					catch (NpgsqlException f)
 					{
@@ -128,22 +137,48 @@ namespace BaggyBot.Database
 				}
 			}
 
-			UserCredentials = provider.GetTable<UserCredential>();
-			Quotes = provider.GetTable<Quote>();
-			UserStatistics = provider.GetTable<UserStatistic>();
-			Emoticons = provider.GetTable<UsedEmoticon>();
-			KeyValuePairs = provider.GetTable<KeyValuePair>();
-			LinkedUrls = provider.GetTable<LinkedUrl>();
-			Users = provider.GetTable<User>();
-			Words = provider.GetTable<UsedWord>();
-			IrcLog = provider.GetTable<IrcLog>();
+			UserCredentials = connection.GetTable<UserCredential>();
+			Quotes = connection.GetTable<Quote>();
+			UserStatistics = connection.GetTable<UserStatistic>();
+			Emoticons = connection.GetTable<UsedEmoticon>();
+			KeyValuePairs = connection.GetTable<KeyValuePair>();
+			LinkedUrls = connection.GetTable<LinkedUrl>();
+			Users = connection.GetTable<User>();
+			Words = connection.GetTable<UsedWord>();
+			IrcLog = connection.GetTable<IrcLog>();
 
 			return true;
 		}
 
+		private bool UpgradeDatabase(string fromVersion)
+		{
+			var upgrader = new DatabaseUpgrader(connection);
+
+			var currentVersion = fromVersion;
+			while (upgrader.HasUpgrade(currentVersion))
+			{
+				var newVersion = upgrader.UpgradeFrom(currentVersion);
+				Logger.Log(this, "Successfully upgraded the database from version {0} to version {1}", LogLevel.Info, true, currentVersion, newVersion);
+				currentVersion = newVersion;
+			}
+
+			metadata.Where(entry => entry.Key == "version").Set(entry => entry.Value, currentVersion).Update();
+
+			if (currentVersion == Bot.DatabaseVersion)
+			{
+				Logger.Log(this, "Database upgrade completed.", LogLevel.Info);
+				return true;
+			}
+			else
+			{
+				Logger.Log(this, "Unable to upgrade the database (current version: {0}) to match the bot (current version {1})", LogLevel.Error, true, currentVersion, Bot.DatabaseVersion);
+				return false;
+			}
+		}
+
 		public bool CloseConnection()
 		{
-			provider.Close();
+			connection.Close();
 			return true;
 		}
 
@@ -161,9 +196,9 @@ namespace BaggyBot.Database
 
 		protected virtual void Dispose(bool cleanAll)
 		{
-			if (provider != null)
+			if (connection != null)
 			{
-				provider.Dispose();
+				connection.Dispose();
 			}
 		}
 
@@ -174,14 +209,14 @@ namespace BaggyBot.Database
 
 		internal int ExecuteStatement(string statement)
 		{
-			var cmd = provider.CreateCommand();
+			var cmd = connection.CreateCommand();
 			cmd.CommandText = statement;
 			return cmd.ExecuteNonQuery();
 		}
 
 		internal List<object> ExecuteQuery(string query)
 		{
-			var cmd = provider.CreateCommand();
+			var cmd = connection.CreateCommand();
 			cmd.CommandText = query;
 			throw new NotImplementedException();
 
@@ -189,7 +224,7 @@ namespace BaggyBot.Database
 
 		public void Update<T>(T match)
 		{
-			provider.Update(match);
+			connection.Update(match);
 		}
 	}
 }
