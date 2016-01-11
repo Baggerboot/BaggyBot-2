@@ -8,14 +8,15 @@ namespace BaggyBot
 	{
 		private readonly Dictionary<string, string> settings = new Dictionary<string, string>();
 
-        private string filename;
+		private string filename;
 
 		private static Settings instance;
 		public static Settings Instance
 		{
 			get
 			{
-				if (instance == null) {
+				if (instance == null)
+				{
 					instance = new Settings();
 
 				}
@@ -27,7 +28,8 @@ namespace BaggyBot
 		{
 			get
 			{
-				if (settings.ContainsKey(key)) {
+				if (settings.ContainsKey(key))
+				{
 					return settings[key];
 				}
 				return null;
@@ -45,25 +47,29 @@ namespace BaggyBot
 		}
 
 
-        /// <summary>
-        /// Tries to parse the value assigned to a key into a boolean.
-        /// If it fails, it returns defaultValue instead, and logs the parse failure.
-        /// </summary>
-        /// <returns></returns>
-        public bool ReadBool(string key, bool defaultValue)
-        {
-            bool result;
-            string value = this[key];
-            if (bool.TryParse(value, out result))
-            {
-                return result;
-            }
-            else
-            {
-                Logger.Log(this, "Parse failure for setting {0}: unable to parse \"{1}\" into a boolean. Default value of {2} was used instead.", LogLevel.Warning, true, key, value, defaultValue);
-                return defaultValue;
-            }
-        }
+		/// <summary>
+		/// Tries to parse the value assigned to a key into a boolean.
+		/// If it fails, it returns defaultValue instead, and logs the parse failure.
+		/// </summary>
+		/// <returns></returns>
+		public bool ReadBool(string key, bool defaultValue)
+		{
+			bool result;
+			string value = this[key];
+			if (value == null)
+			{
+				return defaultValue;
+			}
+			else if (bool.TryParse(value, out result))
+			{
+				return result;
+			}
+			else
+			{
+				Logger.Log(this, "Parse failure for setting {0}: unable to parse \"{1}\" into a boolean. Default value of {2} was used instead.", LogLevel.Warning, true, key, value, defaultValue);
+				return defaultValue;
+			}
+		}
 
 		public bool NewFileCreated
 		{
@@ -71,42 +77,44 @@ namespace BaggyBot
 			private set;
 		}
 
-        public void LoadSettingsFile(string name)
-        {
-            filename = name;
-            if (!File.Exists(filename))
-            {
-                Logger.Log(this, "No settings file found. Creating a new one.", LogLevel.Info);
-                try
-                {
-                    var stream = File.Create(filename);
-                    stream.Close();
-                    NewFileCreated = true;
-                }
-                catch (IOException e)
-                {
-                    Logger.Log(this, "Unable to create a new settings file, an exception ({0}) occurred: \"{1}\"", LogLevel.Error, true, e.GetType().Name, e.Message);
-                    return;
-                }
-            }
-            using (var sr = new StreamReader(filename, Encoding.UTF8))
-            {
-                while (!sr.EndOfStream)
-                {
-                    var line = sr.ReadLine();
-                    if (line == string.Empty || line.StartsWith("#")) continue;
-                    var equalsIndex = line.IndexOf('=');
-                    var property = line.Substring(0, equalsIndex);
-                    var value = line.Substring(equalsIndex + 1);
-                    settings.Add(property, value);
-                }
-            }
-        }
+		public void LoadSettingsFile(string name)
+		{
+			filename = name;
+			if (!File.Exists(filename))
+			{
+				Logger.Log(this, "No settings file found. Creating a new one.", LogLevel.Info);
+				try
+				{
+					var stream = File.Create(filename);
+					stream.Close();
+					NewFileCreated = true;
+				}
+				catch (IOException e)
+				{
+					Logger.Log(this, "Unable to create a new settings file, an exception ({0}) occurred: \"{1}\"", LogLevel.Error, true, e.GetType().Name, e.Message);
+					return;
+				}
+			}
+			using (var sr = new StreamReader(filename, Encoding.UTF8))
+			{
+				while (!sr.EndOfStream)
+				{
+					var line = sr.ReadLine();
+					if (line == string.Empty || line.StartsWith("#")) continue;
+					var equalsIndex = line.IndexOf('=');
+					var property = line.Substring(0, equalsIndex);
+					var value = line.Substring(equalsIndex + 1);
+					settings.Add(property, value);
+				}
+			}
+		}
 
 		private void SaveSettings()
 		{
-			using (var sw = new StreamWriter(filename)) {
-				foreach (var property in settings) {
+			using (var sw = new StreamWriter(filename))
+			{
+				foreach (var property in settings)
+				{
 					sw.WriteLine(property.Key + "=" + property.Value);
 				}
 			}
@@ -123,7 +131,7 @@ namespace BaggyBot
 
 			this["sql_connection_string"] = "";
 			this["sql_use_dblinq"] = "true";
-			
+
 			this["irc_flood_limit"] = "4";
 			this["operator_nick"] = "";
 			this["operator_ident"] = "";
