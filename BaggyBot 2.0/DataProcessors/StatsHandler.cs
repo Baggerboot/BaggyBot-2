@@ -57,27 +57,12 @@ namespace BaggyBot.DataProcessors
 
 			var words = WordTools.GetWords(message.Message);
 
-			// FIXME: Is this necessary?
-			words = words.Select(s => s.Replace("'", "''")).ToList();
-
-			//UserStatistics changes = new UserStatistics();
-			//changes.Id = userId;
-
 			if (message.Action) {
 				dataFunctionSet.IncrementActions(userId);
-				//changes.Actions++;
 			} else {
 				dataFunctionSet.IncrementLineCount(userId);
-				//changes.Lines++;
 			}
 			dataFunctionSet.IncrementWordCount(userId, words.Count);
-			//changes.Words += words.Count;
-			/*foreach (string word in words) {
-				if (WordTools.IsProfanity(word.ToLower())) {
-					changes.Profanities++;
-				}
-			}*/
-			//dataFunctionSet.IncrementUserStatistics(changes);
 
 			dataFunctionSet.IncrementVar("global_line_count");
 			dataFunctionSet.IncrementVar("global_word_count", words.Count);
@@ -94,6 +79,10 @@ namespace BaggyBot.DataProcessors
 			if (message.Sender.Nick == "Ralph" && message.Message.ToLower().Contains("baggybot")) {
 				ircInterface.SendMessage(message.Channel, "Shut up you fool");
 			}
+			else if (message.Message.ToLower().Contains("fuck you baggybot"))
+			{
+				ircInterface.SendMessage(message.Channel, "pls ;___;");
+			}
 		}
 
 		private void ProcessWord(IrcMessage message, string word, int sender)
@@ -101,7 +90,7 @@ namespace BaggyBot.DataProcessors
 			var lword = word.ToLower();
 			var cword = textOnly.Replace(lword, "");
 			if (word.StartsWith("http://") || word.StartsWith("https://")) {
-				dataFunctionSet.IncrementUrl(word, sender, message.Message.Replace("'", "''"));
+				dataFunctionSet.IncrementUrl(word, sender, message.Message);
 			} else if (!WordTools.IsIgnoredWord(cword) && cword.Length >= 3) {
 				dataFunctionSet.IncrementWord(cword);
 			} else if (WordTools.IsProfanity(lword)) {
@@ -146,7 +135,6 @@ namespace BaggyBot.DataProcessors
 			var last = dataFunctionSet.GetLastSnaggedLine(userId);
 			if (last.HasValue) {
 				if ((DateTime.Now - last.Value).Hours < int.Parse(Settings.Instance["snag_min_wait"])) {
-					Logger.Log(this, "Dropped a snag as this user has recently been snagged already");
 					return;
 				}
 			} else {

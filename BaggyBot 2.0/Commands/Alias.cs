@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
     class Alias : ICommand
     {
-        public Dictionary<string, string> Aliases { get; private set; }
-
         public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+	    private readonly DataFunctionSet dataFunctionSet;
 
-        public Alias()
+        public Alias(DataFunctionSet df)
         {
-            Aliases = new Dictionary<string, string>();
+	        dataFunctionSet = df;
         }
 
         public void Use(CommandArgs command)
@@ -27,16 +27,8 @@ namespace BaggyBot.Commands
                 {
                     value = value.Substring(1);
                 }
-                Aliases[key] = value;
+				dataFunctionSet.UpsertMiscData("alias", key, value);
                 command.Reply("I've aliased {0} to \"{1}\"", key, value);
-               /* if (Aliases.ContainsKey(key))
-                {
-                    Aliases[key] = value;
-                }
-                else
-                {
-                    Aliases.Add(key, value);
-                }*/
                 
             }
             else
@@ -44,5 +36,15 @@ namespace BaggyBot.Commands
                 command.Reply("usage: -alias <key> <command> [parameters ...]");
             }
         }
+
+	    public string GetAlias(string key)
+	    {
+		    return dataFunctionSet.GetMiscData("alias", key);
+	    }
+
+	    public bool ContainsKey(string key)
+	    {
+		    return dataFunctionSet.MiscDataContainsKey("alias", key);
+	    }
     }
 }

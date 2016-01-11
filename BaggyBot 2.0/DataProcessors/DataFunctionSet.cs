@@ -628,6 +628,33 @@ namespace BaggyBot.DataProcessors
 			Lock.LockMessage = "None";
 		}
 
+		public void UpsertMiscData(string type, string key, string value)
+		{
+			lock (Lock)
+			{
+				Lock.LockMessage = MiscTools.GetCurrentMethod();
+				var matches = from pair in sqlConnector.MiscData
+					where pair.Type == type
+					      && pair.Key == key
+					select pair;
+				if (matches.Any())
+				{
+					matches.Set(data => data.Value, () => value).Update();
+				}
+				else
+				{
+					sqlConnector.Insert(new MiscData
+					{
+						Type = type,
+						Key = key,
+						Value = value,
+						Enabled = true
+					});
+				}
+			}
+			Lock.LockMessage = "None";
+		}
+
 		public void IncrementUrl(string url, int user, string usage)
 		{
 			lock (Lock)
@@ -738,14 +765,15 @@ namespace BaggyBot.DataProcessors
 			lock (Lock)
 			{
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
-				var data = (from quot in sqlConnector.Quotes
-							where quot.AuthorId == userId
-							&& quot.TakenAt != null
-							select quot
-				).OrderBy(q => q.TakenAt);
+				var data = from quot in sqlConnector.Quotes
+					where quot.AuthorId == userId
+					      && quot.TakenAt != null
+					orderby quot.TakenAt descending 
+					select quot;
+
 				if (data.ToList().Count != 0)
 				{
-					var item = data.Last();
+					var item = data.First();
 					ret = item.TakenAt;
 				}
 				else
@@ -827,6 +855,34 @@ namespace BaggyBot.DataProcessors
 			}
 
 			return topics.OrderByDescending(pair => pair.Score);
+		}
+
+		public string GetMiscData(string type, string key)
+		{
+			var results = from pair in sqlConnector.MiscData
+				where pair.Type == type
+				      && pair.Key == key
+				select pair.Value;
+			if (results.Count() > 1)
+			{
+				throw new InvalidOperationException("Multiple values were returned for a single type-key combination.");
+			}
+			else if (!results.Any())
+			{
+				throw new InvalidOperationException(string.Format("Value for type {0}, key {1} not found.", type, key));
+			}
+			else
+			{
+				return results.First();
+			}
+		}
+
+		public bool MiscDataContainsKey(string type, string key)
+		{
+			return (from pair in sqlConnector.MiscData
+				where pair.Type == type
+				      && pair.Key == key
+				select pair).Any();
 		}
 	}
 	class Topic

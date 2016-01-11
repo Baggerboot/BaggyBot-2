@@ -1,12 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
 	class Remember : ICommand
 	{
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
-		private readonly Dictionary<string, string> remList = new Dictionary<string, string>();
+		private readonly DataFunctionSet dataFunctionSet;
+
+		public Remember(DataFunctionSet df)
+		{
+			dataFunctionSet = df;
+		}
 
 		public void Use(CommandArgs command)
 		{
@@ -20,14 +26,15 @@ namespace BaggyBot.Commands
 				//command.Reply("Usage: -rem <trigger> <response> - Example: -rem hex Hexadecimal value of {0} is (int){0:X8}");
 				return;
 			}
-			remList.Add(key, format);
+			dataFunctionSet.UpsertMiscData("rem", key, format);
 			command.Reply("Saved.");
 		}
 		public void UseRem(CommandArgs command)
 		{
 			string format;
-			if (remList.ContainsKey(command.Command)) {
-				format = remList[command.Command];
+			if (dataFunctionSet.MiscDataContainsKey("rem", command.Command))
+			{
+				format = dataFunctionSet.GetMiscData("rem", command.Command);
 			} else {
 				return;
 			}

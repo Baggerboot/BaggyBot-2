@@ -73,6 +73,7 @@ namespace BaggyBot.DataProcessors
             {
                 recentMessages.Enqueue(message.Message);
 
+				// Display the message in the log
                 if (message.Action)
                 {
                     Logger.Log(this, "*{0} {1}*", LogLevel.Message, true, message.Sender.Nick, message.Message);
@@ -81,6 +82,8 @@ namespace BaggyBot.DataProcessors
                 {
                     Logger.Log(this, message.Sender.Nick + ": " + message.Message, LogLevel.Message);
                 }
+
+				// Add the message to the IRC log
                 var userId = 0;
                 if (dataFunctionSet.ConnectionState != ConnectionState.Closed)
                 {
@@ -88,6 +91,7 @@ namespace BaggyBot.DataProcessors
                     AddMessageToIrcLog(message, userId);
                 }
 
+				// Perform simple substitution
                 var rgx = new Regex(@"^s\/([^\/]{1,})\/([^\/]*)", RegexOptions.IgnoreCase);
                 Match match;
                 if ((match = rgx.Match(message.Message)).Success)
@@ -101,6 +105,7 @@ namespace BaggyBot.DataProcessors
                     return;
                 }
 
+				// Handle query console messages
                 if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py"))
                 {
                     Logger.Log(this, "Processing Query Console python command");
@@ -108,14 +113,16 @@ namespace BaggyBot.DataProcessors
                     commandHandler.ProcessCommand(message);
                     return;
                 }
-                if (message.Message.StartsWith(Bot.CommandIdentifier))
-                {
-                    commandHandler.ProcessCommand(message);
-                }
-                else
-                {
-                    statsHandler.ProcessMessage(message, userId);
-                }
+
+				// Handle regular commands and messages
+	            if (message.Message.StartsWith(Bot.CommandIdentifier))
+	            {
+		            commandHandler.ProcessCommand(message);
+	            }
+	            else
+	            {
+		            statsHandler.ProcessMessage(message, userId);
+	            }
             }
             catch (ArgumentOutOfRangeException)
             {

@@ -21,7 +21,7 @@ namespace BaggyBot.DataProcessors
             this.ircInterface = ircInterface;
             commands = new Dictionary<string, ICommand>()
 			{
-                {"alias", new Alias()},
+                {"alias", new Alias(dataFunctionSet)},
 				{"bf", new Bf()},
 				{"convert", new Convert()},
 				{"cs", new Cs(ircInterface)},
@@ -38,7 +38,7 @@ namespace BaggyBot.DataProcessors
 				{"reconnect", new Reconnect(ircInterface)},
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
-				{"rem", new Remember()},
+				{"rem", new Remember(dataFunctionSet)},
 				{"resolve", new Resolve()},
 				{"say", new Say(ircInterface)},
 				{"set", new Set(dataFunctionSet)},
@@ -76,9 +76,9 @@ namespace BaggyBot.DataProcessors
 			if (!commands.ContainsKey(command)) {
 				Logger.Log(this, "Dropped command \"{0}\"; I do not recognize this command.", LogLevel.Info, true, message.Message);
                 // Check if there's an alias for this command
-                if (((Alias)commands["alias"]).Aliases.ContainsKey(command))
+                if (((Alias)commands["alias"]).ContainsKey(command))
                 {
-                    var aliasedCommand = ((Alias)commands["alias"]).Aliases[command];
+                    var aliasedCommand = ((Alias)commands["alias"]).GetAlias(command);
                     // Process the aliased command
                     ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
                 }
