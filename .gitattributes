@@ -1,5 +1,5 @@
 # Tell Linguist that the code in Lib is vendored
-BaggyBot[[:space:]]2.0/Lib/* linguist-vendored
+Lib/*.py linguist-vendored
 
 # Auto detect text files and perform LF normalization
 * text=auto
