@@ -130,7 +130,6 @@ namespace BaggyBot
 			this["irc_ident"] = "Dredger";
 
 			this["sql_connection_string"] = "";
-			this["sql_use_dblinq"] = "true";
 
 			this["irc_flood_limit"] = "4";
 			this["operator_nick"] = "";
@@ -138,7 +137,7 @@ namespace BaggyBot
 			this["operator_host"] = "";
 			this["operator_uid"] = "*";
 			this["show_debug_log"] = "false";
-			this["display_snag_message"] = "true";
+			this["display_snag_message"] = "false";
 			this["snag_silence_chance"] = "0.6";
 			this["snag_chance"] = "1";
 			this["snag_min_wait"] = "4";
