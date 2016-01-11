@@ -8,6 +8,8 @@ using BaggyBot.Tools;
 using BaggyBot.DataProcessors;
 using System.Threading;
 using System.Threading.Tasks;
+using IRCSharp.IrcCommandProcessors;
+using IRCSharp.IrcCommandProcessors.Quirks;
 
 namespace BaggyBot
 {
@@ -70,7 +72,7 @@ namespace BaggyBot
 
             // Create various data processors and I/O handlers
             sqlConnector = new SqlConnector();
-            client = new IrcClient(/*Settings.Instance["deployed"] == "false"*/);
+            client = new IrcClient();
             ircInterface = new IrcInterface(client);
             dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
             ircInterface.DataFunctionSet = dataFunctionSet;
@@ -146,6 +148,16 @@ namespace BaggyBot
             var password = s["irc_password"];
             var tls = s.ReadBool("irc_use_tls", false);
             var verify = s.ReadBool("irc_verify_server_certificate", true);
+	        var slackCompatMode = s.ReadBool("irc_use_slack_compat_mode", false);
+
+			// Slack IRC messes up domain names by prepending http://<domain> to everything that looks like a domain name or incorrectly formatted URL,
+			// despite the fact that such formatting should really be done by IRC clients, not servers.
+			// BaggyBot doesn't like this; it messes up several of his commands, such as -resolve and -ping.
+			// Therefore, when Slack Compatibility Mode is enabled, we add a SlackIrcProcessor which strips these misformatted domain names from the message.
+	        if (slackCompatMode)
+	        {
+		        client.DataProcessors.Add(new SlackIrcProcessor());
+	        }
 
             Logger.Log(this, "Connecting to the IRC server..");
             Logger.Log(this, "\tNick\t" + nick);

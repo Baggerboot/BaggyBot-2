@@ -9,12 +9,8 @@ namespace BaggyBot.Commands
 	{
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 		private readonly DateTime startTime;
-		private readonly PerformanceCounterCategory cat = new PerformanceCounterCategory("Processor Information");
-		private readonly string[] instances;
 		public Uptime()
 		{
-			instances = cat.GetInstanceNames();
-
 			startTime = DateTime.Now;
 		}
 

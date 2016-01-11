@@ -6,13 +6,11 @@ namespace BaggyBot.Commands
 	class Join : ICommand
 	{
 		private readonly IrcInterface ircInterface;
-		private DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
 
-		public Join(IrcInterface inter, DataFunctionSet df)
+		public Join(IrcInterface inter)
 		{
 			ircInterface = inter;
-			dataFunctionSet = df;
 		}
 
 		public void Use(CommandArgs command)
