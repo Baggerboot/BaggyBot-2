@@ -633,7 +633,7 @@ namespace BaggyBot.DataProcessors
 			lock (Lock)
 			{
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
-				var matches = from tUrl in sqlConnector.Urls
+				var matches = from tUrl in sqlConnector.LinkedUrls
 							  where tUrl.Url == url
 							  select tUrl;
 

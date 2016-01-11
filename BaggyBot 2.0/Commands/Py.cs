@@ -14,7 +14,7 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	class Py : ReadEvaluatePrintCommand, ICommand
+	class Py : ReadEvaluatePrintCommand, ICommand, IDisposable
 	{
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
 		private readonly ScriptEngine engine;
@@ -34,7 +34,7 @@ namespace BaggyBot.Commands
 			scope.SetVariable("ircInterface", IrcInterface);
 			scope.SetVariable("dataFunctionSet", df);
 			scope.SetVariable("tools", new PythonTools());
-            scope.SetVariable("find", new Action<string>((msg) => df.FindLine(msg)));
+            scope.SetVariable("find", new Action<string>(msg => df.FindLine(msg)));
 			var outputStream = new ProducerConsumerStream();
 			var outputStreamWriter = new StreamWriter(outputStream);
 			outputStreamReader = new StreamReader(outputStream);
@@ -176,6 +176,11 @@ namespace BaggyBot.Commands
 				IrcInterface.SendMessage(command.Channel, "Unhandled exception: " + e.GetType() + ": " + e.Message);
 			}
 			threads.Remove(Thread.CurrentThread);
+		}
+
+		public void Dispose()
+		{
+			outputStreamReader.Dispose();
 		}
 	}
 }

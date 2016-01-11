@@ -32,7 +32,6 @@ namespace BaggyBot.Database
 		public ITable<IrcLog> IrcLog;
 		public ITable<KeyValuePair> KeyValuePairs;
 		public ITable<Quote> Quotes;
-		public ITable<LinkedUrl> Urls;
 		public ITable<UsedWord> Words;
 		public ITable<MiscData> MiscData;
 
@@ -145,6 +144,7 @@ namespace BaggyBot.Database
 			Users = connection.GetTable<User>();
 			Words = connection.GetTable<UsedWord>();
 			IrcLog = connection.GetTable<IrcLog>();
+			MiscData = connection.GetTable<MiscData>();
 
 			return true;
 		}

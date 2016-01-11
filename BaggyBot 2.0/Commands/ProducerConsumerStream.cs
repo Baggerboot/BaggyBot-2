@@ -6,6 +6,7 @@ namespace BaggyBot.Commands
 	class ProducerConsumerStream : Stream
 	{
 		private readonly MemoryStream innerStream;
+		private readonly object streamLock = new object();
 		private long readPosition;
 		private long writePosition;
 
@@ -22,7 +23,7 @@ namespace BaggyBot.Commands
 
 		public override void Flush()
 		{
-			lock (innerStream) {
+			lock (streamLock) {
 				innerStream.Flush();
 			}
 		}
@@ -31,7 +32,7 @@ namespace BaggyBot.Commands
 		{
 			get
 			{
-				lock (innerStream) {
+				lock (streamLock) {
 					return innerStream.Length;
 				}
 			}
@@ -45,7 +46,7 @@ namespace BaggyBot.Commands
 
 		public override int Read(byte[] buffer, int offset, int count)
 		{
-			lock (innerStream) {
+			lock (streamLock) {
 				innerStream.Position = readPosition;
 				var red = innerStream.Read(buffer, offset, count);
 				readPosition = innerStream.Position;
@@ -66,7 +67,7 @@ namespace BaggyBot.Commands
 
 		public override void Write(byte[] buffer, int offset, int count)
 		{
-			lock (innerStream) {
+			lock (streamLock) {
 				innerStream.Position = writePosition;
 				innerStream.Write(buffer, offset, count);
 				writePosition = innerStream.Position;

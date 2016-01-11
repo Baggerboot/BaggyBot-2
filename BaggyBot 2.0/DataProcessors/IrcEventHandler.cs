@@ -32,7 +32,7 @@ namespace BaggyBot.DataProcessors
             }
         }
 
-        public T[] ToArray()
+        public new T[] ToArray()
         {
             return base.ToArray();
         }
