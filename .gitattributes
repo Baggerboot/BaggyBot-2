@@ -1,3 +1,6 @@
+# Tell Linguist that the code in Lib is vendored
+BaggyBot 2.0/Lib/* linguist-vendored
+
 # Auto detect text files and perform LF normalization
 * text=auto
 
