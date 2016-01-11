@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Data;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
 using IRCSharp;
 using IRCSharp.IRC;
@@ -190,6 +191,8 @@ namespace BaggyBot.DataProcessors
 				{
 					case "001":
 					case "002":
+						Logger.Log(this, "{0}", LogLevel.Irc, true, line.FinalArgument);
+						break;
 					case "003":
 						Logger.Log(this, "{0}: {1}", LogLevel.Irc, true, line.Sender, line.FinalArgument);
 						break;
@@ -198,6 +201,11 @@ namespace BaggyBot.DataProcessors
 						break;
 					case "333": // Ignore names list
 					case "366":
+						break;
+					case "375": // RPL_MOTDSTART
+					case "376": // RPL_ENDOFMOTD
+					case "372": // RPL_MOTD
+						Logger.Log(this, "{0}", LogLevel.Irc, true, line.FinalArgument);
 						break;
 					case "MODE":
 						if (line.FinalArgument != null)
@@ -215,7 +223,7 @@ namespace BaggyBot.DataProcessors
 				}
 			}
 		}
-		internal readonly string[] IgnoredCommands = { "004" /*RPL_MYINFO*/, "005" /*RPL_ISUPPORT*/, "251" /*RPL_LUSERCLIENT*/, "254" /*RPL_LUSERCHANNELS*/, "252" /*RPL_LUSEROP*/, "255" /*RPL_LUSERME*/, "265", "266", "250", "375", "376" };
+		internal readonly string[] IgnoredCommands = { "004" /*RPL_MYINFO*/, "005" /*RPL_ISUPPORT*/, "251" /*RPL_LUSERCLIENT*/, "254" /*RPL_LUSERCHANNELS*/, "252" /*RPL_LUSEROP*/, "255" /*RPL_LUSERME*/, "265", "266", "250" };
 
 		internal void HandleJoin(IrcUser user, string channel)
 		{
