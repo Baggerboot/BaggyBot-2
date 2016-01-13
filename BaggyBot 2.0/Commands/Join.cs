@@ -1,7 +1,4 @@
-﻿using BaggyBot.DataProcessors;
-
-
-namespace BaggyBot.Commands
+﻿namespace BaggyBot.Commands
 {
 	class Join : ICommand
 	{

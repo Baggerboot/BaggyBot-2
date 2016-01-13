@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using IRCSharp;
 using BaggyBot.Tools;
 using System.Text.RegularExpressions;
 #if postgresql

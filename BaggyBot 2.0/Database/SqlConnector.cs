@@ -6,15 +6,12 @@
 using System;
 using System.Data;
 using System.Collections.Generic;
-using System.Data.Linq.Mapping;
-using System.Diagnostics;
 using System.Linq;
 using LinqToDB.Data;
 using LinqToDB.DataProvider.PostgreSQL;
 using BaggyBot.Database.Model;
 using BaggyBot.Database.Upgrades;
 using LinqToDB;
-using Mono.CSharp.Linq;
 using Npgsql;
 
 

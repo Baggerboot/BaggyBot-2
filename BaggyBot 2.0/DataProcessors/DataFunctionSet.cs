@@ -7,7 +7,6 @@ using BaggyBot.Database;
 using IRCSharp.IRC;
 using BaggyBot.Database.Model;
 using LinqToDB;
-using Mono.CSharp.Linq;
 
 namespace BaggyBot.DataProcessors
 {

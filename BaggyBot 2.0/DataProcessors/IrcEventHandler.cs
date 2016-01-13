@@ -2,11 +2,8 @@
 using System.Text.RegularExpressions;
 using System.Data;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Linq;
-using IRCSharp;
 using IRCSharp.IRC;
-using BaggyBot.Tools;
 
 
 namespace BaggyBot.DataProcessors

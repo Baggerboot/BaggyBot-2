@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace BaggyBot.Commands
+﻿namespace BaggyBot.Commands
 {
 	class Say : ICommand
 	{

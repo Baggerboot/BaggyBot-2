@@ -8,7 +8,6 @@ using BaggyBot.Tools;
 using BaggyBot.DataProcessors;
 using System.Threading;
 using System.Threading.Tasks;
-using IRCSharp.IrcCommandProcessors;
 using IRCSharp.IrcCommandProcessors.Quirks;
 
 namespace BaggyBot
@@ -45,12 +44,9 @@ namespace BaggyBot
 			private set;
 		}
 
-		public static DateTime LastUpdate
-		{
-			get { return MiscTools.RetrieveLinkerTimestamp(); }
-		}
+		public static DateTime LastUpdate => MiscTools.RetrieveLinkerTimestamp();
 
-		// If the bot is started in update mode, a previous version has to be specified.
+	    // If the bot is started in update mode, a previous version has to be specified.
 		// The bot will then announce whether the update was a success or a failure.
 		// To determine this, the previous version is stored in here.
 		// If the bot is not started in update mode, the value of this field remains null.
@@ -105,7 +101,7 @@ namespace BaggyBot
 		private void HookupIrcEvents()
 		{
 			client.OnNickChange += dataFunctionSet.HandleNickChange;
-			client.OnMessageReceived += (message) => Task.Run(() => ircEventHandler.ProcessMessage(message));
+			client.OnMessageReceived += message => Task.Run(() => ircEventHandler.ProcessMessage(message));
 			client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
 			//client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;

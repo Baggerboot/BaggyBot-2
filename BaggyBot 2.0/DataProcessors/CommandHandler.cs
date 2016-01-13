@@ -4,7 +4,6 @@ using System.Linq;
 using System.Diagnostics;
 using BaggyBot.Commands;
 using BaggyBot.Tools;
-using IRCSharp;
 using IRCSharp.IRC;
 using Convert = BaggyBot.Commands.Convert;
 using Version = BaggyBot.Commands.Version;
