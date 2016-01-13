@@ -52,7 +52,7 @@ namespace BaggyBot.Commands
 			}
 			if (Security == InterpreterSecurity.Block)
 			{
-				IrcInterface.SendMessage(command.Channel, "For security reasons, the interactive Python interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
+				IrcInterface.SendMessage(command.Channel, "For security reasons, the interactive C# interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
 				return false;
 			}
 			if (Security == InterpreterSecurity.Notify)
