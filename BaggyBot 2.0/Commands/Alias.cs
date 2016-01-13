@@ -19,7 +19,7 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			if (command.Args.Length > 2)
+			if (command.Args.Length > 1)
 			{
 				var key = command.Args[0];
 				var value = string.Join(" ", command.Args.Skip(1));
