@@ -23,7 +23,6 @@ namespace BaggyBot.DataProcessors
 				{"alias", new Alias(dataFunctionSet)},
 				{"bf", new Bf()},
 				{"convert", new Convert()},
-				{"cs", new Cs(ircInterface)},
 				{"feature", new Feature(dataFunctionSet)},
 				{"get", new Get(dataFunctionSet, ircInterface)},
 				{"html", new Html()},
@@ -33,7 +32,6 @@ namespace BaggyBot.DataProcessors
 				{"ns", new NickServ(dataFunctionSet, ircInterface)},
 				{"part", new Part(ircInterface)},
 				{"ping", new Ping()},
-				{"py", new Py(ircInterface, dataFunctionSet)},
 				{"reconnect", new Reconnect(ircInterface)},
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
@@ -50,6 +48,11 @@ namespace BaggyBot.DataProcessors
 				{"wiki", new Wikipedia()},
 				{"topic", new Topics(dataFunctionSet)}
 			};
+			if(Settings.Instance.ReadBool("enable_interpreters", true))
+			{
+				commands.Add("py", new Py(ircInterface, dataFunctionSet));
+				commands.Add("cs", new Cs(ircInterface));
+			}
 		}
 
 		private CommandArgs BuildCommand(IrcMessage message)
