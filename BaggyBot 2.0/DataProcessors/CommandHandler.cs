@@ -79,9 +79,9 @@ namespace BaggyBot.DataProcessors
 
 			if (!commands.ContainsKey(cmdInfo.Command))
 			{
-
 				if (cmdInfo.Command == "rem")
 				{
+					Logger.Log(this, "Saving rem");
 					var value = cmdInfo.Args.ToList();
 					value.Insert(1, "say");
 					((Alias)commands["alias"]).Use(
@@ -98,7 +98,7 @@ namespace BaggyBot.DataProcessors
 					{
 						aliasedCommand = aliasedCommand.Replace("$args", cmdInfo.FullArgument);
 					}
-					
+					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
 					ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
 				}
 				return;
