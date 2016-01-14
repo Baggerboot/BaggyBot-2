@@ -7,7 +7,6 @@ using BaggyBot.Database;
 using IRCSharp.IRC;
 using BaggyBot.Database.Model;
 using LinqToDB;
-using Mono.CSharp.Linq;
 
 namespace BaggyBot.DataProcessors
 {
@@ -634,9 +633,9 @@ namespace BaggyBot.DataProcessors
 			{
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
 				var matches = from pair in sqlConnector.MiscData
-					where pair.Type == type
-					      && pair.Key == key
-					select pair;
+							  where pair.Type == type
+									&& pair.Key == key
+							  select pair;
 				if (matches.Any())
 				{
 					matches.Set(data => data.Value, () => value).Update();
@@ -694,8 +693,8 @@ namespace BaggyBot.DataProcessors
 				//var statement = "UPDATE dbo.words SET uses = uses + 1 WHERE word = '" + word + "'; INSERT INTO dbo.words (word, uses) SELECT '" + word + "', 1 WHERE NOT EXISTS (SELECT 1 FROM dbo.words WHERE word = '" + word + "');";
 
 				var matches = from usedWord in sqlConnector.Words
-					where usedWord.Word == word
-					select usedWord;
+							  where usedWord.Word == word
+							  select usedWord;
 
 				if (matches.Any())
 				{
@@ -766,10 +765,10 @@ namespace BaggyBot.DataProcessors
 			{
 				Lock.LockMessage = MiscTools.GetCurrentMethod();
 				var data = from quot in sqlConnector.Quotes
-					where quot.AuthorId == userId
-					      && quot.TakenAt != null
-					orderby quot.TakenAt descending 
-					select quot;
+						   where quot.AuthorId == userId
+								 && quot.TakenAt != null
+						   orderby quot.TakenAt descending
+						   select quot;
 
 				if (data.ToList().Count != 0)
 				{
@@ -860,9 +859,9 @@ namespace BaggyBot.DataProcessors
 		public string GetMiscData(string type, string key)
 		{
 			var results = from pair in sqlConnector.MiscData
-				where pair.Type == type
-				      && pair.Key == key
-				select pair.Value;
+						  where pair.Type == type
+								&& pair.Key == key
+						  select pair.Value;
 			if (results.Count() > 1)
 			{
 				throw new InvalidOperationException("Multiple values were returned for a single type-key combination.");
@@ -880,9 +879,9 @@ namespace BaggyBot.DataProcessors
 		public bool MiscDataContainsKey(string type, string key)
 		{
 			return (from pair in sqlConnector.MiscData
-				where pair.Type == type
-				      && pair.Key == key
-				select pair).Any();
+					where pair.Type == type
+						  && pair.Key == key
+					select pair).Any();
 		}
 	}
 	class Topic

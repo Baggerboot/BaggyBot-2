@@ -19,7 +19,7 @@ namespace BaggyBot
 
 	public static class Logger
 	{
-        public static bool UseColouredOutput { get; set; }
+		public static bool UseColouredOutput { get; set; }
 		public const string LogFileName = "baggybot.log";
 		private static bool disposed;
 		private static string prefix = string.Empty;
@@ -48,54 +48,56 @@ namespace BaggyBot
 			prefix = string.Empty;
 		}
 
-        private const string KNRM = "\x1B[0m";
-        private const string KRED = "\x1B[31m";
-        private const string KGRN = "\x1B[32m";
-        private const string KYEL = "\x1B[33m";
-        private const string KBLU = "\x1B[34m";
-        private const string KMAG = "\x1B[35m";
-        private const string KCYN = "\x1B[36m";
-        private const string KWHT = "\x1B[37m";
-        private const string RESET = "\x33[0m";
+		private const string KNRM = "\x1B[0m";
+		private const string KRED = "\x1B[31m";
+		private const string KGRN = "\x1B[32m";
+		private const string KYEL = "\x1B[33m";
+		private const string KBLU = "\x1B[34m";
+		private const string KMAG = "\x1B[35m";
+		private const string KCYN = "\x1B[36m";
+		private const string KWHT = "\x1B[37m";
+		private const string RESET = "\x33[0m";
 
 		public static void Log(object sender, string message, LogLevel level = LogLevel.Debug, bool writeLine = true, params object[] format)
 		{
-			if (format.Length != 0) {
+			if (format.Length != 0)
+			{
 				message = String.Format(message, format);
 			}
 			var lineBuilder = new StringBuilder();
 			//var lineColor = ConsoleColor.Gray;
-		    var lineColor = "";
+			var lineColor = "";
 
-			switch (level) {
+			switch (level)
+			{
 				case LogLevel.Debug:
 					lineBuilder.Append("[DEB] ");
-			        lineColor = KWHT;
+					lineColor = KWHT;
 					break;
 				case LogLevel.Info:
 					lineBuilder.Append("[INF] ");
-			        lineColor = KGRN;
+					lineColor = KGRN;
 					break;
 				case LogLevel.Message:
 					lineBuilder.Append("[MSG] ");
-			        lineColor = KBLU;
+					lineColor = KBLU;
 					break;
 				case LogLevel.Irc:
 					lineBuilder.Append("[IRC] ");
-			        lineColor = KNRM;
+					lineColor = KNRM;
 					break;
 				case LogLevel.Warning:
 					lineBuilder.Append("[WRN] ");
-			        lineColor = KYEL;
+					lineColor = KYEL;
 					break;
 				case LogLevel.Error:
 					lineBuilder.Append("[ERR] ");
-			        lineColor = KRED;
+					lineColor = KRED;
 					break;
 			}
 			lineBuilder.Append(prefix);
 
-			
+
 			if (sender != null)
 			{
 				var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
@@ -110,16 +112,18 @@ namespace BaggyBot
 
 			WriteToConsole(lineColor, level, lineBuilder);
 
-			if ((level == LogLevel.Error || level == LogLevel.Warning) && OnLogEvent != null) {
+			if ((level == LogLevel.Error || level == LogLevel.Warning) && OnLogEvent != null)
+			{
 				OnLogEvent(lineBuilder.ToString(), level);
 			}
-		    WriteToLogFile(lineBuilder, writeLine);
+			WriteToLogFile(lineBuilder, writeLine);
 		}
 
 		private static void WriteToLogFile(StringBuilder lineBuilder, bool writeLine)
 		{
-			if (!disposed) {
-				if(writeLine)
+			if (!disposed)
+			{
+				if (writeLine)
 					textWriter.WriteLine(lineBuilder.ToString());
 				else
 					textWriter.Write(lineBuilder.ToString());
@@ -132,25 +136,32 @@ namespace BaggyBot
 		{
 			//var prevColor = Console.ForegroundColor;
 			//Console.ForegroundColor = lineColor;
-            if (UseColouredOutput)
-            {
-                Console.Write(lineColor);
-            }
+			if (UseColouredOutput)
+			{
+				Console.Write(lineColor);
+			}
 
-			if (level == LogLevel.Debug) {
+			if (level == LogLevel.Debug)
+			{
 				var writeDebug = false;
-				if (bool.TryParse(Settings.Instance["show_debug_log"], out writeDebug)) {
-					if (writeDebug) {
+				if (bool.TryParse(Settings.Instance["show_debug_log"], out writeDebug))
+				{
+					if (writeDebug)
+					{
 						Console.WriteLine(lineBuilder.ToString());
 					}
-				} else {
+				}
+				else
+				{
 					Log(null, "Unable to parse settings value for show_debug_log into a boolean.", LogLevel.Warning);
 					Console.WriteLine(lineBuilder.ToString());
 				}
-			} else {
+			}
+			else
+			{
 				Console.WriteLine(lineBuilder.ToString());
 			}
-            //Console.Write(RESET);
+			//Console.Write(RESET);
 			//Console.ForegroundColor = prevColor;
 		}
 
@@ -167,5 +178,5 @@ namespace BaggyBot
 			textWriter.Dispose();
 			disposed = true;
 		}
-    }
+	}
 }

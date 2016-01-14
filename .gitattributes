@@ -1,3 +1,6 @@
+# Tell Linguist that the code in Lib is vendored
+*Lib/*.py linguist-vendored
+
 # Auto detect text files and perform LF normalization
 * text=auto
 

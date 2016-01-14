@@ -1,5 +1,4 @@
 ﻿using System;
-using IRCSharp;
 using IRCSharp.IRC;
 
 namespace BaggyBot.Commands

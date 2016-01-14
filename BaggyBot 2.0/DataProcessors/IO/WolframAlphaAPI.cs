@@ -284,22 +284,27 @@ namespace BaggyBot.IO.WolframAlpha
 		/// <param name="Width">Width in pixels for images returned Sample Values : 300|500</param>
 		public DataServiceQuery<DefaultPodEntity> GetImageResults(String Input, String Location, String LatitudeLongitude, Int16? Width)
 		{
-			if ((Input == null)) {
+			if ((Input == null))
+			{
 				throw new System.ArgumentNullException("Input", "Input value cannot be null");
 			}
 			DataServiceQuery<DefaultPodEntity> query;
 			query = base.CreateQuery<DefaultPodEntity>("GetImageResults");
-			if ((Input != null)) {
+			if ((Input != null))
+			{
 				query = query.AddQueryOption("Input", string.Concat("\'", Input, "\'"));
 			}
-			if ((Location != null)) {
+			if ((Location != null))
+			{
 				query = query.AddQueryOption("Location", string.Concat("\'", Location, "\'"));
 			}
-			if ((LatitudeLongitude != null)) {
+			if ((LatitudeLongitude != null))
+			{
 				query = query.AddQueryOption("LatitudeLongitude", string.Concat("\'", LatitudeLongitude, "\'"));
 			}
 			if (((Width != null)
-						&& (Width.HasValue == true))) {
+						&& (Width.HasValue == true)))
+			{
 				query = query.AddQueryOption("Width", Width.Value);
 			}
 			return query;
@@ -313,22 +318,27 @@ namespace BaggyBot.IO.WolframAlpha
 		/// <param name="Width">Width in pixels for images returned Sample Values : 300|500</param>
 		public DataServiceQuery<HtmlPodEntity> GetHtmlResults(String Input, String IP, String LatitudeLongitude, Int16? Width)
 		{
-			if ((Input == null)) {
+			if ((Input == null))
+			{
 				throw new System.ArgumentNullException("Input", "Input value cannot be null");
 			}
 			DataServiceQuery<HtmlPodEntity> query;
 			query = base.CreateQuery<HtmlPodEntity>("GetHtmlResults");
-			if ((Input != null)) {
+			if ((Input != null))
+			{
 				query = query.AddQueryOption("Input", string.Concat("\'", Input, "\'"));
 			}
-			if ((IP != null)) {
+			if ((IP != null))
+			{
 				query = query.AddQueryOption("Ip", string.Concat("\'", IP, "\'"));
 			}
-			if ((LatitudeLongitude != null)) {
+			if ((LatitudeLongitude != null))
+			{
 				query = query.AddQueryOption("LatitudeLongitude", string.Concat("\'", LatitudeLongitude, "\'"));
 			}
 			if (((Width != null)
-						&& (Width.HasValue == true))) {
+						&& (Width.HasValue == true)))
+			{
 				query = query.AddQueryOption("Width", Width.Value);
 			}
 			return query;
@@ -342,22 +352,27 @@ namespace BaggyBot.IO.WolframAlpha
 		/// <param name="Width">Width in pixels for images returned Sample Values : 300|500</param>
 		public DataServiceQuery<PlainTextPodEntity> GetPlainTextResults(String Input, String Ip, String LatitudeLongitude, Int16? Width)
 		{
-			if ((Input == null)) {
+			if ((Input == null))
+			{
 				throw new System.ArgumentNullException("Input", "Input value cannot be null");
 			}
 			DataServiceQuery<PlainTextPodEntity> query;
 			query = base.CreateQuery<PlainTextPodEntity>("GetPlainTextResults");
-			if ((Input != null)) {
+			if ((Input != null))
+			{
 				query = query.AddQueryOption("Input", string.Concat("\'", Input, "\'"));
 			}
-			if ((Ip != null)) {
+			if ((Ip != null))
+			{
 				query = query.AddQueryOption("Ip", string.Concat("\'", Ip, "\'"));
 			}
-			if ((LatitudeLongitude != null)) {
+			if ((LatitudeLongitude != null))
+			{
 				query = query.AddQueryOption("LatitudeLongitude", string.Concat("\'", LatitudeLongitude, "\'"));
 			}
 			if (((Width != null)
-						&& (Width.HasValue == true))) {
+						&& (Width.HasValue == true)))
+			{
 				query = query.AddQueryOption("Width", Width.Value);
 			}
 			return query;

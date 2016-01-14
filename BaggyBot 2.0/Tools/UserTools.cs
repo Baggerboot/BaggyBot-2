@@ -1,5 +1,4 @@
 ﻿using System;
-using IRCSharp;
 using BaggyBot.DataProcessors;
 using IRCSharp.IRC;
 

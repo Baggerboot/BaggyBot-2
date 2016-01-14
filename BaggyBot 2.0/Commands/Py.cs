@@ -34,7 +34,7 @@ namespace BaggyBot.Commands
 			scope.SetVariable("ircInterface", IrcInterface);
 			scope.SetVariable("dataFunctionSet", df);
 			scope.SetVariable("tools", new PythonTools());
-            scope.SetVariable("find", new Action<string>(msg => df.FindLine(msg)));
+			scope.SetVariable("find", new Action<string>(msg => df.FindLine(msg)));
 			var outputStream = new ProducerConsumerStream();
 			var outputStreamWriter = new StreamWriter(outputStream);
 			outputStreamReader = new StreamReader(outputStream);
@@ -45,7 +45,8 @@ namespace BaggyBot.Commands
 		{
 			Security = InterpreterSecurity.Block;
 			commandBuilder.Clear();
-			foreach (var thread in threads) {
+			foreach (var thread in threads)
+			{
 				thread.Abort();
 			}
 			IrcInterface.SendMessage(command.Channel, string.Format("Done. {0} running threads have been aborted.", threads.Count));
@@ -54,9 +55,12 @@ namespace BaggyBot.Commands
 		protected override void Threads(CommandArgs command)
 		{
 			var result = string.Join(", ", threads.Select(t => t.Name));
-			if (result.Length == 0) {
+			if (result.Length == 0)
+			{
 				IrcInterface.SendMessage(command.Channel, "Active threads: " + threads);
-			} else {
+			}
+			else
+			{
 				IrcInterface.SendMessage(command.Channel, "No Python threads running right now.");
 			}
 		}
@@ -73,31 +77,39 @@ namespace BaggyBot.Commands
 		/// <returns>True if the user is allowed to execute the command, false if only the bot operator may execute it.</returns>
 		private bool RestrictionsCheck(CommandArgs command)
 		{
-			if (!command.Channel.StartsWith("#")) {
+			if (!command.Channel.StartsWith("#"))
+			{
 				IrcInterface.SendMessage(command.Channel, "Only the bot operator is allowed to execute Python code in non-channels");
 				return false;
 			}
-			if (Security == InterpreterSecurity.Block) {
+			if (Security == InterpreterSecurity.Block)
+			{
 				IrcInterface.SendMessage(command.Channel, "For security reasons, the interactive Python interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
 				return false;
 			}
-			if (Security == InterpreterSecurity.Notify) {
+			if (Security == InterpreterSecurity.Notify)
+			{
 				// Do not return anything yet, but do notify the bot operator.
 				IrcInterface.NotifyOperator("-py used by " + command.Sender.Nick + ": " + command.FullArgument);
 			}
-			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset"))) {
+			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
+			{
 				IrcInterface.SendMessage(command.Channel, "Access to my guts is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("System.Diagnostics.Process"))) {
+			} if (command.FullArgument != null && (command.FullArgument.Contains("System.Diagnostics.Process")))
+			{
 				IrcInterface.SendMessage(command.Channel, "Process control is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("GetMethod"))) {
+			} if (command.FullArgument != null && (command.FullArgument.Contains("GetMethod")))
+			{
 				IrcInterface.SendMessage(command.Channel, "Method invocation trough reflection is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("import posix"))) {
+			} if (command.FullArgument != null && (command.FullArgument.Contains("import posix")))
+			{
 				IrcInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && ((command.FullArgument.Contains("putenv") || command.FullArgument.Contains("listdir") || command.FullArgument.Contains("mkdir") || command.FullArgument.Contains("makedirs") || command.FullArgument.Contains("remove") || command.FullArgument.Contains("rename") || command.FullArgument.Contains("rmdir") || command.FullArgument.Contains("exit"))&& command.FullArgument.Contains("os"))) {
+			} if (command.FullArgument != null && ((command.FullArgument.Contains("putenv") || command.FullArgument.Contains("listdir") || command.FullArgument.Contains("mkdir") || command.FullArgument.Contains("makedirs") || command.FullArgument.Contains("remove") || command.FullArgument.Contains("rename") || command.FullArgument.Contains("rmdir") || command.FullArgument.Contains("exit")) && command.FullArgument.Contains("os")))
+			{
 				IrcInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
 				return false;
 			}
@@ -108,16 +120,20 @@ namespace BaggyBot.Commands
 			ThreadId++;
 			var isOperator = UserTools.Validate(command.Sender);
 
-			if (!(isOperator || RestrictionsCheck(command))) {
+			if (!(isOperator || RestrictionsCheck(command)))
+			{
 				return;
 			}
-			if (command.FullArgument != null) {
-				if (command.FullArgument.StartsWith("--")) {
+			if (command.FullArgument != null)
+			{
+				if (command.FullArgument.StartsWith("--"))
+				{
 					command.FullArgument = command.FullArgument.Substring(2);
 					ProcessControlCommand(command);
 					return;
 				}
-				if (command.FullArgument.EndsWith(":") || command.FullArgument.StartsWith("    ")) {
+				if (command.FullArgument.EndsWith(":") || command.FullArgument.StartsWith("    "))
+				{
 					commandBuilder.AppendLine(command.FullArgument);
 					IrcInterface.SendMessage(command.Channel, ">>>");
 					return;
@@ -129,50 +145,74 @@ namespace BaggyBot.Commands
 			}
 
 			string code;
-			if (command.FullArgument == null && commandBuilder.ToString() != string.Empty) {
+			if (command.FullArgument == null && commandBuilder.ToString() != string.Empty)
+			{
 				code = commandBuilder.ToString();
 				commandBuilder.Clear();
-			} else if (command.FullArgument != null) {
+			}
+			else if (command.FullArgument != null)
+			{
 				code = command.FullArgument;
-			} else {
+			}
+			else
+			{
 				command.Reply("Usage: -py [python code] - Leave the [python code] parameter out if you want to close the last indented block of a multi-line script.");
 				return;
 			}
 			var source = engine.CreateScriptSourceFromString(code, SourceCodeKind.SingleStatement);
 			threads.Add(Thread.CurrentThread);
-			try {
+			try
+			{
 				source.Execute(scope);
 
 				var line = outputStreamReader.ReadLine();
-				if (line == null) {
+				if (line == null)
+				{
 					IrcInterface.SendMessage(command.Channel, "Done (No result)");
-				} else {
-					for (var i = 0; line != null; i++) {
-						if (i > 3 && !isOperator) { // i starts at 0, so when i=4, that would be the 5th line
+				}
+				else
+				{
+					for (var i = 0; line != null; i++)
+					{
+						if (i > 3 && !isOperator)
+						{ // i starts at 0, so when i=4, that would be the 5th line
 							IrcInterface.SendMessage(command.Channel, "Spam prevention triggered. Sending more than 4 lines is not allowed.");
 							outputStreamReader.ReadToEnd();
 							break;
 						}
 						IrcInterface.SendMessage(command.Channel, "--> " + line);
 						line = outputStreamReader.ReadLine();
-						if (line != null && line.Contains("connection_string")) {
+						if (line != null && line.Contains("connection_string"))
+						{
 							line = outputStreamReader.ReadLine();
 						}
 						Thread.Sleep(250); // make sure we don't spam the receiving end too much
 					}
 				}
 
-			} catch (UnboundNameException e) {
+			}
+			catch (UnboundNameException e)
+			{
 				IrcInterface.SendMessage(command.Channel, "Error: " + e.Message);
-			} catch (SyntaxErrorException e) {
+			}
+			catch (SyntaxErrorException e)
+			{
 				IrcInterface.SendMessage(command.Channel, "Syntax Error: " + e.Message);
-			} catch (ImportException e) {
+			}
+			catch (ImportException e)
+			{
 				IrcInterface.SendMessage(command.Channel, "Import Error: " + e.Message);
-			} catch (MissingMemberException e) {
+			}
+			catch (MissingMemberException e)
+			{
 				IrcInterface.SendMessage(command.Channel, "Missing member: " + e.Message);
-			} catch (DivideByZeroException) {
+			}
+			catch (DivideByZeroException)
+			{
 				IrcInterface.SendMessage(command.Channel, "A DivideByZeroException occurred");
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				IrcInterface.SendMessage(command.Channel, "Unhandled exception: " + e.GetType() + ": " + e.Message);
 			}
 			threads.Remove(Thread.CurrentThread);

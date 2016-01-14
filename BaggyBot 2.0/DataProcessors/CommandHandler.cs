@@ -4,31 +4,30 @@ using System.Linq;
 using System.Diagnostics;
 using BaggyBot.Commands;
 using BaggyBot.Tools;
-using IRCSharp;
 using IRCSharp.IRC;
 using Convert = BaggyBot.Commands.Convert;
 using Version = BaggyBot.Commands.Version;
 
 namespace BaggyBot.DataProcessors
 {
-    class CommandHandler
-    {
-        private readonly Dictionary<string, ICommand> commands;
-        private readonly IrcInterface ircInterface;
+	class CommandHandler
+	{
+		private readonly Dictionary<string, ICommand> commands;
+		private readonly IrcInterface ircInterface;
 
-        public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
-        {
-            this.ircInterface = ircInterface;
-            commands = new Dictionary<string, ICommand>()
+		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
+		{
+			this.ircInterface = ircInterface;
+			commands = new Dictionary<string, ICommand>()
 			{
-                {"alias", new Alias(dataFunctionSet)},
+				{"alias", new Alias(dataFunctionSet)},
 				{"bf", new Bf()},
 				{"convert", new Convert()},
 				{"cs", new Cs(ircInterface)},
 				{"feature", new Feature(dataFunctionSet)},
 				{"get", new Get(dataFunctionSet, ircInterface)},
 				{"html", new Html()},
-                {"http", new HttpInterface()},
+				{"http", new HttpInterface()},
 				{"help", new Help()},
 				{"join", new Join(ircInterface)},
 				{"ns", new NickServ(dataFunctionSet, ircInterface)},
@@ -44,7 +43,7 @@ namespace BaggyBot.DataProcessors
 				{"set", new Set(dataFunctionSet)},
 				{"shutdown", new Shutdown(bot)},
 				{"snag", new Snag()},
-                {"ur", new UrbanDictionary()},
+				{"ur", new UrbanDictionary()},
 				{"update", new Update(bot)},
 				{"uptime", new Uptime()},
 				{"version", new Version()},
@@ -52,17 +51,18 @@ namespace BaggyBot.DataProcessors
 				{"wiki", new Wikipedia()},
 				{"topic", new Topics(dataFunctionSet)}
 			};
-        }
+		}
 
-        public void ProcessCommand(IrcMessage message)
+		public void ProcessCommand(IrcMessage message)
 		{
 			Logger.Log(this, "Processing command: " + message.Message);
 			if (message.Message.Equals(Bot.CommandIdentifier)) return;
 
-            var line = message.Message.Substring(1);
+			var line = message.Message.Substring(1);
 
-            // Inject bot information, but do not return.
-			if (new string[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1))) {
+			// Inject bot information, but do not return.
+			if (new string[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1)))
+			{
 				ircInterface.SendMessage(message.Channel, string.Format(Messages.CmdGeneralInfo, Bot.Version));
 			}
 
@@ -73,35 +73,45 @@ namespace BaggyBot.DataProcessors
 			var cmdIndex = line.IndexOf(' ');
 			var cmd = new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ircInterface.SendMessage);
 
-			if (!commands.ContainsKey(command)) {
+			if (!commands.ContainsKey(command))
+			{
 				Logger.Log(this, "Dropped command \"{0}\"; I do not recognize this command.", LogLevel.Info, true, message.Message);
-                // Check if there's an alias for this command
-                if (((Alias)commands["alias"]).ContainsKey(command))
-                {
-                    var aliasedCommand = ((Alias)commands["alias"]).GetAlias(command);
-                    // Process the aliased command
-                    ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
-                }
-                // Try to use it as a rem instead
+				// Check if there's an alias for this command
+				if (((Alias)commands["alias"]).ContainsKey(command))
+				{
+					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(command);
+					// Process the aliased command
+					ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
+				}
+				// Try to use it as a rem instead
 				((Remember)commands["rem"]).UseRem(cmd);
 				return;
 			}
 
-			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender)) {
-                // Don't bother with validation when debugging
-				if (Settings.Instance["deployed"] == "true") {
-					try {
+			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender))
+			{
+				// Don't bother with validation when debugging
+				if (Settings.Instance["deployed"] == "true")
+				{
+					try
+					{
 						commands[command].Use(cmd);
-					} catch (Exception e) {
+					}
+					catch (Exception e)
+					{
 						var exceptionMessage = string.Format("An unhandled exception (type: {0}) occurred while trying to process your command! Exception message: \"{1}\", Occurred at line {2}", e.GetType(), e.Message, new StackTrace(e, true).GetFrame(0).GetFileLineNumber());
 						ircInterface.SendMessage(message.Channel, exceptionMessage);
 					}
-				} else {
+				}
+				else
+				{
 					commands[command].Use(cmd);
 				}
-			} else {
+			}
+			else
+			{
 				ircInterface.SendMessage(message.Channel, Messages.CmdNotAuthorized);
 			}
 		}
-    }
+	}
 }
