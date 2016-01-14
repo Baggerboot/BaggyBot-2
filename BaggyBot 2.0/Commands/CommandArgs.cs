@@ -10,7 +10,7 @@ namespace BaggyBot.Commands
 		public IrcUser Sender;
 		public string Channel;
 		public string FullArgument;
-		private readonly Action<string, string> replyCallback;
+		public readonly Action<string, string> replyCallback;
 
 		public CommandArgs(string command, string[] args, IrcUser sender, string channel, string fullArgument, Action<string, string> replyCallback)
 		{

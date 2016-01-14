@@ -77,7 +77,10 @@ namespace BaggyBot.DataProcessors
 
 				//var statement = "UPDATE user_statistic SET words = words + 1 WHERE user_id = " + uid + ";";
 
-				sqlConnector.UserStatistics.Where(stat => stat.UserId == uid).Set(stat => stat.Words, stat => stat.Words + 1).Update();
+				sqlConnector.UserStatistics
+					.Where(stat => stat.UserId == uid)
+					.Set(stat => stat.Words, stat => stat.Words + 1)
+					.Update();
 
 				//sqlConnector.ExecuteStatement(statement);
 
@@ -858,22 +861,30 @@ namespace BaggyBot.DataProcessors
 
 		public string GetMiscData(string type, string key)
 		{
-			var results = from pair in sqlConnector.MiscData
-						  where pair.Type == type
-								&& pair.Key == key
-						  select pair.Value;
-			if (results.Count() > 1)
+			lock (Lock)
 			{
-				throw new InvalidOperationException("Multiple values were returned for a single type-key combination.");
+				Lock.LockMessage = MiscTools.GetCurrentMethod();
+				var results = from pair in sqlConnector.MiscData
+							  where pair.Type == type
+									&& pair.Key == key
+							  select pair.Value;
+				if (results.Count() > 1)
+				{
+					Lock.LockMessage = "None";
+					throw new InvalidOperationException("Multiple values were returned for a single type-key combination.");
+				}
+				else if (!results.Any())
+				{
+					Lock.LockMessage = "None";
+					throw new InvalidOperationException(string.Format("Value for type {0}, key {1} not found.", type, key));
+				}
+				else
+				{
+					Lock.LockMessage = "None";
+					return results.First();
+				}
 			}
-			else if (!results.Any())
-			{
-				throw new InvalidOperationException(string.Format("Value for type {0}, key {1} not found.", type, key));
-			}
-			else
-			{
-				return results.First();
-			}
+
 		}
 
 		public bool MiscDataContainsKey(string type, string key)
@@ -898,7 +909,7 @@ namespace BaggyBot.DataProcessors
 		public void ScoreByOccurrence(int maxGlobalCount)
 		{
 
-			var maxGlobalPart =  (GlobalCount / (double)maxGlobalCount);
+			var maxGlobalPart = (GlobalCount / (double)maxGlobalCount);
 
 			Score = Score + (maxGlobalPart * 4);
 

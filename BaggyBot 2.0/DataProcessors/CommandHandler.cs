@@ -37,7 +37,6 @@ namespace BaggyBot.DataProcessors
 				{"reconnect", new Reconnect(ircInterface)},
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
-				{"rem", new Remember(dataFunctionSet)},
 				{"resolve", new Resolve()},
 				{"say", new Say()},
 				{"set", new Set(dataFunctionSet)},
@@ -53,12 +52,24 @@ namespace BaggyBot.DataProcessors
 			};
 		}
 
+		private CommandArgs BuildCommand(IrcMessage message)
+		{
+			var line = message.Message.Substring(1);
+
+			var args = line.Split(' ');
+			var command = args[0];
+			args = args.Skip(1).ToArray();
+
+			var cmdIndex = line.IndexOf(' ');
+			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ircInterface.SendMessage);
+		}
+
 		public void ProcessCommand(IrcMessage message)
 		{
 			Logger.Log(this, "Processing command: " + message.Message);
 			if (message.Message.Equals(Bot.CommandIdentifier)) return;
 
-			var line = message.Message.Substring(1);
+			var cmdInfo = BuildCommand(message);
 
 			// Inject bot information, but do not return.
 			if (new string[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1)))
@@ -66,36 +77,41 @@ namespace BaggyBot.DataProcessors
 				ircInterface.SendMessage(message.Channel, string.Format(Messages.CmdGeneralInfo, Bot.Version));
 			}
 
-			var args = line.Split(' ');
-			var command = args[0];
-			args = args.Skip(1).ToArray();
-
-			var cmdIndex = line.IndexOf(' ');
-			var cmd = new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ircInterface.SendMessage);
-
-			if (!commands.ContainsKey(command))
+			if (!commands.ContainsKey(cmdInfo.Command))
 			{
-				Logger.Log(this, "Dropped command \"{0}\"; I do not recognize this command.", LogLevel.Info, true, message.Message);
-				// Check if there's an alias for this command
-				if (((Alias)commands["alias"]).ContainsKey(command))
+
+				if (cmdInfo.Command == "rem")
 				{
-					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(command);
-					// Process the aliased command
+					var value = cmdInfo.Args.ToList();
+					value.Insert(1, "say");
+					((Alias)commands["alias"]).Use(
+						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.replyCallback));
+				}
+				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
+				{
+					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Command);
+					if(cmdInfo.FullArgument == null)
+					{
+						aliasedCommand = aliasedCommand.Replace(" $args", "");
+					}
+					else
+					{
+						aliasedCommand = aliasedCommand.Replace("$args", cmdInfo.FullArgument);
+					}
+					
 					ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
 				}
-				// Try to use it as a rem instead
-				((Remember)commands["rem"]).UseRem(cmd);
 				return;
 			}
 
-			if (commands[command].Permissions == PermissionLevel.All || commands[command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender))
+			if (commands[cmdInfo.Command].Permissions == PermissionLevel.All || commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender))
 			{
-				// Don't bother with validation when debugging
+				// Don't gobble up exceptions when debugging
 				if (Settings.Instance["deployed"] == "true")
 				{
 					try
 					{
-						commands[command].Use(cmd);
+						commands[cmdInfo.Command].Use(cmdInfo);
 					}
 					catch (Exception e)
 					{
@@ -105,7 +121,7 @@ namespace BaggyBot.DataProcessors
 				}
 				else
 				{
-					commands[command].Use(cmd);
+					commands[cmdInfo.Command].Use(cmdInfo);
 				}
 			}
 			else

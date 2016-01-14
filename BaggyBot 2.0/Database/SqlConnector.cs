@@ -55,6 +55,7 @@ namespace BaggyBot.Database
 		public void Insert<T>(T row)
 		{
 			connection.Insert(row);
+
 		}
 
 		public void SubmitChanges()
