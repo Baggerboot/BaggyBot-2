@@ -29,7 +29,15 @@ namespace BaggyBot.Commands
 		}
 		public void ReturnMessage(string format, params object[] args)
 		{
-			replyCallback(Channel, string.Format(format, args));
+			if (args.Length == 0)
+			{
+				replyCallback(Channel, format);
+			}
+			else
+			{
+				replyCallback(Channel, string.Format(format, args));
+			}
+
 		}
 	}
 }
