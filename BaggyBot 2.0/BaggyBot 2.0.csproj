@@ -157,7 +157,6 @@
     <Compile Include="Commands\Py.cs" />
     <Compile Include="Commands\ReadEvaluatePrintCommand.cs" />
     <Compile Include="Commands\Reconnect.cs" />
-    <Compile Include="Commands\Remember.cs" />
     <Compile Include="Commands\ResolveReverse.cs" />
     <Compile Include="Commands\Search.cs" />
     <Compile Include="Commands\Sql.cs" />
