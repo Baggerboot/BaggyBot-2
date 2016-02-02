@@ -29,22 +29,24 @@ namespace BaggyBot.Commands
 				var proc = new Process();
 				proc.StartInfo = new ProcessStartInfo
 				{
-					FileName = "sh",
-					Arguments = "autoupdate.sh"
+					FileName = "bash",
+					UseShellExecute = false,
+					Arguments = "-c 'cd .. && git pull && xbuild'",
+					RedirectStandardOutput = true
 				};
 				proc.Start();
-				command.ReturnMessage("Downloading update...");
+				command.ReturnMessage("Building update...");
+				var output = proc.StandardOutput.ReadToEnd();
+				Logger.Log(this, output);
 				proc.WaitForExit();
 				if (proc.ExitCode != 0)
 				{
-					command.ReturnMessage("Downloader exited with code {0}. Update process aborted. No files were changed.", proc.ExitCode);
+					command.ReturnMessage("Updater exited with code {0}. Update process aborted. No files were changed.", proc.ExitCode);
 					return;
 				}
-				Logger.Log(this, "Replacing files");
-				File.Replace("BaggyBot20.exe.new", "BaggyBot20.exe", null);
-				File.Replace("CsNetLib2.dll.new", "CsNetLib2.dll", null);
 				Logger.Log(this, "Requesting a restart", LogLevel.Info);
-				bot.RequestUpdate(requestChannel, true);
+				bot.Shutdown();
+				//bot.RequestUpdate(requestChannel, true);
 			}
 		}
 	}
