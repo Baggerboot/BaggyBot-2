@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using BaggyBot.Database.Model;
 using LinqToDB;
 using LinqToDB.Data;
-using LinqToDB.DataProvider.PostgreSQL;
 
 namespace BaggyBot.Database.Upgrades
 {

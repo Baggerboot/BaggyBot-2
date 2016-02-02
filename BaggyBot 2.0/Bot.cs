@@ -33,7 +33,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "4.1.6";
+		public const string Version = "4.1.6_1";
 		// Version number of the database. This is checked against the 'version' key in the metadata table. If they do not match,
 		// the DB connection is closed, and the user will be required to update the DB by hand, as automatic updates are not yet supported.
 		public const string DatabaseVersion = "1.2.1";
