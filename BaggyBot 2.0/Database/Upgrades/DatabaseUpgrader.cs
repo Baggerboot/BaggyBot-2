@@ -8,7 +8,7 @@ using LinqToDB.DataProvider.PostgreSQL;
 
 namespace BaggyBot.Database.Upgrades
 {
-	class DatabaseUpgrader
+	internal class DatabaseUpgrader
 	{
 		private readonly Dictionary<string, Func<string>> upgrades;
 		private readonly DataConnection connection;
