@@ -1,0 +1,81 @@
+# Example configuration file for BaggyBot
+
+backend:
+  connection-string: "Host=127.0.0.1;Database=baggybot;Username=baggybot;Password=baggybot;"
+
+# When true, prevents the bot from ignoring non-fatal exceptions.
+debug-mode: true
+# Maximum number of messages a single message may be broken up into.
+flood-limit: 4
+# When true, writes some performance data to performance_log.csv
+log-performance: false
+
+interpreters:
+  # Whether the interactive Python and C# interpreters should be enabled.
+  # If set to false, there will not be any way to enable them at runtime.
+  enabled: true
+  # The security level the interpreters will be set to on startup.
+  # Can be either `block`, `notify` or `allow`.
+  # `block` blocks all non-operators from using them.
+  # `notify` allows anyone to use them, but notifies the operators
+  # if a non-operator user uses them.
+  # `allow` allows anyone to use them.
+  # Regardless of this setting, no one except bot operators will ever be
+  # able to use the interpreters inside query channels.
+  startup-security-level: Block
+
+integrations:
+  wolfram-alpha:
+    app-id: ""
+
+logging:
+  log-file: baggybot.log
+  show-debug: true
+
+# An identity is a set of credentials BaggyBot uses to connect to an IRC server
+# The `ident`, `name` and `real-name` tags do not have to be specified. 
+# If they are unspecified, default values will be used.
+identities: 
+  - &baggybot 
+    ident: Dredger
+    nick: BaggyBot
+    real-name: BaggyBot
+
+# An operator match is a set of rules that will be matched against a user
+# in order to determine whether they're allowed to use operator commands.
+# If any of these rules fails, the match fails.
+
+# Possible tags are `nick`, `ident`, `host`, and `uid`.
+# `nick` and `ident` are matched against a user's IRC nickname and ident.
+# `host` is matched against the host/cloak portion of their hostmask.
+# `uid` is matched against their User ID in the database.
+# The default value for each of these rules is `*`, which matches everything,
+# so be sure to specify at least some rules, unless you want everyone to have
+# operator rights.
+operators:
+  - &baggerboot
+    nick: baggerboot
+    ident: ~Baggykiin
+    host: hubble.jgeluk.net
+    uid: 1
+  - &johan
+    nick: johan
+    ident: johan
+
+# A list of servers BaggyBot should connect to on startup.
+servers:
+  - host: irc.esper.net
+    port: 6697
+    use-tls: true
+    verify-certificate: true
+
+    identity: *baggybot
+    auto-join-channels: ["#baggy"]
+
+    operators: [*baggerboot, *johan]
+
+# Currently not used.
+metadata:
+  bot-version: 4.1.6
+  config-version: 0.1
+
