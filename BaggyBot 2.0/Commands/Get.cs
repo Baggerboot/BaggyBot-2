@@ -1,4 +1,5 @@
-﻿using BaggyBot.DataProcessors;
+﻿using System;
+using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
@@ -25,7 +26,9 @@ namespace BaggyBot.Commands
 				if (command.Args[1] == "sql_connection_string") {
 
 				}
-				result = Settings.Instance[command.Args[1]];
+				// TODO: Allow settings lookup for new settings format
+				throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
+				//result = Settings.Instance[command.Args[1]];
 				if (result != null) {
 					command.Reply("value for {0}: {1}", command.Args[1], result);
 					return;

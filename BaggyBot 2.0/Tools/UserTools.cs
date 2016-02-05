@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using BaggyBot.Configuration;
 using BaggyBot.DataProcessors;
 using IRCSharp.IRC;
 
@@ -23,14 +25,15 @@ namespace BaggyBot.Tools
 		public static bool Validate(IrcUser user)
 		{
 			Logger.Log(null, "Validating user");
-			Match match = (input, reference) => {
-				return (reference.Equals("*") || input.Equals(reference));
-			};
+			Match match = (input, reference) => (reference.Equals("*") || input.Equals(reference));
 
-			var nick = Settings.Instance["operator_nick"];
-			var ident = Settings.Instance["operator_ident"];
-			var host = Settings.Instance["operator_host"];
-			var uid = Settings.Instance["operator_uid"];
+			// TODO: allow validation of multiple operators
+			var op = ConfigManager.Config.Operators.First();
+
+			var nick = op.Nick;
+			var ident = op.Ident;
+			var host = op.Host;
+			var uid = op.Uid;
             int[] uids;
             try
             {

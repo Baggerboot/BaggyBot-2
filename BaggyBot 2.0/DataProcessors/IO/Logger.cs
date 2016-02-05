@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 using System.IO;
+using BaggyBot.Configuration;
 using BaggyBot.Tools;
 
 namespace BaggyBot
@@ -143,13 +145,9 @@ namespace BaggyBot
 
 			if (level == LogLevel.Debug)
 			{
-				var writeDebug = false;
-				if (bool.TryParse(Settings.Instance["show_debug_log"], out writeDebug))
+				if (ConfigManager.Config.Logging.ShowDebug)
 				{
-					if (writeDebug)
-					{
-						Console.WriteLine(lineBuilder.ToString());
-					}
+					Console.WriteLine(lineBuilder.ToString());
 				}
 				else
 				{
@@ -177,6 +175,12 @@ namespace BaggyBot
 			textWriter.Close();
 			textWriter.Dispose();
 			disposed = true;
+		}
+
+		internal static void logException(object sender, Exception e, string currentAction)
+		{
+			var stackTrace = new StackTrace(e, true).GetFrame(0);
+			Log(sender, $"An unhandled exception (type: {e.GetType()}) occurred while {currentAction}. Exception message: \"{e.Message}\"; in file:{stackTrace.GetFileName()}:{stackTrace.GetFileLineNumber()}");
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
@@ -40,13 +41,15 @@ namespace BaggyBot.Commands
 					} else {
 						data = command.Args[2];
 					}
-					Settings.Instance[command.Args[1]] = data;
-					if (Settings.Instance.SettingExists(command.Args[1])) {
+
+					throw new NotImplementedException("Runtime modification of the settings file is not supported yet.");
+					
+					//TODO: Allow runtime modification of settings file
+					/*if (Settings.Instance.SettingExists(command.Args[1])) {
 						command.Reply(command.Args[1] + " set to " + data);
 					} else {
 						command.ReturnMessage("New key \"{0}\" created. Value set to {1}", command.Args[1], data);
-					}
-					break;
+					}*/
 				default:
 					command.ReturnMessage("The property \"{0}\" does not exist.", command.Args[0]);
 					break;

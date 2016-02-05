@@ -1,18 +1,25 @@
 ﻿using System;
+using System.Linq;
+using BaggyBot.Configuration;
 using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	abstract class ReadEvaluatePrintCommand
+	internal abstract class ReadEvaluatePrintCommand
 	{
 		protected int ThreadId = 0;
 		protected IrcInterface IrcInterface;
-		protected InterpreterSecurity Security = InterpreterSecurity.Notify;
-		protected enum InterpreterSecurity
+		protected InterpreterSecurity Security;
+		internal enum InterpreterSecurity
 		{
 			Allow,
 			Notify,
 			Block,
+		}
+
+		protected ReadEvaluatePrintCommand()
+		{
+			Security = ConfigManager.Config.Interpreters.StartupSecurityLevel;
 		}
 
 		private void SetSecurity(string setting)
@@ -24,20 +31,35 @@ namespace BaggyBot.Commands
 		protected abstract void GetBuffer(CommandArgs command);
 		protected void ProcessControlCommand(CommandArgs command)
 		{
-			if (!UserTools.Validate(command.Sender)) {
+			if (!UserTools.Validate(command.Sender))
+			{
 				IrcInterface.SendMessage(command.Channel, "Python Interpreter control commands may only be used by the bot operator");
 				return;
 			}
 			var control = command.Args[0].Substring(2);
-			switch (control) {
+			switch (control)
+			{
 				case "security":
-					try {
-						SetSecurity(command.Args[1]);
-					} catch (ArgumentException) {
-						IrcInterface.SendMessage(command.Channel, command.Args[1] + ": Invalid security level");
-						break;
+					switch (command.Args.Length)
+					{
+						case 1:
+							command.Reply($"the current security level is {Security}");
+							break;
+						case 2:
+							try
+							{
+								SetSecurity(command.Args[1]);
+								IrcInterface.SendMessage(command.Channel, "Security level set to " + Security);
+							}
+							catch (ArgumentException)
+							{
+								command.ReturnMessage($"Invalid security level: \"{string.Join(" ", command.Args.Skip(1))}\"");
+							}
+							break;
+						default:
+							command.ReturnMessage($"Invalid security level: \"{string.Join(" ", command.Args.Skip(1))}\"");
+							break;
 					}
-					IrcInterface.SendMessage(command.Channel, "Security level set to " + Security);
 					break;
 				case "abort":
 					Abort(command);

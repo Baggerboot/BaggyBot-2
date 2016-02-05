@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Xml;
 using System.Net;
+using BaggyBot.Configuration;
 
 namespace BaggyBot.Commands
 {
@@ -82,7 +83,7 @@ namespace BaggyBot.Commands
 
 			lastDisplayedResult = null;
 
-			var appid = Settings.Instance["wolfram_alpha_appid"];
+			var appid = ConfigManager.Config.Integrations.WolframAlpha;
 
 			var uri = string.Format("http://api.wolframalpha.com/v2/query?appid={0}&input={1}&ip={2}&format=plaintext&units=metric", appid, Uri.EscapeDataString(command.FullArgument), command.Sender.Hostmask);
 			//var escaped = Uri.EscapeDataString(uri);

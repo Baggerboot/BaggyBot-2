@@ -142,6 +142,10 @@
     <Reference Include="DbLinq.PostgreSql">
       <HintPath>Lib\DbLinq.PostgreSql.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet, Version=3.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.3.8.0\lib\net35\YamlDotNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
@@ -153,6 +157,7 @@
     <Compile Include="Commands\Html.cs" />
     <Compile Include="Commands\HttpInterface.cs" />
     <Compile Include="Commands\NewCommand.cs" />
+    <Compile Include="Commands\Notify.cs" />
     <Compile Include="Commands\ProducerConsumerStream.cs" />
     <Compile Include="Commands\Py.cs" />
     <Compile Include="Commands\ReadEvaluatePrintCommand.cs" />
@@ -202,6 +207,7 @@
     <Compile Include="ControlVariables.cs" />
     <Compile Include="DataProcessors\DataFunctionSet.cs" />
     <Compile Include="DataProcessors\IO\Emoticons.cs" />
+    <Compile Include="Configuration\Config.cs" />
     <Compile Include="DataProcessors\IrcEventHandler.cs" />
     <Compile Include="DataProcessors\IO\IrcInterface.cs" />
     <Compile Include="DataProcessors\IO\Logger.cs" />
@@ -214,11 +220,6 @@
     <Compile Include="LockObject.cs" />
     <Compile Include="OutputHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
     <Compile Include="DataProcessors\IO\Settings.cs" />
     <Compile Include="Database\SqlConnector.cs" />
     <Compile Include="DataProcessors\StatsHandler.cs" />
@@ -228,6 +229,7 @@
     <Compile Include="Tools\PythonTools.cs" />
     <Compile Include="Tools\UserTools.cs" />
     <Compile Include="Tools\WordTools.cs" />
+    <EmbeddedResource Include="Embedded\example-config.yaml" />
     <None Include="Lib\ensurepip\_bundled\pip-1.5.6-py2.py3-none-any.whl" />
     <None Include="Lib\ensurepip\_bundled\setuptools-3.6-py2.py3-none-any.whl" />
     <None Include="LinqToDB.Templates\DataAnnotations.ttinclude" />
@@ -277,11 +279,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\app.manifest">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>

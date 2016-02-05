@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading;
+using BaggyBot.Configuration;
 using IRCSharp;
 using BaggyBot.DataProcessors;
 using IRCSharp.IRC;
@@ -36,6 +38,9 @@ namespace BaggyBot
 				client.ReplyToPings = value;
 			}
 		}
+
+		public string Password => client.Password;
+
 		public bool InChannel(string channel)
 		{
 			return client.InChannel(channel);
@@ -127,9 +132,7 @@ namespace BaggyBot
 
 		private void SendMessageChunk(string target, string message, int recursionDepth)
 		{
-			int floodLimit;
-			if (!int.TryParse(Settings.Instance["irc_flood_limit"], out floodLimit))
-				floodLimit = 4;
+			int floodLimit = ConfigManager.Config.FloodLimit;
 
 			if (recursionDepth >= floodLimit) {
 				client.SendMessage(target, "Flood limit triggered. The remaining part of the message has been discarded.");
@@ -149,7 +152,7 @@ namespace BaggyBot
 
 			var result = client.SendMessage(target, message);
 			if (result && DataFunctionSet.ConnectionState != ConnectionState.Closed) {
-				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, client.Nick, message);
 			}
 			if (cutoff != null) {
 				SendMessageChunk(target, cutoff, ++recursionDepth);
@@ -161,6 +164,14 @@ namespace BaggyBot
 			SendMessageChunk(target, message, 0);
 		}
 
+		public void SendMessage(IEnumerable<string> targets, string message)
+		{
+			foreach (var target in targets)
+			{
+				SendMessageChunk(target, message, 0);
+			}
+		}
+
 		/// <summary>
 		/// Sends a message directly to the IRC client, without trying to make sure the message is sent in chunks.
 		/// </summary>
@@ -169,7 +180,7 @@ namespace BaggyBot
 		public void SendMessageDirectly(string target, string message)
 		{
 			if(client.SendMessage(target, message)){
-				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target,  client.Nick, message);
 			}
 		}
 
@@ -180,7 +191,7 @@ namespace BaggyBot
 
 		public void NotifyOperator(string message)
 		{
-			SendMessage(Settings.Instance["operator_nick"], message);
+			SendMessage(ConfigManager.Config.Operators.Select(op => op.Nick), message);
 		}
 
 		public bool JoinChannel(string channel)

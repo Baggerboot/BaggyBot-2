@@ -11,17 +11,10 @@ namespace BaggyBot
 	class BotDiagnostics : IDisposable
 	{
 		private readonly IrcInterface ircInterface;
-		private readonly Timer taskScheduler;
-		private readonly PerformanceCounter pc = new PerformanceCounter();
+		private Timer taskScheduler;
+		private PerformanceCounter pc;
 		private const string PerfLogFile = "performance_log.csv";
 		private readonly PerformanceLogger performanceLogger = new PerformanceLogger(PerfLogFile);
-		public List<PerformanceObject> PerformanceLog
-		{
-			get
-			{
-				return performanceLogger.PerformanceLog;
-			}
-		}
 
 		public void Dispose()
 		{
@@ -34,15 +27,7 @@ namespace BaggyBot
 		{
 			this.ircInterface = ircInterface;
 
-			var selfProc = Process.GetCurrentProcess();
-			pc.CategoryName = "Process";
-			pc.CounterName = "Working Set - Private";
-			pc.InstanceName = selfProc.ProcessName;
-
 			AppDomain.CurrentDomain.UnhandledException += HandleException;
-			
-
-			taskScheduler = new Timer {Interval = 2000};
 		}
 
 		private void HandleException(Object sender, UnhandledExceptionEventArgs args)
@@ -59,7 +44,15 @@ namespace BaggyBot
 
 		internal void StartPerformanceLogging()
 		{
+			var selfProc = Process.GetCurrentProcess();
+			pc = new PerformanceCounter();
+			pc.CategoryName = "Process";
+			pc.CounterName = "Working Set - Private";
+			pc.InstanceName = selfProc.ProcessName;
+
 			Logger.Log(this, "Logging performance statistics to " + PerfLogFile, LogLevel.Info);
+
+			taskScheduler = new Timer { Interval = 2000 };
 			taskScheduler.Start();
 			taskScheduler.Elapsed += (source, eventArgs) =>
 			{

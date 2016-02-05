@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Data;
 using System.Collections.Concurrent;
 using System.Linq;
+using BaggyBot.Configuration;
 using IRCSharp.IRC;
 
 
@@ -105,7 +106,8 @@ namespace BaggyBot.DataProcessors
 				}
 
 				// Handle query console messages
-				if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py"))
+				// TODO: Allow validation of multiple operators
+				if (ControlVariables.QueryConsole && message.Channel == ConfigManager.Config.Operators.First().Nick && !message.Message.StartsWith("-py"))
 				{
 					Logger.Log(this, "Processing Query Console python command");
 					message.Message = "-py " + message.Message;
@@ -176,8 +178,9 @@ namespace BaggyBot.DataProcessors
 			}
 			else if (line.Command.Equals("464"))
 			{
+				//throw new NotImplementedException("Unable to supply the password from the IRC Event Handler.");
 				Logger.Log(this, "Password required by server.", LogLevel.Info);
-				var msg = "PASS " + Settings.Instance["irc_password"];
+				var msg = "PASS " + ircInterface.Password;
 				Logger.Log(this, "Replying with " + msg, LogLevel.Info);
 				ircInterface.SendRaw(msg);
 			}

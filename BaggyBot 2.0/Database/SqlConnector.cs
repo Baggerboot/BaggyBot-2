@@ -7,13 +7,14 @@ using System;
 using System.Data;
 using System.Collections.Generic;
 using System.Linq;
+using BaggyBot.Configuration;
 using LinqToDB.Data;
 using LinqToDB.DataProvider.PostgreSQL;
 using BaggyBot.Database.Model;
 using BaggyBot.Database.Upgrades;
 using LinqToDB;
 using Npgsql;
-
+using Metadata = BaggyBot.Database.Model.Metadata;
 
 namespace BaggyBot.Database
 {
@@ -34,6 +35,7 @@ namespace BaggyBot.Database
 
 		private ITable<Metadata> metadata;
 
+		private ConnectionState internalState;
 
 		public ConnectionState ConnectionState
 		{
@@ -45,9 +47,7 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					return ConnectionState.Open;
-					// TODO: Figure out how to determine the connection state correctly
-					//return connection.Connection.State;
+					return internalState;
 				}
 			}
 		}
@@ -64,13 +64,17 @@ namespace BaggyBot.Database
 		}
 		public bool OpenConnection()
 		{
-			var connectionString = Settings.Instance["sql_connection_string"];
+			var connectionString = ConfigManager.Config.Backend.ConnectionString;
 			if (string.IsNullOrWhiteSpace(connectionString))
 			{
 				Logger.Log(this, "Unable to connect to the SQL database: No connection specified.", LogLevel.Error);
 				return false;
 			}
+			internalState = ConnectionState.Connecting;
 			connection = PostgreSQLTools.CreateDataConnection(connectionString);
+			internalState = ConnectionState.Open;
+			connection.OnClosing += (sender, args) => internalState = ConnectionState.Closed;
+			connection.OnClosed += (sender, args) => internalState = ConnectionState.Closed;
 			metadata = connection.GetTable<Metadata>();
 			try
 			{
@@ -177,12 +181,6 @@ namespace BaggyBot.Database
 		{
 			connection.Close();
 			return true;
-		}
-
-		public void Reconnect()
-		{
-			// TODO: implement reconnect
-			throw new NotImplementedException();
 		}
 
 		public void Dispose()
