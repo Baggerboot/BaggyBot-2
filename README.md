@@ -18,3 +18,13 @@ generally containing information about how often the word/username/emoticon/URL 
 as well as the name of the last user who said it.
 
 Finally, BaggyBot is able to grab random quotes from users, and store these in the database as well.
+
+TODO
+--------
+
+ - Improve the help command. Help information is currently stored in the Help command's class.
+   It is better to store help for each command in the class belonging to that command, and 
+   have the help command grab the correct help information from that class.
+ - Create a generic argument parsing class to help with efficient, exception-less argument parsing
+   for commands (ideally this should be done for process arguments as well).
+
