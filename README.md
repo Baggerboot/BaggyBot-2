@@ -27,4 +27,6 @@ TODO
    have the help command grab the correct help information from that class.
  - Create a generic argument parsing class to help with efficient, exception-less argument parsing
    for commands (ideally this should be done for process arguments as well).
+ - Improve user matching code. It should be less reluctant to try a NickServ match, and more conservative
+   when determining whether a user matches another, already known user.
 
