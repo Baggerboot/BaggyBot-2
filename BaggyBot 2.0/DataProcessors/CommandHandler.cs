@@ -29,7 +29,6 @@ namespace BaggyBot.DataProcessors
 				{"get", new Get(dataFunctionSet, ircInterface)},
 				{"html", new Html()},
 				{"http", new HttpInterface()},
-				{"help", new Help()},
 				{"join", new Join(ircInterface)},
 				{"ns", new NickServ(dataFunctionSet, ircInterface)},
 				{"part", new Part(ircInterface)},
@@ -48,8 +47,11 @@ namespace BaggyBot.DataProcessors
 				{"version", new Version()},
 				{"wa", new WolframAlpha()},
 				{"wiki", new Wikipedia()},
-				{"topic", new Topics(dataFunctionSet)}
+				{"topics", new Topics(dataFunctionSet)}
 			};
+			// Command list must be initialised before we can pass a reference to it to the Help command.
+			commands.Add("help", new Help(commands));
+
 			if (ConfigManager.Config.Interpreters.Enabled)
 			{
 				commands.Add("py", new Py(ircInterface, dataFunctionSet));
@@ -82,7 +84,7 @@ namespace BaggyBot.DataProcessors
 			var cmdInfo = BuildCommand(message);
 
 			// Inject bot information, but do not return.
-			if (new string[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1)))
+			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1)))
 			{
 				ircInterface.SendMessage(message.Channel, string.Format(Messages.CmdGeneralInfo, Bot.Version));
 			}

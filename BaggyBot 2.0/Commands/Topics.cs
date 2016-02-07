@@ -39,7 +39,7 @@ namespace BaggyBot.Commands
 				topicString = string.Join(", ", topics.Take(20).Select(pair => pair.Name));
 			}
 
-			replyCallback("Words associated with {0}: {1}", new object[] { nick, topicString });
+			replyCallback("words associated with {0}: {1}", new object[] { nick, topicString });
 		}
 
 		public void Use(CommandArgs command)
