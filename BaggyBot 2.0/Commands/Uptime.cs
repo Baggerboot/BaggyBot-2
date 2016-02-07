@@ -2,9 +2,9 @@
 
 namespace BaggyBot.Commands
 {
-	class Uptime : ICommand
+	internal class Uptime : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 		private readonly DateTime startTime;
 		public Uptime()
 		{

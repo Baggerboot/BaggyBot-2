@@ -1,14 +1,15 @@
-﻿using BaggyBot.DataProcessors;
+﻿using System;
+using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	class Get : ICommand
+	internal class Get : ICommand
 	{
 		private readonly DataFunctionSet dataFunctionSet;
 		private readonly IrcInterface ircInterface;
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
-		public Get(DataFunctionSet df, IrcInterface ircInterface )
+		public Get(DataFunctionSet df, IrcInterface ircInterface)
 		{
 			dataFunctionSet = df;
 			this.ircInterface = ircInterface;
@@ -16,34 +17,35 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			if (command.Args.Length >2) {
+			if (command.Args.Length > 2)
+			{
 				command.Reply("Usage: -get <property> <key>");
 				return;
 			}
-			if (command.Args.Length == 2 && command.Args[0] == "-s") {
-				string result = null;
-				if (command.Args[1] == "sql_connection_string") {
-
-				}
-				result = Settings.Instance[command.Args[1]];
-				if (result != null) {
-					command.Reply("value for {0}: {1}", command.Args[1], result);
-					return;
-				}
+			if (command.Args.Length == 2 && command.Args[0] == "-s")
+			{
+				// TODO: Allow settings lookup for new settings format
+				// TODO: Disallow lookup of settings that should not be exposed
+				throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
 			}
-			switch (command.Args[0]) {
+			switch (command.Args[0])
+			{
 				case "uid":
 					var nick = command.Args.Length > 1 ? command.Args[1] : command.Sender.Nick;
 					var uid = dataFunctionSet.GetIdFromNick(nick);
 					command.Reply("Your user Id is " + uid);
 					break;
 				case "users":
-					if (command.Args.Length != 2) {
+					if (command.Args.Length != 2)
+					{
 						command.Reply("usage: -get users <#channel>");
-					} else {
-						if (ircInterface.InChannel(command.Args[1])) {
+					}
+					else {
+						if (ircInterface.InChannel(command.Args[1]))
+						{
 							command.Reply("users in {0}: {1}", command.Args[1], string.Join(", ", ircInterface.GetUsers(command.Args[1])));
-						} else {
+						}
+						else {
 							command.Reply("I am not in that channel");
 						}
 					}
@@ -52,7 +54,6 @@ namespace BaggyBot.Commands
 					command.ReturnMessage("That is not a valid property.");
 					break;
 			}
-
 		}
 	}
 }

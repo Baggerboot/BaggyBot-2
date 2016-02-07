@@ -1,18 +1,19 @@
-﻿using System;
+﻿using BaggyBot.Configuration;
+using BaggyBot.Database;
+using BaggyBot.DataProcessors;
+using BaggyBot.Tools;
+using IRCSharp;
+using IRCSharp.IrcCommandProcessors.Quirks;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
-using IRCSharp;
-using BaggyBot.Database;
-using BaggyBot.Tools;
-using BaggyBot.DataProcessors;
 using System.Threading;
 using System.Threading.Tasks;
-using IRCSharp.IrcCommandProcessors.Quirks;
 
 namespace BaggyBot
 {
-	public sealed class Bot : IDisposable
+	internal sealed class Bot : IDisposable
 	{
 		// Provides an interface to an SQL Entity Provider
 		private readonly SqlConnector sqlConnector;
@@ -37,6 +38,7 @@ namespace BaggyBot
 		// Version number of the database. This is checked against the 'version' key in the metadata table. If they do not match,
 		// the DB connection is closed, and the user will be required to update the DB by hand, as automatic updates are not yet supported.
 		public const string DatabaseVersion = "1.2.1";
+		public const string ConfigVersion = "0.1";
 
 		public bool QuitRequested
 		{
@@ -46,7 +48,7 @@ namespace BaggyBot
 
 		public static DateTime LastUpdate => MiscTools.RetrieveLinkerTimestamp();
 
-	    // If the bot is started in update mode, a previous version has to be specified.
+		// If the bot is started in update mode, a previous version has to be specified.
 		// The bot will then announce whether the update was a success or a failure.
 		// To determine this, the previous version is stored in here.
 		// If the bot is not started in update mode, the value of this field remains null.
@@ -55,16 +57,18 @@ namespace BaggyBot
 		public Bot()
 		{
 			Logger.ClearLog();
-			CheckSettingsFile();
 
-			previousVersion = Settings.Instance["version"];
+			previousVersion = ConfigManager.Config.Metadata.BotVersion;
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
 			Logger.Log(this, "Starting BaggyBot version " + Version, LogLevel.Info);
-			if (previousVersion != null && previousVersion != Version)
+
+			// TODO: Check for version changes in a different way
+			/*if (previousVersion != null && previousVersion != Version)
 			{
 				Logger.Log(this, "Updated from version {0} to version {1}", LogLevel.Info, true, previousVersion, Version);
 			}
-			Settings.Instance["version"] = Version;
+			ConfigManager.Config.Metadata.BotVersion = Version;
+			Logger.Log("");*/
 
 			// Create various data processors and I/O handlers
 			sqlConnector = new SqlConnector();
@@ -81,27 +85,32 @@ namespace BaggyBot
 			HookupIrcEvents();
 		}
 
-		private void CheckSettingsFile()
-		{
-			var s = Settings.Instance;
-			if (s.NewFileCreated)
-			{
-				s.FillDefault();
-				Logger.Log(this, "New settings file created ({0}). Please fill it with the correct data, then start the bot again. BaggyBot will now exit.", LogLevel.Info, true, Logger.LogFileName);
-				Environment.Exit(0);
-			}
-		}
-
 		~Bot()
 		{
 			Console.WriteLine("Shutting down bot instance (version {0})", Version);
 		}
 
-
 		private void HookupIrcEvents()
 		{
 			client.OnNickChange += dataFunctionSet.HandleNickChange;
-			client.OnMessageReceived += message => Task.Run(() => ircEventHandler.ProcessMessage(message));
+			client.OnMessageReceived += message => Task.Run(() =>
+			{
+				try
+				{
+					ircEventHandler.ProcessMessage(message);
+				}
+				catch (Exception e)
+				{
+					if (Debugger.IsAttached)
+					{
+						Debugger.Break();
+					}
+					else
+					{
+						Logger.logException(this, e, "processing a message");
+					}
+				}
+			});
 			client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
 			//client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;
@@ -123,8 +132,7 @@ namespace BaggyBot
 				if (sqlConnector.OpenConnection())
 					Logger.Log(this, "Database connection established", LogLevel.Info);
 				else
-					Logger.Log(this, "Database connection not established. Bot functionality will be very limited.",
-						LogLevel.Warning);
+					Logger.Log(this, "Database connection not established. Bot functionality will be very limited.", LogLevel.Warning);
 			}
 			catch (Exception e)
 			{
@@ -135,16 +143,17 @@ namespace BaggyBot
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
-		private bool ConnectIrc(string host, int port)
+		private bool ConnectIrc(Server server)
 		{
-			var s = Settings.Instance;
-			var nick = s["irc_nick"];
-			var ident = s["irc_ident"];
-			var realname = s["irc_realname"];
-			var password = s["irc_password"];
-			var tls = s.ReadBool("irc_use_tls", false);
-			var verify = s.ReadBool("irc_verify_server_certificate", true);
-			var slackCompatMode = s.ReadBool("irc_use_slack_compat_mode", false);
+			var host = server.Host;
+			var port = server.Port;
+			var nick = server.Identity.Nick;
+			var ident = server.Identity.Ident;
+			var realname = server.Identity.RealName;
+			var password = server.Password;
+			var tls = server.UseTls;
+			var verify = server.VerifyCertificate;
+			var slackCompatMode = server.CompatModes.Contains("slack");
 
 			// Slack IRC messes up domain names by prepending http://<domain> to everything that looks like a domain name or incorrectly formatted URL,
 			// despite the fact that such formatting should really be done by IRC clients, not servers.
@@ -195,7 +204,10 @@ namespace BaggyBot
 
 		public void OnPostConnect()
 		{
-			botDiagnostics.StartPerformanceLogging();
+			if (ConfigManager.Config.LogPerformance)
+			{
+				botDiagnostics.StartPerformanceLogging();
+			}
 			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
 			Logger.OnLogEvent += (message, level) =>
 			{
@@ -236,7 +248,7 @@ namespace BaggyBot
 					ircInterface.ChangeClient(client);
 					HookupIrcEvents();
 
-					success = ConnectIrc(state.RemoteHost, state.RemotePort);
+					success = ConnectIrc(ConfigManager.Config.Servers.First(server => server.Host == state.RemoteHost || server.Port == state.RemotePort));
 					if (success) continue;
 					Logger.Log(this, "Reconnection attempt failed. Retrying in 5 seconds.", LogLevel.Warning, true, reason.ToString());
 					Thread.Sleep(5000);
@@ -307,35 +319,43 @@ namespace BaggyBot
 			Environment.Exit(0);
 		}
 
-		private void TryConnectIrc(string host, int port)
+		private void TryConnectIrc(Server server)
 		{
-			if (ConnectIrc(host, port)) return;
+			if (ConnectIrc(server)) return;
 			Logger.Log(this, "FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
 			Environment.Exit(1);
 		}
 
-		private void JoinInitialChannel()
+		private void JoinInitialChannels(string[] channels)
 		{
-			var firstChannel = Settings.Instance["irc_initial_channel"];
-			// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
-			if (string.IsNullOrWhiteSpace(firstChannel))
+			foreach (var channel in channels)
 			{
-				Logger.Log(this, "Unable to join the initial channel: settings value for irc_initial_channel not set.", LogLevel.Error);
-			}
-			else
-			{
-				ircInterface.JoinChannel(firstChannel);
-				Logger.Log(this, "Ready to collect statistics in " + firstChannel, LogLevel.Info);
+				// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
+				if (string.IsNullOrWhiteSpace(channel))
+				{
+					Logger.Log(this, $"Unable to join {channel}: invalid channel name.", LogLevel.Error);
+				}
+				else
+				{
+					if (ircInterface.JoinChannel(channel))
+					{
+						Logger.Log(this, $"Ready to collect statistics in {channel}.", LogLevel.Info);
+					}
+					else
+					{
+						Logger.Log(this, $"Auto-joining {channel} failed.");
+					}
+				}
 			}
 		}
 
-		public void Connect(string host, int port)
+		public void Connect(Server server)
 		{
 			var dbConTask = Task.Run(() => ConnectDatabase());
-			var ircConTask = Task.Run(() => TryConnectIrc(host, port));
+			var ircConTask = Task.Run(() => TryConnectIrc(server));
 			Task.WaitAll(dbConTask, ircConTask);
 
-			JoinInitialChannel();
+			JoinInitialChannels(server.AutoJoinChannels);
 			OnPostConnect();
 
 			if (previousVersion != null && previousVersion != Version)
@@ -344,7 +364,6 @@ namespace BaggyBot
 			}
 			EnterMainLoop();
 		}
-
 
 		internal void RequestUpdate(string channel, bool updateFiles)
 		{
@@ -356,7 +375,7 @@ namespace BaggyBot
 				return;
 			}
 			ircInterface.Disconnect("Updating...");
-			Process.Start("mono", string.Format("BaggyBot20.exe -updated {0} {1}", data, channel));
+			Process.Start("mono", $"BaggyBot20.exe -updated {data} {channel}");
 			Environment.Exit(0);
 		}
 
@@ -384,12 +403,35 @@ namespace BaggyBot
 					Console.WriteLine("ERROR: expected a value after {0}", args[i - 1]);
 				}
 			}
-			Settings.Instance.LoadSettingsFile(settingsFile);
+			var result = ConfigManager.Load("baggybot-settings.yaml");
+			switch (result)
+			{
+				case ConfigManager.LoadResult.Success:
+					break;
+				case ConfigManager.LoadResult.NewFileCreated:
+					Logger.Log(null, "A new configuration file has been created, please fill it with the correct settings. BaggyBot will now exit.", LogLevel.Info);
+					goto handleExit;
+				case ConfigManager.LoadResult.Failure:
+					Logger.Log(null, "Unable to load the configuration file. BaggyBot will now exit.");
+					goto handleExit;
+					handleExit:
+					// If we're running on Windows, the application was most likely started by double-clicking the executable.
+					// This creates a command prompt window that will immediately disappear when the bot exits.
+					// For this reason, we should wait for user input so they can read the messages that have just been displayed.
+					if (Environment.OSVersion.Platform.ToString().Contains("Win32"))
+					{
+						Console.WriteLine("Press any key to exit... ");
+						Console.ReadKey();
+					}
+					Environment.Exit(1);
+					break;
+			}
 			Logger.UseColouredOutput = colours;
 
 			using (var bot = new Bot())
 			{
-				bot.Connect(Settings.Instance["irc_server"], int.Parse(Settings.Instance["irc_port"]));
+				var server = ConfigManager.Config.Servers.First();
+				bot.Connect(server);
 			}
 		}
 	}

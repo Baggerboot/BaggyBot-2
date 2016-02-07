@@ -3,8 +3,8 @@ using LinqToDB.Mapping;
 
 namespace BaggyBot.Database.Model
 {
-	[Table(Name =  "irc_log")]
-	class IrcLog : Poco
+	[Table(Name = "irc_log")]
+	internal class IrcLog : Poco
 	{
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
@@ -24,6 +24,5 @@ namespace BaggyBot.Database.Model
 
 		[Column(Name = "message"), NotNull]
 		public string Message { get; set; }
-
 	}
 }

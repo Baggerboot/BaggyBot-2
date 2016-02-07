@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using BaggyBot.Database.Model;
+﻿using BaggyBot.Database.Model;
 using LinqToDB;
 using LinqToDB.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BaggyBot.Database.Upgrades
 {

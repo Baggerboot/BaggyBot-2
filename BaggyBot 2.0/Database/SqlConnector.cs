@@ -1,39 +1,36 @@
-﻿// To switch between compiling for Transact-SQL and PostgreSQL, comment and uncomment the correct options
-//#define mssql
-
-//BaggyBot.Database.PostgreSQL
-
-using System;
-using System.Data;
-using System.Collections.Generic;
-using System.Linq;
-using LinqToDB.Data;
-using LinqToDB.DataProvider.PostgreSQL;
+﻿using BaggyBot.Configuration;
 using BaggyBot.Database.Model;
 using BaggyBot.Database.Upgrades;
 using LinqToDB;
+using LinqToDB.Data;
+using LinqToDB.DataProvider.PostgreSQL;
 using Npgsql;
-
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using Metadata = BaggyBot.Database.Model.Metadata;
 
 namespace BaggyBot.Database
 {
-	class SqlConnector : IDisposable
+	internal class SqlConnector : IDisposable
 	{
 		private DataConnection connection;
 
-		public ITable<LinkedUrl> LinkedUrls;
-		public ITable<User> Users;
-		public ITable<UserCredential> UserCredentials;
-		public ITable<UserStatistic> UserStatistics;
-		public ITable<UsedEmoticon> Emoticons;
-		public ITable<IrcLog> IrcLog;
-		public ITable<KeyValuePair> KeyValuePairs;
-		public ITable<Quote> Quotes;
-		public ITable<UsedWord> Words;
-		public ITable<MiscData> MiscData;
+		public ITable<LinkedUrl> LinkedUrls { get; private set; }
+		public ITable<User> Users { get; private set; }
+		public ITable<UserCredential> UserCredentials { get; private set; }
+		public ITable<UserStatistic> UserStatistics { get; private set; }
+		public ITable<UsedEmoticon> Emoticons { get; private set; }
+		public ITable<IrcLog> IrcLog { get; private set; }
+		public ITable<KeyValuePair> KeyValuePairs { get; private set; }
+		public ITable<Quote> Quotes { get; private set; }
+		public ITable<UsedWord> Words { get; private set; }
+		public ITable<MiscData> MiscData { get; private set; }
 
 		private ITable<Metadata> metadata;
 
+		private ConnectionState internalState;
 
 		public ConnectionState ConnectionState
 		{
@@ -45,9 +42,7 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					return ConnectionState.Open;
-					// TODO: Figure out how to determine the connection state correctly
-					//return connection.Connection.State;
+					return internalState;
 				}
 			}
 		}
@@ -55,22 +50,24 @@ namespace BaggyBot.Database
 		public void Insert<T>(T row)
 		{
 			connection.Insert(row);
-
 		}
 
 		public void SubmitChanges()
 		{
-
 		}
 		public bool OpenConnection()
 		{
-			var connectionString = Settings.Instance["sql_connection_string"];
+			var connectionString = ConfigManager.Config.Backend.ConnectionString;
 			if (string.IsNullOrWhiteSpace(connectionString))
 			{
 				Logger.Log(this, "Unable to connect to the SQL database: No connection specified.", LogLevel.Error);
 				return false;
 			}
+			internalState = ConnectionState.Connecting;
 			connection = PostgreSQLTools.CreateDataConnection(connectionString);
+			internalState = ConnectionState.Open;
+			connection.OnClosing += (sender, args) => internalState = ConnectionState.Closed;
+			connection.OnClosed += (sender, args) => internalState = ConnectionState.Closed;
 			metadata = connection.GetTable<Metadata>();
 			try
 			{
@@ -179,12 +176,6 @@ namespace BaggyBot.Database
 			return true;
 		}
 
-		public void Reconnect()
-		{
-			// TODO: implement reconnect
-			throw new NotImplementedException();
-		}
-
 		public void Dispose()
 		{
 			Dispose(true);
@@ -193,10 +184,7 @@ namespace BaggyBot.Database
 
 		protected virtual void Dispose(bool cleanAll)
 		{
-			if (connection != null)
-			{
-				connection.Dispose();
-			}
+			connection?.Dispose();
 		}
 
 		~SqlConnector()
@@ -216,7 +204,6 @@ namespace BaggyBot.Database
 			var cmd = connection.CreateCommand();
 			cmd.CommandText = query;
 			throw new NotImplementedException();
-
 		}
 
 		public void Update<T>(T match)

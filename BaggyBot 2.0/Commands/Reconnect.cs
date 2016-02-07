@@ -1,8 +1,8 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Reconnect : ICommand
+	internal class Reconnect : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		public PermissionLevel Permissions => PermissionLevel.BotOperator;
 		private readonly IrcInterface ircInterface;
 
 		public Reconnect(IrcInterface ircInterface)

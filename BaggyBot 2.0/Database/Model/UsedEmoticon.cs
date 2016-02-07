@@ -3,7 +3,7 @@
 namespace BaggyBot.Database.Model
 {
 	[Table(Name = "used_emoticon")]
-	class UsedEmoticon : Poco
+	internal class UsedEmoticon : Poco
 	{
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }

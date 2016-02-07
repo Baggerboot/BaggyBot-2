@@ -1,8 +1,10 @@
 ﻿namespace BaggyBot.Commands
 {
-	interface ICommand
+	internal interface ICommand
 	{
 		void Use(CommandArgs c);
 		PermissionLevel Permissions { get; }
+		//string Usage { get; }
+		//string Description { get; }
 	}
 }

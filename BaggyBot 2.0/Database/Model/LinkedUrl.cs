@@ -3,9 +3,9 @@
 namespace BaggyBot.Database.Model
 {
 	[Table(Name = "linked_url")]
-	class LinkedUrl : Poco
+	internal class LinkedUrl : Poco
 	{
-		[Column(Name="id"), PrimaryKey, Identity]
+		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
 
 		[Column(Name = "url"), NotNull]
@@ -19,7 +19,7 @@ namespace BaggyBot.Database.Model
 		[Association(ThisKey = "last_used_by", OtherKey = "id")]
 		public User LastUsedBy { get; set; }
 
-		[Column(Name= "last_usage"), NotNull]
+		[Column(Name = "last_usage"), NotNull]
 		public string LastUsage { get; set; }
 	}
 }

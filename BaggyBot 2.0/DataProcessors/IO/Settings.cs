@@ -1,10 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
-namespace BaggyBot
+﻿namespace BaggyBot
 {
-	public class Settings
+	/*public class Settings
 	{
 		private readonly Dictionary<string, string> settings = new Dictionary<string, string>();
 
@@ -145,5 +141,5 @@ namespace BaggyBot
 			this["wolfram_alpha_appid"] = "";
 			this["enable_oidentd"] = "false";
 		}
-	}
+	}*/
 }

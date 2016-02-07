@@ -1,9 +1,9 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Part : ICommand
+	internal class Part : ICommand
 	{
 		private readonly IrcInterface ircInterface;
-		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		public PermissionLevel Permissions => PermissionLevel.BotOperator;
 
 		public Part(IrcInterface inter)
 		{
@@ -12,10 +12,12 @@
 
 		public void Use(CommandArgs command)
 		{
-			if (command.Args.Length == 0 || command.Args.Length > 2) {
+			if (command.Args.Length == 0 || command.Args.Length > 2)
+			{
 				command.ReturnMessage("usage: -part <channel> [reason]");
-			} else {
-				ircInterface.Part(command.Args[0], (command.Args.Length == 2 ? command.Args[1] : null));
+			}
+			else {
+				ircInterface.Part(command.Args[0], command.Args.Length == 2 ? command.Args[1] : null);
 			}
 		}
 	}

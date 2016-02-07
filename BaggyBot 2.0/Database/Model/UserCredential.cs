@@ -3,7 +3,7 @@
 namespace BaggyBot.Database.Model
 {
 	[Table(Name = "user_credential")]
-	class UserCredential : Poco
+	internal class UserCredential : Poco
 	{
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }

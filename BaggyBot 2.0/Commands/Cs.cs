@@ -6,14 +6,14 @@ using Mono.CSharp;
 
 namespace BaggyBot.Commands
 {
-	class Cs : ReadEvaluatePrintCommand, ICommand
+	internal class Cs : ReadEvaluatePrintCommand, ICommand
 	{
 		private readonly Evaluator evaluator;
 		private readonly CodeFormatter codeFormatter = new CodeFormatter();
 		private readonly IrcReportPrinter reportPrinter = new IrcReportPrinter();
 		private readonly Dictionary<string, StringBuilder> commandBuilders = new Dictionary<string, StringBuilder>();
 
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public Cs(IrcInterface inter)
 		{
@@ -35,7 +35,7 @@ namespace BaggyBot.Commands
 
 		protected override void GetBuffer(CommandArgs command)
 		{
-			IrcInterface.SendMessage(command.Channel, string.Format("{0}, \"{1}\"", command.Sender.Nick, commandBuilders[command.Sender.Nick].ToString().Replace('\n', '\\')));
+			IrcInterface.SendMessage(command.Channel, $"{command.Sender.Nick}, \"{commandBuilders[command.Sender.Nick].ToString().Replace('\n', '\\')}\"");
 		}
 
 		protected override void Threads(CommandArgs command)
@@ -64,15 +64,18 @@ namespace BaggyBot.Commands
 			{
 				IrcInterface.SendMessage(command.Channel, "Access to my guts is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("Process")))
+			}
+			if (command.FullArgument != null && command.FullArgument.Contains("Process"))
 			{
 				IrcInterface.SendMessage(command.Channel, "Process control is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("GetMethod")))
+			}
+			if (command.FullArgument != null && command.FullArgument.Contains("GetMethod"))
 			{
 				IrcInterface.SendMessage(command.Channel, "Method invocation trough reflection is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("Environment.Exit")))
+			}
+			if (command.FullArgument != null && command.FullArgument.Contains("Environment.Exit"))
 			{
 				IrcInterface.SendMessage(command.Channel, "Calls to Environment.Exit are not allowed");
 				return false;
@@ -132,7 +135,7 @@ namespace BaggyBot.Commands
 						while (reportPrinter.HasMessage)
 						{
 							var message = reportPrinter.GetNextMessage();
-							IrcInterface.SendMessage(command.Channel, string.Format("{0} at column {1}: {2}", message.MessageType, message.Location.Column, message.Text));
+							IrcInterface.SendMessage(command.Channel, $"{message.MessageType} at column {message.Location.Column}: {message.Text}");
 						}
 					}
 					else
@@ -146,7 +149,6 @@ namespace BaggyBot.Commands
 					commandBuilders[command.Sender.Nick].Append(input);
 					IrcInterface.SendMessage(command.Channel, ">>>");
 				}
-
 			}
 			catch (InternalErrorException e)
 			{

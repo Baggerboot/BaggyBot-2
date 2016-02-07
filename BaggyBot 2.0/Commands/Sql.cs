@@ -1,12 +1,12 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Sql : ICommand
+	internal class Sql : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public void Use(CommandArgs command)
 		{
-
+			// TODO: Implement the SQL command again
 		}
 	}
 }

@@ -2,14 +2,14 @@
 
 namespace BaggyBot.Commands
 {
-	class Update : ICommand
+	internal class Update : ICommand
 	{
 		private readonly Bot bot;
 		public Update(Bot bot)
 		{
 			this.bot = bot;
 		}
-		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		public PermissionLevel Permissions => PermissionLevel.BotOperator;
 
 		private string requestChannel;
 

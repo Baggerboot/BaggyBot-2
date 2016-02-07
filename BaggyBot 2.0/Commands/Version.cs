@@ -1,8 +1,8 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Version : ICommand
+	internal class Version : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public void Use(CommandArgs command)
 		{

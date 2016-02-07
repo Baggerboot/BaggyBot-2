@@ -4,7 +4,7 @@ using System.IO;
 
 namespace BaggyBot
 {
-	class PerformanceLogger : IDisposable
+	internal class PerformanceLogger : IDisposable
 	{
 		private readonly StreamWriter sw;
 		public List<PerformanceObject> PerformanceLog

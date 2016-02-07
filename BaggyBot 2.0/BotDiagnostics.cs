@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Timers;
 
@@ -8,21 +7,21 @@ namespace BaggyBot
 	/// <summary>
 	/// This class gathers data about the bot's performance and sends it to a logger so it can be written to a log file.
 	/// </summary>
-	class BotDiagnostics : IDisposable
+	internal class BotDiagnostics : IDisposable
 	{
-		private readonly IrcInterface ircInterface;
-		private readonly Timer taskScheduler;
-		private readonly PerformanceCounter pc = new PerformanceCounter();
 		private const string PerfLogFile = "performance_log.csv";
+		private readonly IrcInterface ircInterface;
+		private Timer taskScheduler;
+		private PerformanceCounter pc;
 		private readonly PerformanceLogger performanceLogger = new PerformanceLogger(PerfLogFile);
-		public List<PerformanceObject> PerformanceLog
-		{
-			get
-			{
-				return performanceLogger.PerformanceLog;
-			}
-		}
 
+		public BotDiagnostics(IrcInterface ircInterface)
+		{
+			this.ircInterface = ircInterface;
+
+			AppDomain.CurrentDomain.UnhandledException += HandleException;
+		}
+		
 		public void Dispose()
 		{
 			pc.Dispose();
@@ -30,22 +29,7 @@ namespace BaggyBot
 			taskScheduler.Dispose();
 		}
 
-		public BotDiagnostics(IrcInterface ircInterface)
-		{
-			this.ircInterface = ircInterface;
-
-			var selfProc = Process.GetCurrentProcess();
-			pc.CategoryName = "Process";
-			pc.CounterName = "Working Set - Private";
-			pc.InstanceName = selfProc.ProcessName;
-
-			AppDomain.CurrentDomain.UnhandledException += HandleException;
-			
-
-			taskScheduler = new Timer {Interval = 2000};
-		}
-
-		private void HandleException(Object sender, UnhandledExceptionEventArgs args)
+		private void HandleException(object sender, UnhandledExceptionEventArgs args)
 		{
 			var e = (Exception)args.ExceptionObject;
 			var trace = new StackTrace(e, true);
@@ -59,7 +43,15 @@ namespace BaggyBot
 
 		internal void StartPerformanceLogging()
 		{
+			var selfProc = Process.GetCurrentProcess();
+			pc = new PerformanceCounter();
+			pc.CategoryName = "Process";
+			pc.CounterName = "Working Set - Private";
+			pc.InstanceName = selfProc.ProcessName;
+
 			Logger.Log(this, "Logging performance statistics to " + PerfLogFile, LogLevel.Info);
+
+			taskScheduler = new Timer { Interval = 2000 };
 			taskScheduler.Start();
 			taskScheduler.Elapsed += (source, eventArgs) =>
 			{

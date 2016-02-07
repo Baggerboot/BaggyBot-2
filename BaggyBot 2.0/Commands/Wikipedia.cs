@@ -5,13 +5,14 @@ using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
 {
-	class Wikipedia : ICommand
+	internal class Wikipedia : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public void Use(CommandArgs command)
 		{
-			var uri = new Uri(string.Format("http://en.wikipedia.org/w/api.php?format=json&action=query&titles={0}&prop=revisions&rvprop=content", command.FullArgument));
+			var uri = new Uri(
+				$"http://en.wikipedia.org/w/api.php?format=json&action=query&titles={command.FullArgument}&prop=revisions&rvprop=content");
 
 			var rq = WebRequest.Create(uri);
 			var response = rq.GetResponse();

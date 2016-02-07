@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using BaggyBot.Tools;
 using System.Text.RegularExpressions;
+using BaggyBot.Configuration;
 #if postgresql
 
 #endif
@@ -14,7 +15,7 @@ using IRCSharp.IRC;
 
 namespace BaggyBot.DataProcessors
 {
-	class StatsHandler
+	internal class StatsHandler
 	{
 		private readonly DataFunctionSet dataFunctionSet;
 		private readonly IrcInterface ircInterface;
@@ -25,29 +26,12 @@ namespace BaggyBot.DataProcessors
 				private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
 		*/
 		private readonly string[] snagMessages = { "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
-
-
+		
 		public StatsHandler(DataFunctionSet dm, IrcInterface inter)
 		{
 			dataFunctionSet = dm;
 			ircInterface = inter;
 			rand = new Random();
-
-
-			// It might seem confusing that we're creating a variable (snagChance) here without actually using it.
-			// The reason for this is that we don't actually need it right now.
-			// The value of snag_chance will be read from the Settings class each time it is required, so that, when it updates,
-			// the updated value will be used right away.
-			// This requires us to parse the variable each time it is read.
-			// However, we do not want to log an error every time the parsing fails. For this reason, we parse it initially,
-			// and, should a parse error occur, log the error.
-			// The downside to this approach is that, if the variable is assigned an incorrect value at runtime,
-			// the parser will fail silently, without logging its fallback to the default value.
-			double snagChance;
-			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance))
-			{
-				Logger.Log(this, "Invalid settings value for snag_chance. Default value will be used.", LogLevel.Warning);
-			}
 		}
 		public void ProcessMessage(IrcMessage message, int userId)
 		{
@@ -93,7 +77,7 @@ namespace BaggyBot.DataProcessors
 		private void ProcessWord(IrcMessage message, string word, int sender)
 		{
 			var lword = word.ToLower();
-			var cword = textOnly.Replace(lword, "");
+			var cword = textOnly.Replace(lword, string.Empty);
 			if (word.StartsWith("http://") || word.StartsWith("https://"))
 			{
 				dataFunctionSet.IncrementUrl(word, sender, message.Message);
@@ -108,7 +92,7 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		readonly Regex textOnly = new Regex("[^a-z]");
+		private readonly Regex textOnly = new Regex("[^a-z]");
 
 		private void GetEmoticons(int userId, IEnumerable<string> words)
 		{
@@ -150,7 +134,7 @@ namespace BaggyBot.DataProcessors
 			var last = dataFunctionSet.GetLastSnaggedLine(userId);
 			if (last.HasValue)
 			{
-				if ((DateTime.Now - last.Value).Hours < int.Parse(Settings.Instance["snag_min_wait"]))
+				if ((DateTime.Now - last.Value).Hours < ConfigManager.Config.Quotes.MinDelayHours)
 				{
 					return;
 				}
@@ -159,25 +143,15 @@ namespace BaggyBot.DataProcessors
 			{
 				Logger.Log(this, "This user hasn't been snagged before");
 			}
-
-			double snagChance;
-			if (!double.TryParse(Settings.Instance["snag_chance"], out snagChance))
-			{ // Set the base snag chance
-				snagChance = 0.015;
-			}
-
-			double silenceChance;
-			if (!double.TryParse(Settings.Instance["snag_silence_chance"], out silenceChance))
-			{ // Set the chance for a silent snag
-				silenceChance = 0.6;
-			}
-
+			
+			double snagChance = ConfigManager.Config.Quotes.Chance;
+			double silenceChance = ConfigManager.Config.Quotes.SilentQuoteChance;
 
 			if (words.Count > 6)
 			{ // Do not snag if the amount of words to be snagged is less than 7
 				if (rand.NextDouble() <= snagChance)
 				{
-					bool allowSnagMessage = Settings.Instance.ReadBool("display_snag_message", false);
+					bool allowSnagMessage = ConfigManager.Config.Quotes.AllowQuoteNotifications;
 					var hideSnagMessage = rand.NextDouble() <= silenceChance;
 					if (!allowSnagMessage || hideSnagMessage)
 					{ // Check if snag message should be displayed

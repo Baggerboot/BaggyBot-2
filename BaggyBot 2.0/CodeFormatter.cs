@@ -4,17 +4,20 @@ using System.Text;
 
 namespace BaggyBot
 {
-	class CodeFormatter
+	internal class CodeFormatter
 	{
-
 		private bool WorksAsEnumerable(object obj)
 		{
 			var enumerable = obj as IEnumerable;
-			if (enumerable != null) {
-				try {
+			if (enumerable != null)
+			{
+				try
+				{
 					enumerable.GetEnumerator();
 					return true;
-				} catch {
+				}
+				catch
+				{
 					// nothing, we return false below
 				}
 			}
@@ -29,35 +32,48 @@ namespace BaggyBot
 		public string PrettyPrint(object result)
 		{
 			var sb = new StringBuilder();
-			if (result == null) {
+			if (result == null)
+			{
 				sb.Append("null");
 				return sb.ToString();
 			}
 
-			if (result is Array) {
+			if (result is Array)
+			{
 				var a = (Array)result;
 
 				sb.Append("{ ");
 				var top = a.GetUpperBound(0);
-				for (var i = a.GetLowerBound(0); i <= top; i++) {
+				for (var i = a.GetLowerBound(0); i <= top; i++)
+				{
 					sb.Append(PrettyPrint(a.GetValue(i)));
-					if (i != top)
-						sb.Append(", ");
+					if (i != top) sb.Append(", ");
 				}
 				sb.Append(" }");
-			} else if (result is bool) {
+			}
+			else if (result is bool)
+			{
 				if ((bool)result)
+				{
 					sb.Append("true");
+				}
 				else
+				{
 					sb.Append("false");
-			} else if (result is string) {
-				sb.Append(String.Format("\"{0}\"", EscapeString((string)result)));
-			} else if (result is IDictionary) {
+				}
+			}
+			else if (result is string)
+			{
+				sb.Append($"\"{EscapeString((string)result)}\"");
+			}
+			else if (result is IDictionary)
+			{
 				var dict = (IDictionary)result;
 				int top = dict.Count, count = 0;
 
 				sb.Append("{");
-				foreach (DictionaryEntry entry in dict) {
+				foreach (DictionaryEntry entry in dict)
+				{
 					count++;
 					sb.Append("{ ");
 					sb.Append(PrettyPrint(entry.Key));
@@ -69,19 +85,25 @@ namespace BaggyBot
 						sb.Append(" }");
 				}
 				sb.Append("}");
-			} else if (WorksAsEnumerable(result)) {
+			}
+			else if (WorksAsEnumerable(result))
+			{
 				var i = 0;
 				sb.Append("{ ");
-				foreach (var item in (IEnumerable)result) {
+				foreach (var item in (IEnumerable)result)
+				{
 					if (i++ != 0)
 						sb.Append(", ");
 
 					sb.Append(PrettyPrint(item));
 				}
 				sb.Append(" }");
-			} else if (result is char) {
+			}
+			else if (result is char)
+			{
 				sb.Append(EscapeChar((char)result));
-			} else {
+			}
+			else {
 				sb.Append(result);
 			}
 			return sb.ToString();
@@ -89,13 +111,16 @@ namespace BaggyBot
 
 		public string EscapeChar(char c)
 		{
-			if (c == '\'') {
+			if (c == '\'')
+			{
 				return "'\\''";
 			}
-			if (c > 32) {
-				return string.Format("'{0}'", c);
+			if (c > 32)
+			{
+				return $"'{c}'";
 			}
-			switch (c) {
+			switch (c)
+			{
 				case '\a':
 					return "'\\a'";
 
@@ -118,9 +143,8 @@ namespace BaggyBot
 					return "'\\t";
 
 				default:
-					return string.Format("'\\x{0:x}", (int)c);
+					return $"'\\x{(int)c:x}";
 			}
 		}
-
 	}
 }

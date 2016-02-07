@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 using BaggyBot.Commands;
+using BaggyBot.Configuration;
 using BaggyBot.Tools;
 using IRCSharp.IRC;
 using Convert = BaggyBot.Commands.Convert;
 using Version = BaggyBot.Commands.Version;
+using WolframAlpha = BaggyBot.Commands.WolframAlpha;
 
 namespace BaggyBot.DataProcessors
 {
-	class CommandHandler
+	internal class CommandHandler
 	{
 		private readonly Dictionary<string, ICommand> commands;
 		private readonly IrcInterface ircInterface;
@@ -48,10 +50,15 @@ namespace BaggyBot.DataProcessors
 				{"wiki", new Wikipedia()},
 				{"topic", new Topics(dataFunctionSet)}
 			};
-			if(Settings.Instance.ReadBool("enable_interpreters", true))
+			if (ConfigManager.Config.Interpreters.Enabled)
 			{
 				commands.Add("py", new Py(ircInterface, dataFunctionSet));
 				commands.Add("cs", new Cs(ircInterface));
+			}
+			else
+			{
+				commands.Add("py", new Notify("The interactive Python interpreter is currently disabled. It can be enabled in the configuration file."));
+				commands.Add("cs", new Notify("The interactive C# interpreter is currently disabled. It can be enabled in the configuration file."));
 			}
 		}
 
@@ -88,7 +95,7 @@ namespace BaggyBot.DataProcessors
 					var value = cmdInfo.Args.ToList();
 					value.Insert(1, "say");
 					((Alias)commands["alias"]).Use(
-						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.replyCallback));
+						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.ReplyCallback));
 				}
 				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
 				{
@@ -110,7 +117,11 @@ namespace BaggyBot.DataProcessors
 			if (commands[cmdInfo.Command].Permissions == PermissionLevel.All || commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender))
 			{
 				// Don't gobble up exceptions when debugging
-				if (Settings.Instance["deployed"] == "true")
+				if (ConfigManager.Config.DebugMode)
+				{
+					commands[cmdInfo.Command].Use(cmdInfo);
+				}
+				else
 				{
 					try
 					{
@@ -118,13 +129,9 @@ namespace BaggyBot.DataProcessors
 					}
 					catch (Exception e)
 					{
-						var exceptionMessage = string.Format("An unhandled exception (type: {0}) occurred while trying to process your command! Exception message: \"{1}\", Occurred at line {2}", e.GetType(), e.Message, new StackTrace(e, true).GetFrame(0).GetFileLineNumber());
+						var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\", Occurred at line {new StackTrace(e, true).GetFrame(0).GetFileLineNumber()}";
 						ircInterface.SendMessage(message.Channel, exceptionMessage);
 					}
-				}
-				else
-				{
-					commands[cmdInfo.Command].Use(cmdInfo);
 				}
 			}
 			else

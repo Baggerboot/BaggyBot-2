@@ -3,12 +3,12 @@ using System.Diagnostics;
 
 namespace BaggyBot.Commands
 {
-	class RegenerateGraphs : ICommand
+	internal class RegenerateGraphs : ICommand
 	{
-				public PermissionLevel Permissions { get { return PermissionLevel.All; } }
-		private DateTime lastUsage;
 		private const double MinWaitTime = 10; // In seconds
-
+		public PermissionLevel Permissions => PermissionLevel.All;
+		private DateTime lastUsage;
+		
 		public RegenerateGraphs()
 		{
 			lastUsage = DateTime.Now.AddSeconds(MinWaitTime * -1);
@@ -17,7 +17,8 @@ namespace BaggyBot.Commands
 		public void Use(CommandArgs command)
 		{
 			var diff = DateTime.Now - lastUsage;
-			if (diff.TotalSeconds < MinWaitTime) {
+			if (diff.TotalSeconds < MinWaitTime)
+			{
 				command.ReturnMessage("This command may not be used more than once every {0} seconds. Please try again in {1} seconds.", MinWaitTime, (int)(MinWaitTime - diff.TotalSeconds));
 				return;
 			}

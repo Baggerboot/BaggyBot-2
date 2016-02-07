@@ -1,30 +1,36 @@
-﻿using System;
+﻿using BaggyBot.Configuration;
+using BaggyBot.DataProcessors;
+using IRCSharp;
+using IRCSharp.IRC;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading;
-using IRCSharp;
-using BaggyBot.DataProcessors;
-using IRCSharp.IRC;
 
 namespace BaggyBot
 {
-	class IrcInterface
+	internal class IrcInterface
 	{
-		private readonly Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
-		private readonly Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
-		public DataFunctionSet DataFunctionSet { private get; set; }
-
-		private IrcClient client;
-
 		private const int messageLengthLimit = 510;
 
 		private readonly List<string> whoisCalls = new List<string>();
 		private readonly List<string> nickservCalls = new List<string>(); // Holds information about which users are currently being looked up
-		private bool canDoNickservCall = true;
-		public bool HasNickservCall { get { return nickservCalls.Count > 0; } }
-		public bool HasWhoisCall { get { return whoisCalls.Count > 0; } }
+		private readonly Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
+		private readonly Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
 
-		public int ChannelCount { get { return client.ChannelCount; } }
+		public DataFunctionSet DataFunctionSet { private get; set; }
+		private IrcClient client;
+		
+		private bool canDoNickservCall = true;
+
+		public bool HasNickservCall => nickservCalls.Count > 0;
+		public bool HasWhoisCall => whoisCalls.Count > 0;
+		public int ChannelCount => client.ChannelCount;
+		public string Password => client.Password;
+		public int TotalUserCount => client.TotalUserCount;
+		public bool Connected => client.Connected;
+
 		public bool ReplyToPings
 		{
 			get
@@ -36,13 +42,11 @@ namespace BaggyBot
 				client.ReplyToPings = value;
 			}
 		}
+
 		public bool InChannel(string channel)
 		{
 			return client.InChannel(channel);
 		}
-
-
-		public int TotalUserCount { get { return client.TotalUserCount; } }
 
 		public IrcInterface(IrcClient client)
 		{
@@ -66,11 +70,14 @@ namespace BaggyBot
 
 		public void AddNickserv(string nick, string nickserv)
 		{
-			if (nickservCallResults.ContainsKey(nick)) {
-				if (nickservCallResults[nick] == nickserv) {
-					Logger.Log(this, string.Format("Dropped NickServ reply for {0}:{1} as an entry already exists.", nick, nickserv), LogLevel.Warning);
-				} else {
-					Logger.Log(this, string.Format("Invalid NickServ reply stored for {0}:{1}. The stored value was {2}.", nick, nickserv, nickservCallResults[nick]), LogLevel.Error);
+			if (nickservCallResults.ContainsKey(nick))
+			{
+				if (nickservCallResults[nick] == nickserv)
+				{
+					Logger.Log(this, $"Dropped NickServ reply for {nick}:{nickserv} as an entry already exists.", LogLevel.Warning);
+				}
+				else {
+					Logger.Log(this, $"Invalid NickServ reply stored for {nick}:{nickserv}. The stored value was {nickservCallResults[nick]}.", LogLevel.Error);
 					nickservCallResults[nick] = nick;
 				}
 				return;
@@ -84,21 +91,24 @@ namespace BaggyBot
 
 			Logger.Log(this, "Nickserv call requested for " + nick, LogLevel.Debug);
 
-			if (!nickservCalls.Contains(nick)) {
+			if (!nickservCalls.Contains(nick))
+			{
 				nickservCalls.Add(nick);
 				Logger.Log(this, "Calling NickServ for " + nick, LogLevel.Info);
 				SendMessage("NickServ", "INFO " + nick);
-			} else {
+			}
+			else {
 				Logger.Log(this, "An entry already exists for " + nick, LogLevel.Debug);
 			}
 			nick = nick.ToLower();
 
-
 			var waitTime = 0;
-			while (!nickservCallResults.ContainsKey(nick)) {
+			while (!nickservCallResults.ContainsKey(nick))
+			{
 				Thread.Sleep(20);
 				waitTime += 20;
-				if (waitTime == 6000) {
+				if (waitTime == 6000)
+				{
 					Logger.Log(this, "No nickserv reply received for {0} after 6 seconds", LogLevel.Warning, true, nick);
 					return null;
 				}
@@ -113,7 +123,7 @@ namespace BaggyBot
 		}
 		private int CalculatePrefixLength(string target)
 		{
-			var prefix = string.Format(":{0}!{1}@{2} PRIVMSG {3} :", client.Nick, client.Ident, client.LocalHost, target);
+			var prefix = $":{client.Nick}!{client.Ident}@{client.LocalHost} PRIVMSG {target} :";
 			return prefix.Length;
 		}
 		private int GetMaxMessageLength(string target)
@@ -122,36 +132,39 @@ namespace BaggyBot
 		}
 		private string GenerateFullMessage(string target, string message)
 		{
-			return string.Format(":{0}!{1}@{2} PRIVMSG {3} :{4}", client.Nick, client.Ident, client.LocalHost, target, message);
+			return $":{client.Nick}!{client.Ident}@{client.LocalHost} PRIVMSG {target} :{message}";
 		}
 
 		private void SendMessageChunk(string target, string message, int recursionDepth)
 		{
-			int floodLimit;
-			if (!int.TryParse(Settings.Instance["irc_flood_limit"], out floodLimit))
-				floodLimit = 4;
+			int floodLimit = ConfigManager.Config.FloodLimit;
 
-			if (recursionDepth >= floodLimit) {
+			if (recursionDepth >= floodLimit)
+			{
 				client.SendMessage(target, "Flood limit triggered. The remaining part of the message has been discarded.");
 				return;
 			}
 			string cutoff = null;
-			if (CalculateMessageLength(target, message) > messageLengthLimit) {
+			if (CalculateMessageLength(target, message) > messageLengthLimit)
+			{
 				cutoff = message.Substring(GetMaxMessageLength(target));
 				message = message.Substring(0, GetMaxMessageLength(target));
 			}
 
 			var fullMsg = GenerateFullMessage(target, message);
 
-			if (fullMsg.Length > messageLengthLimit) {
+			if (fullMsg.Length > messageLengthLimit)
+			{
 				Logger.Log(this, "Message prototype exceeds maximum allowed message length! Message prototype: " + fullMsg, LogLevel.Warning);
 			}
 
 			var result = client.SendMessage(target, message);
-			if (result && DataFunctionSet.ConnectionState != ConnectionState.Closed) {
-				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+			if (result && DataFunctionSet.ConnectionState != ConnectionState.Closed)
+			{
+				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, client.Nick, message);
 			}
-			if (cutoff != null) {
+			if (cutoff != null)
+			{
 				SendMessageChunk(target, cutoff, ++recursionDepth);
 			}
 		}
@@ -161,15 +174,22 @@ namespace BaggyBot
 			SendMessageChunk(target, message, 0);
 		}
 
+		public void SendMessage(IEnumerable<string> targets, string message)
+		{
+			foreach (var target in targets)
+			{
+				SendMessageChunk(target, message, 0);
+			}
+		}
+
 		/// <summary>
 		/// Sends a message directly to the IRC client, without trying to make sure the message is sent in chunks.
 		/// </summary>
-		/// <param name="target"></param>
-		/// <param name="message"></param>
 		public void SendMessageDirectly(string target, string message)
 		{
-			if(client.SendMessage(target, message)){
-				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, Settings.Instance["irc_nick"], message);
+			if (client.SendMessage(target, message))
+			{
+				DataFunctionSet.AddIrcMessage(DateTime.Now, 0, target, client.Nick, message);
 			}
 		}
 
@@ -180,7 +200,7 @@ namespace BaggyBot
 
 		public void NotifyOperator(string message)
 		{
-			SendMessage(Settings.Instance["operator_nick"], message);
+			SendMessage(ConfigManager.Config.Operators.Select(op => op.Nick), message);
 		}
 
 		public bool JoinChannel(string channel)
@@ -199,7 +219,8 @@ namespace BaggyBot
 			var t = new Thread(() => client.SendRaw("WHOIS " + nick));
 			t.Start();
 
-			while (!whoisCallResults.ContainsKey(nick)) {
+			while (!whoisCallResults.ContainsKey(nick))
+			{
 				Thread.Sleep(20);
 			}
 			whoisCalls.Remove(nick);
@@ -222,8 +243,6 @@ namespace BaggyBot
 		{
 			client.Part(channel, reason);
 		}
-
-		public bool Connected { get { return client.Connected; } }
 
 		internal void ChangeClient(IrcClient client)
 		{

@@ -4,9 +4,9 @@ using System.Net;
 
 namespace BaggyBot.Commands
 {
-	class HttpInterface : ICommand
+	internal class HttpInterface : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public void Use(CommandArgs command)
 		{
@@ -25,7 +25,7 @@ namespace BaggyBot.Commands
 			string response;
 			using (var client = new WebClient())
 			{
-				client.Headers.Add("User-Agent", string.Format("BaggyBot/{0} ({1}) IRC stats bot", Bot.Version, Environment.OSVersion));
+				client.Headers.Add("User-Agent", $"BaggyBot/{Bot.Version} ({Environment.OSVersion}) IRC stats bot");
 				try
 				{
 					if (method == "GET")
@@ -42,7 +42,6 @@ namespace BaggyBot.Commands
 				{
 					command.ReturnMessage("The HTTP request failed ({0}).", e.Message);
 				}
-
 			}
 		}
 	}

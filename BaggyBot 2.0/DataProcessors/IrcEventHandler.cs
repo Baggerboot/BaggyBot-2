@@ -1,49 +1,20 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using System.Data;
-using System.Collections.Concurrent;
-using System.Linq;
+﻿using BaggyBot.Collections.Generic;
+using BaggyBot.Configuration;
 using IRCSharp.IRC;
-
+using System;
+using System.Data;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BaggyBot.DataProcessors
 {
-	public class FixedSizedQueue<T> : ConcurrentQueue<T>
-	{
-		private readonly object syncObject = new object();
-		public int Size { get; private set; }
-
-		public FixedSizedQueue(int size)
-		{
-			Size = size;
-		}
-
-		public new void Enqueue(T obj)
-		{
-			base.Enqueue(obj);
-			lock (syncObject)
-			{
-				while (base.Count > Size)
-				{
-					T outObj;
-					base.TryDequeue(out outObj);
-				}
-			}
-		}
-
-		public new T[] ToArray()
-		{
-			return base.ToArray();
-		}
-	}
-
-	class IrcEventHandler
+	internal class IrcEventHandler
 	{
 		private readonly DataFunctionSet dataFunctionSet;
 		private readonly CommandHandler commandHandler;
 		private readonly IrcInterface ircInterface;
 		private readonly StatsHandler statsHandler;
-		private FixedSizedQueue<string> recentMessages = new FixedSizedQueue<string>(15);
+		private FixedSizeQueue<string> recentMessages = new FixedSizeQueue<string>(15);
 
 		public IrcEventHandler(DataFunctionSet dataFunctionSet, IrcInterface ircInterface, CommandHandler commandHandler, StatsHandler statsHandler)
 		{
@@ -105,7 +76,8 @@ namespace BaggyBot.DataProcessors
 				}
 
 				// Handle query console messages
-				if (ControlVariables.QueryConsole && message.Channel == Settings.Instance["operator_nick"] && !message.Message.StartsWith("-py"))
+				// TODO: Allow validation of multiple operators
+				if (ControlVariables.QueryConsole && message.Channel == ConfigManager.Config.Operators.First().Nick && !message.Message.StartsWith("-py"))
 				{
 					Logger.Log(this, "Processing Query Console python command");
 					message.Message = "-py " + message.Message;
@@ -126,7 +98,9 @@ namespace BaggyBot.DataProcessors
 			catch (ArgumentOutOfRangeException)
 			{
 				Logger.Log(this, "\r\nArgumentOutOfRangeException occurred while attempting to process a message", LogLevel.Error);
-				Logger.Log(this, "The message contained the following bytes of data: {" + string.Join(", ", message.Message.ToCharArray().Select(c => string.Format("0x{0:X2}", (byte)c))) + "}", LogLevel.Error);
+				Logger.Log(this, "The message contained the following bytes of data: {"
+					+ string.Join(", ", message.Message.ToCharArray()
+						.Select(c => $"0x{(byte)c:X2}")) + "}", LogLevel.Error);
 				Logger.Log(this, "This message has been discarded.", LogLevel.Warning);
 			}
 		}
@@ -157,10 +131,10 @@ namespace BaggyBot.DataProcessors
 				Logger.Log(this, "Received an unexpected NickServ response: " + notice, LogLevel.Warning);
 			}
 		}
+
 		/// <summary>
 		/// Custom code for checking whether a user has registered with NickServ. Ugly, but it works.
 		/// </summary>
-		/// <param name="line"></param>
 		internal void ProcessFormattedLine(IrcLine line)
 		{
 			// This IRC server does not have a NickServ service.
@@ -176,12 +150,12 @@ namespace BaggyBot.DataProcessors
 			}
 			else if (line.Command.Equals("464"))
 			{
+				//throw new NotImplementedException("Unable to supply the password from the IRC Event Handler.");
 				Logger.Log(this, "Password required by server.", LogLevel.Info);
-				var msg = "PASS " + Settings.Instance["irc_password"];
+				var msg = "PASS " + ircInterface.Password;
 				Logger.Log(this, "Replying with " + msg, LogLevel.Info);
 				ircInterface.SendRaw(msg);
 			}
-			//
 			if (!IgnoredCommands.Contains(line.Command))
 			{
 				switch (line.Command)

@@ -2,8 +2,8 @@
 
 namespace BaggyBot.Database.Model
 {
-	[Table(Name="used_word")]
-	class UsedWord : Poco
+	[Table(Name = "used_word")]
+	internal class UsedWord : Poco
 	{
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
