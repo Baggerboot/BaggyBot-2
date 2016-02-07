@@ -55,6 +55,12 @@ namespace BaggyBot.Database
 		public void SubmitChanges()
 		{
 		}
+
+		private void HandleConnectionFailure()
+		{
+			internalState = ConnectionState.Closed;
+		}
+
 		public bool OpenConnection()
 		{
 			var connectionString = ConfigManager.Config.Backend.ConnectionString;
@@ -79,6 +85,7 @@ namespace BaggyBot.Database
 				if (count != 1)
 				{
 					Logger.Log(this, "Zero or multiple 'version' entries found in the Metadata table. The database connection will be dropped.", LogLevel.Error);
+					HandleConnectionFailure();
 					return false;
 				}
 
@@ -88,6 +95,7 @@ namespace BaggyBot.Database
 					if (!UpgradeDatabase(version.First()))
 					{
 						Logger.Log(this, "Upgrade failed. The database connection will be dropped.", LogLevel.Warning);
+						HandleConnectionFailure();
 						return false;
 					}
 				}
@@ -114,6 +122,7 @@ namespace BaggyBot.Database
 					catch (NpgsqlException f)
 					{
 						Logger.Log(this, "Unable to create a new tableset: An exception occurred({0}: {1}). The database connection will be dropped.", LogLevel.Error, true, f.GetType().Name, f.Message);
+						HandleConnectionFailure();
 						return false;
 					}
 					Logger.Log(this, "The database has been populated. Writing metadata...", LogLevel.Info);
@@ -126,6 +135,7 @@ namespace BaggyBot.Database
 				else
 				{
 					Logger.Log(this, "Unable to retrieve the database version: An exception occurred ({0}: {1}). The database connection will be dropped.", LogLevel.Error, true, e.GetType().Name, e.Message);
+					HandleConnectionFailure();
 					return false;
 				}
 			}
