@@ -58,7 +58,7 @@ namespace BaggyBot
 		{
 			Logger.ClearLog();
 
-			previousVersion = ConfigManager.Config.Metadata.BotVersion;
+			//previousVersion = ConfigManager.Config.Metadata.BotVersion;
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
 			Logger.Log(this, "Starting BaggyBot version " + Version, LogLevel.Info);
 
