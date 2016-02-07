@@ -29,7 +29,7 @@ TODO
    for commands (ideally this should be done for process arguments as well).
  - Improve user matching code. It should be less reluctant to try a NickServ match, and more conservative
    when determining whether a user matches another, already known user.
- - Better finetuning of permissions. Allow specifying multiple operators, and allow specifying permissions
+ - Better finetuning of permissions. Allow specifying multiple bot operators, and allow specifying permissions
    on a per-channel, per-command basis, overriding the default permissions for each command.
  - Additionally, create another permission level for channel operators, and give them access to a few more
    commands if it makes sense.
