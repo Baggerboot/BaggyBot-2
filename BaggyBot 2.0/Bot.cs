@@ -101,13 +101,10 @@ namespace BaggyBot
 				}
 				catch (Exception e)
 				{
+					Logger.logException(this, e, "processing a message");
 					if (Debugger.IsAttached)
 					{
 						Debugger.Break();
-					}
-					else
-					{
-						Logger.logException(this, e, "processing a message");
 					}
 				}
 			});
