@@ -216,12 +216,10 @@
     <Compile Include="DataProcessors\IO\Diagnostics\PerformanceLogger.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="DataProcessors\IO\Diagnostics\PerformanceObject.cs" />
-    <Compile Include="DataProcessors\IO\WolframAlphaAPI.cs" />
     <Compile Include="IrcReportPrinter.cs" />
     <Compile Include="LockObject.cs" />
     <Compile Include="OutputHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DataProcessors\IO\Settings.cs" />
     <Compile Include="Database\SqlConnector.cs" />
     <Compile Include="DataProcessors\StatsHandler.cs" />
     <Compile Include="Tools\ExtensionMethods.cs" />
