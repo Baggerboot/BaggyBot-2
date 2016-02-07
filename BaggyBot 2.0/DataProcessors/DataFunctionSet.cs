@@ -779,59 +779,63 @@ namespace BaggyBot.DataProcessors
 
 		internal IOrderedEnumerable<Topic> FindTopics(int userId, string channel)
 		{
-			Logger.Log(this, "finding words");
-			var words = from word in sqlConnector.Words
-						where word.Uses > 1
-						select word;
-			Logger.Log(this, "building dictionary");
-			var globalWordCount = words.ToDictionary(word => word.Word, word => word.Uses);
-
-			Logger.Log(this, "finding sentences");
-			var userSentencesQuery = (from sentence in sqlConnector.IrcLog
-									  where sentence.SenderId == userId
-									  && sentence.Channel == channel
-									  select sentence.Message).ToList();
-
-			if (userSentencesQuery.Count == 0)
+			lock (lockObj)
 			{
-				return null;
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				Logger.Log(this, "finding words");
+				var words = from word in sqlConnector.Words
+					where word.Uses > 1
+					select word;
+				Logger.Log(this, "building dictionary");
+				var globalWordCount = words.ToDictionary(word => word.Word, word => word.Uses);
+
+				Logger.Log(this, "finding sentences");
+				var userSentencesQuery = (from sentence in sqlConnector.IrcLog
+					where sentence.SenderId == userId
+					      && sentence.Channel == channel
+					select sentence.Message).ToList();
+
+				if (userSentencesQuery.Count == 0)
+				{
+					return null;
+				}
+
+				Logger.Log(this, "filtering commands");
+				var userSentences = userSentencesQuery.ToList().Where(s => !s.StartsWith("-")).ToList();
+
+				Logger.Log(this, "finding user words");
+				IEnumerable<string> userWords = new List<string>();
+				foreach (var sentence in userSentences)
+				{
+					userWords = userWords.Concat(sentence.Split(' '));
+				}
+
+				Logger.Log(this, "grouping user words");
+				var userWordCount = userWords.GroupBy(word => word).Select(group => Tuple.Create(group.Key, group.Count()));
+
+				Logger.Log(this, "calculating usage difference of " + userWordCount.Count() + " words");
+
+				var topics = (from pair in userWordCount
+					where globalWordCount.ContainsKey(pair.Item1)
+					let userCount = pair.Item2
+					let globalCount = globalWordCount[pair.Item1]
+					where userCount <= globalCount
+					select new Topic(pair.Item1, userCount, globalCount, userCount/(double) globalCount)).ToList();
+
+				Logger.Log(this, "\ncalculating average usage difference");
+				var avgDifference = topics.Average(topic => topic.Score);
+				var maxGlobalCount = globalWordCount.Max(pair => pair.Value);
+				var avgMultiplier = 1/avgDifference;
+
+				Logger.Log(this, "multiplying difference with multiplier");
+				foreach (var topic in topics)
+				{
+					topic.Normalise(avgMultiplier);
+					topic.ScoreByOccurrence(maxGlobalCount);
+				}
+				lockObj.LockMessage = "None";
+				return topics.OrderByDescending(pair => pair.Score);
 			}
-
-			Logger.Log(this, "filtering commands");
-			var userSentences = userSentencesQuery.ToList().Where(s => !s.StartsWith("-")).ToList();
-
-			Logger.Log(this, "finding user words");
-			IEnumerable<string> userWords = new List<string>();
-			foreach (var sentence in userSentences)
-			{
-				userWords = userWords.Concat(sentence.Split(' '));
-			}
-
-			Logger.Log(this, "grouping user words");
-			var userWordCount = userWords.GroupBy(word => word).Select(group => Tuple.Create(group.Key, group.Count()));
-
-			Logger.Log(this, "calculating usage difference of " + userWordCount.Count() + " words");
-
-			var topics = (from pair in userWordCount
-						  where globalWordCount.ContainsKey(pair.Item1)
-						  let userCount = pair.Item2
-						  let globalCount = globalWordCount[pair.Item1]
-						  where userCount <= globalCount
-						  select new Topic(pair.Item1, userCount, globalCount, userCount / (double)globalCount)).ToList();
-
-			Logger.Log(this, "\ncalculating average usage difference");
-			var avgDifference = topics.Average(topic => topic.Score);
-			var maxGlobalCount = globalWordCount.Max(pair => pair.Value);
-			var avgMultiplier = 1 / avgDifference;
-
-			Logger.Log(this, "multiplying difference with multiplier");
-			foreach (var topic in topics)
-			{
-				topic.Normalise(avgMultiplier);
-				topic.ScoreByOccurrence(maxGlobalCount);
-			}
-
-			return topics.OrderByDescending(pair => pair.Score);
 		}
 
 		public string GetMiscData(string type, string key)
