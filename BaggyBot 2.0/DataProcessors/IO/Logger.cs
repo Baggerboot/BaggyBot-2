@@ -180,7 +180,7 @@ namespace BaggyBot
 		internal static void logException(object sender, Exception e, string currentAction)
 		{
 			var stackTrace = new StackTrace(e, true).GetFrame(0);
-			Log(sender, $"An unhandled exception (type: {e.GetType()}) occurred while {currentAction}. Exception message: \"{e.Message}\"; in file:{stackTrace.GetFileName()}:{stackTrace.GetFileLineNumber()}");
+			Log(sender, $"An unhandled exception (type: {e.GetType()}) occurred while {currentAction}. Exception message: \"{e.Message}\"; in file:{stackTrace.GetFileName()}:{stackTrace.GetFileLineNumber()}", LogLevel.Error);
 		}
 	}
 }
