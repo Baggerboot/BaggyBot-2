@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
-namespace BaggyBot
+﻿namespace BaggyBot
 {
 	/*public class Settings
 	{

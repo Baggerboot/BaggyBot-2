@@ -3,7 +3,7 @@ using System.IO;
 
 namespace BaggyBot.Commands
 {
-	class ProducerConsumerStream : Stream
+	internal class ProducerConsumerStream : Stream
 	{
 		private readonly MemoryStream innerStream;
 		private readonly object streamLock = new object();
@@ -15,15 +15,16 @@ namespace BaggyBot.Commands
 			innerStream = new MemoryStream();
 		}
 
-		public override bool CanRead { get { return true; } }
+		public override bool CanRead => true;
 
-		public override bool CanSeek { get { return false; } }
+		public override bool CanSeek => false;
 
-		public override bool CanWrite { get { return true; } }
+		public override bool CanWrite => true;
 
 		public override void Flush()
 		{
-			lock (streamLock) {
+			lock (streamLock)
+			{
 				innerStream.Flush();
 			}
 		}
@@ -32,7 +33,8 @@ namespace BaggyBot.Commands
 		{
 			get
 			{
-				lock (streamLock) {
+				lock (streamLock)
+				{
 					return innerStream.Length;
 				}
 			}
@@ -46,7 +48,8 @@ namespace BaggyBot.Commands
 
 		public override int Read(byte[] buffer, int offset, int count)
 		{
-			lock (streamLock) {
+			lock (streamLock)
+			{
 				innerStream.Position = readPosition;
 				var red = innerStream.Read(buffer, offset, count);
 				readPosition = innerStream.Position;
@@ -67,7 +70,8 @@ namespace BaggyBot.Commands
 
 		public override void Write(byte[] buffer, int offset, int count)
 		{
-			lock (streamLock) {
+			lock (streamLock)
+			{
 				innerStream.Position = writePosition;
 				innerStream.Write(buffer, offset, count);
 				writePosition = innerStream.Position;

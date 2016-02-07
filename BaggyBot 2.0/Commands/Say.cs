@@ -1,10 +1,11 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Say : ICommand
+	internal class Say : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
-		public void Use(CommandArgs command){
+		public void Use(CommandArgs command)
+		{
 			command.ReturnMessage(command.FullArgument);
 		}
 	}

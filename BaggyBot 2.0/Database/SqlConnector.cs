@@ -1,37 +1,32 @@
-﻿// To switch between compiling for Transact-SQL and PostgreSQL, comment and uncomment the correct options
-//#define mssql
-
-//BaggyBot.Database.PostgreSQL
-
-using System;
-using System.Data;
-using System.Collections.Generic;
-using System.Linq;
-using BaggyBot.Configuration;
-using LinqToDB.Data;
-using LinqToDB.DataProvider.PostgreSQL;
+﻿using BaggyBot.Configuration;
 using BaggyBot.Database.Model;
 using BaggyBot.Database.Upgrades;
 using LinqToDB;
+using LinqToDB.Data;
+using LinqToDB.DataProvider.PostgreSQL;
 using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using Metadata = BaggyBot.Database.Model.Metadata;
 
 namespace BaggyBot.Database
 {
-	class SqlConnector : IDisposable
+	internal class SqlConnector : IDisposable
 	{
 		private DataConnection connection;
 
-		public ITable<LinkedUrl> LinkedUrls;
-		public ITable<User> Users;
-		public ITable<UserCredential> UserCredentials;
-		public ITable<UserStatistic> UserStatistics;
-		public ITable<UsedEmoticon> Emoticons;
-		public ITable<IrcLog> IrcLog;
-		public ITable<KeyValuePair> KeyValuePairs;
-		public ITable<Quote> Quotes;
-		public ITable<UsedWord> Words;
-		public ITable<MiscData> MiscData;
+		public ITable<LinkedUrl> LinkedUrls { get; private set; }
+		public ITable<User> Users { get; private set; }
+		public ITable<UserCredential> UserCredentials { get; private set; }
+		public ITable<UserStatistic> UserStatistics { get; private set; }
+		public ITable<UsedEmoticon> Emoticons { get; private set; }
+		public ITable<IrcLog> IrcLog { get; private set; }
+		public ITable<KeyValuePair> KeyValuePairs { get; private set; }
+		public ITable<Quote> Quotes { get; private set; }
+		public ITable<UsedWord> Words { get; private set; }
+		public ITable<MiscData> MiscData { get; private set; }
 
 		private ITable<Metadata> metadata;
 
@@ -55,12 +50,10 @@ namespace BaggyBot.Database
 		public void Insert<T>(T row)
 		{
 			connection.Insert(row);
-
 		}
 
 		public void SubmitChanges()
 		{
-
 		}
 		public bool OpenConnection()
 		{
@@ -191,10 +184,7 @@ namespace BaggyBot.Database
 
 		protected virtual void Dispose(bool cleanAll)
 		{
-			if (connection != null)
-			{
-				connection.Dispose();
-			}
+			connection?.Dispose();
 		}
 
 		~SqlConnector()
@@ -214,7 +204,6 @@ namespace BaggyBot.Database
 			var cmd = connection.CreateCommand();
 			cmd.CommandText = query;
 			throw new NotImplementedException();
-
 		}
 
 		public void Update<T>(T match)

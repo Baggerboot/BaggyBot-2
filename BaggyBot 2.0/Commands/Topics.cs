@@ -4,9 +4,9 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	class Topics : ICommand
+	internal class Topics : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		private readonly DataFunctionSet dataFunctionSet;
 
@@ -21,38 +21,46 @@ namespace BaggyBot.Commands
 			var userId = dataFunctionSet.GetIdFromNick(nick);
 			var topics = dataFunctionSet.FindTopics(userId, channel);
 
-			if (topics == null) {
+			if (topics == null)
+			{
 				replyCallback("Could not find any IRC data by {0}. Did you spell their name correctly?", new object[] { nick });
 				return;
 			}
 
 			string topicString;
 
-			if (showDebugInfo) {
-				topicString = string.Join(", ", topics.Take(20).Select(pair => string.Format("\x02{0}\x02 ({1}/{2}: {3:N2})", pair.Name, pair.UserCount, pair.GlobalCount, pair.Score)));
-			} else {
+			if (showDebugInfo)
+			{
+				topicString = string.Join(", ", topics.Take(20).Select(pair => $"\x02{pair.Name}\x02 ({pair.UserCount}/{pair.GlobalCount}: {pair.Score:N2})"));
+			}
+			else {
 				topicString = string.Join(", ", topics.Take(20).Select(pair => pair.Name));
 			}
 
-			
-
-			replyCallback("Words associated with {0}: {1}", new object[] {nick, topicString });
+			replyCallback("Words associated with {0}: {1}", new object[] { nick, topicString });
 		}
 
 		public void Use(CommandArgs command)
 		{
 			var showDebugInfo = false;
-			if (command.Args[0] == "-d") {
+			if (command.Args[0] == "-d")
+			{
 				command.Args = command.Args.Skip(1).ToArray();
 				showDebugInfo = true;
 			}
-			if (command.Args.Length == 0) {
+			if (command.Args.Length == 0)
+			{
 				ShowTopics(command.Sender.Nick, command.Channel, command.Reply, showDebugInfo);
-			} else if (command.Args.Length > 2) {
+			}
+			else if (command.Args.Length > 2)
+			{
 				command.ReturnMessage("Usage: -topics [nick]");
-			} else if(command.Args.Length == 2){
+			}
+			else if (command.Args.Length == 2)
+			{
 				ShowTopics(command.Args[0], command.Args[1], command.Reply, showDebugInfo);
-			} else {
+			}
+			else {
 				ShowTopics(command.Args[0], command.Channel, command.Reply, showDebugInfo);
 			}
 		}

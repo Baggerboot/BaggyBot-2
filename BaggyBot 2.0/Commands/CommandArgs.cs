@@ -10,7 +10,7 @@ namespace BaggyBot.Commands
 		public IrcUser Sender;
 		public string Channel;
 		public string FullArgument;
-		public readonly Action<string, string> replyCallback;
+		public readonly Action<string, string> ReplyCallback;
 
 		public CommandArgs(string command, string[] args, IrcUser sender, string channel, string fullArgument, Action<string, string> replyCallback)
 		{
@@ -19,24 +19,25 @@ namespace BaggyBot.Commands
 			Sender = sender;
 			Channel = channel;
 			FullArgument = fullArgument;
-			this.replyCallback = replyCallback;
+			this.ReplyCallback = replyCallback;
 		}
+
 		public void Reply(string format, params object[] args)
 		{
 			var message = Sender.Nick + ", " + string.Format(format, args);
-			replyCallback(Channel, message);
+			this.ReplyCallback(Channel, message);
 		}
+
 		public void ReturnMessage(string format, params object[] args)
 		{
 			if (args.Length == 0)
 			{
-				replyCallback(Channel, format);
+				this.ReplyCallback(Channel, format);
 			}
 			else
 			{
-				replyCallback(Channel, string.Format(format, args));
+				this.ReplyCallback(Channel, string.Format(format, args));
 			}
-
 		}
 	}
 }

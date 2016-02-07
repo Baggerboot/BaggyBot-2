@@ -1,16 +1,15 @@
-﻿using System;
+﻿using BaggyBot.Configuration;
+using BaggyBot.Database;
+using BaggyBot.DataProcessors;
+using BaggyBot.Tools;
+using IRCSharp;
+using IRCSharp.IrcCommandProcessors.Quirks;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
-using IRCSharp;
-using BaggyBot.Database;
-using BaggyBot.Tools;
-using BaggyBot.DataProcessors;
 using System.Threading;
 using System.Threading.Tasks;
-using BaggyBot.Configuration;
-using IronPython.Modules;
-using IRCSharp.IrcCommandProcessors.Quirks;
 
 namespace BaggyBot
 {
@@ -49,7 +48,7 @@ namespace BaggyBot
 
 		public static DateTime LastUpdate => MiscTools.RetrieveLinkerTimestamp();
 
-	    // If the bot is started in update mode, a previous version has to be specified.
+		// If the bot is started in update mode, a previous version has to be specified.
 		// The bot will then announce whether the update was a success or a failure.
 		// To determine this, the previous version is stored in here.
 		// If the bot is not started in update mode, the value of this field remains null.
@@ -58,7 +57,7 @@ namespace BaggyBot
 		public Bot()
 		{
 			Logger.ClearLog();
-			
+
 			previousVersion = ConfigManager.Config.Metadata.BotVersion;
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
 			Logger.Log(this, "Starting BaggyBot version " + Version, LogLevel.Info);
@@ -90,7 +89,6 @@ namespace BaggyBot
 		{
 			Console.WriteLine("Shutting down bot instance (version {0})", Version);
 		}
-
 
 		private void HookupIrcEvents()
 		{
@@ -134,8 +132,7 @@ namespace BaggyBot
 				if (sqlConnector.OpenConnection())
 					Logger.Log(this, "Database connection established", LogLevel.Info);
 				else
-					Logger.Log(this, "Database connection not established. Bot functionality will be very limited.",
-						LogLevel.Warning);
+					Logger.Log(this, "Database connection not established. Bot functionality will be very limited.", LogLevel.Warning);
 			}
 			catch (Exception e)
 			{
@@ -368,7 +365,6 @@ namespace BaggyBot
 			EnterMainLoop();
 		}
 
-
 		internal void RequestUpdate(string channel, bool updateFiles)
 		{
 			var state = client.GetClientState();
@@ -379,7 +375,7 @@ namespace BaggyBot
 				return;
 			}
 			ircInterface.Disconnect("Updating...");
-			Process.Start("mono", string.Format("BaggyBot20.exe -updated {0} {1}", data, channel));
+			Process.Start("mono", $"BaggyBot20.exe -updated {data} {channel}");
 			Environment.Exit(0);
 		}
 
@@ -414,10 +410,21 @@ namespace BaggyBot
 					break;
 				case ConfigManager.LoadResult.NewFileCreated:
 					Logger.Log(null, "A new configuration file has been created, please fill it with the correct settings. BaggyBot will now exit.", LogLevel.Info);
-					return;
+					goto handleExit;
 				case ConfigManager.LoadResult.Failure:
 					Logger.Log(null, "Unable to load the configuration file. BaggyBot will now exit.");
-					return;
+					goto handleExit;
+					handleExit:
+					// If we're running on Windows, the application was most likely started by double-clicking the executable.
+					// This creates a command prompt window that will immediately disappear when the bot exits.
+					// For this reason, we should wait for user input so they can read the messages that have just been displayed.
+					if (Environment.OSVersion.Platform.ToString().Contains("Win32"))
+					{
+						Console.WriteLine("Press any key to exit... ");
+						Console.ReadKey();
+					}
+					Environment.Exit(1);
+					break;
 			}
 			Logger.UseColouredOutput = colours;
 

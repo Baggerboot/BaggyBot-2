@@ -2,19 +2,18 @@
 
 namespace BaggyBot.Commands
 {
-	class Search : ICommand
+	internal class Search : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
-		//private DataFunctionSet dataFunctionSet;
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public Search(DataFunctionSet df)
 		{
+			// TODO: Implement the Search command again
 			//dataFunctionSet = df;
 		}
 
 		public void Use(CommandArgs command)
 		{
-
 		}
 	}
 }

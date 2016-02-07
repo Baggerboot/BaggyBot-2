@@ -1,9 +1,9 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Shutdown : ICommand
+	internal class Shutdown : ICommand
 	{
 		private readonly Bot program;
-		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		public PermissionLevel Permissions => PermissionLevel.BotOperator;
 
 		public Shutdown(Bot prg)
 		{

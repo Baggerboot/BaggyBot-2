@@ -103,7 +103,7 @@ namespace BaggyBot
 			if (sender != null)
 			{
 				var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
-				var location = string.Format("[{0}-{1:X4}] ", sender.GetType().Name.Truncate(16), sender.GetHashCode());
+				var location = $"[{sender.GetType().Name.Truncate(16)}-{sender.GetHashCode():X4}] ";
 				lineBuilder.Insert(0, (time + location).PadRight(prefixLength));
 			}
 			else

@@ -15,7 +15,7 @@ using IRCSharp.IRC;
 
 namespace BaggyBot.DataProcessors
 {
-	class StatsHandler
+	internal class StatsHandler
 	{
 		private readonly DataFunctionSet dataFunctionSet;
 		private readonly IrcInterface ircInterface;
@@ -26,8 +26,7 @@ namespace BaggyBot.DataProcessors
 				private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
 		*/
 		private readonly string[] snagMessages = { "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
-
-
+		
 		public StatsHandler(DataFunctionSet dm, IrcInterface inter)
 		{
 			dataFunctionSet = dm;
@@ -78,7 +77,7 @@ namespace BaggyBot.DataProcessors
 		private void ProcessWord(IrcMessage message, string word, int sender)
 		{
 			var lword = word.ToLower();
-			var cword = textOnly.Replace(lword, "");
+			var cword = textOnly.Replace(lword, string.Empty);
 			if (word.StartsWith("http://") || word.StartsWith("https://"))
 			{
 				dataFunctionSet.IncrementUrl(word, sender, message.Message);
@@ -93,7 +92,7 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		readonly Regex textOnly = new Regex("[^a-z]");
+		private readonly Regex textOnly = new Regex("[^a-z]");
 
 		private void GetEmoticons(int userId, IEnumerable<string> words)
 		{

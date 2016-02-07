@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
-
+using System.IO;
 
 namespace BaggyBot.Tools
 {
@@ -11,20 +10,24 @@ namespace BaggyBot.Tools
 		// ReSharper disable InconsistentNaming
 		[PythonFunction]
 		public string plot(IEnumerable<object> data, string x = "Index", string y = "Value")
-
 		{
-			string filename;
+			// TODO: Create new plot generation script and add it to the codebase
+			throw new NotImplementedException("Generating plots is currently not possible");
+			/*string filename;
 			int num;
-			using (var w = new StreamWriter(MiscTools.GetContentName(out filename, out num, "plots", ".csv", 4))) {
+			using (var w = new StreamWriter(MiscTools.GetContentName(out filename, out num, "plots", ".csv", 4)))
+			{
 				w.WriteLine(x + ", " + y);
 				var i = 0;
-				foreach (var item in data) {
+				foreach (var item in data)
+				{
 					w.WriteLine("{0}, {1}", i, item);
 					i++;
 				}
 			}
-			Process.Start("R", string.Format("-f /var/www/html/usercontent/plots/generate-plot.R --args /var/www/html/usercontent/plots/{0} /var/www/html/usercontent/plots/{1:X4}.png {2} {3}", filename, num, x, y));
-			return string.Format(" http://jgeluk.net/usercontent/plots/{0:X4}.png ", num); 		
+			Process.Start("R",
+				$"-f /var/www/html/usercontent/plots/generate-plot.R --args /var/www/html/usercontent/plots/{filename} /var/www/html/usercontent/plots/{num:X4}.png {x} {y}");
+			return $" http://jgeluk.net/usercontent/plots/{num:X4}.png ";*/
 		}
 
 		[PythonFunction]
@@ -38,7 +41,8 @@ namespace BaggyBot.Tools
 		{
 			var values = new List<object>();
 
-			for (float f = 0; f < resolution; f++) {
+			for (float f = 0; f < resolution; f++)
+			{
 				values.Add(function(f));
 			}
 			return plot(values, x, y);

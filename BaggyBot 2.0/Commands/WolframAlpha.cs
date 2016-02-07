@@ -1,19 +1,18 @@
-﻿using System;
+﻿using BaggyBot.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Xml;
 using System.Net;
-using BaggyBot.Configuration;
+using System.Xml;
 
 namespace BaggyBot.Commands
 {
-	class WolframAlpha : ICommand
+	internal class WolframAlpha : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		private XmlNode lastDisplayedResult;
-
 
 		private XmlNode GetNextSibling(XmlNode startingPoint)
 		{
@@ -33,7 +32,6 @@ namespace BaggyBot.Commands
 
 			return currentSibling;
 		}
-
 
 		private string ShowMore()
 		{
@@ -85,7 +83,8 @@ namespace BaggyBot.Commands
 
 			var appid = ConfigManager.Config.Integrations.WolframAlpha;
 
-			var uri = string.Format("http://api.wolframalpha.com/v2/query?appid={0}&input={1}&ip={2}&format=plaintext&units=metric", appid, Uri.EscapeDataString(command.FullArgument), command.Sender.Hostmask);
+			var uri =
+				$"http://api.wolframalpha.com/v2/query?appid={appid}&input={Uri.EscapeDataString(command.FullArgument)}&ip={command.Sender.Hostmask}&format=plaintext&units=metric";
 			//var escaped = Uri.EscapeDataString(uri);
 
 			var rq = WebRequest.Create(uri);
@@ -155,9 +154,8 @@ namespace BaggyBot.Commands
 				return null;
 
 			nodes.OrderByDescending(node => double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture));
-			var didyoumeans = nodes.Select(node => string.Format("\"{0}\" (score: {1}%)", node.InnerText,
-				Math.Round(double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture) * 100)
-			));
+			var didyoumeans = nodes.Select(node =>
+				$"\"{node.InnerText}\" (score: {Math.Round(double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture)*100)}%)");
 
 			var firstItems = string.Join(", ", didyoumeans.Take(didyoumeans.Count() - 1));
 

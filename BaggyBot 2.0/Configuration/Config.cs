@@ -1,21 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using BaggyBot.Commands;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Convert = System.Convert;
-
-/*using YamlDotNet.RepresentationModel;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;*/
-
-
 namespace BaggyBot.Configuration
 {
 	internal static class ConfigManager
@@ -29,8 +20,8 @@ namespace BaggyBot.Configuration
 
 		private static string fileName;
 
-		public static Configuration Config;
-		private static Configuration ConfigOnDisk;
+		public static Configuration Config { get; private set; }
+		//private static Configuration ConfigOnDisk;
 
 		public static LoadResult Load(string fileName)
 		{
@@ -59,10 +50,10 @@ namespace BaggyBot.Configuration
 			{
 				Config = deserialiser.Deserialize<Configuration>(reader);
 			}
-			using (var reader = File.OpenText(fileName))
+			/*using (var reader = File.OpenText(fileName))
 			{
 				ConfigOnDisk = deserialiser.Deserialize<Configuration>(reader);
-			}
+			}*/
 			return LoadResult.Success;
 		}
 
@@ -110,10 +101,6 @@ namespace BaggyBot.Configuration
 		/// Recurses through the properties of an object, comparing them against the properties of another object,
 		/// adding all unmatched properties to a list.
 		/// </summary>
-		/// <param name="properties"></param>
-		/// <param name="fullName"></param>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
 		private static Dictionary<string, object> CompareMembers(Dictionary<string, object> properties, string fullName, object a, object b)
 		{
 			var aType = a.GetType();
@@ -128,7 +115,7 @@ namespace BaggyBot.Configuration
 				var aPropVal = aProp.GetValue(a);
 				var bPropVal = aProp.GetValue(b);
 
-				if (Convert.GetTypeCode(aPropVal) == TypeCode.Object)
+				if (System.Convert.GetTypeCode(aPropVal) == TypeCode.Object)
 				{
 					if (aPropVal is IList)
 					{
@@ -147,7 +134,6 @@ namespace BaggyBot.Configuration
 					{
 						CompareMembers(properties, fullName + "." + aProp.Name, aPropVal, bPropVal);
 					}
-
 				}
 				else
 				{
@@ -177,7 +163,6 @@ namespace BaggyBot.Configuration
 		public Identity[] Identities { get; set; } = new Identity[0];
 		public Operator[] Operators { get; set; } = new Operator[0];
 		public Server[] Servers { get; set; } = new Server[0];
-
 	}
 
 	internal class Interpreters
@@ -205,8 +190,8 @@ namespace BaggyBot.Configuration
 		public bool UseTls { get; set; } = false;
 		public bool VerifyCertificate { get; set; } = true;
 		public string[] CompatModes { get; set; } = new string[0];
-
 	}
+
 	internal class Operator
 	{
 		public string Nick { get; set; } = "*";
@@ -214,6 +199,7 @@ namespace BaggyBot.Configuration
 		public string Host { get; set; } = "*";
 		public string Uid { get; set; } = "*";
 	}
+
 	internal class Identity
 	{
 		public string Nick { get; set; } = "BaggyBot";
@@ -248,8 +234,7 @@ namespace BaggyBot.Configuration
 	{
 		public string AppId { get; set; }
 	}
-
-
+	
 	internal static class StringExtensions
 	{
 		private static string ToCamelOrPascalCase(string str, Func<char, char> firstLetterTransform)
@@ -263,9 +248,8 @@ namespace BaggyBot.Configuration
 
 		/// <summary>
 		/// Convert the string with underscores (this_is_a_test) or hyphens (this-is-a-test) to
-		///             camel case (thisIsATest). Camel case is the same as Pascal case, except the first letter
-		///             is lowercase.
-		/// 
+		/// camel case (thisIsATest). Camel case is the same as Pascal case, except the first letter
+		/// is lowercase.
 		/// </summary>
 		/// <param name="str">String to convert</param>
 		/// <returns>
@@ -278,9 +262,8 @@ namespace BaggyBot.Configuration
 
 		/// <summary>
 		/// Convert the string with underscores (this_is_a_test) or hyphens (this-is-a-test) to
-		///             pascal case (ThisIsATest). Pascal case is the same as camel case, except the first letter
-		///             is uppercase.
-		/// 
+		/// pascal case (ThisIsATest). Pascal case is the same as camel case, except the first letter
+		/// is uppercase.
 		/// </summary>
 		/// <param name="str">String to convert</param>
 		/// <returns>
@@ -293,8 +276,7 @@ namespace BaggyBot.Configuration
 
 		/// <summary>
 		/// Convert the string from camelcase (thisIsATest) to a hyphenated (this-is-a-test) or
-		///             underscored (this_is_a_test) string
-		/// 
+		/// underscored (this_is_a_test) string
 		/// </summary>
 		/// <param name="str">String to convert</param><param name="separator">Separator to use between segments</param>
 		/// <returns>

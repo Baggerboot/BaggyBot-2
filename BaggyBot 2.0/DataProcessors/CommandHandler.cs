@@ -12,7 +12,7 @@ using WolframAlpha = BaggyBot.Commands.WolframAlpha;
 
 namespace BaggyBot.DataProcessors
 {
-	class CommandHandler
+	internal class CommandHandler
 	{
 		private readonly Dictionary<string, ICommand> commands;
 		private readonly IrcInterface ircInterface;
@@ -95,7 +95,7 @@ namespace BaggyBot.DataProcessors
 					var value = cmdInfo.Args.ToList();
 					value.Insert(1, "say");
 					((Alias)commands["alias"]).Use(
-						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.replyCallback));
+						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.ReplyCallback));
 				}
 				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
 				{

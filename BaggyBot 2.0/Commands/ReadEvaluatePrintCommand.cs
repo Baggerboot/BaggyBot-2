@@ -7,9 +7,9 @@ namespace BaggyBot.Commands
 {
 	internal abstract class ReadEvaluatePrintCommand
 	{
-		protected int ThreadId = 0;
-		protected IrcInterface IrcInterface;
-		protected InterpreterSecurity Security;
+		protected int ThreadId { get; set; } = 0;
+		protected IrcInterface IrcInterface { get; set; }
+		protected InterpreterSecurity Security { get; set; }
 		internal enum InterpreterSecurity
 		{
 			Allow,

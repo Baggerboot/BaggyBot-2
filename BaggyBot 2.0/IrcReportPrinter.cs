@@ -3,7 +3,7 @@ using Mono.CSharp;
 
 namespace BaggyBot
 {
-	class IrcReportPrinter : ReportPrinter
+	internal class IrcReportPrinter : ReportPrinter
 	{
 		private readonly Queue<AbstractMessage> unreadMessages = new Queue<AbstractMessage>();
 

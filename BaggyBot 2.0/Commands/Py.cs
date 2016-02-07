@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using BaggyBot.DataProcessors;
 using BaggyBot.Tools;
+using IronPython.Hosting;
 using IronPython.Runtime;
 using IronPython.Runtime.Exceptions;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
-using IronPython.Hosting;
+using System;
+using System.Collections.Generic;
 using System.IO;
-using BaggyBot.DataProcessors;
+using System.Linq;
+using System.Text;
+using System.Threading;
 
 namespace BaggyBot.Commands
 {
-	class Py : ReadEvaluatePrintCommand, ICommand, IDisposable
+	internal class Py : ReadEvaluatePrintCommand, ICommand, IDisposable
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 		private readonly ScriptEngine engine;
 		private readonly ScriptScope scope;
 		private readonly StreamReader outputStreamReader;
@@ -49,7 +49,7 @@ namespace BaggyBot.Commands
 			{
 				thread.Abort();
 			}
-			IrcInterface.SendMessage(command.Channel, string.Format("Done. {0} running threads have been aborted.", threads.Count));
+			IrcInterface.SendMessage(command.Channel, $"Done. {threads.Count} running threads have been aborted.");
 			threads.Clear();
 		}
 		protected override void Threads(CommandArgs command)
@@ -67,7 +67,7 @@ namespace BaggyBot.Commands
 
 		protected override void GetBuffer(CommandArgs command)
 		{
-			IrcInterface.SendMessage(command.Channel, string.Format("{0}, \"{1}\"", command.Sender.Nick, commandBuilder));
+			IrcInterface.SendMessage(command.Channel, $"{command.Sender.Nick}, \"{commandBuilder}\"");
 		}
 
 		/// <summary>
@@ -96,19 +96,23 @@ namespace BaggyBot.Commands
 			{
 				IrcInterface.SendMessage(command.Channel, "Access to my guts is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("System.Diagnostics.Process")))
+			}
+			if (command.FullArgument != null && command.FullArgument.Contains("System.Diagnostics.Process"))
 			{
 				IrcInterface.SendMessage(command.Channel, "Process control is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("GetMethod")))
+			}
+			if (command.FullArgument != null && command.FullArgument.Contains("GetMethod"))
 			{
 				IrcInterface.SendMessage(command.Channel, "Method invocation trough reflection is restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && (command.FullArgument.Contains("import posix")))
+			}
+			if (command.FullArgument != null && command.FullArgument.Contains("import posix"))
 			{
 				IrcInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
 				return false;
-			} if (command.FullArgument != null && ((command.FullArgument.Contains("putenv") || command.FullArgument.Contains("listdir") || command.FullArgument.Contains("mkdir") || command.FullArgument.Contains("makedirs") || command.FullArgument.Contains("remove") || command.FullArgument.Contains("rename") || command.FullArgument.Contains("rmdir") || command.FullArgument.Contains("exit")) && command.FullArgument.Contains("os")))
+			}
+			if (command.FullArgument != null && ((command.FullArgument.Contains("putenv") || command.FullArgument.Contains("listdir") || command.FullArgument.Contains("mkdir") || command.FullArgument.Contains("makedirs") || command.FullArgument.Contains("remove") || command.FullArgument.Contains("rename") || command.FullArgument.Contains("rmdir") || command.FullArgument.Contains("exit")) && command.FullArgument.Contains("os")))
 			{
 				IrcInterface.SendMessage(command.Channel, "Posix module calls are restricted to the operator.");
 				return false;
@@ -189,7 +193,6 @@ namespace BaggyBot.Commands
 						Thread.Sleep(250); // make sure we don't spam the receiving end too much
 					}
 				}
-
 			}
 			catch (UnboundNameException e)
 			{

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Timers;
 
@@ -8,20 +7,13 @@ namespace BaggyBot
 	/// <summary>
 	/// This class gathers data about the bot's performance and sends it to a logger so it can be written to a log file.
 	/// </summary>
-	class BotDiagnostics : IDisposable
+	internal class BotDiagnostics : IDisposable
 	{
+		private const string PerfLogFile = "performance_log.csv";
 		private readonly IrcInterface ircInterface;
 		private Timer taskScheduler;
 		private PerformanceCounter pc;
-		private const string PerfLogFile = "performance_log.csv";
 		private readonly PerformanceLogger performanceLogger = new PerformanceLogger(PerfLogFile);
-
-		public void Dispose()
-		{
-			pc.Dispose();
-			performanceLogger.Dispose();
-			taskScheduler.Dispose();
-		}
 
 		public BotDiagnostics(IrcInterface ircInterface)
 		{
@@ -29,8 +21,15 @@ namespace BaggyBot
 
 			AppDomain.CurrentDomain.UnhandledException += HandleException;
 		}
+		
+		public void Dispose()
+		{
+			pc.Dispose();
+			performanceLogger.Dispose();
+			taskScheduler.Dispose();
+		}
 
-		private void HandleException(Object sender, UnhandledExceptionEventArgs args)
+		private void HandleException(object sender, UnhandledExceptionEventArgs args)
 		{
 			var e = (Exception)args.ExceptionObject;
 			var trace = new StackTrace(e, true);

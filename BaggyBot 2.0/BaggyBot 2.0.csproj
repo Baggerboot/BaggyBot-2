@@ -150,6 +150,7 @@
   <ItemGroup>
     <Compile Include="BotDiagnostics.cs" />
     <Compile Include="CodeFormatter.cs" />
+    <Compile Include="Collections\Generic\FixedSizeQueue.cs" />
     <Compile Include="Commands\Alias.cs" />
     <Compile Include="Commands\Bf.cs" />
     <Compile Include="Commands\Convert.cs" />

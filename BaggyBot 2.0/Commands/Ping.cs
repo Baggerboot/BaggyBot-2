@@ -6,9 +6,9 @@ using System.Threading;
 
 namespace BaggyBot.Commands
 {
-	class Ping : ICommand
+	internal class Ping : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		private string Colour(int? code)
 		{
@@ -77,9 +77,8 @@ namespace BaggyBot.Commands
 				var raw = string.Join(", ", pings.Select(reply => (reply.Status == IPStatus.Success ? Colourise(reply.RoundtripTime) + reply.RoundtripTime + "ms" + Colour(null) : Colour(4) + "failed" + Colour(null))));
 				var word = successCount == 1 ? "reply" : "replies";
 				var address = pings[0].Address == null ? "Unknown IP Address" : pings[0].Address.ToString();
-				var number = (double.IsNaN(average) ? "NaN " : average.ToString());
+				var number = double.IsNaN(average) ? "NaN " : average.ToString();
 				command.ReturnMessage("{0} {1} from {2}, averaging {3} ({4})", successCount, word, address, Colourise(average) + number + "ms" + Colour(null), raw);
-
 			}
 			else
 			{

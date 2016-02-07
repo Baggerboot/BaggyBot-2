@@ -1,9 +1,8 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Help : ICommand
+	internal class Help : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
-
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public void Use(CommandArgs command)
 		{
@@ -12,11 +11,13 @@
 
 		private string GetHelpMessage(string[] args)
 		{
-			const string defaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: help, ns, ping, regen, resolve, rdns, version. -- Operator commands: crash, ed, feature, get, join, part, query, say, set, shutdown, snag, sqlreconnect.";
+			const string DefaultReply = "Use -help <command> to get help about a specific command. -- Regular commands: ";
 
-			switch (args.Length) {
+			switch (args.Length)
+			{
 				case 1:
-					switch (args[0]) {
+					switch (args[0])
+					{
 						case "ed":
 							return "Shows detailed information about an exception. Usage: -ed [-ra] [-r] [-i <index>]";
 						case "help":
@@ -54,10 +55,10 @@
 						case "wa":
 							return "Queries Wolfram Alpha and returns the result. Usage: -wa <query>";
 						default:
-							return defaultReply;
+							return DefaultReply;
 					}
 				default:
-					return defaultReply;
+					return DefaultReply;
 			}
 		}
 	}

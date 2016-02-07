@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -7,9 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
 {
-	class UrbanDictionary : ICommand
+	internal class UrbanDictionary : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public void Use(CommandArgs command)
 		{
@@ -28,7 +27,7 @@ namespace BaggyBot.Commands
 
 			string name;
 			string definition;
-			string example = "";
+			string example = string.Empty;
 
 			name = (string)obj.list[0].word;
 
@@ -66,7 +65,7 @@ namespace BaggyBot.Commands
 				example = example.Substring(0, 250);
 				example += " (...)";
 			}
-			var exampleString = string.IsNullOrWhiteSpace(example) ? "" : $" - \u001d{example}\u001d";
+			var exampleString = string.IsNullOrWhiteSpace(example) ? string.Empty : $" - \u001d{example}\u001d";
 
 			command.ReturnMessage("\u0002{0}\u0002: {1}{2} - urbandictionary.com/define.php?term={3}", name, definition, exampleString, term);
 		}

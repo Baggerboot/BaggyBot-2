@@ -1,12 +1,13 @@
 ﻿namespace BaggyBot.Commands
 {
-	class Snag : ICommand
+	internal class Snag : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		public PermissionLevel Permissions => PermissionLevel.BotOperator;
 
 		public void Use(CommandArgs command)
 		{
-			switch (command.Args.Length) {
+			switch (command.Args.Length)
+			{
 				case 0:
 					ControlVariables.SnagNextLine = true;
 					break;

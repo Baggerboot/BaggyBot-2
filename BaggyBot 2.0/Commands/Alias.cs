@@ -3,9 +3,9 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	class Alias : ICommand
+	internal class Alias : ICommand
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 		private readonly DataFunctionSet dataFunctionSet;
 
 		public Alias(DataFunctionSet df)
@@ -25,7 +25,6 @@ namespace BaggyBot.Commands
 				}
 				dataFunctionSet.UpsertMiscData("alias", key, value);
 				command.Reply("I've aliased {0} to \"{1}\"", key, value);
-
 			}
 			else
 			{

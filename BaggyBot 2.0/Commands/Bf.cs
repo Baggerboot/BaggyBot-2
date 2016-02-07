@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BaggyBot.Commands
 {
-	class Bf : ICommand
+	internal class Bf : ICommand
 	{
 		private class MemoryCell
 		{
@@ -14,7 +14,7 @@ namespace BaggyBot.Commands
 				get
 				{
 					if (next != null) return next;
-					next = new MemoryCell {Previous = this};
+					next = new MemoryCell { Previous = this };
 					return next;
 				}
 				private set
@@ -28,7 +28,7 @@ namespace BaggyBot.Commands
 				get
 				{
 					if (previous != null) return previous;
-					previous = new MemoryCell {Next = this};
+					previous = new MemoryCell { Next = this };
 					return previous;
 				}
 				private set
@@ -36,21 +36,24 @@ namespace BaggyBot.Commands
 					previous = value;
 				}
 			}
-			public byte Value;
+			public byte Value { get; set; }
 			public override string ToString()
 			{
 				return Previous.Value + " - " + Value + " - " + Next.Value;
 			}
 		}
 
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public void Use(CommandArgs command)
 		{
-			if (command.Args.Length == 0) {
+			if (command.Args.Length == 0)
+			{
 				command.Reply("usage: -bf <brainfuck code>");
-			} else {
-				if (command.FullArgument.Contains(',')) {
+			}
+			else {
+				if (command.FullArgument.Contains(','))
+				{
 					command.ReturnMessage("Reading the Input Buffer is not supported yet.");
 				}
 				command.ReturnMessage(ProcessCode(command.FullArgument));
@@ -60,10 +63,13 @@ namespace BaggyBot.Commands
 		{
 			byte register = 0;
 			var pointer = new MemoryCell();
-			try {
+			try
+			{
 				var output = ProcessCodeBlock(pointer, code, ref register);
 				return output;
-			} catch (ArgumentException e) {
+			}
+			catch (ArgumentException e)
+			{
 				return e.Message;
 			}
 		}
@@ -72,8 +78,10 @@ namespace BaggyBot.Commands
 		{
 			var outputBuilder = new StringBuilder();
 
-			for (var i = 0; i < code.Length; i++) {
-				switch (code[i]) {
+			for (var i = 0; i < code.Length; i++)
+			{
+				switch (code[i])
+				{
 					case '>':
 						pointer = pointer.Next;
 						break;
@@ -95,23 +103,30 @@ namespace BaggyBot.Commands
 					case '[':
 						var depth = 0;
 						var length = -1;
-						for (var j = i; j < code.Length; j++) {
-							if (code[j] == '[') {
+						for (var j = i; j < code.Length; j++)
+						{
+							if (code[j] == '[')
+							{
 								depth++;
-							} else if (code[j] == ']') {
+							}
+							else if (code[j] == ']')
+							{
 								depth--;
-								if (depth == 0) {
+								if (depth == 0)
+								{
 									length = j - i;
 									break;
 								}
 							}
 						}
-						if (length == -1) {
-							Logger.Log(this, depth + "");
+						if (length == -1)
+						{
+							Logger.Log(this, depth.ToString());
 							throw new ArgumentException("Syntax Error: '[' and ']' do not match up.");
 						}
 
-						while (pointer.Value != 0) {
+						while (pointer.Value != 0)
+						{
 							var codeBlock = code.Substring(i + 1, length - 1);
 							outputBuilder.Append(ProcessCodeBlock(pointer, codeBlock, ref register));
 						}
@@ -120,7 +135,6 @@ namespace BaggyBot.Commands
 					case '.':
 						outputBuilder.Append(Encoding.ASCII.GetString(new[] { pointer.Value }));
 						break;
-
 				}
 			}
 			return outputBuilder.ToString();

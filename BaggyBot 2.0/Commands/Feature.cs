@@ -4,10 +4,10 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	class Feature : ICommand
+	internal class Feature : ICommand
 	{
 		private readonly DataFunctionSet dataFunctionSet;
-		public PermissionLevel Permissions { get { return PermissionLevel.BotOperator; } }
+		public PermissionLevel Permissions => PermissionLevel.BotOperator;
 
 		public Feature(DataFunctionSet df)
 		{
@@ -18,9 +18,10 @@ namespace BaggyBot.Commands
 		{
 			var search = command.FullArgument;
 
-			var searchResults  = dataFunctionSet.FindQuote(search);
+			var searchResults = dataFunctionSet.FindQuote(search);
 
-			if(searchResults == null){
+			if (searchResults == null)
+			{
 				command.ReturnMessage("No such quote found.");
 				return;
 			}
@@ -30,21 +31,24 @@ namespace BaggyBot.Commands
 
 			var max = searchResults.Count > 12 ? 12 : searchResults.Count;
 
-			for(var i = 0; i < max; i++){
+			for (var i = 0; i < max; i++)
+			{
 				quoteListBuiler.Append("\"");
-				quoteListBuiler.Append(searchResults[i].Text.Substring(0,25));
+				quoteListBuiler.Append(searchResults[i].Text.Substring(0, 25));
 				quoteListBuiler.Append("\"");
-				if( i != max -1){
+				if (i != max - 1)
+				{
 					quoteListBuiler.Append(", ");
 				}
 			}
 			var diff = searchResults.Count - max;
-			if (diff > 0) {
-				quoteListBuiler.Append(String.Format(" and {0} more.", diff));
+			if (diff > 0)
+			{
+				quoteListBuiler.Append($" and {diff} more.");
 			}
-
-
-			if (searchResults.Count > 1) {
+			
+			if (searchResults.Count > 1)
+			{
 				command.Reply(quoteListBuiler.ToString());
 				return;
 			}

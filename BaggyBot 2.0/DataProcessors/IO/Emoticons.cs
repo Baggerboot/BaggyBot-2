@@ -1,6 +1,6 @@
 ﻿namespace BaggyBot
 {
-	class Emoticons
+	internal class Emoticons
 	{
 		//Thanks Lyyti
 		public static string[] List = 
@@ -102,5 +102,4 @@
 		",~,", ",-,", ",_,", "(Â´ãƒ»Ï‰ãƒ»ï½€)"
 		};
 	}
-
 }

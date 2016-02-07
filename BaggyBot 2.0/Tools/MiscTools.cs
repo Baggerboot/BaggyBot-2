@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace BaggyBot.Tools
@@ -36,7 +36,8 @@ namespace BaggyBot.Tools
 
 			var files = Directory.GetFiles(prefix).Where(s => s.EndsWith(extension)).OrderBy(s => s);
 			num = 1;
-			if (files.Count() != 0) {
+			if (files.Count() != 0)
+			{
 				var name = files.Last();
 
 				name = name.Split('/').Last();
@@ -44,18 +45,19 @@ namespace BaggyBot.Tools
 				num = int.Parse(name);
 				num++;
 			}
-			filename = num.ToString("D"+depth) + extension;
+			filename = num.ToString("D" + depth) + extension;
 			return prefix + "/" + filename;
 		}
 
-		public static double NthRoot(double baseValue, int N)
+		public static double NthRoot(double baseValue, int n)
 		{
-			if (N == 1)
+			if (n == 1)
 				return baseValue;
 			double deltaX;
 			var x = 0.1;
-			do {
-				deltaX = (baseValue / Math.Pow(x, N - 1) - x) / N;
+			do
+			{
+				deltaX = ((baseValue / Math.Pow(x, n - 1)) - x) / n;
 				x = x + deltaX;
 			} while (Math.Abs(deltaX) > 0);
 			return x;
@@ -69,11 +71,15 @@ namespace BaggyBot.Tools
 			var b = new byte[2048];
 			Stream s = null;
 
-			try {
+			try
+			{
 				s = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 				s.Read(b, 0, 2048);
-			} finally {
-				if (s != null) {
+			}
+			finally
+			{
+				if (s != null)
+				{
 					s.Close();
 				}
 			}
