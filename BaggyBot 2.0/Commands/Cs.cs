@@ -8,13 +8,15 @@ namespace BaggyBot.Commands
 {
 	internal class Cs : ReadEvaluatePrintCommand, ICommand
 	{
+		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<C# code>";
+		public string Description => "Executes the given C# code and prints its result to IRC.";
+
 		private readonly Evaluator evaluator;
 		private readonly CodeFormatter codeFormatter = new CodeFormatter();
 		private readonly IrcReportPrinter reportPrinter = new IrcReportPrinter();
 		private readonly Dictionary<string, StringBuilder> commandBuilders = new Dictionary<string, StringBuilder>();
-
-		public PermissionLevel Permissions => PermissionLevel.All;
-
+		
 		public Cs(IrcInterface inter)
 		{
 			IrcInterface = inter;

@@ -8,6 +8,8 @@ namespace BaggyBot.Commands
 	internal class Convert : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<amount> <ISO Currency Code> [to] <ISO Currency Code>";
+		public string Description => "Converts the value of a given amount of money from one currency to another.";
 
 		public void Use(CommandArgs command)
 		{

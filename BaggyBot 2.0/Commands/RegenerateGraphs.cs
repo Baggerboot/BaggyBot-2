@@ -5,8 +5,11 @@ namespace BaggyBot.Commands
 {
 	internal class RegenerateGraphs : ICommand
 	{
-		private const double MinWaitTime = 10; // In seconds
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "";
+		public string Description => "Regenerates the graphs on the stats page.";
+
+		private const double MinWaitTime = 10; // In seconds
 		private DateTime lastUsage;
 		
 		public RegenerateGraphs()
@@ -16,7 +19,9 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			var diff = DateTime.Now - lastUsage;
+			// TODO: Reimplement regeneration of graphs
+			throw new NotImplementedException("Regenerating the graphs on the stats page is currently not possible.");
+			/*var diff = DateTime.Now - lastUsage;
 			if (diff.TotalSeconds < MinWaitTime)
 			{
 				command.ReturnMessage("This command may not be used more than once every {0} seconds. Please try again in {1} seconds.", MinWaitTime, (int)(MinWaitTime - diff.TotalSeconds));
@@ -25,7 +30,7 @@ namespace BaggyBot.Commands
 			const string args = "regenerate_graphs.sh";
 			Process.Start("sh", args);
 			lastUsage = DateTime.Now;
-			command.ReturnMessage("I have regenerated the graphs on the stats page.");
+			command.ReturnMessage("I have regenerated the graphs on the stats page.");*/
 		}
 	}
 }

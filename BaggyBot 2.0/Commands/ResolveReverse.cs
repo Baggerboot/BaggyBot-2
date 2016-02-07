@@ -7,6 +7,8 @@ namespace BaggyBot.Commands
 	internal class ResolveReverse : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<IP address>";
+		public string Description => "Performs a reverse DNS lookup on a given IP address, and returns the associated hostname.";
 
 		public void Use(CommandArgs command)
 		{
@@ -37,7 +39,7 @@ namespace BaggyBot.Commands
 			}
 			catch (SocketException)
 			{
-				command.ReturnMessage("Unable to do a lookup on " + hostIpAddress + ". Most likely a reverse DNS entry does not exist for this address.");
+				command.ReturnMessage($"Unable to do a lookup on {hostIpAddress}. Most likely a reverse DNS entry does not exist for this address.");
 				return;
 			}
 			// Get the IP address list that resolves to the host names contained in 

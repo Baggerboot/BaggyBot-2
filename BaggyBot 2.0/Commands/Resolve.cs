@@ -6,6 +6,8 @@ namespace BaggyBot.Commands
 	internal class Resolve : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<hostname>";
+		public string Description => "Performs an A and AAAA lookup on a given hostname, and returns all associated IP addresses.";
 
 		public void Use(CommandArgs command)
 		{

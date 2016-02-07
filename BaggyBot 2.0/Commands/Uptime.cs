@@ -5,6 +5,9 @@ namespace BaggyBot.Commands
 	internal class Uptime : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "";
+		public string Description => "Shows how long I've been running.";
+
 		private readonly DateTime startTime;
 		public Uptime()
 		{

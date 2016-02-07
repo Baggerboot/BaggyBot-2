@@ -9,6 +9,8 @@ namespace BaggyBot.Commands
 	internal class UrbanDictionary : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<search term>";
+		public string Description => "Searches Urban Dictionary for a given term.";
 
 		public void Use(CommandArgs command)
 		{

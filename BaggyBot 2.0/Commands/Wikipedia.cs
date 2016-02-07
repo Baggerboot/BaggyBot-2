@@ -8,6 +8,8 @@ namespace BaggyBot.Commands
 	internal class Wikipedia : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<search term>";
+		public string Description => "Searches for an article on Wikipedia.";
 
 		public void Use(CommandArgs command)
 		{

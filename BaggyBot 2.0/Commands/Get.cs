@@ -5,9 +5,12 @@ namespace BaggyBot.Commands
 {
 	internal class Get : ICommand
 	{
+		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<property> [key]";
+		public string Description => "Retrieves the value of a property, or the value of a key belonging to that property.";
+
 		private readonly DataFunctionSet dataFunctionSet;
 		private readonly IrcInterface ircInterface;
-		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public Get(DataFunctionSet df, IrcInterface ircInterface)
 		{

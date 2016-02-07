@@ -7,6 +7,8 @@ namespace BaggyBot.Commands
 	internal class HttpInterface : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<method> <URL> [request body ...]";
+		public string Description => "Performs an HTTP request against the given URL, using the given method. You may optionally specify the body of a request as well.";
 
 		public void Use(CommandArgs command)
 		{
@@ -28,6 +30,7 @@ namespace BaggyBot.Commands
 				client.Headers.Add("User-Agent", $"BaggyBot/{Bot.Version} ({Environment.OSVersion}) IRC stats bot");
 				try
 				{
+					// TODO: Check whether uploading data with a GET request can be considered valid
 					if (method == "GET")
 					{
 						response = client.DownloadString(url);

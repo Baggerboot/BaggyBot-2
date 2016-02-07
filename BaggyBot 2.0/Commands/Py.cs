@@ -17,6 +17,9 @@ namespace BaggyBot.Commands
 	internal class Py : ReadEvaluatePrintCommand, ICommand, IDisposable
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<python code>";
+		public string Description => "Executes the given Python code and prints its result to IRC.";
+
 		private readonly ScriptEngine engine;
 		private readonly ScriptScope scope;
 		private readonly StreamReader outputStreamReader;

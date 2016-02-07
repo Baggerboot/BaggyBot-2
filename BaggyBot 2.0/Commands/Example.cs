@@ -5,6 +5,8 @@ namespace BaggyBot.Commands
 	class Example : ICommand
 	{
 		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public string Usage => "";
+		public string Description => "";
 
 		public void Use(CommandArgs command)
 		{

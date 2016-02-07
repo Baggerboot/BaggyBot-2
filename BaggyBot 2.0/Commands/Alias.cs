@@ -6,6 +6,9 @@ namespace BaggyBot.Commands
 	internal class Alias : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<key> <command> [parameters ...]";
+		public string Description => "Creates an alias for a command.";
+
 		private readonly DataFunctionSet dataFunctionSet;
 
 		public Alias(DataFunctionSet df)

@@ -4,13 +4,16 @@ namespace BaggyBot.Commands
 {
 	internal class Update : ICommand
 	{
+		public PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public string Usage => "[--no-dl]";
+		public string Description => "Downloads a new update and makes me restart to apply it.";
+
 		private readonly Bot bot;
 		public Update(Bot bot)
 		{
 			this.bot = bot;
 		}
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-
+		
 		private string requestChannel;
 
 		public void Use(CommandArgs command)

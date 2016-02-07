@@ -5,9 +5,12 @@ namespace BaggyBot.Commands
 {
 	internal class NickServ : ICommand
 	{
+		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "[-f]|[set <username>]";
+		public string Description => "Performs a NickServ lookup for your username against the database. Use `-f` to query the NickServ service instead, or use `set` to store a user's current NickServ username in the database.";
+
 		private readonly IrcInterface ircInterface;
 		private readonly DataFunctionSet dataFunctionSet;
-		public PermissionLevel Permissions => PermissionLevel.All;
 
 		public NickServ(DataFunctionSet df, IrcInterface inter)
 		{
@@ -17,7 +20,7 @@ namespace BaggyBot.Commands
 
 		public void Use(CommandArgs command)
 		{
-			if (command.Args.Length == 2 && command.Args[0].Equals("add"))
+			if (command.Args.Length == 2 && command.Args[0].Equals("set"))
 			{
 				if (UserTools.Validate(command.Sender))
 				{
@@ -38,7 +41,7 @@ namespace BaggyBot.Commands
 				var username = ircInterface.DoNickservCall(command.Sender.Nick);
 				if (username == null)
 				{
-					command.Reply("you don't appear to have registered with NickServ");
+					command.Reply("you don't appear to be registered with NickServ");
 				}
 				else {
 					command.Reply("your NickServ username is " + username);

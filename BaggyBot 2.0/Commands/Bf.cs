@@ -6,6 +6,11 @@ namespace BaggyBot.Commands
 {
 	internal class Bf : ICommand
 	{
+		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<Brainfuck code>";
+		public string Description => "Executes the given Brainfuck code and prints its result to IRC.";
+		
+		// TODO: extract Brainfuck processing to its own namespace and classes
 		private class MemoryCell
 		{
 			private MemoryCell next;
@@ -42,9 +47,7 @@ namespace BaggyBot.Commands
 				return Previous.Value + " - " + Value + " - " + Next.Value;
 			}
 		}
-
-		public PermissionLevel Permissions => PermissionLevel.All;
-
+		
 		public void Use(CommandArgs command)
 		{
 			if (command.Args.Length == 0)

@@ -3,6 +3,8 @@
 	internal class Help : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "<command>";
+		public string Description => "Get help about my commands.";
 
 		public void Use(CommandArgs command)
 		{

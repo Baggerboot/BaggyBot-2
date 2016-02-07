@@ -6,9 +6,12 @@ namespace BaggyBot.Commands
 {
 	internal class Feature : ICommand
 	{
-		private readonly DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public string Usage => "<search string>";
+		public string Description => "Feature a quote I've taken.";
 
+		private readonly DataFunctionSet dataFunctionSet;
+		
 		public Feature(DataFunctionSet df)
 		{
 			dataFunctionSet = df;

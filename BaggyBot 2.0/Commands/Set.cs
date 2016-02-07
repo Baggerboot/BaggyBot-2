@@ -6,8 +6,11 @@ namespace BaggyBot.Commands
 {
 	internal class Set : ICommand
 	{
-		private readonly DataFunctionSet dataFunctionSet;
 		public PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public string Usage => "<property> [key] <value>";
+		public string Description => "Sets the value of a property, or the value of a key belonging to that property.";
+
+		private readonly DataFunctionSet dataFunctionSet;
 
 		public Set(DataFunctionSet df)
 		{

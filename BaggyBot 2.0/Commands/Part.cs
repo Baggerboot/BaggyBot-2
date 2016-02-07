@@ -2,9 +2,11 @@
 {
 	internal class Part : ICommand
 	{
-		private readonly IrcInterface ircInterface;
 		public PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public string Usage => "<channel>";
+		public string Description => "Makes me leave an IRC channel.";
 
+		private readonly IrcInterface ircInterface;
 		public Part(IrcInterface inter)
 		{
 			ircInterface = inter;

@@ -9,6 +9,8 @@ namespace BaggyBot.Commands
 	internal class Ping : ICommand
 	{
 		public PermissionLevel Permissions => PermissionLevel.All;
+		public string Usage => "[server] [count]";
+		public string Description => "Returns \"Pong!\" when no arguments are given. When [server] is specified, tries to ping that server once, or as many times as specified in [count].";
 
 		private string Colour(int? code)
 		{
