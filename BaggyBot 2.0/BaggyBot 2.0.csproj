@@ -157,7 +157,6 @@
     <Compile Include="Commands\Cs.cs" />
     <Compile Include="Commands\Html.cs" />
     <Compile Include="Commands\HttpInterface.cs" />
-    <Compile Include="Commands\NewCommand.cs" />
     <Compile Include="Commands\Notify.cs" />
     <Compile Include="Commands\ProducerConsumerStream.cs" />
     <Compile Include="Commands\Py.cs" />
