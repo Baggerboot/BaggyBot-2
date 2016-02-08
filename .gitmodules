@@ -1,0 +1,6 @@
+[submodule "CsNetLib2"]
+	path = CsNetLib2
+	url = https://github.com/Baggykiin/CsNetLib2.git
+[submodule "IRCSharp"]
+	path = IRCSharp
+	url = https://github.com/Baggykiin/IRCSharp.git
