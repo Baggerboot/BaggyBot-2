@@ -2,11 +2,11 @@
 
 namespace BaggyBot.Commands
 {
-	class Example : ICommand
+	class Example : Command
 	{
-		public PermissionLevel Permissions { get { return PermissionLevel.All; } }
-		public string Usage => "";
-		public string Description => "";
+		public override PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public override string Usage => "";
+		public override string Description => "";
 
 		public void Use(CommandArgs command)
 		{
