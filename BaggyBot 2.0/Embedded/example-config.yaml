@@ -72,7 +72,7 @@ servers:
     identity: *baggybot
     auto-join-channels: ["#baggy"]
 
-    operators: [*baggerboot, *johan]
+    operators: [*baggerboot]
 
 # Currently not used.
 metadata:
