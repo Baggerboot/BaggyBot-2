@@ -69,18 +69,6 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_Slack|AnyCPU'">
-    <OutputPath>..\Bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_EsperNet|AnyCPU'">
-    <OutputPath>..\Bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="IronPython, Version=2.7.5.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\IronPython.2.7.5\lib\Net45\IronPython.dll</HintPath>
@@ -803,5 +791,15 @@
   <ItemGroup>
     <Folder Include="Commands\Interpreters\CSharp\" />
     <Folder Include="Commands\Interpreters\Python\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CsNetLib2\CsNetLib2\CsNetLib2.csproj">
+      <Project>{68170802-5de7-4f66-99c7-136b3c7dd93c}</Project>
+      <Name>CsNetLib2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IRCSharp\IRCSharp\IRCSharp.csproj">
+      <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
+      <Name>IRCSharp</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
