@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using BaggyBot.CommandParsing;
 
 namespace BaggyBot
 {
@@ -378,7 +379,11 @@ namespace BaggyBot
 
 		public static void Main(string[] args)
 		{
-			var settingsFile = "baggybot.settings";
+			var parser = new CommandParser(new Operation()
+				.AddKey("config", "baggybot-settings.yaml", 'c')
+				.AddKey("colours", "Ansi", 'C'));
+
+			/*var settingsFile = "baggybot.settings";
 			var colours = true;
 
 			for (int i = 0; i < args.Length; i++)
@@ -399,7 +404,7 @@ namespace BaggyBot
 				{
 					Console.WriteLine("ERROR: expected a value after {0}", args[i - 1]);
 				}
-			}
+			}*/
 			var result = ConfigManager.Load("baggybot-settings.yaml");
 			switch (result)
 			{
@@ -423,7 +428,7 @@ namespace BaggyBot
 					Environment.Exit(1);
 					break;
 			}
-			Logger.UseColouredOutput = colours;
+			Logger.UseColouredOutput = Colours.Windows;
 
 			using (var bot = new Bot())
 			{

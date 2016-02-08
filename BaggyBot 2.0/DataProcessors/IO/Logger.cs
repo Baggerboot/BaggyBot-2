@@ -17,11 +17,18 @@ namespace BaggyBot
 		Error
 	}
 
+	public enum Colours
+	{
+		Windows,
+		Ansi,
+		Disabled
+	}
+
 	public delegate void LogEvent(string message, LogLevel level);
 
 	public static class Logger
 	{
-		public static bool UseColouredOutput { get; set; }
+		public static Colours UseColouredOutput { get; set; }
 		public const string LogFileName = "baggybot.log";
 		private static bool disposed;
 		private static string prefix = string.Empty;
@@ -50,6 +57,18 @@ namespace BaggyBot
 			prefix = string.Empty;
 		}
 
+		private enum Colour
+		{
+			Normal,
+			Red,
+			Green,
+			Yellow,
+			Blue,
+			Magenta,
+			White,
+			Reset
+		}
+
 		private const string KNRM = "\x1B[0m";
 		private const string KRED = "\x1B[31m";
 		private const string KGRN = "\x1B[32m";
@@ -67,82 +86,126 @@ namespace BaggyBot
 				message = String.Format(message, format);
 			}
 			var lineBuilder = new StringBuilder();
-			//var lineColor = ConsoleColor.Gray;
-			var lineColor = "";
+			var lineColour = Colour.Normal;
 
 			switch (level)
 			{
 				case LogLevel.Debug:
 					lineBuilder.Append("[DEB] ");
-					lineColor = KWHT;
+					lineColour = Colour.White;
 					break;
 				case LogLevel.Info:
 					lineBuilder.Append("[INF] ");
-					lineColor = KGRN;
+					lineColour = Colour.Green;
 					break;
 				case LogLevel.Message:
 					lineBuilder.Append("[MSG] ");
-					lineColor = KBLU;
+					lineColour = Colour.Blue;
 					break;
 				case LogLevel.Irc:
 					lineBuilder.Append("[IRC] ");
-					lineColor = KNRM;
+					lineColour = Colour.Normal;
 					break;
 				case LogLevel.Warning:
 					lineBuilder.Append("[WRN] ");
-					lineColor = KYEL;
+					lineColour = Colour.Yellow;
 					break;
 				case LogLevel.Error:
 					lineBuilder.Append("[ERR] ");
-					lineColor = KRED;
+					lineColour = Colour.Red;
 					break;
 			}
 			lineBuilder.Append(prefix);
 
-
+			var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
 			if (sender != null)
 			{
-				var time = DateTime.Now.ToString("[MMM dd - HH:mm:ss.fff] ");
 				var location = $"[{sender.GetType().Name.Truncate(16)}-{sender.GetHashCode():X4}] ";
 				lineBuilder.Insert(0, (time + location).PadRight(prefixLength));
 			}
 			else
 			{
-				lineBuilder.Insert(0, "".PadRight(prefixLength));
+				lineBuilder.Insert(0, time.PadRight(prefixLength));
 			}
 			lineBuilder.Append(message);
 
-			WriteToConsole(lineColor, level, lineBuilder);
+			WriteToConsole(lineColour, level, lineBuilder);
 
-			if ((level == LogLevel.Error || level == LogLevel.Warning) && OnLogEvent != null)
+			if ((level == LogLevel.Error || level == LogLevel.Warning))
 			{
-				OnLogEvent(lineBuilder.ToString(), level);
+				OnLogEvent?.Invoke(lineBuilder.ToString(), level);
 			}
 			WriteToLogFile(lineBuilder, writeLine);
 		}
 
 		private static void WriteToLogFile(StringBuilder lineBuilder, bool writeLine)
 		{
-			if (!disposed)
+			if (disposed) return;
+
+			if (writeLine)
+				textWriter.WriteLine(lineBuilder.ToString());
+			else
+				textWriter.Write(lineBuilder.ToString());
+			textWriter.Flush();
+		}
+
+		private static ConsoleColor GetForegroundColour(Colour colour)
+		{
+			switch (colour)
 			{
-				if (writeLine)
-					textWriter.WriteLine(lineBuilder.ToString());
-				else
-					textWriter.Write(lineBuilder.ToString());
-				textWriter.Flush();
+				case Colour.Blue:
+					return ConsoleColor.Blue;
+				case Colour.Green:
+					return ConsoleColor.Green;
+				case Colour.Red:
+					return ConsoleColor.Red;
+				case Colour.Magenta:
+					return ConsoleColor.Cyan;
+				case Colour.Yellow:
+					return ConsoleColor.Yellow;
+				case Colour.White:
+					return ConsoleColor.White;
+				case Colour.Reset:
+				case Colour.Normal:
+				default:
+					return ConsoleColor.Gray;
 			}
 		}
 
-		private static void WriteToConsole(string lineColor, LogLevel level, StringBuilder lineBuilder)
-		//private static void WriteToConsole(ConsoleColor lineColor, LogLevel level, StringBuilder lineBuilder)
+		private static string GetAnsiColour(Colour colour)
 		{
-			//var prevColor = Console.ForegroundColor;
-			//Console.ForegroundColor = lineColor;
-			if (UseColouredOutput)
+			switch (colour)
 			{
-				Console.Write(lineColor);
+				case Colour.Blue:
+					return KBLU;
+				case Colour.Green:
+					return KGRN;
+				case Colour.Red:
+					return KRED;
+				case Colour.Magenta:
+					return KMAG;
+				case Colour.Yellow:
+					return KYEL;
+				case Colour.White:
+					return KWHT;
+				case Colour.Reset:
+					return RESET;
+				case Colour.Normal:
+				default:
+					return KNRM;
 			}
+		}
 
+		private static void WriteToConsole(Colour lineColour, LogLevel level, StringBuilder lineBuilder)
+		{
+			if (UseColouredOutput == Colours.Windows)
+			{
+				Console.ForegroundColor = GetForegroundColour(lineColour);
+			}
+			else if (UseColouredOutput == Colours.Ansi)
+			{
+				Console.Write(GetAnsiColour(lineColour));
+			}
 			if (level == LogLevel.Debug)
 			{
 				if (ConfigManager.Config.Logging.ShowDebug)
