@@ -273,16 +273,6 @@
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\CsNetLib2\CsNetLib2\CsNetLib2.csproj">
-      <Project>{68170802-5de7-4f66-99c7-136b3c7dd93c}</Project>
-      <Name>CsNetLib2</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\IRCSharp\IRCSharp\IRCSharp.csproj">
-      <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
-      <Name>IRCSharp</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
   </PropertyGroup>
