@@ -5,7 +5,7 @@ using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	internal abstract class ReadEvaluatePrintCommand
+	internal abstract class ReadEvaluatePrintCommand : Command
 	{
 		protected int ThreadId { get; set; } = 0;
 		protected IrcInterface IrcInterface { get; set; }

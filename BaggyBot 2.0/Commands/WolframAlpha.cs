@@ -8,11 +8,11 @@ using System.Xml;
 
 namespace BaggyBot.Commands
 {
-	internal class WolframAlpha : ICommand
+	internal class WolframAlpha : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<query>|<more>";
-		public string Description => "Makes Wolfram Alpha calculate or look up the query you've entered, and returns the result. Using the 'more' argument will print additional information about the last query you looked up.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<query>|<more>";
+		public override string Description => "Makes Wolfram Alpha calculate or look up the query you've entered, and returns the result. Using the 'more' argument will print additional information about the last query you looked up.";
 
 		private XmlNode lastDisplayedResult;
 
@@ -54,7 +54,7 @@ namespace BaggyBot.Commands
 			return input.Replace("\n", " -- ");
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{

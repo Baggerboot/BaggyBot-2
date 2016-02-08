@@ -1,10 +1,10 @@
 ﻿namespace BaggyBot.Commands
 {
-	internal class Join : ICommand
+	internal class Join : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public string Usage => "<channel>";
-		public string Description => "Makes me join an IRC channel.";
+		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Usage => "<channel>";
+		public override string Description => "Makes me join an IRC channel.";
 
 		private readonly IrcInterface ircInterface;
 
@@ -13,7 +13,7 @@
 			ircInterface = inter;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length == 1)
 			{

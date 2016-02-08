@@ -4,13 +4,13 @@ using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	internal class Html : ICommand
+	internal class Html : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "[-h] <html code>";
-		public string Description => "Generate some HTML code. Use the -h switch to automatically add all the boilerplate tags so you can start entering the contents of the <body> immediately.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "[-h] <html code>";
+		public override string Description => "Generate some HTML code. Use the -h switch to automatically add all the boilerplate tags so you can start entering the contents of the <body> immediately.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			throw new NotImplementedException("This command is currently not available.");
 			// TODO: Reimplement this command

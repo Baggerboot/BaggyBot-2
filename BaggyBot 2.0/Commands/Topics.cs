@@ -4,11 +4,11 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	internal class Topics : ICommand
+	internal class Topics : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "[-d] [username] [channel]";
-		public string Description => "Find the topics associated with a given username in a given channel. Default values are the username of the sender and the channel the command was entered in. The -d flag will print additional debug info.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "[-d] [username] [channel]";
+		public override string Description => "Find the topics associated with a given username in a given channel. Default values are the username of the sender and the channel the command was entered in. The -d flag will print additional debug info.";
 
 		private readonly DataFunctionSet dataFunctionSet;
 
@@ -42,7 +42,7 @@ namespace BaggyBot.Commands
 			replyCallback("words associated with {0}: {1}", new object[] { nick, topicString });
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			var showDebugInfo = false;
 			if (command.Args[0] == "-d")

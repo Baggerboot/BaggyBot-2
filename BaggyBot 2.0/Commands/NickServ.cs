@@ -3,11 +3,11 @@ using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	internal class NickServ : ICommand
+	internal class NickServ : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "[-f]|[set <username>]";
-		public string Description => "Performs a NickServ lookup for your username against the database. Use `-f` to query the NickServ service instead, or use `set` to store a user's current NickServ username in the database.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "[-f]|[set <username>]";
+		public override string Description => "Performs a NickServ lookup for your username against the database. Use `-f` to query the NickServ service instead, or use `set` to store a user's current NickServ username in the database.";
 
 		private readonly IrcInterface ircInterface;
 		private readonly DataFunctionSet dataFunctionSet;
@@ -18,7 +18,7 @@ namespace BaggyBot.Commands
 			ircInterface = inter;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length == 2 && command.Args[0].Equals("set"))
 			{

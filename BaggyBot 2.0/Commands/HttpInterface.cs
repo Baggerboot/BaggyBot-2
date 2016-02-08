@@ -4,13 +4,13 @@ using System.Net;
 
 namespace BaggyBot.Commands
 {
-	internal class HttpInterface : ICommand
+	internal class HttpInterface : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<method> <URL> [request body ...]";
-		public string Description => "Performs an HTTP request against the given URL, using the given method. You may optionally specify the body of a request as well.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<method> <URL> [request body ...]";
+		public override string Description => "Performs an HTTP request against the given URL, using the given method. You may optionally specify the body of a request as well.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			var method = command.Args[0].ToUpper();
 			var url = command.Args[1];

@@ -6,13 +6,13 @@ using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
 {
-	internal class UrbanDictionary : ICommand
+	internal class UrbanDictionary : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<search term>";
-		public string Description => "Searches Urban Dictionary for a given term.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<search term>";
+		public override string Description => "Searches Urban Dictionary for a given term.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{

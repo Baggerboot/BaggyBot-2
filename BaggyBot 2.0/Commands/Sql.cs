@@ -1,12 +1,12 @@
 ﻿namespace BaggyBot.Commands
 {
-	internal class Sql : ICommand
+	internal class Sql : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<SQL code>";
-		public string Description => "Execute arbitrary SQL code and return its result.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<SQL code>";
+		public override string Description => "Execute arbitrary SQL code and return its result.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			// TODO: Implement the SQL command again
 		}

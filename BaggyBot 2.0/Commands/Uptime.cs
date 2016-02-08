@@ -2,11 +2,11 @@
 
 namespace BaggyBot.Commands
 {
-	internal class Uptime : ICommand
+	internal class Uptime : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "";
-		public string Description => "Shows how long I've been running.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "";
+		public override string Description => "Shows how long I've been running.";
 
 		private readonly DateTime startTime;
 		public Uptime()
@@ -14,7 +14,7 @@ namespace BaggyBot.Commands
 			startTime = DateTime.Now;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			var diff = DateTime.Now - startTime;
 			var d = diff.Days + (diff.Days == 1 ? " day" : " days");

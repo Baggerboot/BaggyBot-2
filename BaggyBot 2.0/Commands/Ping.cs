@@ -6,11 +6,11 @@ using System.Threading;
 
 namespace BaggyBot.Commands
 {
-	internal class Ping : ICommand
+	internal class Ping : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "[server] [count]";
-		public string Description => "Returns \"Pong!\" when no arguments are given. When [server] is specified, tries to ping that server once, or as many times as specified in [count].";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "[server] [count]";
+		public override string Description => "Returns \"Pong!\" when no arguments are given. When [server] is specified, tries to ping that server once, or as many times as specified in [count].";
 
 		private string Colour(int? code)
 		{
@@ -34,7 +34,7 @@ namespace BaggyBot.Commands
 			return Colour(4);
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length == 1)
 			{

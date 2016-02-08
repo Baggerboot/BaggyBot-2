@@ -37,6 +37,10 @@ namespace BaggyBot.DataProcessors
 				dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, message.Message);
 			}
 		}
+
+		// This is what we call a God Method. It's like a God Object, only it's a method.
+		// It does way too fucking much, this really needs to be cleaned up sometime.
+		// TODO: Clean up ProcessMessage()
 		internal void ProcessMessage(IrcMessage message)
 		{
 			try

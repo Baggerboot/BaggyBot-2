@@ -3,13 +3,13 @@ using System.Net;
 
 namespace BaggyBot.Commands
 {
-	internal class Resolve : ICommand
+	internal class Resolve : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<hostname>";
-		public string Description => "Performs an A and AAAA lookup on a given hostname, and returns all associated IP addresses.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<hostname>";
+		public override string Description => "Performs an A and AAAA lookup on a given hostname, and returns all associated IP addresses.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length != 1)
 			{

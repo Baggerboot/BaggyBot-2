@@ -1,10 +1,10 @@
 ﻿namespace BaggyBot.Commands
 {
-	internal class Reconnect : ICommand
+	internal class Reconnect : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public string Usage => "";
-		public string Description => "Simulates a ping timeout, causing me to attempt to reconnect to the IRC server.";
+		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Usage => "";
+		public override string Description => "Simulates a ping timeout, causing me to attempt to reconnect to the IRC server.";
 
 		private readonly IrcInterface ircInterface;
 
@@ -13,7 +13,7 @@
 			this.ircInterface = ircInterface;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			ircInterface.Reconnect();
 		}

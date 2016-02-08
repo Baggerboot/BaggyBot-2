@@ -3,20 +3,20 @@ using System.Linq;
 
 namespace BaggyBot.Commands
 {
-	internal class Help : ICommand
+	internal class Help : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<command>";
-		public string Description => "Get help about my commands.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<command>";
+		public override string Description => "Get help about my commands.";
 
-		private readonly Dictionary<string, ICommand> commandList; 
+		private readonly Dictionary<string, Command> commandList; 
 
-		public Help(Dictionary<string, ICommand> commandList)
+		public Help(Dictionary<string, Command> commandList)
 		{
 			this.commandList = commandList;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 
 

@@ -1,13 +1,14 @@
 ﻿using System;
+using BaggyBot.CommandParsing;
 using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	internal class Get : ICommand
+	internal class Get : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<property> [key]";
-		public string Description => "Retrieves the value of a property, or the value of a key belonging to that property.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<property> [key]";
+		public override string Description => "Retrieves the value of a property, or the value of a key belonging to that property.";
 
 		private readonly DataFunctionSet dataFunctionSet;
 		private readonly IrcInterface ircInterface;
@@ -18,43 +19,43 @@ namespace BaggyBot.Commands
 			this.ircInterface = ircInterface;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
-			if (command.Args.Length > 2)
+			var cmdParser = new CommandParser(new Operation())
+				.AddOperation("cfg", new Operation()
+					.AddArgument("config-key", null))
+				.AddOperation("uid", new Operation()
+					.AddArgument("user", command.Sender.Nick))
+				.AddOperation("users", new Operation()
+					.AddArgument("channel", command.Channel));
+
+			var result = cmdParser.Parse(command.FullArgument);
+
+			switch (result.OperationName)
 			{
-				command.Reply("Usage: -get <property> <key>");
-				return;
-			}
-			if (command.Args.Length == 2 && command.Args[0] == "-s")
-			{
-				// TODO: Allow settings lookup for new settings format
-				// TODO: Disallow lookup of settings that should not be exposed
-				throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
-			}
-			switch (command.Args[0])
-			{
+				case "default":
+					InformUsage(command);
+					break;
+				case "cfg":
+					// TODO: Allow settings lookup for new settings format
+					// TODO: Disallow lookup of settings that should not be exposed
+					throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
+					break;
 				case "uid":
-					var nick = command.Args.Length > 1 ? command.Args[1] : command.Sender.Nick;
-					var uid = dataFunctionSet.GetIdFromNick(nick);
+					var uid = dataFunctionSet.GetIdFromNick(result.Arguments["user"]);
 					command.Reply("Your user Id is " + uid);
 					break;
 				case "users":
-					if (command.Args.Length != 2)
+					var channel = result.Arguments["channel"];
+					if (ircInterface.InChannel(channel))
 					{
-						command.Reply("usage: -get users <#channel>");
+						var users = ircInterface.GetUsers(channel);
+						command.Reply($"users in {channel}: {string.Join(", ", users)}");
 					}
-					else {
-						if (ircInterface.InChannel(command.Args[1]))
-						{
-							command.Reply("users in {0}: {1}", command.Args[1], string.Join(", ", ircInterface.GetUsers(command.Args[1])));
-						}
-						else {
-							command.Reply("I am not in that channel");
-						}
+					else
+					{
+						command.Reply($"I'm not in that channel.");
 					}
-					break;
-				default:
-					command.ReturnMessage("That is not a valid property.");
 					break;
 			}
 		}

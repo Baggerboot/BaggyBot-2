@@ -3,11 +3,11 @@ using System.Diagnostics;
 
 namespace BaggyBot.Commands
 {
-	internal class RegenerateGraphs : ICommand
+	internal class RegenerateGraphs : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "";
-		public string Description => "Regenerates the graphs on the stats page.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "";
+		public override string Description => "Regenerates the graphs on the stats page.";
 
 		private const double MinWaitTime = 10; // In seconds
 		private DateTime lastUsage;
@@ -17,7 +17,7 @@ namespace BaggyBot.Commands
 			lastUsage = DateTime.Now.AddSeconds(MinWaitTime * -1);
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			// TODO: Reimplement regeneration of graphs
 			throw new NotImplementedException("Regenerating the graphs on the stats page is currently not possible.");

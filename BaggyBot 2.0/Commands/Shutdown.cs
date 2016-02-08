@@ -1,10 +1,10 @@
 ﻿namespace BaggyBot.Commands
 {
-	internal class Shutdown : ICommand
+	internal class Shutdown : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public string Usage => "";
-		public string Description => "Makes me shut down.";
+		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Usage => "";
+		public override string Description => "Makes me shut down.";
 
 		private readonly Bot program;
 
@@ -13,7 +13,7 @@
 			program = prg;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			program.Shutdown();
 		}

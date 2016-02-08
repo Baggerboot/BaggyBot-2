@@ -1,10 +1,10 @@
 ﻿namespace BaggyBot.Commands
 {
-	internal class Notify : ICommand
+	internal class Notify : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "";
-		public string Description => "Returns a pre-defined message to the user of the command.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "";
+		public override string Description => "Returns a pre-defined message to the user of the command.";
 
 		private string message;
 		public Notify(string message)
@@ -12,7 +12,7 @@
 			this.message = message;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			command.Reply(message);
 		}

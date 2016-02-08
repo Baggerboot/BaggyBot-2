@@ -4,11 +4,11 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	internal class Feature : ICommand
+	internal class Feature : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public string Usage => "<search string>";
-		public string Description => "Feature a quote I've taken.";
+		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Usage => "<search string>";
+		public override string Description => "Feature a quote I've taken.";
 
 		private readonly DataFunctionSet dataFunctionSet;
 		
@@ -17,7 +17,7 @@ namespace BaggyBot.Commands
 			dataFunctionSet = df;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			var search = command.FullArgument;
 

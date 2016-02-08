@@ -3,11 +3,11 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	internal class Alias : ICommand
+	internal class Alias : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<key> <command> [parameters ...]";
-		public string Description => "Creates an alias for a command.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<key> <command> [parameters ...]";
+		public override string Description => "Creates an alias for a command.";
 
 		private readonly DataFunctionSet dataFunctionSet;
 
@@ -16,7 +16,7 @@ namespace BaggyBot.Commands
 			dataFunctionSet = df;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length > 1)
 			{

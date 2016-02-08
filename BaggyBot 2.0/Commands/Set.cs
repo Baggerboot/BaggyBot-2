@@ -4,11 +4,11 @@ using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {
-	internal class Set : ICommand
+	internal class Set : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public string Usage => "<property> [key] <value>";
-		public string Description => "Sets the value of a property, or the value of a key belonging to that property.";
+		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Usage => "<property> [key] <value>";
+		public override string Description => "Sets the value of a property, or the value of a key belonging to that property.";
 
 		private readonly DataFunctionSet dataFunctionSet;
 
@@ -17,7 +17,7 @@ namespace BaggyBot.Commands
 			dataFunctionSet = df;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length < 3)
 			{

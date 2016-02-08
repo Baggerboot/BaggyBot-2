@@ -14,13 +14,13 @@ namespace BaggyBot.DataProcessors
 {
 	internal class CommandHandler
 	{
-		private readonly Dictionary<string, ICommand> commands;
+		private readonly Dictionary<string, Command> commands;
 		private readonly IrcInterface ircInterface;
 
 		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
 		{
 			this.ircInterface = ircInterface;
-			commands = new Dictionary<string, ICommand>()
+			commands = new Dictionary<string, Command>()
 			{
 				{"alias", new Alias(dataFunctionSet)},
 				{"bf", new Bf()},

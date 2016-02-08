@@ -6,11 +6,11 @@ using Mono.CSharp;
 
 namespace BaggyBot.Commands
 {
-	internal class Cs : ReadEvaluatePrintCommand, ICommand
+	internal class Cs : ReadEvaluatePrintCommand
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<C# code>";
-		public string Description => "Executes the given C# code and prints its result to IRC.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<C# code>";
+		public override string Description => "Executes the given C# code and prints its result to IRC.";
 
 		private readonly Evaluator evaluator;
 		private readonly CodeFormatter codeFormatter = new CodeFormatter();
@@ -85,7 +85,7 @@ namespace BaggyBot.Commands
 			return true;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			var isOperator = UserTools.Validate(command.Sender);
 

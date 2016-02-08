@@ -5,13 +5,13 @@ using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
 {
-	internal class Convert : ICommand
+	internal class Convert : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<amount> <ISO Currency Code> [to] <ISO Currency Code>";
-		public string Description => "Converts the value of a given amount of money from one currency to another.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<amount> <ISO Currency Code> [to] <ISO Currency Code>";
+		public override string Description => "Converts the value of a given amount of money from one currency to another.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			string fromAmount;
 			string fromCurrency;

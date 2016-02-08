@@ -14,11 +14,11 @@ using System.Threading;
 
 namespace BaggyBot.Commands
 {
-	internal class Py : ReadEvaluatePrintCommand, ICommand, IDisposable
+	internal class Py : ReadEvaluatePrintCommand, IDisposable
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<python code>";
-		public string Description => "Executes the given Python code and prints its result to IRC.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<python code>";
+		public override string Description => "Executes the given Python code and prints its result to IRC.";
 
 		private readonly ScriptEngine engine;
 		private readonly ScriptScope scope;
@@ -122,7 +122,7 @@ namespace BaggyBot.Commands
 			}
 			return true;
 		}
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			ThreadId++;
 			var isOperator = UserTools.Validate(command.Sender);

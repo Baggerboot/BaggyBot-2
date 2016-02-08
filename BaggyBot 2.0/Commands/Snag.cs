@@ -1,12 +1,12 @@
 ﻿namespace BaggyBot.Commands
 {
-	internal class Snag : ICommand
+	internal class Snag : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public string Usage => "[username]";
-		public string Description => "Makes me quote the next message that's written to this channel, or the next message written by the user specified.";
+		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Usage => "[username]";
+		public override string Description => "Makes me quote the next message that's written to this channel, or the next message written by the user specified.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			switch (command.Args.Length)
 			{

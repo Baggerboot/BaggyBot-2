@@ -4,13 +4,13 @@ using System.Net.Sockets;
 
 namespace BaggyBot.Commands
 {
-	internal class ResolveReverse : ICommand
+	internal class ResolveReverse : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "<IP address>";
-		public string Description => "Performs a reverse DNS lookup on a given IP address, and returns the associated hostname.";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "<IP address>";
+		public override string Description => "Performs a reverse DNS lookup on a given IP address, and returns the associated hostname.";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length != 1)
 			{

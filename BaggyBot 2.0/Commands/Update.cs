@@ -2,11 +2,11 @@
 
 namespace BaggyBot.Commands
 {
-	internal class Update : ICommand
+	internal class Update : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public string Usage => "[--no-dl]";
-		public string Description => "Downloads a new update and makes me restart to apply it.";
+		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Usage => "[--no-dl]";
+		public override string Description => "Downloads a new update and makes me restart to apply it.";
 
 		private readonly Bot bot;
 		public Update(Bot bot)
@@ -16,7 +16,7 @@ namespace BaggyBot.Commands
 		
 		private string requestChannel;
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 			Logger.Log(this, "Preparing to update");
 			requestChannel = command.Channel;

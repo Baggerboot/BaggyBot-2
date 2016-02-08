@@ -2,11 +2,11 @@
 
 namespace BaggyBot.Commands
 {
-	internal class Search : ICommand
+	internal class Search : Command
 	{
-		public PermissionLevel Permissions => PermissionLevel.All;
-		public string Usage => "";
-		public string Description => "Search for what?";
+		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Usage => "";
+		public override string Description => "Search for what?";
 
 		public Search(DataFunctionSet df)
 		{
@@ -14,7 +14,7 @@ namespace BaggyBot.Commands
 			//dataFunctionSet = df;
 		}
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 		}
 	}
