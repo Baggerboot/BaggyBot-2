@@ -151,12 +151,25 @@
     <Compile Include="BotDiagnostics.cs" />
     <Compile Include="CodeFormatter.cs" />
     <Compile Include="Collections\Generic\FixedSizeQueue.cs" />
+    <Compile Include="CommandParsing\ArgumentList.cs" />
+    <Compile Include="CommandParsing\Flag.cs" />
+    <Compile Include="CommandParsing\InvalidCommandException.cs" />
+    <Compile Include="CommandParsing\NonexistentOptionException.cs" />
+    <Compile Include="CommandParsing\OperationResult.cs" />
+    <Compile Include="CommandParsing\CommandParser.cs" />
+    <Compile Include="CommandParsing\Option.cs" />
+    <Compile Include="CommandParsing\Key.cs" />
+    <Compile Include="CommandParsing\Operation.cs" />
+    <Compile Include="CommandParsing\OptionType.cs" />
+    <Compile Include="CommandParsing\Argument.cs" />
     <Compile Include="Commands\Alias.cs" />
     <Compile Include="Commands\Bf.cs" />
     <Compile Include="Commands\Convert.cs" />
     <Compile Include="Commands\Cs.cs" />
     <Compile Include="Commands\Html.cs" />
     <Compile Include="Commands\HttpInterface.cs" />
+    <Compile Include="Commands\Interpreters\Brainfuck\BrainfuckInterpreter.cs" />
+    <Compile Include="Commands\Interpreters\Brainfuck\MemoryCell.cs" />
     <Compile Include="Commands\Notify.cs" />
     <Compile Include="Commands\ProducerConsumerStream.cs" />
     <Compile Include="Commands\Py.cs" />
@@ -191,7 +204,7 @@
     <Compile Include="Commands\Feature.cs" />
     <Compile Include="Commands\Get.cs" />
     <Compile Include="Commands\Help.cs" />
-    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\NickServ.cs" />
     <Compile Include="Commands\Part.cs" />
@@ -796,5 +809,9 @@
     <Content Include="Lib\_weakrefset.py" />
     <Content Include="Lib\__future__.py" />
     <Content Include="Lib\__phello__.foo.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commands\Interpreters\CSharp\" />
+    <Folder Include="Commands\Interpreters\Python\" />
   </ItemGroup>
 </Project>
