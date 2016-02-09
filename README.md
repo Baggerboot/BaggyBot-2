@@ -35,4 +35,4 @@ TODO
    on a per-channel, per-command basis, overriding the default permissions for each command.
  - Additionally, create another permission level for channel operators, and give them access to a few more
    commands if it makes sense.
-
+ - Allow connecting to multiple servers simultaneously.
