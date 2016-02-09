@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using BaggyBot.Commands.Interpreters;
+using BaggyBot.DataProcessors.IO;
 using BaggyBot.Tools;
 using Mono.CSharp;
 
@@ -13,7 +15,6 @@ namespace BaggyBot.Commands
 		public override string Description => "Executes the given C# code and prints its result to IRC.";
 
 		private readonly Evaluator evaluator;
-		private readonly CodeFormatter codeFormatter = new CodeFormatter();
 		private readonly IrcReportPrinter reportPrinter = new IrcReportPrinter();
 		private readonly Dictionary<string, StringBuilder> commandBuilders = new Dictionary<string, StringBuilder>();
 		
@@ -126,7 +127,7 @@ namespace BaggyBot.Commands
 
 				if (resultSet)
 				{
-					var output = codeFormatter.PrettyPrint(result);
+					var output = CodeFormatter.PrettyPrint(result);
 					IrcInterface.SendMessage(command.Channel, "--> " + output);
 					commandBuilders[command.Sender.Nick].Clear();
 				}

@@ -11,10 +11,12 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using BaggyBot.CommandParsing;
+using BaggyBot.Commands.Interpreters;
+using BaggyBot.DataProcessors.IO;
 
 namespace BaggyBot
 {
-	internal sealed class Bot : IDisposable
+	public sealed class Bot : IDisposable
 	{
 		// Provides an interface to an SQL Entity Provider
 		private readonly SqlConnector sqlConnector;
@@ -80,8 +82,19 @@ namespace BaggyBot
 			var statsHandler = new StatsHandler(dataFunctionSet, ircInterface);
 			UserTools.DataFunctionSet = dataFunctionSet;
 			botDiagnostics = new BotDiagnostics(ircInterface);
+
+			InterpreterContext.Globals = new InterpreterGlobals(new BotContext
+			{
+				Cfg = ConfigManager.Config,
+				Db = dataFunctionSet,
+				Irc = ircInterface,
+				Bot = this
+			});
+
 			var commandHandler = new CommandHandler(ircInterface, dataFunctionSet, this);
 			ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, commandHandler, statsHandler);
+
+
 
 			HookupIrcEvents();
 		}

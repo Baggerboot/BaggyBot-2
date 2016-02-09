@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Linq;
 using BaggyBot.Configuration;
+using BaggyBot.DataProcessors.IO;
 using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	internal abstract class ReadEvaluatePrintCommand : Command
+	public abstract class ReadEvaluatePrintCommand : Command
 	{
 		protected int ThreadId { get; set; } = 0;
 		protected IrcInterface IrcInterface { get; set; }
 		protected InterpreterSecurity Security { get; set; }
-		internal enum InterpreterSecurity
+		public enum InterpreterSecurity
 		{
 			Allow,
 			Notify,

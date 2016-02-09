@@ -7,13 +7,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using BaggyBot.DataProcessors.IO;
 
 namespace BaggyBot.DataProcessors
 {
 	/// <summary>
 	/// Provides an abstraction layer for commonly used database interactions.
 	/// </summary>
-	internal class DataFunctionSet
+	public class DataFunctionSet
 	{
 		private readonly SqlConnector sqlConnector;
 		private readonly IrcInterface ircInterface;
@@ -58,12 +59,26 @@ namespace BaggyBot.DataProcessors
 
 		public int ExecuteStatement(string statement)
 		{
-			return sqlConnector.ExecuteStatement(statement);
+			int result;
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				result = sqlConnector.ExecuteStatement(statement);
+			}
+			lockObj.LockMessage = "None";
+			return result;
 		}
 
-		public List<object> ExecuteQuery(string query)
+		public List<object[]> ExecuteQuery(string query)
 		{
-			return sqlConnector.ExecuteQuery(query);
+			List<object[]> results = null;
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				results = sqlConnector.ExecuteQuery(query);
+			}
+			lockObj.LockMessage = "None";
+			return results;
 		}
 
 		public void IncrementWordCount(int uid, int words)

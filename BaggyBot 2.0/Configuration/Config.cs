@@ -9,7 +9,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 namespace BaggyBot.Configuration
 {
-	internal static class ConfigManager
+	public static class ConfigManager
 	{
 		public enum LoadResult
 		{
@@ -147,7 +147,7 @@ namespace BaggyBot.Configuration
 		}
 	}
 
-	internal class Configuration
+	public class Configuration
 	{
 		public bool DebugMode { get; set; } = false;
 		public bool LogPerformance { get; set; } = false;
@@ -165,13 +165,13 @@ namespace BaggyBot.Configuration
 		public Server[] Servers { get; set; } = new Server[0];
 	}
 
-	internal class Interpreters
+	public class Interpreters
 	{
 		public bool Enabled { get; set; } = true;
 		public ReadEvaluatePrintCommand.InterpreterSecurity StartupSecurityLevel { get; set; } = ReadEvaluatePrintCommand.InterpreterSecurity.Block;
 	}
 
-	internal class Quotes
+	public class Quotes
 	{
 		public double SilentQuoteChance { get; set; } = 0.6;
 		public int MinDelayHours { get; set; } = 4;
@@ -179,7 +179,7 @@ namespace BaggyBot.Configuration
 		public bool AllowQuoteNotifications { get; set; } = false;
 	}
 
-	internal class Server
+	public class Server
 	{
 		public string Host { get; set; }
 		public int Port { get; set; } = 6667;
@@ -192,7 +192,7 @@ namespace BaggyBot.Configuration
 		public string[] CompatModes { get; set; } = new string[0];
 	}
 
-	internal class Operator
+	public class Operator
 	{
 		public string Nick { get; set; } = "*";
 		public string Ident { get; set; } = "*";
@@ -200,7 +200,7 @@ namespace BaggyBot.Configuration
 		public string Uid { get; set; } = "*";
 	}
 
-	internal class Identity
+	public class Identity
 	{
 		public string Nick { get; set; } = "BaggyBot";
 		public string Ident { get; set; } = "Dredger";
@@ -208,34 +208,34 @@ namespace BaggyBot.Configuration
 		public bool Hidden { get; set; } = true;
 	}
 
-	internal class Integrations
+	public class Integrations
 	{
 		public WolframAlpha WolframAlpha { get; set; } = new WolframAlpha();
 	}
 
-	internal class Backend
+	public class Backend
 	{
 		public string ConnectionString { get; set; }
 	}
 
-	internal class Metadata
+	public class Metadata
 	{
 		public string BotVersion { get; set; } = Bot.Version;
 		public string ConfigVersion { get; set; } = Bot.ConfigVersion;
 	}
 
-	internal class Logging
+	public class Logging
 	{
 		public string LogFile { get; set; } = "baggybot.log";
 		public bool ShowDebug { get; set; } = false;
 	}
 
-	internal class WolframAlpha
+	public class WolframAlpha
 	{
 		public string AppId { get; set; }
 	}
 	
-	internal static class StringExtensions
+	public static class StringExtensions
 	{
 		private static string ToCamelOrPascalCase(string str, Func<char, char> firstLetterTransform)
 		{

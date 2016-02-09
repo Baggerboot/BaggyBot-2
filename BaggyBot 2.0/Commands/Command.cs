@@ -1,6 +1,6 @@
 ﻿namespace BaggyBot.Commands
 {
-	internal abstract class Command
+	public abstract class Command
 	{
 		public abstract PermissionLevel Permissions { get; }
 		public abstract string Usage { get; }

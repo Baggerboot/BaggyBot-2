@@ -13,7 +13,7 @@ using Metadata = BaggyBot.Database.Model.Metadata;
 
 namespace BaggyBot.Database
 {
-	internal class SqlConnector : IDisposable
+	public class SqlConnector : IDisposable
 	{
 		private DataConnection connection;
 
@@ -209,11 +209,26 @@ namespace BaggyBot.Database
 			return cmd.ExecuteNonQuery();
 		}
 
-		internal List<object> ExecuteQuery(string query)
+		internal List<object[]> ExecuteQuery(string query)
 		{
-			var cmd = connection.CreateCommand();
-			cmd.CommandText = query;
-			throw new NotImplementedException();
+			var data = new List<object[]>();
+			using (var cmd = connection.CreateCommand())
+			{
+				cmd.CommandText = query;
+				using (var reader = cmd.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						var row = new object[reader.FieldCount];
+						for (int i = 0; i < reader.FieldCount; i++)
+						{
+							row[i] = reader[i];
+						}
+						data.Add(row);
+					}
+				}
+			}
+			return data;
 		}
 
 		public void Update<T>(T match)

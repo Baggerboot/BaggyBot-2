@@ -1,6 +1,6 @@
 ﻿namespace BaggyBot.Database.Model
 {
-	internal abstract class Poco
+	public abstract class Poco
 	{
 	}
 }

@@ -1,4 +1,6 @@
-﻿namespace BaggyBot.Commands
+﻿using BaggyBot.DataProcessors.IO;
+
+namespace BaggyBot.Commands
 {
 	internal class Join : Command
 	{

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Diagnostics;
 using BaggyBot.Commands;
 using BaggyBot.Configuration;
+using BaggyBot.DataProcessors.IO;
 using BaggyBot.Tools;
 using IRCSharp.IRC;
 using Convert = BaggyBot.Commands.Convert;
+using Roslyn = BaggyBot.Commands.RoslynExec;
 using Version = BaggyBot.Commands.Version;
 using WolframAlpha = BaggyBot.Commands.WolframAlpha;
 
@@ -37,6 +39,7 @@ namespace BaggyBot.DataProcessors
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
 				{"resolve", new Resolve()},
+				{"roslyn", new RoslynExec()},
 				{"say", new Say()},
 				{"set", new Set(dataFunctionSet)},
 				{"shutdown", new Shutdown(bot)},

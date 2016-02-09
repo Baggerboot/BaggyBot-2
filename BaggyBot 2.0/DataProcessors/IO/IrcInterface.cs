@@ -8,9 +8,9 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 
-namespace BaggyBot
+namespace BaggyBot.DataProcessors.IO
 {
-	internal class IrcInterface
+	public class IrcInterface
 	{
 		private const int messageLengthLimit = 510;
 

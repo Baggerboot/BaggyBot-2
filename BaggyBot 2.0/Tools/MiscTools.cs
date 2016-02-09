@@ -13,14 +13,6 @@ namespace BaggyBot.Tools
 	/// </summary>
 	public static class MiscTools
 	{
-		public static void ConsoleWriteLine(string line, ConsoleColor color = ConsoleColor.Gray)
-		{
-			//var prev = Console.ForegroundColor;
-			//Console.ForegroundColor = color;
-			Console.WriteLine(line);
-			//Console.ForegroundColor = prev;
-		}
-
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static string GetCurrentMethod()
 		{
@@ -28,25 +20,6 @@ namespace BaggyBot.Tools
 			var sf = st.GetFrame(1);
 
 			return sf.GetMethod().Name;
-		}
-
-		public static string GetContentName(out string filename, out int num, string dirname, string extension, int depth)
-		{
-			var prefix = "/var/www/html/usercontent/" + dirname;
-
-			var files = Directory.GetFiles(prefix).Where(s => s.EndsWith(extension)).OrderBy(s => s);
-			num = 1;
-			if (files.Count() != 0)
-			{
-				var name = files.Last();
-
-				name = name.Split('/').Last();
-				name = name.Substring(0, depth);
-				num = int.Parse(name);
-				num++;
-			}
-			filename = num.ToString("D" + depth) + extension;
-			return prefix + "/" + filename;
 		}
 
 		public static double NthRoot(double baseValue, int n)
