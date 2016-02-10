@@ -41,7 +41,4 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = BaggyBotHost\BaggyBotHost.csproj
-	EndGlobalSection
 EndGlobal
