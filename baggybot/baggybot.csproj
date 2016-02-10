@@ -208,7 +208,6 @@
     <Compile Include="src\Database\Upgrades\DatabaseUpgrader.cs" />
     <Compile Include="src\DataProcessors\CommandHandler.cs" />
     <Compile Include="src\Commands\CommandArgs.cs" />
-    <None Include="app.config" />
     <None Include="src\Commands\Example.cs" />
     <Compile Include="src\Commands\Feature.cs" />
     <Compile Include="src\Commands\Get.cs" />
