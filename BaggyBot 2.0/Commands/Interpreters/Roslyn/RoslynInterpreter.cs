@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using BaggyBot.DataProcessors;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CSharp.RuntimeBinder;
-using Newtonsoft.Json;
 
 namespace BaggyBot.Commands.Interpreters.Roslyn
 {
@@ -17,8 +15,8 @@ namespace BaggyBot.Commands.Interpreters.Roslyn
 		{
 			var options = ScriptOptions.Default
 				.AddReferences(Assembly.GetAssembly(typeof(RoslynInterpreter)))
-				.AddImports("System", "System.Math", "System.Linq", "System.Collections.Generic", "System.IO", "System.Reflection", "System.Dynamic", "BaggyBot.Commands.Interpreters.Roslyn", "BaggyBot", "BaggyBot.DataProcessors.IO");
-			var script = CSharpScript.Create("5+5", options, typeof(InterpreterGlobals));
+				.AddImports("System", "System.Math", "System.Linq", "System.Collections.Generic", "System.IO", "System.Reflection", "System.Dynamic", "BaggyBot", "BaggyBot.DataProcessors.IO");
+			var script = CSharpScript.Create("", options, typeof(InterpreterGlobals));
 			state = script.RunAsync(InterpreterContext.Globals).Result;
 		}
 

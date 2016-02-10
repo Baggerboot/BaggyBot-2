@@ -85,7 +85,6 @@ namespace BaggyBot
 
 			InterpreterContext.Globals = new InterpreterGlobals(new BotContext
 			{
-				Cfg = ConfigManager.Config,
 				Db = dataFunctionSet,
 				Irc = ircInterface,
 				Bot = this
