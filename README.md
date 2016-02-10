@@ -21,6 +21,22 @@ Finally, BaggyBot is able to grab random quotes from users, and store these in t
 
 He's meant to be used with a script (or website) that retrieves those statistics from the database and visualises them.
 
+Building
+--------
+The build process is fairly straighforward. However, because this repository uses submodules,
+you should, after cloning this repository, first set them up. Navigate to the repository root,
+then run `git submodule init` and then clone the submodule repositories with `git submodule update`.
+
+Occasionally, as the submodules get updated, you might have to run that command again.
+
+To build BaggyBot from VS, no additional steps are required. To build him from commandline,
+you'll have to restore all referenced packages first. In the repository root, run `nuget restore`.
+
+Now you can build the project, running either `xbuild` or `msbuild`, depending on whether you want
+to build the project using the Mono or the Microsoft compiler. No additional arguments are required.
+
+To build for the release configuration, run `xbuild/msbuild /p:Configuration=Release`
+
 TODO
 --------
 
