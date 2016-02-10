@@ -35,7 +35,7 @@ you'll have to restore all referenced packages first. In the repository root, ru
 Now you can build the project, running either `xbuild` or `msbuild`, depending on whether you want
 to build the project using the Mono or the Microsoft compiler. No additional arguments are required.
 
-To build for the release configuration, run `xbuild/msbuild /p:Configuration=Release`
+To build for the release configuration, run `(x/ms)build /p:Configuration=Release`
 
 TODO
 --------
