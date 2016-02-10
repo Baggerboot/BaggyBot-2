@@ -1,28 +1,29 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
+/*using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;*/
 using Microsoft.CSharp.RuntimeBinder;
 
 namespace BaggyBot.Commands.Interpreters.Roslyn
 {
 	class RoslynInterpreter
 	{
-		private ScriptState state;
+		//private ScriptState state;
 
 		public RoslynInterpreter()
 		{
-			var options = ScriptOptions.Default
+			/*var options = ScriptOptions.Default
 				.AddReferences(Assembly.GetAssembly(typeof(RoslynInterpreter)))
-				.AddImports("System", "System.Math", "System.Linq", "System.Collections.Generic", "System.IO", "System.Reflection", "System.Dynamic", "BaggyBot", "BaggyBot.DataProcessors.IO");
+				.AddImports("System", "System.Math", "System.Linq", "System.Collections.Generic", "System.IO", "System.Reflection", "System.Dynamic", "BaggyBot", "BaggyBot.DataProcessors");
 			var script = CSharpScript.Create("", options, typeof(InterpreterGlobals));
-			state = script.RunAsync(InterpreterContext.Globals).Result;
+			state = script.RunAsync(InterpreterContext.Globals).Result;*/
 		}
 
 		public string Interpret(string code)
 		{
-			try
+			throw new NotImplementedException("The Roslyn interpreter is not available on .NET 4.5");
+			/*try
 			{
 				state = state.ContinueWithAsync(code).Result;
 				var returnValue = state.ReturnValue;
@@ -63,7 +64,7 @@ namespace BaggyBot.Commands.Interpreters.Roslyn
 			catch (Exception e) when (e is CompilationErrorException || e is RuntimeBinderException)
 			{
 				return e.Message;
-			}
+			}*/
 		}
 	}
 }

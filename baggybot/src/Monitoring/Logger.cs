@@ -208,11 +208,6 @@ namespace BaggyBot.Monitoring
 				{
 					Console.WriteLine(lineBuilder.ToString());
 				}
-				else
-				{
-					Log(null, "Unable to parse settings value for show_debug_log into a boolean.", LogLevel.Warning);
-					Console.WriteLine(lineBuilder.ToString());
-				}
 			}
 			else
 			{

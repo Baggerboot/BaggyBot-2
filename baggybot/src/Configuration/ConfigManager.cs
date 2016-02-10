@@ -20,7 +20,7 @@ namespace BaggyBot.Configuration
 
 		private static string fileName;
 
-		public static Configuration Config { get; private set; }
+		public static Configuration Config { get; private set; } = new Configuration();
 		//private static Configuration ConfigOnDisk;
 
 		public static LoadResult Load(string fileName)
@@ -31,10 +31,10 @@ namespace BaggyBot.Configuration
 				try
 				{
 					var exampleConfigStream =
-						Assembly.GetExecutingAssembly().GetManifestResourceStream("BaggyBot.EmbeddedData.Configuration.example-config.yaml");
+						Assembly.GetExecutingAssembly().GetManifestResourceStream("BaggyBot.src.EmbeddedData.Configuration.example-config.yaml");
 					exampleConfigStream.CopyTo(File.Create(fileName));
 				}
-				catch (Exception e) when (e is FileNotFoundException || e is FileLoadException)
+				catch (Exception e) when (e is FileNotFoundException || e is FileLoadException || e is IOException)
 				{
 					Logger.Log(null, "Unable to load the default config file.", LogLevel.Error);
 					Logger.Log(null, "Default config file not created. You might have to create one yourself.", LogLevel.Warning);
