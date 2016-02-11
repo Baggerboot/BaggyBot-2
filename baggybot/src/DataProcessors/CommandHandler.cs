@@ -10,7 +10,6 @@ using BaggyBot.Monitoring;
 using BaggyBot.Tools;
 using IRCSharp.IRC;
 using Convert = BaggyBot.Commands.Convert;
-using Roslyn = BaggyBot.Commands.RoslynExec;
 using Version = BaggyBot.Commands.Version;
 using WolframAlpha = BaggyBot.Commands.WolframAlpha;
 
@@ -41,7 +40,6 @@ namespace BaggyBot.DataProcessors
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
 				{"resolve", new Resolve()},
-				{"roslyn", new RoslynExec()},
 				{"say", new Say()},
 				{"set", new Set(dataFunctionSet)},
 				{"shutdown", new Shutdown(bot)},
@@ -61,6 +59,7 @@ namespace BaggyBot.DataProcessors
 			{
 				commands.Add("py", new Py(ircInterface, dataFunctionSet));
 				commands.Add("cs", new Cs(ircInterface));
+				commands.Add("roslyn", new RoslynExec());
 			}
 			else
 			{
@@ -69,29 +68,21 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		private CommandArgs BuildCommand(IrcMessage message)
-		{
-			var line = message.Message.Substring(1);
-
-			var args = line.Split(' ');
-			var command = args[0];
-			args = args.Skip(1).ToArray();
-
-			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ircInterface.SendMessage);
-		}
-
-		public void ProcessCommand(IrcMessage message)
+		public void ProcessMessage(IrcMessage message)
 		{
 			Logger.Log(this, "Processing command: " + message.Message);
 			if (message.Message.Equals(Bot.CommandIdentifier)) return;
 
-			var cmdInfo = BuildCommand(message);
+			var cmdInfo = CommandArgs.FromMessage(message);
+			ProcessCommand(cmdInfo);
+		}
 
+		private void ProcessCommand(CommandArgs cmdInfo)
+		{
 			// Inject bot information, but do not return.
-			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1)))
+			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(cmdInfo.Command.ToLower()))
 			{
-				ircInterface.SendMessage(message.Channel, string.Format(Messages.CmdGeneralInfo, Bot.Version));
+				cmdInfo.ReturnMessage(string.Format(Messages.CmdGeneralInfo, Bot.Version));
 			}
 
 			if (!commands.ContainsKey(cmdInfo.Command))
@@ -102,7 +93,7 @@ namespace BaggyBot.DataProcessors
 					var value = cmdInfo.Args.ToList();
 					value.Insert(1, "say");
 					((Alias)commands["alias"]).Use(
-						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.ReplyCallback));
+						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.IrcInterface));
 				}
 				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
 				{
@@ -116,12 +107,14 @@ namespace BaggyBot.DataProcessors
 						aliasedCommand = aliasedCommand.Replace("$args", cmdInfo.FullArgument);
 					}
 					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
-					ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
+
+					ProcessCommand(CommandArgs.FromMessage(new IrcMessage(cmdInfo.Sender, cmdInfo.Channel, "-" + aliasedCommand)));
+					//ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.ReplyCallback, message.Action));
 				}
 				return;
 			}
 
-			if (commands[cmdInfo.Command].Permissions == PermissionLevel.All || commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender))
+			if (commands[cmdInfo.Command].Permissions == PermissionLevel.All || commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(cmdInfo.Sender))
 			{
 				// Don't gobble up exceptions when debugging
 				if (ConfigManager.Config.DebugMode)
@@ -136,14 +129,17 @@ namespace BaggyBot.DataProcessors
 					}
 					catch (Exception e)
 					{
-						var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\", Occurred at line {new StackTrace(e, true).GetFrame(0).GetFileLineNumber()}";
-						ircInterface.SendMessage(message.Channel, exceptionMessage);
-					}
+						var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\"";
+						ircInterface.SendMessage(cmdInfo.Channel, exceptionMessage);
+						// Previously, debugging information (filename and line number) were put in the error message.
+						// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
+						Logger.LogException(commands[cmdInfo.Command], e, $"processing the command \"{cmdInfo.Command} {cmdInfo.FullArgument}\"");
+                    }
 				}
 			}
 			else
 			{
-				ircInterface.SendMessage(message.Channel, Messages.CmdNotAuthorised);
+				ircInterface.SendMessage(cmdInfo.Channel, Messages.CmdNotAuthorised);
 			}
 		}
 	}

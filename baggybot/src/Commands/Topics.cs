@@ -19,7 +19,7 @@ namespace BaggyBot.Commands
 			dataFunctionSet = df;
 		}
 
-		private void ShowTopics(string nick, string channel, Action<string, object[]> replyCallback, bool showDebugInfo)
+		private void ShowTopics(string nick, string channel, Func<string, object[], bool> replyCallback, bool showDebugInfo)
 		{
 			Logger.Log(this, "Showing topics for " + nick);
 			var userId = dataFunctionSet.GetIdFromNick(nick);

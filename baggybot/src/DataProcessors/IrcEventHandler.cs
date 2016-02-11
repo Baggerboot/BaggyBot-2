@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using BaggyBot.Database;
 using BaggyBot.Monitoring;
+using Microsoft.Scripting.Utils;
 
 namespace BaggyBot.DataProcessors
 {
@@ -20,12 +21,12 @@ namespace BaggyBot.DataProcessors
 
 		private readonly string[] IgnoredCommands = { "004" /*RPL_MYINFO*/, "005" /*RPL_ISUPPORT*/, "251" /*RPL_LUSERCLIENT*/, "254" /*RPL_LUSERCHANNELS*/, "252" /*RPL_LUSEROP*/, "255" /*RPL_LUSERME*/, "265", "266", "250" };
 
-		public IrcEventHandler(DataFunctionSet dataFunctionSet, IrcInterface ircInterface, CommandHandler commandHandler, StatsHandler statsHandler)
+		public IrcEventHandler(DataFunctionSet dataFunctionSet, IrcInterface ircInterface, Bot bot)
 		{
 			this.dataFunctionSet = dataFunctionSet;
 			this.ircInterface = ircInterface;
-			this.commandHandler = commandHandler;
-			this.statsHandler = statsHandler;
+			this.commandHandler = new CommandHandler(this.ircInterface, this.dataFunctionSet, bot);
+			this.statsHandler = new StatsHandler(this.dataFunctionSet, this.ircInterface);
 		}
 
 		private void AddMessageToIrcLog(IrcMessage message, int userId)
@@ -43,7 +44,7 @@ namespace BaggyBot.DataProcessors
 		// This is what we call a God Method. It's like a God Object, only it's a method.
 		// It does way too fucking much, this really needs to be cleaned up sometime.
 		// TODO: Clean up ProcessMessage()
-		internal void ProcessMessage(IrcMessage message)
+		private void ProcessMessage(IrcMessage message)
 		{
 			try
 			{
@@ -75,7 +76,7 @@ namespace BaggyBot.DataProcessors
 					var needle = match.Groups[1].Value;
 					var replacement = match.Groups[2].Value;
 
-					var haystack = recentMessages.ToArray().Reverse().First(msg => msg.Contains(needle) && msg != message.Message);
+					var haystack = Enumerable.Reverse(recentMessages.ToArray()).First(msg => msg.Contains(needle) && msg != message.Message);
 
 					ircInterface.SendMessage(message.Channel, message.Sender.Nick + ", " + haystack.Replace(needle, replacement));
 					return;
@@ -87,14 +88,14 @@ namespace BaggyBot.DataProcessors
 				{
 					Logger.Log(this, "Processing Query Console python command");
 					message.Message = "-py " + message.Message;
-					commandHandler.ProcessCommand(message);
+					commandHandler.ProcessMessage(message);
 					return;
 				}
 
 				// Handle regular commands and messages
 				if (message.Message.StartsWith(Bot.CommandIdentifier))
 				{
-					commandHandler.ProcessCommand(message);
+					commandHandler.ProcessMessage(message);
 				}
 				else
 				{

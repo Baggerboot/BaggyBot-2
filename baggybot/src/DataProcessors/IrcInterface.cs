@@ -20,6 +20,7 @@ namespace BaggyBot.DataProcessors
 		private readonly Dictionary<string, string> nickservCallResults = new Dictionary<string, string>();
 		private readonly Dictionary<string, IrcUser> whoisCallResults = new Dictionary<string, IrcUser>();
 
+		private readonly IrcEventHandler ircEventHandler;
 		public DataFunctionSet DataFunctionSet { private get; set; }
 		private IrcClient client;
 		
@@ -44,14 +45,14 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		public bool InChannel(string channel)
-		{
-			return client.InChannel(channel);
-		}
-
 		public IrcInterface(IrcClient client)
 		{
 			this.client = client;
+		}
+
+		public bool InChannel(string channel)
+		{
+			return client.InChannel(channel);
 		}
 
 		public void UpdateClient(IrcClient client)
@@ -118,45 +119,43 @@ namespace BaggyBot.DataProcessors
 			return nickservCallResults[nick];
 		}
 
-		private int CalculateMessageLength(string target, string message)
-		{
-			return CalculatePrefixLength(target) + message.Length;
-		}
-		private int CalculatePrefixLength(string target)
-		{
-			var prefix = $":{client.Nick}!{client.Ident}@{client.LocalHost} PRIVMSG {target} :";
-			return prefix.Length;
-		}
 		private int GetMaxMessageLength(string target)
 		{
-			return messageLengthLimit - CalculatePrefixLength(target);
+			return messageLengthLimit - GeneratePrefix(target).Length;
 		}
+
+		private string GeneratePrefix(string target)
+		{
+			return $":{client.Nick}!{client.Ident}@{client.LocalHost} PRIVMSG {target} :";
+		}
+
 		private string GenerateFullMessage(string target, string message)
 		{
 			return $":{client.Nick}!{client.Ident}@{client.LocalHost} PRIVMSG {target} :{message}";
 		}
 
-		private void SendMessageChunk(string target, string message, int recursionDepth)
+		/// <summary>
+		/// Sends a message to the IRC server. Checks to ensure it doesn't exceed the length limit for IRC commands,
+		/// breaking it up into multiple messages if it does.
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="message"></param>
+		/// <param name="recursionDepth"></param>
+		/// <returns></returns>
+		private bool SendMessageChunk(string target, string message, int recursionDepth)
 		{
 			var floodLimit = ConfigManager.Config.FloodLimit;
 
 			if (recursionDepth >= floodLimit)
 			{
 				client.SendMessage(target, "Flood limit triggered. The remaining part of the message has been discarded.");
-				return;
+				return true;
 			}
 			string cutoff = null;
-			if (CalculateMessageLength(target, message) > messageLengthLimit)
+			if (GenerateFullMessage(target, message).Length > messageLengthLimit)
 			{
 				cutoff = message.Substring(GetMaxMessageLength(target));
 				message = message.Substring(0, GetMaxMessageLength(target));
-			}
-
-			var fullMsg = GenerateFullMessage(target, message);
-
-			if (fullMsg.Length > messageLengthLimit)
-			{
-				Logger.Log(this, "Message prototype exceeds maximum allowed message length! Message prototype: " + fullMsg, LogLevel.Warning);
 			}
 
 			var result = client.SendMessage(target, message);
@@ -166,21 +165,27 @@ namespace BaggyBot.DataProcessors
 			}
 			if (cutoff != null)
 			{
-				SendMessageChunk(target, cutoff, ++recursionDepth);
+				return result && SendMessageChunk(target, cutoff, ++recursionDepth);
+			}
+			else
+			{
+				return result;
 			}
 		}
 
-		public void SendMessage(string target, string message)
+		public bool SendMessage(string target, string message)
 		{
-			SendMessageChunk(target, message, 0);
+			return SendMessageChunk(target, message, 0);
 		}
 
-		public void SendMessage(IEnumerable<string> targets, string message)
+		public bool SendMessage(IEnumerable<string> targets, string message)
 		{
+			var success = true;
 			foreach (var target in targets)
 			{
-				SendMessageChunk(target, message, 0);
+				success = success && SendMessageChunk(target, message, 0);
 			}
+			return success;
 		}
 
 		/// <summary>

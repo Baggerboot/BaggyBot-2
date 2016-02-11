@@ -23,11 +23,11 @@ namespace BaggyBot
 		private readonly SqlConnector sqlConnector;
 		// Abstraction over SqlConnector for database operations
 		private readonly DataFunctionSet dataFunctionSet;
-		private IrcClient client;
+		//private IrcClient client;
 		// Provides an interface to the IRC client for sending data
-		private readonly IrcInterface ircInterface;
+		//private readonly IrcInterface ircInterface;
 		// Handles IRC events, passing them on the the appropriate data processors if neccessary
-		private readonly IrcEventHandler ircEventHandler;
+		//private readonly IrcEventHandler ircEventHandler;
 		// Collects performance statistics
 		private readonly BotDiagnostics botDiagnostics;
 
@@ -66,6 +66,15 @@ namespace BaggyBot
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
 			Logger.Log(this, "Starting BaggyBot version " + Version, LogLevel.Info);
 
+			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
+			Logger.OnLogEvent += (message, level) =>
+			{
+				if (level == LogLevel.Error || level == LogLevel.Warning)
+				{
+					ircInterface.NotifyOperator("LOG WARNING/ERROR: " + message);
+				}
+			};
+
 			// TODO: Check for version changes in a different way
 			/*if (previousVersion != null && previousVersion != Version)
 			{
@@ -80,7 +89,6 @@ namespace BaggyBot
 			ircInterface = new IrcInterface(client);
 			dataFunctionSet = new DataFunctionSet(sqlConnector, ircInterface);
 			ircInterface.DataFunctionSet = dataFunctionSet;
-			var statsHandler = new StatsHandler(dataFunctionSet, ircInterface);
 			UserTools.DataFunctionSet = dataFunctionSet;
 			botDiagnostics = new BotDiagnostics(ircInterface);
 
@@ -91,17 +99,9 @@ namespace BaggyBot
 				Bot = this
 			});
 
-			var commandHandler = new CommandHandler(ircInterface, dataFunctionSet, this);
-			ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, commandHandler, statsHandler);
-
-
+			ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, this);
 
 			HookupIrcEvents();
-		}
-
-		~Bot()
-		{
-			Console.WriteLine("Shutting down bot instance (version {0})", Version);
 		}
 
 		private void HookupIrcEvents()
@@ -123,7 +123,6 @@ namespace BaggyBot
 				}
 			});
 			client.OnFormattedLineReceived += ircEventHandler.ProcessFormattedLine;
-			//client.OnRawLineReceived += ircEventHandler.ProcessRawLine;
 			client.OnNoticeReceived += ircEventHandler.ProcessNotice;
 			client.OnDisconnect += (reason, exception) => HandleDisconnect(client, reason, exception);
 			client.OnKicked += (channel, reason, kicker) => Logger.Log(this, $"I was kicked from {channel} by {kicker.Nick} ({reason})", LogLevel.Warning);
@@ -135,6 +134,9 @@ namespace BaggyBot
 			client.OnQuit += ircEventHandler.HandleQuit;
 		}
 
+		/// <summary>
+		/// Connects the bot to the SQL database.
+		/// </summary>
 		private void ConnectDatabase()
 		{
 			Logger.Log(this, "Connecting to the database", LogLevel.Info);
@@ -143,7 +145,7 @@ namespace BaggyBot
 				if (sqlConnector.OpenConnection())
 					Logger.Log(this, "Database connection established", LogLevel.Info);
 				else
-					Logger.Log(this, "Database connection not established. Bot functionality will be very limited.", LogLevel.Warning);
+					Logger.Log(this, "Database connection not established. Statistics collection will not be possible.", LogLevel.Warning);
 			}
 			catch (Exception e)
 			{
@@ -219,17 +221,6 @@ namespace BaggyBot
 			{
 				botDiagnostics.StartPerformanceLogging();
 			}
-			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
-			Logger.OnLogEvent += (message, level) =>
-			{
-				if (level == LogLevel.Error || level == LogLevel.Warning)
-				{
-					if (ircInterface.Connected)
-					{
-						ircInterface.NotifyOperator("LOG WARNING/ERROR: " + message);
-					}
-				}
-			};
 		}
 
 		private void HandleDisconnect(object source, DisconnectReason reason, Exception ex)

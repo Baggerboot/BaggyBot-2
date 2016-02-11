@@ -9,7 +9,6 @@ namespace BaggyBot.Commands
 	public abstract class ReadEvaluatePrintCommand : Command
 	{
 		protected int ThreadId { get; set; } = 0;
-		protected IrcInterface IrcInterface { get; set; }
 		protected InterpreterSecurity Security { get; set; }
 		public enum InterpreterSecurity
 		{
@@ -34,7 +33,7 @@ namespace BaggyBot.Commands
 		{
 			if (!UserTools.Validate(command.Sender))
 			{
-				IrcInterface.SendMessage(command.Channel, "Python Interpreter control commands may only be used by the bot operator");
+				command.ReturnMessage("Python Interpreter control commands may only be used by the bot operator");
 				return;
 			}
 			var control = command.Args[0].Substring(2);
@@ -50,7 +49,7 @@ namespace BaggyBot.Commands
 							try
 							{
 								SetSecurity(command.Args[1]);
-								IrcInterface.SendMessage(command.Channel, "Security level set to " + Security);
+								command.ReturnMessage("Security level set to " + Security);
 							}
 							catch (ArgumentException)
 							{
@@ -67,10 +66,10 @@ namespace BaggyBot.Commands
 					break;
 				case "toggle":
 					ControlVariables.QueryConsole = !ControlVariables.QueryConsole;
-					IrcInterface.SendMessage(command.Channel, "Interactive query console: " + (ControlVariables.QueryConsole ? "On" : "Off"));
+					command.ReturnMessage("Interactive query console: " + (ControlVariables.QueryConsole ? "On" : "Off"));
 					break;
 				case "help":
-					IrcInterface.SendMessage(command.Channel, "The following control commands are available: security, abort, toggle");
+					command.ReturnMessage("The following control commands are available: security, abort, toggle");
 					break;
 				case "threads":
 					Threads(command);
@@ -79,7 +78,7 @@ namespace BaggyBot.Commands
 					GetBuffer(command);
 					break;
 				default:
-					IrcInterface.SendMessage(command.Channel, "That is not a valid control command.");
+					command.ReturnMessage("That is not a valid control command.");
 					break;
 			}
 		}
