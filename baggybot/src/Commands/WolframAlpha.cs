@@ -1,10 +1,12 @@
 ﻿using BaggyBot.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Xml;
+using BaggyBot.Monitoring;
 
 namespace BaggyBot.Commands
 {
@@ -12,7 +14,11 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "<query>|<more>";
-		public override string Description => "Makes Wolfram Alpha calculate or look up the query you've entered, and returns the result. Using the 'more' argument will print additional information about the last query you looked up.";
+
+		public override string Description
+			=>
+				"Makes Wolfram Alpha calculate or look up the query you've entered, and returns the result. Using the 'more' argument will print additional information about the last query you looked up."
+			;
 
 		private XmlNode lastDisplayedResult;
 
@@ -41,12 +47,46 @@ namespace BaggyBot.Commands
 			if (lastDisplayedResult == null) return null;
 
 			var result = GetNextSibling(lastDisplayedResult);
+
 			if (result != null)
 			{
-				returnData = "\x02" + result.Attributes["title"].Value + "\x02: " + result.InnerText;
 				lastDisplayedResult = result;
+				return ReadPod(result);
 			}
 			return returnData;
+		}
+
+		private static string ReadPod(XmlNode node)
+		{
+			var children = node.SelectNodes("subpod/plaintext");
+			if (children.Count > 1)
+			{
+				string data = string.Empty;
+				foreach (var childNode in children)
+				{
+					if (childNode is XmlNode)
+					{
+						data += " \x001dand\x001d " + ((XmlNode) childNode).InnerText;
+					}
+					else
+					{
+						Debugger.Break();
+					}
+				}
+				data = data.Substring(" \x0002and\x0002 ".Length);
+				return "\x02" + node.Attributes["title"].Value + "\x02: " + data;
+			}
+			else
+			{
+				if (string.IsNullOrWhiteSpace(node.InnerText))
+				{
+					return null;
+				}
+				else
+				{
+					return "\x02" + node.Attributes["title"].Value + "\x02: " + node.InnerText;
+				}
+			}
 		}
 
 		public string ReplaceNewlines(string input)
@@ -58,7 +98,8 @@ namespace BaggyBot.Commands
 		{
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{
-				command.Reply("Usage: '-wa <WolframAlpha query>' -- Displays information acquired from http://www.wolframalpha.com. In addition to this, you can use the command '-wa more' to display additional information about the last subject");
+				command.Reply(
+					"Usage: '-wa <WolframAlpha query>' -- Displays information acquired from http://www.wolframalpha.com. In addition to this, you can use the command '-wa more' to display additional information about the last subject");
 				return;
 			}
 
@@ -76,7 +117,7 @@ namespace BaggyBot.Commands
 					{
 						more += " -- " + secondItem;
 					}
-					command.ReturnMessage(ReplaceNewlines(more));
+					command.ReturnMessage(ReplaceNewlines(WaReplace(more)));
 				}
 				return;
 			}
@@ -134,10 +175,10 @@ namespace BaggyBot.Commands
 			}
 			var input = queryresult.FirstChild;
 			var title = ReplaceNewlines(input.Attributes["title"].Value);
-			var result = ReplaceNewlines(input.NextSibling.InnerText);
+			var result = ReadPod(input.NextSibling);
 			lastDisplayedResult = input.NextSibling;
 
-			if (result == string.Empty)
+			if (result == null)
 			{
 				result = ShowMore();
 			}
@@ -146,7 +187,24 @@ namespace BaggyBot.Commands
 				result += " -- " + ShowMore();
 			}
 
-			command.Reply("({0}: {1}): {2}", title, ReplaceNewlines(input.InnerText), ReplaceNewlines(result));
+			command.Reply("({0}: {1}): {2}", WaReplace(title), ReplaceNewlines(WaReplace(input.InnerText)), ReplaceNewlines(WaReplace(result)));
+		}
+
+		private static string WaReplace(string text)
+		{
+			text = text.Replace("\uf7d9", "==");
+			text = text.Replace("\uf6c4", "\x1ds\x1d");
+			text = text.Replace("\uf522", "->");
+
+			foreach (char c in text)
+			{
+				if ((int) c >= 0xE000 && (int) c <= 0xF8FF)
+				{
+					Logger.Log(null, $"Unrecognised character detected: Code point 0x{(int)c:x4}", LogLevel.Warning);
+				}
+			}
+
+			return text;
 		}
 
 		private string GetDidYouMeans(XmlNodeList xmlNodeList)
@@ -157,7 +215,7 @@ namespace BaggyBot.Commands
 
 			nodes.OrderByDescending(node => double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture));
 			var didyoumeans = nodes.Select(node =>
-				$"\"{node.InnerText}\" (score: {Math.Round(double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture)*100)}%)");
+				$"\"{node.InnerText}\" (score: {Math.Round(double.Parse(node.Attributes["score"].Value, CultureInfo.InvariantCulture) * 100)}%)");
 
 			var firstItems = string.Join(", ", didyoumeans.Take(didyoumeans.Count() - 1));
 
