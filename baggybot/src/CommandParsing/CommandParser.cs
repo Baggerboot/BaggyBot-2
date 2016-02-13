@@ -38,7 +38,7 @@ namespace BaggyBot.CommandParsing
 			}
 			if (!operations.ContainsKey(components[0]))
 			{
-				throw new InvalidCommandException();
+				throw new InvalidCommandException("Unrecognised operation.", components[0]);
 			}
 			else
 			{

@@ -28,7 +28,16 @@ namespace BaggyBot.Commands
 				.AddOperation("users", new Operation()
 					.AddArgument("channel", command.Channel));
 
-			var result = cmdParser.Parse(command.FullArgument);
+			OperationResult result;
+			try
+			{
+				result = cmdParser.Parse(command.FullArgument);
+			}
+			catch (InvalidCommandException e)
+			{
+				command.ReturnMessage(e.Message);
+				return;
+			}
 
 			switch (result.OperationName)
 			{
