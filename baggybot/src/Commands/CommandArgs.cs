@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using BaggyBot.DataProcessors;
-using IRCSharp.IRC;
+using BaggyBot.MessagingInterface;
+using IRCSharp;
 
 namespace BaggyBot.Commands
 {
@@ -10,22 +10,19 @@ namespace BaggyBot.Commands
 		public string Command { get; private set; }
 		// TODO: CommandArgs.Args should be made into a get-only accessor.
 		public string[] Args { get; set; }
-		public IrcUser Sender { get; private set; }
-		public string Channel { get; private set; }
+		public IrcUser Sender { get;}
+		public string Channel { get;}
 		// TODO: CommandArgs.FullArgument should be made into a get-only accessor.
 		public string FullArgument { get; set; }
-		//public Func<string, string, bool> ReplyCallback { get; private set; }
+		public IrcClientWrapper Client => Sender.Client;
 
-		public IrcInterface IrcInterface { get; private set; }
-
-		public CommandArgs(string command, string[] args, IrcUser sender, string channel, string fullArgument, IrcInterface ircInterface)
+		public CommandArgs(string command, string[] args, IrcUser sender, string channel, string fullArgument)
 		{
 			Command = command;
 			Args = args;
 			Sender = sender;
 			Channel = channel;
 			FullArgument = fullArgument;
-			IrcInterface = ircInterface;
 			//ReplyCallback = replyCallback;
 		}
 
@@ -46,7 +43,7 @@ namespace BaggyBot.Commands
 			args = args.Skip(1).ToArray();
 
 			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), context.IrcInterface);
+			return new CommandArgs(command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
 		}
 		
 
@@ -59,18 +56,18 @@ namespace BaggyBot.Commands
 			args = args.Skip(1).ToArray();
 
 			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), message.IrcInterface);
+			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
 		}
 
-		public bool Reply(string format, params object[] args)
+		public MessageSendResult Reply(string format, params object[] args)
 		{
 			var message = Sender.Nick + ", " + string.Format(format, args);
-			return IrcInterface.SendMessage(Channel, message);
+			return Sender.Client.SendMessage(Channel, message);
 		}
 
-		public bool ReturnMessage(string format, params object[] args)
+		public MessageSendResult ReturnMessage(string format, params object[] args)
 		{
-			return IrcInterface.SendMessage(Channel, args.Length == 0 ? format : string.Format(format, args));
+			return Sender.Client.SendMessage(Channel, args.Length == 0 ? format : string.Format(format, args));
 		}
 	}
 }

@@ -21,19 +21,21 @@ namespace BaggyBot.Commands
 		public override string Usage => "<python code>";
 		public override string Description => "Executes the given Python code and prints its result to IRC.";
 
+		private readonly Bot bot;
+
 		private readonly ScriptEngine engine;
 		private readonly ScriptScope scope;
 		private readonly StreamReader outputStreamReader;
 
 		private readonly List<Thread> threads = new List<Thread>();
-
 		private readonly StringBuilder commandBuilder = new StringBuilder();
 
-		public Py(IrcInterface inter, DataFunctionSet df)
+
+		public Py(DataFunctionSet df, Bot bot)
 		{
+			this.bot = bot;
 			engine = Python.CreateEngine();
 			scope = engine.CreateScope();
-			scope.SetVariable("ircInterface", inter);
 			scope.SetVariable("dataFunctionSet", df);
 			scope.SetVariable("tools", new PythonTools());
 			scope.SetVariable("find", new Action<string>(msg => df.FindLine(msg)));
@@ -92,7 +94,7 @@ namespace BaggyBot.Commands
 			if (Security == InterpreterSecurity.Notify)
 			{
 				// Do not return anything yet, but do notify the bot operator.
-				command.IrcInterface.NotifyOperator("-py used by " + command.Sender.Nick + ": " + command.FullArgument);
+				bot.NotifyOperator("-py used by " + command.Sender.Nick + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
 			{

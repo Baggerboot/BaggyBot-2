@@ -11,13 +11,11 @@ namespace BaggyBot.Commands
 		public override string Usage => "[-f]|[set <username>]";
 		public override string Description => "Performs a NickServ lookup for your username against the database. Use `-f` to query the NickServ service instead, or use `set` to store a user's current NickServ username in the database.";
 
-		private readonly IrcInterface ircInterface;
 		private readonly DataFunctionSet dataFunctionSet;
 
-		public NickServ(DataFunctionSet df, IrcInterface inter)
+		public NickServ(DataFunctionSet df)
 		{
 			dataFunctionSet = df;
-			ircInterface = inter;
 		}
 
 		public override void Use(CommandArgs command)
@@ -27,9 +25,9 @@ namespace BaggyBot.Commands
 				if (UserTools.Validate(command.Sender))
 				{
 					var uid = dataFunctionSet.GetIdFromNick(command.Args[1]);
-					if (uid < 0) uid = dataFunctionSet.GetIdFromUser(ircInterface.DoWhoisCall(command.Args[1]));
-					var nickserv = ircInterface.DoNickservCall(command.Args[1]);
-					dataFunctionSet.SetNsLogin(uid, nickserv);
+					if (uid < 0) uid = dataFunctionSet.GetIdFromUser(command.Client.DoWhoisCall(command.Args[1]));
+					var nickserv = command.Client.NickservLookup(command.Args[1]);
+					dataFunctionSet.SetNsLogin(uid, nickserv.AccountName);
 
 					command.ReturnMessage("Nickserv updated to {0} for {1}.", nickserv, command.Args[1]);
 					return;
@@ -40,7 +38,7 @@ namespace BaggyBot.Commands
 			if (command.Args.Length == 1 && command.Args[0].Equals("-f"))
 			{
 				command.ReturnMessage("Sending a NickServ call");
-				var username = ircInterface.DoNickservCall(command.Sender.Nick);
+				var username = command.Client.NickservLookup(command.Sender.Nick);
 				if (username == null)
 				{
 					command.Reply("you don't appear to be registered with NickServ");

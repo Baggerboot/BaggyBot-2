@@ -83,7 +83,7 @@ namespace BaggyBot.Commands
 
 			lastDisplayedResult = null;
 
-			var appid = ConfigManager.Config.Integrations.WolframAlpha;
+			var appid = ConfigManager.Config.Integrations.WolframAlpha.AppId;
 
 			var uri =
 				$"http://api.wolframalpha.com/v2/query?appid={appid}&input={Uri.EscapeDataString(command.FullArgument)}&ip={command.Sender.Hostmask}&format=plaintext&units=metric";

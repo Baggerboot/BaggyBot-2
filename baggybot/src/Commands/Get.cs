@@ -12,12 +12,10 @@ namespace BaggyBot.Commands
 		public override string Description => "Retrieves the value of a property, or the value of a key belonging to that property.";
 
 		private readonly DataFunctionSet dataFunctionSet;
-		private readonly IrcInterface ircInterface;
 
-		public Get(DataFunctionSet df, IrcInterface ircInterface)
+		public Get(DataFunctionSet df)
 		{
 			dataFunctionSet = df;
-			this.ircInterface = ircInterface;
 		}
 
 		public override void Use(CommandArgs command)
@@ -38,8 +36,7 @@ namespace BaggyBot.Commands
 					InformUsage(command);
 					break;
 				case "cfg":
-					// TODO: Allow settings lookup for new settings format
-					// TODO: Disallow lookup of settings that should not be exposed
+					// TODO: Allow settings lookup for new settings format, disallow lookup of settings that should not be exposed
 					throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
 				case "uid":
 					var uid = dataFunctionSet.GetIdFromNick(result.Arguments["user"]);
@@ -47,10 +44,11 @@ namespace BaggyBot.Commands
 					break;
 				case "users":
 					var channel = result.Arguments["channel"];
-					if (ircInterface.InChannel(channel))
+					
+					if (command.Client.InChannel(channel))
 					{
-						var users = ircInterface.GetUsers(channel);
-						command.Reply($"users in {channel}: {string.Join(", ", users)}");
+						var ircChannel = command.Client.GetChannel(channel);
+						command.Reply($"users in {channel}: {string.Join(", ", ircChannel.UserCount)}");
 					}
 					else
 					{

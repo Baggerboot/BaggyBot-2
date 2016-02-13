@@ -15,6 +15,6 @@ namespace BaggyBot.Configuration
 
 		public Identity[] Identities { get; set; } = new Identity[0];
 		public Operator[] Operators { get; set; } = new Operator[0];
-		public Server[] Servers { get; set; } = new Server[0];
+		public ServerCfg[] Servers { get; set; } = new ServerCfg[0];
 	}
 }

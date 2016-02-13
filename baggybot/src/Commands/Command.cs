@@ -5,7 +5,6 @@
 		public abstract PermissionLevel Permissions { get; }
 		public abstract string Usage { get; }
 		public abstract string Description { get; }
-		// TODO: Create an Example field as well
 
 		public abstract void Use(CommandArgs c);
 

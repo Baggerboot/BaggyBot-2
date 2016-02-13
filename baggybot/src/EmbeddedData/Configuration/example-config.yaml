@@ -66,6 +66,8 @@ operators:
 servers:
   - host: irc.esper.net
     port: 6697
+	# A unique name used for internal identification
+	server-name EsperNet
     use-tls: true
     verify-certificate: true
 

@@ -3,6 +3,7 @@ using System.Linq;
 using BaggyBot.Database;
 using BaggyBot.DataProcessors;
 using BaggyBot.Monitoring;
+using IRCSharp;
 
 namespace BaggyBot.Commands
 {
@@ -19,7 +20,7 @@ namespace BaggyBot.Commands
 			dataFunctionSet = df;
 		}
 
-		private void ShowTopics(string nick, string channel, Func<string, object[], bool> replyCallback, bool showDebugInfo)
+		private void ShowTopics(string nick, string channel, Func<string, object[], MessageSendResult> replyCallback, bool showDebugInfo)
 		{
 			Logger.Log(this, "Showing topics for " + nick);
 			var userId = dataFunctionSet.GetIdFromNick(nick);

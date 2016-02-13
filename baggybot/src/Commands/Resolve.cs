@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 
 namespace BaggyBot.Commands
 {
@@ -20,6 +21,11 @@ namespace BaggyBot.Commands
 			try
 			{
 				hostEntry = Dns.GetHostEntry(command.Args[0]);
+			}
+			catch (SocketException e)
+			{
+				command.ReturnMessage(e.Message);
+				return;
 			}
 			catch (Exception)
 			{

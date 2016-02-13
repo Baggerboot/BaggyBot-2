@@ -1,7 +1,10 @@
+using System;
+
 namespace BaggyBot.Configuration
 {
-	public class Server
+	public class ServerCfg
 	{
+		public string ServerName { get; set; } = Guid.NewGuid().ToString();
 		public string Host { get; set; }
 		public int Port { get; set; } = 6667;
 		public string Password { get; set; } = null;

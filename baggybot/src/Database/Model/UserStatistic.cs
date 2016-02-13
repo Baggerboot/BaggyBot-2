@@ -8,7 +8,7 @@ namespace BaggyBot.Database.Model
 		[Column(Name = "user_id"), PrimaryKey, NotNull]
 		public int UserId { get; set; }
 		//[Association(ThisKey = "user_id", OtherKey = "idf")]
-		//public User User { get; set; }
+		//public User IrcUser { get; set; }
 
 		[Column(Name = "lines"), NotNull]
 		public int Lines { get; set; }

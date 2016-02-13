@@ -3,8 +3,8 @@ using System.Linq;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.DataProcessors;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
-using IRCSharp.IRC;
 
 namespace BaggyBot.Tools
 {

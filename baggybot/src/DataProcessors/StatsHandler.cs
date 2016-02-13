@@ -7,40 +7,45 @@ using System.Text.RegularExpressions;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.EmbeddedData;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
+using Mono.CSharp;
+
 #if postgresql
 
 #endif
 #if mssql
 using BaggyBot.Database.MS_SQL;
 #endif
-using IRCSharp.IRC;
 
 namespace BaggyBot.DataProcessors
 {
 	internal class StatsHandler
 	{
 		private readonly DataFunctionSet dataFunctionSet;
-		private readonly IrcInterface ircInterface;
 		private readonly Random rand;
 
 		// Non-exhaustive list of shared idents that are commonly used by multiple people, often because they are standard values for their respective IRC clients.
 		/*
 				private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
 		*/
+		// TODO: move these to EmbeddedData
 		private readonly string[] snagMessages = { "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
 		
-		public StatsHandler(DataFunctionSet dm, IrcInterface inter)
+		public StatsHandler(DataFunctionSet dm)
 		{
 			dataFunctionSet = dm;
-			ircInterface = inter;
 			rand = new Random();
 		}
-		public void ProcessMessage(IrcMessage message, int userId)
+		public void ProcessMessage(IrcMessage message)
 		{
 			if (dataFunctionSet.ConnectionState == ConnectionState.Closed) return;
 
 			Logger.Log(this, "Processing message for " + message.Sender.Nick);
+
+			int userId = dataFunctionSet.GetIdFromUser(message.Sender);
+
+			AddMessageToIrcLog(message, userId);
 
 			var words = WordTools.GetWords(message.Message);
 
@@ -65,15 +70,23 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
+		private void AddMessageToIrcLog(IrcMessage message, int userId)
+		{
+			dataFunctionSet.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick, 
+				message.Action
+				? $"*{message.Sender.Nick} {message.Message}*"
+				: message.Message);
+		}
+
 		private void ProcessRandomEvents(IrcMessage message)
 		{
 			if (message.Sender.Nick == "Ralph" && message.Message.ToLower().Contains("baggybot"))
 			{
-				ircInterface.SendMessage(message.Channel, "Shut up you fool");
+				message.ReturnMessage("Shut up you fool");
 			}
 			else if (message.Message.ToLower().Contains("fuck you baggybot"))
 			{
-				ircInterface.SendMessage(message.Channel, "pls ;___;");
+				message.ReturnMessage("pls ;___;");
 			}
 		}
 
@@ -118,33 +131,29 @@ namespace BaggyBot.DataProcessors
 			{
 				ControlVariables.SnagNextLine = false;
 				dataFunctionSet.Snag(message);
-				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
+				message.ReturnMessage("Snagged line on request.");
 				return;
 			}
 			if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nick)
 			{
 				ControlVariables.SnagNextLineBy = null;
 				dataFunctionSet.Snag(message);
-				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
+				message.ReturnMessage("Snagged line on request.");
 				return;
 			}
 
-			PerformSnagLogic(message, words, userId);
+			TryTakeQuote(message, words, userId);
 		}
 
-		private void PerformSnagLogic(IrcMessage message, List<string> words, int userId)
+		private void TryTakeQuote(IrcMessage message, List<string> words, int userId)
 		{
-			var last = dataFunctionSet.GetLastSnaggedLine(userId);
+			var last = dataFunctionSet.GetLastQuotedLine(userId);
 			if (last.HasValue)
 			{
 				if ((DateTime.Now - last.Value).Hours < ConfigManager.Config.Quotes.MinDelayHours)
 				{
 					return;
 				}
-			}
-			else
-			{
-				Logger.Log(this, "This user hasn't been snagged before");
 			}
 			
 			var snagChance = ConfigManager.Config.Quotes.Chance;
@@ -166,20 +175,20 @@ namespace BaggyBot.DataProcessors
 						var randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
 						if (randint < snagMessages.Length)
 						{
-							SnagMessage(message, snagMessages[randint]);
+							TakeQuote(message, snagMessages[randint]);
 						}
 						else
 						{
-							SnagMessage(message, "Snagged!");
+							TakeQuote(message, "Snagged!");
 						}
 					}
 				}
 			}
 		}
 
-		private void SnagMessage(IrcMessage message, string snagMessage)
+		private void TakeQuote(IrcMessage message, string snagMessage)
 		{
-			ircInterface.SendMessage(message.Channel, snagMessage);
+			message.ReturnMessage(snagMessage);
 			dataFunctionSet.Snag(message);
 		}
 	}

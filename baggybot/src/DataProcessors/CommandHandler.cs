@@ -6,9 +6,9 @@ using BaggyBot.Commands;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.EmbeddedData;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
-using IRCSharp.IRC;
 using Convert = BaggyBot.Commands.Convert;
 using Version = BaggyBot.Commands.Version;
 using WolframAlpha = BaggyBot.Commands.WolframAlpha;
@@ -18,25 +18,23 @@ namespace BaggyBot.DataProcessors
 	internal class CommandHandler
 	{
 		private readonly Dictionary<string, Command> commands;
-		private readonly IrcInterface ircInterface;
 
-		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
+		public CommandHandler(DataFunctionSet dataFunctionSet, Bot bot)
 		{
-			this.ircInterface = ircInterface;
 			commands = new Dictionary<string, Command>()
 			{
 				{"alias", new Alias(dataFunctionSet)},
 				{"bf", new Bf()},
 				{"convert", new Convert()},
 				{"feature", new Feature(dataFunctionSet)},
-				{"get", new Get(dataFunctionSet, ircInterface)},
+				{"get", new Get(dataFunctionSet)},
 				{"html", new Html()},
 				{"http", new HttpInterface()},
-				{"join", new Join(ircInterface)},
-				{"ns", new NickServ(dataFunctionSet, ircInterface)},
-				{"part", new Part(ircInterface)},
+				{"join", new Join()},
+				{"ns", new NickServ(dataFunctionSet)},
+				{"part", new Part()},
 				{"ping", new Ping()},
-				{"reconnect", new Reconnect(ircInterface)},
+				{"reconnect", new Reconnect()},
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
 				{"resolve", new Resolve()},
@@ -57,8 +55,8 @@ namespace BaggyBot.DataProcessors
 
 			if (ConfigManager.Config.Interpreters.Enabled)
 			{
-				commands.Add("py", new Py(ircInterface, dataFunctionSet));
-				commands.Add("cs", new Cs(ircInterface));
+				commands.Add("py", new Py(dataFunctionSet, bot));
+				commands.Add("cs", new Cs(bot));
 				commands.Add("roslyn", new RoslynExec());
 			}
 			else
@@ -93,7 +91,7 @@ namespace BaggyBot.DataProcessors
 					var value = cmdInfo.Args.ToList();
 					value.Insert(1, "say");
 					((Alias)commands["alias"]).Use(
-						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.IrcInterface));
+						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value)));
 				}
 				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
 				{
@@ -108,7 +106,7 @@ namespace BaggyBot.DataProcessors
 					}
 					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
 
-					ProcessCommand(CommandArgs.FromMessage(new IrcMessage(cmdInfo.Sender, cmdInfo.Channel, "-" + aliasedCommand)));
+					ProcessCommand(CommandArgs.FromMessage(new IrcMessage(cmdInfo.Client, cmdInfo.Sender, cmdInfo.Channel, "-" + aliasedCommand)));
 					//ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.ReplyCallback, message.Action));
 				}
 				return;
@@ -130,7 +128,7 @@ namespace BaggyBot.DataProcessors
 					catch (Exception e)
 					{
 						var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\"";
-						ircInterface.SendMessage(cmdInfo.Channel, exceptionMessage);
+						cmdInfo.ReturnMessage(exceptionMessage);
 						// Previously, debugging information (filename and line number) were put in the error message.
 						// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
 						Logger.LogException(commands[cmdInfo.Command], e, $"processing the command \"{cmdInfo.Command} {cmdInfo.FullArgument}\"");
@@ -139,7 +137,7 @@ namespace BaggyBot.DataProcessors
 			}
 			else
 			{
-				ircInterface.SendMessage(cmdInfo.Channel, Messages.CmdNotAuthorised);
+				cmdInfo.ReturnMessage(Messages.CmdNotAuthorised);
 			}
 		}
 	}

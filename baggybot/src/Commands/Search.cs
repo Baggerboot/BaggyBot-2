@@ -11,7 +11,7 @@ namespace BaggyBot.Commands
 
 		public Search(DataFunctionSet df)
 		{
-			// TODO: Implement the Search command again
+			// TODO: Reimplement the search command
 			//dataFunctionSet = df;
 		}
 
