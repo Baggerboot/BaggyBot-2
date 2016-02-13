@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using BaggyBot.CommandParsing;
 
 namespace BaggyBot.Commands
 {
@@ -12,15 +14,33 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			if (command.Args.Length != 1)
+			var parser = new CommandParser(new Operation().AddArgument("hostname", null));
+			OperationResult result;
+			try
 			{
-				command.Reply("Usage: -resolve <hostname>");
+				result = parser.Parse(command.FullArgument);
+			}
+			catch (InvalidCommandException e)
+			{
+				command.ReturnMessage(e.Message);
 				return;
 			}
+			if (result.Arguments["hostname"] == null)
+			{
+				command.Reply("Usage: -resolve <hostname>");
+			}
+			else
+			{
+				ResolveHost(result.Arguments["hostname"], command);
+			}
+		}
+
+		private void ResolveHost(string hostname, CommandArgs command)
+		{
 			IPHostEntry hostEntry;
 			try
 			{
-				hostEntry = Dns.GetHostEntry(command.Args[0]);
+				hostEntry = Dns.GetHostEntry(hostname);
 			}
 			catch (SocketException e)
 			{
@@ -35,13 +55,7 @@ namespace BaggyBot.Commands
 
 			if (hostEntry.AddressList.Length > 0)
 			{
-				var addr = string.Empty;
-				foreach (var address in hostEntry.AddressList)
-				{
-					addr += ", " + address;
-				}
-
-				addr = addr.Substring(2);
+				var addr = string.Join(", ", hostEntry.AddressList.Select(host => host.ToString()));
 
 				command.Reply($"IP address(es) belonging to {command.Args[0]}: {addr}");
 			}
