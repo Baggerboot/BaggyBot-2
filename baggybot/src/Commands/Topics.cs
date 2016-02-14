@@ -12,23 +12,17 @@ namespace BaggyBot.Commands
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "[-d] [username] [channel]";
 		public override string Description => "Find the topics associated with a given username in a given channel. Default values are the username of the sender and the channel the command was entered in. The -d flag will print additional debug info.";
+		
 
-		private readonly DataFunctionSet dataFunctionSet;
-
-		public Topics(DataFunctionSet df)
-		{
-			dataFunctionSet = df;
-		}
-
-		private void ShowTopics(string nick, string channel, Func<string, object[], MessageSendResult> replyCallback, bool showDebugInfo)
+		private void ShowTopics(string nick, string channel, CommandArgs command, bool showDebugInfo)
 		{
 			Logger.Log(this, "Showing topics for " + nick);
-			var userId = dataFunctionSet.GetIdFromNick(nick);
-			var topics = dataFunctionSet.FindTopics(userId, channel);
+			var userId = command.Client.StatsDatabase.GetIdFromNick(nick);
+			var topics = command.Client.StatsDatabase.FindTopics(userId, channel);
 
 			if (topics == null)
 			{
-				replyCallback("Could not find any IRC data by {0}. Did you spell their name correctly?", new object[] { nick });
+				command.Reply("could not find any IRC data by {0}. Did you spell their name correctly?", nick);
 				return;
 			}
 
@@ -42,7 +36,7 @@ namespace BaggyBot.Commands
 				topicString = string.Join(", ", topics.Take(20).Select(pair => pair.Name));
 			}
 
-			replyCallback("words associated with {0}: {1}", new object[] { nick, topicString });
+			command.Reply("words associated with {0}: {1}", nick, topicString);
 		}
 
 		public override void Use(CommandArgs command)
@@ -55,7 +49,7 @@ namespace BaggyBot.Commands
 			}
 			if (command.Args.Length == 0)
 			{
-				ShowTopics(command.Sender.Nick, command.Channel, command.Reply, showDebugInfo);
+				ShowTopics(command.Sender.Nick, command.Channel, command, showDebugInfo);
 			}
 			else if (command.Args.Length > 2)
 			{
@@ -63,10 +57,10 @@ namespace BaggyBot.Commands
 			}
 			else if (command.Args.Length == 2)
 			{
-				ShowTopics(command.Args[0], command.Args[1], command.Reply, showDebugInfo);
+				ShowTopics(command.Args[0], command.Args[1], command, showDebugInfo);
 			}
 			else {
-				ShowTopics(command.Args[0], command.Channel, command.Reply, showDebugInfo);
+				ShowTopics(command.Args[0], command.Channel, command, showDebugInfo);
 			}
 		}
 	}

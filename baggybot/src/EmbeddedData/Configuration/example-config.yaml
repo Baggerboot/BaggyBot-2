@@ -1,7 +1,8 @@
 # Example configuration file for BaggyBot
 
-backend:
-  connection-string: "Host=127.0.0.1;Database=baggybot;Username=baggybot;Password=baggybot;"
+backends:
+  - &default
+    connection-string: "Host=127.0.0.1;Database=baggybot;Username=baggybot;Password=baggybot;"
 
 # When true, prevents the bot from ignoring non-fatal exceptions.
 debug-mode: true
@@ -69,8 +70,9 @@ servers:
 	# A unique name used for internal identification
 	server-name EsperNet
     use-tls: true
+	use-unicode: true
     verify-certificate: true
-
+	backend: *default
     identity: *baggybot
     auto-join-channels: ["#baggy"]
 

@@ -11,13 +11,6 @@ namespace BaggyBot.Commands
 		public override string Usage => "<property> [key]";
 		public override string Description => "Retrieves the value of a property, or the value of a key belonging to that property.";
 
-		private readonly DataFunctionSet dataFunctionSet;
-
-		public Get(DataFunctionSet df)
-		{
-			dataFunctionSet = df;
-		}
-
 		public override void Use(CommandArgs command)
 		{
 			var cmdParser = new CommandParser(new Operation())
@@ -48,7 +41,7 @@ namespace BaggyBot.Commands
 					// TODO: Allow settings lookup for new settings format, disallow lookup of settings that should not be exposed
 					throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
 				case "uid":
-					var uid = dataFunctionSet.GetIdFromNick(result.Arguments["user"]);
+					var uid = command.Client.StatsDatabase.GetIdFromNick(result.Arguments["user"]);
 					command.Reply("Your user Id is " + uid);
 					break;
 				case "users":

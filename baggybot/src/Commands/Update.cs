@@ -15,8 +15,6 @@ namespace BaggyBot.Commands
 		{
 			this.bot = bot;
 		}
-		
-		private string requestChannel;
 
 		public override void Use(CommandArgs command)
 		{

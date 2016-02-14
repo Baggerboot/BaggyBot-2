@@ -7,7 +7,7 @@ namespace BaggyBot.Configuration
 		public int FloodLimit { get; set; } = 4;
 
 		public Interpreters Interpreters { get; private set; } = new Interpreters();
-		public Backend Backend { get; private set; } = new Backend();
+		public Backend[] Backends { get; private set; } = new Backend[0];
 		public Integrations Integrations { get; private set; } = new Integrations();
 		public Quotes Quotes { get; private set; } = new Quotes();
 		public Logging Logging { get; private set; } = new Logging();

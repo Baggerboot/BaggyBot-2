@@ -96,6 +96,9 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
+			var server = ConfigManager.Config.Servers.FirstOrDefault(s => s.ServerName == command.Client.ServerName);
+			var useUnicode = server?.UseUnicode ?? true;
+
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{
 				command.Reply(
@@ -117,7 +120,7 @@ namespace BaggyBot.Commands
 					{
 						more += " -- " + secondItem;
 					}
-					command.ReturnMessage(ReplaceNewlines(WaReplace(more)));
+					command.ReturnMessage(ReplaceNewlines(more));
 				}
 				return;
 			}
@@ -187,14 +190,23 @@ namespace BaggyBot.Commands
 				result += " -- " + ShowMore();
 			}
 
-			command.Reply("({0}: {1}): {2}", WaReplace(title), ReplaceNewlines(WaReplace(input.InnerText)), ReplaceNewlines(WaReplace(result)));
+			command.Reply("({0}: {1}): {2}", WaReplace(title, useUnicode), ReplaceNewlines(WaReplace(input.InnerText, useUnicode)), ReplaceNewlines(WaReplace(result, useUnicode)));
 		}
 
-		private static string WaReplace(string text)
+		private static string WaReplace(string text, bool useUnicode)
 		{
-			text = text.Replace("\uf7d9", "==");
-			text = text.Replace("\uf6c4", "\x1ds\x1d");
-			text = text.Replace("\uf522", "->");
+			if (useUnicode)
+			{
+				text = text.Replace("\uf7d9", "=="); // Long equals
+				text = text.Replace("\uf6c4", "\x1ds\x1d"); // Script S
+				text = text.Replace("\uf522", "→"); // Right arrow
+				text = text.Replace("\uf7b5", "ℝ"); // Set of all real numbers
+			}
+			else
+			{
+				
+			}
+
 
 			foreach (char c in text)
 			{

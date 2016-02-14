@@ -12,7 +12,6 @@ namespace BaggyBot.DataProcessors
 {
 	internal class IrcEventHandler
 	{
-		private readonly DataFunctionSet dataFunctionSet;
 		// Handles parsing and executing commands
 		private readonly CommandHandler commandHandler;
 		// Handles the generation of statistics from incoming messages
@@ -34,9 +33,8 @@ namespace BaggyBot.DataProcessors
 			"250" /*RPL_STATSCONN*/
 		};
 
-		public IrcEventHandler(DataFunctionSet dataFunctionSet, CommandHandler commandHandler, StatsHandler statsHandler)
+		public IrcEventHandler(CommandHandler commandHandler, StatsHandler statsHandler)
 		{
-			this.dataFunctionSet = dataFunctionSet;
 			this.commandHandler = commandHandler;
 			this.statsHandler = statsHandler;
 		}
@@ -101,7 +99,7 @@ namespace BaggyBot.DataProcessors
 		internal void ProcessNotice(IrcUser sender, string notice)
 		{
 			Logger.Log(this, notice, LogLevel.Irc);
-			dataFunctionSet.AddIrcMessage(DateTime.Now, -1, "ALL", sender.Hostmask, notice);
+			sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, "ALL", sender.Hostmask, notice);
 		}
 
 		/// <summary>
@@ -187,10 +185,10 @@ namespace BaggyBot.DataProcessors
 		internal void DisplayEvent(string message, IrcUser sender, string channel = "ALL")
 		{
 			Logger.Log(this, message, LogLevel.Irc);
-			if (dataFunctionSet.ConnectionState == ConnectionState.Open)
+			if (sender.Client.StatsDatabase.ConnectionState == ConnectionState.Open)
 			{
-				var uid = dataFunctionSet.GetIdFromUser(sender);
-				dataFunctionSet.AddIrcMessage(DateTime.Now, uid, channel, "NOTICE", message);
+				var uid = sender.Client.StatsDatabase.GetIdFromUser(sender);
+				sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, uid, channel, "NOTICE", message);
 			}
 		}
 

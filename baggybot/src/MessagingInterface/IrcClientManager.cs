@@ -7,14 +7,16 @@ using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 using BaggyBot.Configuration;
+using BaggyBot.Database;
 using BaggyBot.DataProcessors;
 using BaggyBot.Monitoring;
 using IRCSharp;
 using IRCSharp.IrcCommandProcessors.Quirks;
+using Mono.CSharp;
 
 namespace BaggyBot.MessagingInterface
 {
-	class IrcClientManager
+	class IrcClientManager : IDisposable
 	{
 		private readonly IrcEventHandler ircEventHandler;
 		private readonly Dictionary<string, IrcClientWrapper> clients = new Dictionary<string, IrcClientWrapper>();
@@ -26,13 +28,36 @@ namespace BaggyBot.MessagingInterface
 			this.ircEventHandler = ircEventHandler;
 		}
 
+
+		/// <summary>
+		/// Connects the bot to the SQL database.
+		/// </summary>
+		private SqlConnector ConnectDatabase(Backend backend)
+		{
+			var sqlConnector = new SqlConnector();
+			Logger.Log(this, "Connecting to the database", LogLevel.Info);
+			try
+			{
+				if (sqlConnector.OpenConnection(backend.ConnectionString))
+					Logger.Log(this, "Database connection established", LogLevel.Info);
+				else
+					Logger.Log(this, "Database connection not established. Statistics collection will not be possible.", LogLevel.Warning);
+			}
+			catch (Exception e)
+			{
+				Logger.LogException(this, e, "trying to connect to the database");
+			}
+			return sqlConnector;
+		}
+
 		/// <summary>
 		/// Connects the bot to the IRC server
 		/// </summary>
 		public bool ConnectIrc(ServerCfg server)
 		{
-			var client = new IRCSharp.IrcClient();
-			var wrapper = new IrcClientWrapper(client);
+			var client = new IrcClient();
+			var statsDatabaseManager = new StatsDatabaseManager(ConnectDatabase(server.Backend), server.UseNickserv);
+			var wrapper = new IrcClientWrapper(client, statsDatabaseManager, server.ServerName);
 			HookupIrcEvents(client, wrapper, server.ServerName);
 
 			var host = server.Host;
@@ -169,6 +194,14 @@ namespace BaggyBot.MessagingInterface
 			foreach (var client in clients)
 			{
 				client.Value.Quit(reason);
+			}
+		}
+
+		public void Dispose()
+		{
+			foreach (var client in clients)
+			{
+				client.Value.Dispose();
 			}
 		}
 	}

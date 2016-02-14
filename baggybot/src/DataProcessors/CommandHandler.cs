@@ -19,19 +19,19 @@ namespace BaggyBot.DataProcessors
 	{
 		private readonly Dictionary<string, Command> commands;
 
-		public CommandHandler(DataFunctionSet dataFunctionSet, Bot bot)
+		public CommandHandler(Bot bot)
 		{
 			commands = new Dictionary<string, Command>()
 			{
-				{"alias", new Alias(dataFunctionSet)},
+				{"alias", new Alias()},
 				{"bf", new Bf()},
 				{"convert", new Convert()},
-				{"feature", new Feature(dataFunctionSet)},
-				{"get", new Get(dataFunctionSet)},
+				{"feature", new Feature()},
+				{"get", new Get()},
 				{"html", new Html()},
 				{"http", new HttpInterface()},
 				{"join", new Join()},
-				{"ns", new NickServ(dataFunctionSet)},
+				{"ns", new NickServ()},
 				{"part", new Part()},
 				{"ping", new Ping()},
 				{"reconnect", new Reconnect()},
@@ -39,7 +39,7 @@ namespace BaggyBot.DataProcessors
 				{"regen", new RegenerateGraphs()},
 				{"resolve", new Resolve()},
 				{"say", new Say()},
-				{"set", new Set(dataFunctionSet)},
+				{"set", new Set()},
 				{"shutdown", new Shutdown(bot)},
 				{"snag", new Snag()},
 				{"ur", new UrbanDictionary()},
@@ -48,14 +48,14 @@ namespace BaggyBot.DataProcessors
 				{"version", new Version()},
 				{"wa", new WolframAlpha()},
 				{"wiki", new Wikipedia()},
-				{"topics", new Topics(dataFunctionSet)}
+				{"topics", new Topics()}
 			};
 			// Command list must be initialised before we can pass a reference to it to the Help command.
 			commands.Add("help", new Help(commands));
 
 			if (ConfigManager.Config.Interpreters.Enabled)
 			{
-				commands.Add("py", new Py(dataFunctionSet, bot));
+				commands.Add("py", new Py(bot));
 				commands.Add("cs", new Cs(bot));
 				commands.Add("roslyn", new RoslynExec());
 			}
@@ -93,9 +93,9 @@ namespace BaggyBot.DataProcessors
 					((Alias)commands["alias"]).Use(
 						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value)));
 				}
-				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
+				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Client.StatsDatabase, cmdInfo.Command))
 				{
-					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Command);
+					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Client.StatsDatabase, cmdInfo.Command);
 					if(cmdInfo.FullArgument == null)
 					{
 						aliasedCommand = aliasedCommand.Replace(" $args", "");

@@ -20,10 +20,6 @@ namespace BaggyBot
 {
 	public sealed class Bot : IDisposable
 	{
-		// Provides an interface to an SQL Entity Provider
-		private readonly SqlConnector sqlConnector;
-		// Abstraction over SqlConnector for database operations
-		private readonly DataFunctionSet dataFunctionSet;
 		// Manages multiple IRC Clients by handling events and forwarding messages
 		private readonly IrcClientManager ircClientManager;
 		//private IrcClient clientWrapper;
@@ -41,7 +37,7 @@ namespace BaggyBot
 		// changing the platforms the bot can run on, etc.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
 		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
-		public const string Version = "4.2";
+		public const string Version = "4.3";
 		// Version number of the database. This is checked against the 'version' key in the metadata table. If they do not match,
 		// the DB connection is closed, and the user will be required to update the DB by hand, as automatic updates are not yet supported.
 		public const string DatabaseVersion = "1.2.1";
@@ -85,20 +81,9 @@ namespace BaggyBot
 			}
 			ConfigManager.Config.Metadata.BotVersion = Version;
 			Logger.Log("");*/
-
-			// Create various data processors and I/O handlers
-
-			sqlConnector = new SqlConnector();
-			dataFunctionSet = new DataFunctionSet(sqlConnector);
-			ircClientManager = new IrcClientManager(new IrcEventHandler(dataFunctionSet, new CommandHandler(dataFunctionSet, this), new StatsHandler(dataFunctionSet)));
-			UserTools.DataFunctionSet = dataFunctionSet;
+			
+			ircClientManager = new IrcClientManager(new IrcEventHandler(new CommandHandler(this), new StatsHandler()));
 			botDiagnostics = new BotDiagnostics(this);
-
-			InterpreterContext.Globals = new InterpreterGlobals(new BotContext
-			{
-				Db = dataFunctionSet,
-				Bot = this
-			});
 
 			//ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, this);
 		}
@@ -107,26 +92,7 @@ namespace BaggyBot
 		{
 			//TODO: implement NotifyOperators
 		}
-
-		/// <summary>
-		/// Connects the bot to the SQL database.
-		/// </summary>
-		private void ConnectDatabase()
-		{
-			Logger.Log(this, "Connecting to the database", LogLevel.Info);
-			try
-			{
-				if (sqlConnector.OpenConnection())
-					Logger.Log(this, "Database connection established", LogLevel.Info);
-				else
-					Logger.Log(this, "Database connection not established. Statistics collection will not be possible.", LogLevel.Warning);
-			}
-			catch (Exception e)
-			{
-				Logger.LogException(this, e, "trying to connect to the database");
-			}
-		}
-
+		
 		~Bot()
 		{
 			Debugger.Break();
@@ -148,7 +114,7 @@ namespace BaggyBot
 		public void Dispose()
 		{
 			botDiagnostics.Dispose();
-			sqlConnector.Dispose();
+			ircClientManager.Dispose();
 		}
 
 		private void EnterMainLoop()
@@ -159,9 +125,7 @@ namespace BaggyBot
 			}
 			Logger.Log(this, "Preparing to shut down", LogLevel.Info);
 			ircClientManager.Disconnect("Shutting down");
-			sqlConnector.CloseConnection();
-			Logger.Log(this, "Closed SQL server connection", LogLevel.Info);
-			sqlConnector.Dispose();
+			ircClientManager.Dispose();
 			Logger.Log(this, "Disposed SQL server connection object", LogLevel.Info);
 			Logger.Dispose();
 			Console.WriteLine("Goodbye.");
@@ -202,27 +166,16 @@ namespace BaggyBot
 
 		public void Connect(ServerCfg server)
 		{
-			var dbConTask = Task.Run(() => ConnectDatabase());
-			dbConTask.Wait();
-			var ircConTask = Task.Run(() => TryConnectIrc(server));
-			Task.WaitAll(dbConTask, ircConTask);
+			TryConnectIrc(server);
+			ircClientManager[server.ServerName].JoinChannels(server.AutoJoinChannels);
 
-			if (ircConTask.Status == TaskStatus.RanToCompletion)
+			OnPostConnect();
+
+			if (previousVersion != null && previousVersion != Version)
 			{
-				ircClientManager[server.ServerName].JoinChannels(server.AutoJoinChannels);
-
-				OnPostConnect();
-
-				if (previousVersion != null && previousVersion != Version)
-				{
-					NotifyOperator($"Succesfully updated from version {previousVersion} to version {Version}");
-				}
-				EnterMainLoop();
+				NotifyOperator($"Succesfully updated from version {previousVersion} to version {Version}");
 			}
-			else
-			{
-				Logger.Log(this, "Failed to create an IRC connection. BaggyBot will now exit.", LogLevel.Error);
-			}
+			EnterMainLoop();
 		}
 
 		public static void ShutdownNow()

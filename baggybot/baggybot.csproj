@@ -231,7 +231,7 @@
     <Compile Include="src\Commands\Snag.cs" />
     <Compile Include="src\Commands\Version.cs" />
     <Compile Include="src\ControlVariables.cs" />
-    <Compile Include="src\Database\DataFunctionSet.cs" />
+    <Compile Include="src\Database\StatsDatabaseManager.cs" />
     <Compile Include="src\EmbeddedData\Emoticons.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
     <Compile Include="src\DataProcessors\IrcEventHandler.cs" />

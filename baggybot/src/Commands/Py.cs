@@ -31,14 +31,12 @@ namespace BaggyBot.Commands
 		private readonly StringBuilder commandBuilder = new StringBuilder();
 
 
-		public Py(DataFunctionSet df, Bot bot)
+		public Py(Bot bot)
 		{
 			this.bot = bot;
 			engine = Python.CreateEngine();
 			scope = engine.CreateScope();
-			scope.SetVariable("dataFunctionSet", df);
 			scope.SetVariable("tools", new PythonTools());
-			scope.SetVariable("find", new Action<string>(msg => df.FindLine(msg)));
 			var outputStream = new ProducerConsumerStream();
 			var outputStreamWriter = new StreamWriter(outputStream);
 			outputStreamReader = new StreamReader(outputStream);

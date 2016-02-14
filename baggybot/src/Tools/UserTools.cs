@@ -13,12 +13,6 @@ namespace BaggyBot.Tools
 	/// </summary>
 	internal static class UserTools
 	{
-		public static DataFunctionSet DataFunctionSet
-		{
-			private get;
-			set;
-		}
-
 		/// <summary>
 		/// Checks whether the specified user has operator permissions
 		/// </summary>
@@ -38,7 +32,7 @@ namespace BaggyBot.Tools
 			int[] uids;
 			try
 			{
-				uids = DataFunctionSet.GetUids(user);
+				uids = user.Client.StatsDatabase.GetUids(user);
 			}
 			catch (Exception e)
 			{

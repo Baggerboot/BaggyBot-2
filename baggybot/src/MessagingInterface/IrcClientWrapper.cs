@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BaggyBot.Database;
 using IRCSharp;
 using IRCSharp.IRC;
 
@@ -12,13 +13,17 @@ namespace BaggyBot.MessagingInterface
 	/// Provides a light wrapper over an <see cref="IrcClient"/>, exposing only
 	/// the methods required for normal operation.
 	/// </summary>
-	public class IrcClientWrapper
+	public class IrcClientWrapper : IDisposable
 	{
 		private readonly IrcClient client;
 		public IReadOnlyList<IrcChannel> Channels => client.Channels;
+		public string ServerName { get; }
+		public StatsDatabaseManager StatsDatabase { get; }
 
-		internal IrcClientWrapper(IrcClient client)
+		internal IrcClientWrapper(IrcClient client, StatsDatabaseManager database, string serverName)
 		{
+			ServerName = serverName;
+			StatsDatabase = database;
 			this.client = client;
 		}
 
@@ -70,6 +75,11 @@ namespace BaggyBot.MessagingInterface
 		public void Quit(string reason)
 		{
 			client.Quit(reason);
+		}
+
+		public void Dispose()
+		{
+			StatsDatabase.Dispose();
 		}
 	}
 }

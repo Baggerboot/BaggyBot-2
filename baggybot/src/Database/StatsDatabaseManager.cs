@@ -13,14 +13,16 @@ namespace BaggyBot.Database
 	/// <summary>
 	/// Provides an abstraction layer for commonly used database interactions.
 	/// </summary>
-	public class DataFunctionSet
+	public class StatsDatabaseManager : IDisposable
 	{
 		private readonly SqlConnector sqlConnector;
 		private readonly LockObject lockObj;
+		private readonly bool allowNickservLookup;
 		public ConnectionState ConnectionState => sqlConnector.ConnectionState;
 
-		public DataFunctionSet(SqlConnector sqlConnector)
+		public StatsDatabaseManager(SqlConnector sqlConnector, bool allowNickservLookup)
 		{
+			this.allowNickservLookup = allowNickservLookup;
 			this.sqlConnector = sqlConnector;
 			lockObj = new LockObject();
 		}
@@ -40,7 +42,6 @@ namespace BaggyBot.Database
 				{
 					var match = matches.First();
 					match.Lines++;
-					Logger.Log(this, "Incremented lines for " + uid + ".");
 					SubmitChanges();
 				}
 				else
@@ -440,7 +441,7 @@ namespace BaggyBot.Database
 				// Check for a nickserv match
 				Level l3 = () =>
 				{
-					var nickserv = user.Client.NickservLookup(user.Nick);
+					var nickserv = allowNickservLookup ? user.Client.NickservLookup(user.Nick) : null;
 
 					if (nickserv == null) // No nickserv info available, try a level 4 instead
 					{
@@ -767,7 +768,6 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					Logger.Log(this, "No last snagged line available for user #" + userId);
 					ret = null;
 				}
 			}
@@ -883,6 +883,11 @@ namespace BaggyBot.Database
 					where pair.Type == type
 						  && pair.Key == key
 					select pair).Any();
+		}
+
+		public void Dispose()
+		{
+			sqlConnector.Dispose();
 		}
 	}
 

@@ -10,14 +10,7 @@ namespace BaggyBot.Commands
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
 		public override string Usage => "<property> [key] <value>";
 		public override string Description => "Sets the value of a property, or the value of a key belonging to that property.";
-
-		private readonly DataFunctionSet dataFunctionSet;
-
-		public Set(DataFunctionSet df)
-		{
-			dataFunctionSet = df;
-		}
-
+		
 		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length < 3)
@@ -31,11 +24,11 @@ namespace BaggyBot.Commands
 					int uid;
 					if (int.TryParse(command.Args[1], out uid))
 					{
-						dataFunctionSet.SetPrimary(uid, command.Args[2]);
+						command.Client.StatsDatabase.SetPrimary(uid, command.Args[2]);
 						command.Reply("Done.");
 					}
 					else {
-						if (dataFunctionSet.SetPrimary(command.Args[1], command.Args[2]))
+						if (command.Client.StatsDatabase.SetPrimary(command.Args[1], command.Args[2]))
 						{
 							command.Reply("Done.");
 						}
