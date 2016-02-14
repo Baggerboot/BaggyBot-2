@@ -62,9 +62,8 @@ namespace BaggyBot.Database
 			internalState = ConnectionState.Closed;
 		}
 
-		public bool OpenConnection()
+		public bool OpenConnection(string connectionString)
 		{
-			var connectionString = ConfigManager.Config.Backend.ConnectionString;
 			if (string.IsNullOrWhiteSpace(connectionString))
 			{
 				Logger.Log(this, "Unable to connect to the SQL database: No connection specified.", LogLevel.Error);

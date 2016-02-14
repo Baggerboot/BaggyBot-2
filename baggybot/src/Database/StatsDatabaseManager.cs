@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using BaggyBot.Database.Model;
-using BaggyBot.DataProcessors;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
-using IRCSharp.IRC;
 using LinqToDB;
 
 namespace BaggyBot.Database
@@ -14,17 +13,17 @@ namespace BaggyBot.Database
 	/// <summary>
 	/// Provides an abstraction layer for commonly used database interactions.
 	/// </summary>
-	public class DataFunctionSet
+	public class StatsDatabaseManager : IDisposable
 	{
 		private readonly SqlConnector sqlConnector;
-		private readonly IrcInterface ircInterface;
 		private readonly LockObject lockObj;
+		private readonly bool allowNickservLookup;
 		public ConnectionState ConnectionState => sqlConnector.ConnectionState;
 
-		public DataFunctionSet(SqlConnector sqlConnector, IrcInterface inter)
+		public StatsDatabaseManager(SqlConnector sqlConnector, bool allowNickservLookup)
 		{
+			this.allowNickservLookup = allowNickservLookup;
 			this.sqlConnector = sqlConnector;
-			ircInterface = inter;
 			lockObj = new LockObject();
 		}
 
@@ -43,7 +42,6 @@ namespace BaggyBot.Database
 				{
 					var match = matches.First();
 					match.Lines++;
-					Logger.Log(this, "Incremented lines for " + uid + ".");
 					SubmitChanges();
 				}
 				else
@@ -170,7 +168,7 @@ namespace BaggyBot.Database
 			return ret;
 		}
 
-		public void Snag(IrcMessage message)
+		internal void Snag(IrcMessage message)
 		{
 			lock (lockObj)
 			{
@@ -443,22 +441,22 @@ namespace BaggyBot.Database
 				// Check for a nickserv match
 				Level l3 = () =>
 				{
-					var nickserv = ircInterface.DoNickservCall(user.Nick);
+					var nickserv = allowNickservLookup ? user.Client.NickservLookup(user.Nick) : null;
 
 					if (nickserv == null) // No nickserv info available, try a level 4 instead
 					{
 						return l4();
 					}
 
-					var res = GetMatchesThirdLevel(nickserv);
+					var res = GetMatchesThirdLevel(nickserv.AccountName);
 					if (res.Length == 1)
 					{ // Match found trough NickServ, add a credentials combinations for easy access next time.
-						AddCredCombination(user, nickserv, res[0]);
+						AddCredCombination(user, nickserv.AccountName, res[0]);
 						return res[0];
 					}
 					if (res.Length == 0)
 					{ // No matches found, not even with NickServ. Most likely a new user, unless you change your hostname and ident, and log in with a different nick than the one you logged out with.
-						var uid = AddCredCombination(user, nickserv);
+						var uid = AddCredCombination(user, nickserv.AccountName);
 						return uid;
 					} // Multiple people registered using the same NickServ account? That's most likely an error.
 					return -1;
@@ -611,7 +609,7 @@ namespace BaggyBot.Database
 					}
 					{
 						var nickserv = GetNickserv(uids[0]);
-						AddCredCombination(new IrcUser(newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
+						AddCredCombination(new IrcUser(user.Client, newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
 					}
 				}
 				else if (count == 1)
@@ -751,7 +749,7 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
-		public DateTime? GetLastSnaggedLine(int userId)
+		public DateTime? GetLastQuotedLine(int userId)
 		{
 			DateTime? ret;
 			lock (lockObj)
@@ -770,7 +768,6 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					Logger.Log(this, "No last snagged line available for user #" + userId);
 					ret = null;
 				}
 			}
@@ -886,6 +883,11 @@ namespace BaggyBot.Database
 					where pair.Type == type
 						  && pair.Key == key
 					select pair).Any();
+		}
+
+		public void Dispose()
+		{
+			sqlConnector.Dispose();
 		}
 	}
 

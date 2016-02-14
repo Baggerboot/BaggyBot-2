@@ -11,16 +11,13 @@ namespace BaggyBot.Monitoring.Diagnostics
 	internal class BotDiagnostics : IDisposable
 	{
 		private const string PerfLogFile = "performance_log.csv";
-		private readonly IrcInterface ircInterface;
 		private Timer taskScheduler;
 		private PerformanceCounter pc;
 		private readonly PerformanceLogger performanceLogger = new PerformanceLogger(PerfLogFile);
 
-		public BotDiagnostics(IrcInterface ircInterface)
+		public BotDiagnostics(Bot bot)
 		{
-			this.ircInterface = ircInterface;
-
-			AppDomain.CurrentDomain.UnhandledException += HandleException;
+			AppDomain.CurrentDomain.UnhandledException += (sender, args) => HandleException(args, bot);
 		}
 		
 		public void Dispose()
@@ -30,15 +27,15 @@ namespace BaggyBot.Monitoring.Diagnostics
 			taskScheduler.Dispose();
 		}
 
-		private void HandleException(object sender, UnhandledExceptionEventArgs args)
+		private void HandleException(UnhandledExceptionEventArgs args, Bot bot)
 		{
 			var e = (Exception)args.ExceptionObject;
 			var trace = new StackTrace(e, true);
 			var bottomFrame = trace.GetFrame(0);
 
 			var message = "A fatal unhandled exception occured: " + e.GetType().Name + " - " + e.Message + " - in file: " + bottomFrame.GetFileName() + ":" + bottomFrame.GetFileLineNumber();
+			bot.NotifyOperator(message);
 
-			ircInterface.NotifyOperator(message);
 			Logger.Log(this, message, LogLevel.Error);
 		}
 
@@ -57,9 +54,10 @@ namespace BaggyBot.Monitoring.Diagnostics
 			taskScheduler.Elapsed += (source, eventArgs) =>
 			{
 				var mem = (long)(pc.NextValue() / 1024);
-				var users = ircInterface.TotalUserCount;
-				var chans = ircInterface.ChannelCount;
-				performanceLogger.Log(mem, chans, users);
+				// TODO: Find a better way to get access to these values
+				//var users = ircInterface.TotalUserCount;
+				//var chans = ircInterface.ChannelCount;
+				performanceLogger.Log(mem, 0, 0);
 			};
 		}
 	}

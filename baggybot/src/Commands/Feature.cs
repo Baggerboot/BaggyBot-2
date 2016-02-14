@@ -10,19 +10,12 @@ namespace BaggyBot.Commands
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
 		public override string Usage => "<search string>";
 		public override string Description => "Feature a quote I've taken.";
-
-		private readonly DataFunctionSet dataFunctionSet;
 		
-		public Feature(DataFunctionSet df)
-		{
-			dataFunctionSet = df;
-		}
-
 		public override void Use(CommandArgs command)
 		{
 			var search = command.FullArgument;
 
-			var searchResults = dataFunctionSet.FindQuote(search);
+			var searchResults = command.Client.StatsDatabase.FindQuote(search);
 
 			if (searchResults == null)
 			{
@@ -57,7 +50,7 @@ namespace BaggyBot.Commands
 				return;
 			}
 			command.ReturnMessage("The following quote has been featured: \"" + searchResults[0].Text + "\"");
-			dataFunctionSet.SetVar("featured_quote", searchResults[0].Id);
+			command.Client.StatsDatabase.SetVar("featured_quote", searchResults[0].Id);
 		}
 	}
 }

@@ -9,14 +9,7 @@ namespace BaggyBot.Commands
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "<key> <command> [parameters ...]";
 		public override string Description => "Creates an alias for a command.";
-
-		private readonly DataFunctionSet dataFunctionSet;
-
-		public Alias(DataFunctionSet df)
-		{
-			dataFunctionSet = df;
-		}
-
+		
 		public override void Use(CommandArgs command)
 		{
 			if (command.Args.Length > 1)
@@ -27,7 +20,7 @@ namespace BaggyBot.Commands
 				{
 					value = value.Substring(1);
 				}
-				dataFunctionSet.UpsertMiscData("alias", key, value);
+				command.Client.StatsDatabase.UpsertMiscData("alias", key, value);
 				command.Reply("I've aliased {0} to \"{1}\"", key, value);
 			}
 			else
@@ -36,14 +29,14 @@ namespace BaggyBot.Commands
 			}
 		}
 
-		public string GetAlias(string key)
+		public string GetAlias(StatsDatabaseManager db, string key)
 		{
-			return dataFunctionSet.GetMiscData("alias", key);
+			return db.GetMiscData("alias", key);
 		}
 
-		public bool ContainsKey(string key)
+		public bool ContainsKey(StatsDatabaseManager db, string key)
 		{
-			return dataFunctionSet.MiscDataContainsKey("alias", key);
+			return db.MiscDataContainsKey("alias", key);
 		}
 	}
 }

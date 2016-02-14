@@ -6,6 +6,7 @@ namespace BaggyBot.Database.Model
 	[Table(Name = "irc_log")]
 	public class IrcLog : Poco
 	{
+		// TODO: Add an IsAction boolean field
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
 

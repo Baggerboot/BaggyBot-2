@@ -23,12 +23,20 @@ namespace BaggyBot.CommandParsing
 
 		public OperationResult Parse(string arguments)
 		{
+			if (arguments == null)
+			{
+				return new OperationResult("default");
+			}
 			var components = arguments.Split((char[]) null, StringSplitOptions.RemoveEmptyEntries);
 			if (components.Length == 0)
 			{
 				return new OperationResult("default");
 			}
 			if (components[0].StartsWith("-"))
+			{
+				return operations["default"].Parse(components, "default");
+			}
+			if (!operations.ContainsKey(components[0]))
 			{
 				return operations["default"].Parse(components, "default");
 			}

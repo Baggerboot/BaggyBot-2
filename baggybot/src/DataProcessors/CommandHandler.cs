@@ -6,11 +6,10 @@ using BaggyBot.Commands;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.EmbeddedData;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
-using IRCSharp.IRC;
 using Convert = BaggyBot.Commands.Convert;
-using Roslyn = BaggyBot.Commands.RoslynExec;
 using Version = BaggyBot.Commands.Version;
 using WolframAlpha = BaggyBot.Commands.WolframAlpha;
 
@@ -19,31 +18,28 @@ namespace BaggyBot.DataProcessors
 	internal class CommandHandler
 	{
 		private readonly Dictionary<string, Command> commands;
-		private readonly IrcInterface ircInterface;
 
-		public CommandHandler(IrcInterface ircInterface, DataFunctionSet dataFunctionSet, Bot bot)
+		public CommandHandler(Bot bot)
 		{
-			this.ircInterface = ircInterface;
 			commands = new Dictionary<string, Command>()
 			{
-				{"alias", new Alias(dataFunctionSet)},
+				{"alias", new Alias()},
 				{"bf", new Bf()},
 				{"convert", new Convert()},
-				{"feature", new Feature(dataFunctionSet)},
-				{"get", new Get(dataFunctionSet, ircInterface)},
+				{"feature", new Feature()},
+				{"get", new Get()},
 				{"html", new Html()},
 				{"http", new HttpInterface()},
-				{"join", new Join(ircInterface)},
-				{"ns", new NickServ(dataFunctionSet, ircInterface)},
-				{"part", new Part(ircInterface)},
+				{"join", new Join()},
+				{"ns", new NickServ()},
+				{"part", new Part()},
 				{"ping", new Ping()},
-				{"reconnect", new Reconnect(ircInterface)},
+				{"reconnect", new Reconnect()},
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
 				{"resolve", new Resolve()},
-				{"roslyn", new RoslynExec()},
 				{"say", new Say()},
-				{"set", new Set(dataFunctionSet)},
+				{"set", new Set()},
 				{"shutdown", new Shutdown(bot)},
 				{"snag", new Snag()},
 				{"ur", new UrbanDictionary()},
@@ -52,15 +48,16 @@ namespace BaggyBot.DataProcessors
 				{"version", new Version()},
 				{"wa", new WolframAlpha()},
 				{"wiki", new Wikipedia()},
-				{"topics", new Topics(dataFunctionSet)}
+				{"topics", new Topics()}
 			};
 			// Command list must be initialised before we can pass a reference to it to the Help command.
 			commands.Add("help", new Help(commands));
 
 			if (ConfigManager.Config.Interpreters.Enabled)
 			{
-				commands.Add("py", new Py(ircInterface, dataFunctionSet));
-				commands.Add("cs", new Cs(ircInterface));
+				commands.Add("py", new Py(bot));
+				commands.Add("cs", new Cs(bot));
+				commands.Add("roslyn", new RoslynExec());
 			}
 			else
 			{
@@ -69,29 +66,21 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		private CommandArgs BuildCommand(IrcMessage message)
-		{
-			var line = message.Message.Substring(1);
-
-			var args = line.Split(' ');
-			var command = args[0];
-			args = args.Skip(1).ToArray();
-
-			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ircInterface.SendMessage);
-		}
-
-		public void ProcessCommand(IrcMessage message)
+		public void ProcessMessage(IrcMessage message)
 		{
 			Logger.Log(this, "Processing command: " + message.Message);
 			if (message.Message.Equals(Bot.CommandIdentifier)) return;
 
-			var cmdInfo = BuildCommand(message);
+			var cmdInfo = CommandArgs.FromMessage(message);
+			ProcessCommand(cmdInfo);
+		}
 
+		private void ProcessCommand(CommandArgs cmdInfo)
+		{
 			// Inject bot information, but do not return.
-			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(message.Message.ToLower().Substring(1)))
+			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(cmdInfo.Command.ToLower()))
 			{
-				ircInterface.SendMessage(message.Channel, string.Format(Messages.CmdGeneralInfo, Bot.Version));
+				cmdInfo.ReturnMessage(string.Format(Messages.CmdGeneralInfo, Bot.Version));
 			}
 
 			if (!commands.ContainsKey(cmdInfo.Command))
@@ -102,11 +91,11 @@ namespace BaggyBot.DataProcessors
 					var value = cmdInfo.Args.ToList();
 					value.Insert(1, "say");
 					((Alias)commands["alias"]).Use(
-						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value), cmdInfo.ReplyCallback));
+						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value)));
 				}
-				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
+				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Client.StatsDatabase, cmdInfo.Command))
 				{
-					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Command);
+					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Client.StatsDatabase, cmdInfo.Command);
 					if(cmdInfo.FullArgument == null)
 					{
 						aliasedCommand = aliasedCommand.Replace(" $args", "");
@@ -116,12 +105,14 @@ namespace BaggyBot.DataProcessors
 						aliasedCommand = aliasedCommand.Replace("$args", cmdInfo.FullArgument);
 					}
 					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
-					ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.Action));
+
+					ProcessCommand(CommandArgs.FromMessage(new IrcMessage(cmdInfo.Client, cmdInfo.Sender, cmdInfo.Channel, "-" + aliasedCommand)));
+					//ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.ReplyCallback, message.Action));
 				}
 				return;
 			}
 
-			if (commands[cmdInfo.Command].Permissions == PermissionLevel.All || commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(message.Sender))
+			if (commands[cmdInfo.Command].Permissions == PermissionLevel.All || commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(cmdInfo.Sender))
 			{
 				// Don't gobble up exceptions when debugging
 				if (ConfigManager.Config.DebugMode)
@@ -136,14 +127,17 @@ namespace BaggyBot.DataProcessors
 					}
 					catch (Exception e)
 					{
-						var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\", Occurred at line {new StackTrace(e, true).GetFrame(0).GetFileLineNumber()}";
-						ircInterface.SendMessage(message.Channel, exceptionMessage);
-					}
+						var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\"";
+						cmdInfo.ReturnMessage(exceptionMessage);
+						// Previously, debugging information (filename and line number) were put in the error message.
+						// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
+						Logger.LogException(commands[cmdInfo.Command], e, $"processing the command \"{cmdInfo.Command} {cmdInfo.FullArgument}\"");
+                    }
 				}
 			}
 			else
 			{
-				ircInterface.SendMessage(message.Channel, Messages.CmdNotAuthorised);
+				cmdInfo.ReturnMessage(Messages.CmdNotAuthorised);
 			}
 		}
 	}

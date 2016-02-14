@@ -15,13 +15,14 @@ namespace BaggyBot.Commands
 		public override string Usage => "<C# code>";
 		public override string Description => "Executes the given C# code and prints its result to IRC.";
 
+		private readonly Bot bot;
 		private readonly Evaluator evaluator;
 		private readonly IrcReportPrinter reportPrinter = new IrcReportPrinter();
 		private readonly Dictionary<string, StringBuilder> commandBuilders = new Dictionary<string, StringBuilder>();
 		
-		public Cs(IrcInterface inter)
+		public Cs(Bot bot)
 		{
-			IrcInterface = inter;
+			this.bot = bot;
 			evaluator = new Evaluator(new CompilerContext(new CompilerSettings { Unsafe = true }, reportPrinter))
 			{
 				DescribeTypeExpressions = true,
@@ -39,7 +40,7 @@ namespace BaggyBot.Commands
 
 		protected override void GetBuffer(CommandArgs command)
 		{
-			IrcInterface.SendMessage(command.Channel, $"{command.Sender.Nick}, \"{commandBuilders[command.Sender.Nick].ToString().Replace('\n', '\\')}\"");
+			command.ReturnMessage($"{command.Sender.Nick}, \"{commandBuilders[command.Sender.Nick].ToString().Replace('\n', '\\')}\"");
 		}
 
 		protected override void Threads(CommandArgs command)
@@ -51,37 +52,37 @@ namespace BaggyBot.Commands
 		{
 			if (!command.Channel.StartsWith("#"))
 			{
-				IrcInterface.SendMessage(command.Channel, "Only the bot operator is allowed to execute Python code in non-channels");
+				command.ReturnMessage("Only the bot operator is allowed to execute Python code in non-channels");
 				return false;
 			}
 			if (Security == InterpreterSecurity.Block)
 			{
-				IrcInterface.SendMessage(command.Channel, "For security reasons, the interactive C# interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
+				command.ReturnMessage("For security reasons, the interactive C# interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
 				return false;
 			}
 			if (Security == InterpreterSecurity.Notify)
 			{
 				// Do not return anything yet, but do notify the bot operator.
-				IrcInterface.NotifyOperator("-cs used by " + command.Sender.Nick + ": " + command.FullArgument);
+				bot.NotifyOperator("-cs used by " + command.Sender.Nick + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
 			{
-				IrcInterface.SendMessage(command.Channel, "Access to my guts is restricted to the operator.");
+				command.ReturnMessage("Access to my guts is restricted to the operator.");
 				return false;
 			}
 			if (command.FullArgument != null && command.FullArgument.Contains("Process"))
 			{
-				IrcInterface.SendMessage(command.Channel, "Process control is restricted to the operator.");
+				command.ReturnMessage("Process control is restricted to the operator.");
 				return false;
 			}
 			if (command.FullArgument != null && command.FullArgument.Contains("GetMethod"))
 			{
-				IrcInterface.SendMessage(command.Channel, "Method invocation trough reflection is restricted to the operator.");
+				command.ReturnMessage("Method invocation trough reflection is restricted to the operator.");
 				return false;
 			}
 			if (command.FullArgument != null && command.FullArgument.Contains("Environment.Exit"))
 			{
-				IrcInterface.SendMessage(command.Channel, "Calls to Environment.Exit are not allowed");
+				command.ReturnMessage("Calls to Environment.Exit are not allowed");
 				return false;
 			}
 			return true;
@@ -104,7 +105,7 @@ namespace BaggyBot.Commands
 
 			if (command.FullArgument.Contains("Console.Write"))
 			{
-				IrcInterface.SendMessage(command.Channel, "Console.Write calls are not supported yet.");
+				command.ReturnMessage("Console.Write calls are not supported yet.");
 				return;
 			}
 			if (!(isOperator || RestrictionsCheck(command)))
@@ -129,7 +130,7 @@ namespace BaggyBot.Commands
 				if (resultSet)
 				{
 					var output = CodeFormatter.PrettyPrint(result);
-					IrcInterface.SendMessage(command.Channel, "--> " + output);
+					command.ReturnMessage("--> " + output);
 					commandBuilders[command.Sender.Nick].Clear();
 				}
 				else if (input == null)
@@ -139,24 +140,24 @@ namespace BaggyBot.Commands
 						while (reportPrinter.HasMessage)
 						{
 							var message = reportPrinter.GetNextMessage();
-							IrcInterface.SendMessage(command.Channel, $"{message.MessageType} at column {message.Location.Column}: {message.Text}");
+							command.ReturnMessage($"{message.MessageType} at column {message.Location.Column}: {message.Text}");
 						}
 					}
 					else
 					{
-						IrcInterface.SendMessage(command.Channel, "Done (No result)");
+						command.ReturnMessage("Done (No result)");
 					}
 					commandBuilders[command.Sender.Nick].Clear();
 				}
 				else
 				{
 					commandBuilders[command.Sender.Nick].Append(input);
-					IrcInterface.SendMessage(command.Channel, ">>>");
+					command.ReturnMessage(">>>");
 				}
 			}
 			catch (InternalErrorException e)
 			{
-				IrcInterface.SendMessage(command.Channel, "Exception: " + e);
+				command.ReturnMessage("Exception: " + e);
 			}
 		}
 	}

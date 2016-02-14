@@ -28,6 +28,10 @@ namespace BaggyBot.CommandParsing
 
 		public void AddArgument(string value)
 		{
+			if (arguments.Count <= currentIndex)
+			{
+				throw new InvalidCommandException("Unexpected command parameter.", value);
+			}
 			arguments[currentIndex++] = value;
 		}
 	}

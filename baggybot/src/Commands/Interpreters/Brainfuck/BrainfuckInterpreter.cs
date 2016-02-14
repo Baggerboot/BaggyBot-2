@@ -15,7 +15,7 @@ namespace BaggyBot.Commands.Interpreters.Brainfuck
 			var pointer = new MemoryCell();
 			try
 			{
-				var output = ProcessCodeBlock(pointer, code, ref register);
+				var output = ProcessCodeBlock(ref pointer, code, ref register);
 				return output;
 			}
 			catch (ArgumentException e)
@@ -24,7 +24,7 @@ namespace BaggyBot.Commands.Interpreters.Brainfuck
 			}
 		}
 
-		private string ProcessCodeBlock(MemoryCell pointer, string code, ref byte register)
+		private string ProcessCodeBlock(ref MemoryCell pointer, string code, ref byte register)
 		{
 			var outputBuilder = new StringBuilder();
 
@@ -44,12 +44,12 @@ namespace BaggyBot.Commands.Interpreters.Brainfuck
 					case '-':
 						pointer.Value--;
 						break;
-					case 'r':
+					/*case 'r':
 						register = pointer.Value;
 						break;
 					case 'w':
 						pointer.Value = register;
-						break;
+						break;*/
 					case '[':
 						var depth = 0;
 						var length = -1;
@@ -78,7 +78,7 @@ namespace BaggyBot.Commands.Interpreters.Brainfuck
 						while (pointer.Value != 0)
 						{
 							var codeBlock = code.Substring(i + 1, length - 1);
-							outputBuilder.Append(ProcessCodeBlock(pointer, codeBlock, ref register));
+							outputBuilder.Append(ProcessCodeBlock(ref pointer, codeBlock, ref register));
 						}
 						i += length;
 						break;

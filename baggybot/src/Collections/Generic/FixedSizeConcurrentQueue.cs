@@ -7,13 +7,18 @@ using System.Threading.Tasks;
 
 namespace BaggyBot.Collections.Generic
 {
-	// TODO: Check whether concurrency is correctly implemented
-	internal class FixedSizeQueue<T> : ConcurrentQueue<T>
+	/// <summary>
+	/// Custom Queue class that contains a fixed maximum number of items.
+	/// If, after enqueueing a new item, the queue contains too many items,
+	/// the item at the front of the queue will be dequeued.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	internal class FixedSizeConcurrentQueue<T> : ConcurrentQueue<T>
 	{
 		private readonly object syncObject = new object();
 		public int Size { get; }
 
-		public FixedSizeQueue(int size)
+		public FixedSizeConcurrentQueue(int size)
 		{
 			Size = size;
 		}
@@ -21,14 +26,8 @@ namespace BaggyBot.Collections.Generic
 		public new void Enqueue(T obj)
 		{
 			base.Enqueue(obj);
-			lock (syncObject)
-			{
-				while (Count > Size)
-				{
-					T outObj;
-					TryDequeue(out outObj);
-				}
-			}
+			T outObj;
+			TryDequeue(out outObj);
 		}
 
 		public new T[] ToArray()

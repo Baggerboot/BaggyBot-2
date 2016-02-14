@@ -13,7 +13,7 @@ namespace BaggyBot.Commands
 		public override void Use(CommandArgs command)
 		{
 			throw new NotImplementedException("This command is currently not available.");
-			// TODO: Reimplement this command
+			// TODO: Reimplement the HTML command
 			/*if (string.IsNullOrEmpty(command.FullArgument))
 			{
 				command.Reply("Usage: html [-h] <html code> - Use the -h switch to automatically add a doctype decoration, and opening and closing HTML and body tags");

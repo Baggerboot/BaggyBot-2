@@ -7,73 +7,84 @@ using System.Text.RegularExpressions;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.EmbeddedData;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
+using Mono.CSharp;
+
 #if postgresql
 
 #endif
 #if mssql
 using BaggyBot.Database.MS_SQL;
 #endif
-using IRCSharp.IRC;
 
 namespace BaggyBot.DataProcessors
 {
 	internal class StatsHandler
 	{
-		private readonly DataFunctionSet dataFunctionSet;
-		private readonly IrcInterface ircInterface;
 		private readonly Random rand;
 
 		// Non-exhaustive list of shared idents that are commonly used by multiple people, often because they are standard values for their respective IRC clients.
 		/*
 				private string[] sharedIdents = { "webchat", "~quassel", "~AndChat12", "AndChat66", "~chatzilla", "~IceChat77", "~androirc", "Mibbit", "~PircBotX" };
 		*/
+		// TODO: move these to EmbeddedData
 		private readonly string[] snagMessages = { "Snagged the shit outta that one!", "What a lame quote. Snagged!", "Imma stash those words for you.", "Snagged, motherfucker!", "Everything looks great out of context. Snagged!", "Yoink!", "That'll look nice on the stats page." };
-		
-		public StatsHandler(DataFunctionSet dm, IrcInterface inter)
+
+		public StatsHandler()
 		{
-			dataFunctionSet = dm;
-			ircInterface = inter;
 			rand = new Random();
 		}
-		public void ProcessMessage(IrcMessage message, int userId)
+		public void ProcessMessage(IrcMessage message)
 		{
-			if (dataFunctionSet.ConnectionState == ConnectionState.Closed) return;
+			if (message.Client.StatsDatabase.ConnectionState == ConnectionState.Closed) return;
 
 			Logger.Log(this, "Processing message for " + message.Sender.Nick);
+
+			int userId = message.Client.StatsDatabase.GetIdFromUser(message.Sender);
+
+			AddMessageToIrcLog(message, userId);
 
 			var words = WordTools.GetWords(message.Message);
 
 			if (message.Action)
 			{
-				dataFunctionSet.IncrementActions(userId);
+				message.Client.StatsDatabase.IncrementActions(userId);
 			}
 			else
 			{
-				dataFunctionSet.IncrementLineCount(userId);
+				message.Client.StatsDatabase.IncrementLineCount(userId);
 			}
-			dataFunctionSet.IncrementWordCount(userId, words.Count);
+			message.Client.StatsDatabase.IncrementWordCount(userId, words.Count);
 
-			dataFunctionSet.IncrementVar("global_line_count");
-			dataFunctionSet.IncrementVar("global_word_count", words.Count);
+			message.Client.StatsDatabase.IncrementVar("global_line_count");
+			message.Client.StatsDatabase.IncrementVar("global_word_count", words.Count);
 			GenerateRandomQuote(message, words, userId);
 			ProcessRandomEvents(message);
-			GetEmoticons(userId, words);
+			GetEmoticons(message.Client.StatsDatabase, userId, words);
 			foreach (var word in words)
 			{
 				ProcessWord(message, word, userId);
 			}
 		}
 
+		private void AddMessageToIrcLog(IrcMessage message, int userId)
+		{
+			message.Client.StatsDatabase.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick,
+				message.Action
+				? $"*{message.Sender.Nick} {message.Message}*"
+				: message.Message);
+		}
+
 		private void ProcessRandomEvents(IrcMessage message)
 		{
 			if (message.Sender.Nick == "Ralph" && message.Message.ToLower().Contains("baggybot"))
 			{
-				ircInterface.SendMessage(message.Channel, "Shut up you fool");
+				message.ReturnMessage("Shut up you fool");
 			}
 			else if (message.Message.ToLower().Contains("fuck you baggybot"))
 			{
-				ircInterface.SendMessage(message.Channel, "pls ;___;");
+				message.ReturnMessage("pls ;___;");
 			}
 		}
 
@@ -83,27 +94,27 @@ namespace BaggyBot.DataProcessors
 			var cword = textOnly.Replace(lword, string.Empty);
 			if (word.StartsWith("http://") || word.StartsWith("https://"))
 			{
-				dataFunctionSet.IncrementUrl(word, sender, message.Message);
+				message.Client.StatsDatabase.IncrementUrl(word, sender, message.Message);
 			}
 			else if (!WordTools.IsIgnoredWord(cword) && cword.Length >= 3)
 			{
-				dataFunctionSet.IncrementWord(cword);
+				message.Client.StatsDatabase.IncrementWord(cword);
 			}
 			else if (WordTools.IsProfanity(lword))
 			{
-				dataFunctionSet.IncrementProfanities(sender);
+				message.Client.StatsDatabase.IncrementProfanities(sender);
 			}
 		}
 
 		private readonly Regex textOnly = new Regex("[^a-z]");
 
-		private void GetEmoticons(int userId, IEnumerable<string> words)
+		private void GetEmoticons(StatsDatabaseManager statsDb, int userId, IEnumerable<string> words)
 		{
 			foreach (var word in words)
 			{
 				if (Emoticons.List.Contains(word))
 				{
-					dataFunctionSet.IncrementEmoticon(word, userId);
+					statsDb.IncrementEmoticon(word, userId);
 				}
 			}
 		}
@@ -117,24 +128,24 @@ namespace BaggyBot.DataProcessors
 			if (ControlVariables.SnagNextLine)
 			{
 				ControlVariables.SnagNextLine = false;
-				dataFunctionSet.Snag(message);
-				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
+				message.Client.StatsDatabase.Snag(message);
+				message.ReturnMessage("Snagged line on request.");
 				return;
 			}
 			if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nick)
 			{
 				ControlVariables.SnagNextLineBy = null;
-				dataFunctionSet.Snag(message);
-				ircInterface.SendMessage(message.Channel, "Snagged line on request.");
+				message.Client.StatsDatabase.Snag(message);
+				message.ReturnMessage("Snagged line on request.");
 				return;
 			}
 
-			PerformSnagLogic(message, words, userId);
+			TryTakeQuote(message, words, userId);
 		}
 
-		private void PerformSnagLogic(IrcMessage message, List<string> words, int userId)
+		private void TryTakeQuote(IrcMessage message, List<string> words, int userId)
 		{
-			var last = dataFunctionSet.GetLastSnaggedLine(userId);
+			var last = message.Client.StatsDatabase.GetLastQuotedLine(userId);
 			if (last.HasValue)
 			{
 				if ((DateTime.Now - last.Value).Hours < ConfigManager.Config.Quotes.MinDelayHours)
@@ -142,11 +153,7 @@ namespace BaggyBot.DataProcessors
 					return;
 				}
 			}
-			else
-			{
-				Logger.Log(this, "This user hasn't been snagged before");
-			}
-			
+
 			var snagChance = ConfigManager.Config.Quotes.Chance;
 			var silenceChance = ConfigManager.Config.Quotes.SilentQuoteChance;
 
@@ -159,28 +166,28 @@ namespace BaggyBot.DataProcessors
 					if (!allowSnagMessage || hideSnagMessage)
 					{ // Check if snag message should be displayed
 						Logger.Log(this, "Silently snagging this message");
-						dataFunctionSet.Snag(message);
+						message.Client.StatsDatabase.Snag(message);
 					}
 					else
 					{
 						var randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
 						if (randint < snagMessages.Length)
 						{
-							SnagMessage(message, snagMessages[randint]);
+							TakeQuote(message, snagMessages[randint]);
 						}
 						else
 						{
-							SnagMessage(message, "Snagged!");
+							TakeQuote(message, "Snagged!");
 						}
 					}
 				}
 			}
 		}
 
-		private void SnagMessage(IrcMessage message, string snagMessage)
+		private void TakeQuote(IrcMessage message, string snagMessage)
 		{
-			ircInterface.SendMessage(message.Channel, snagMessage);
-			dataFunctionSet.Snag(message);
+			message.ReturnMessage(snagMessage);
+			message.Client.StatsDatabase.Snag(message);
 		}
 	}
 }
