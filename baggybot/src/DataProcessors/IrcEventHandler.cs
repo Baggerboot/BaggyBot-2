@@ -148,9 +148,12 @@ namespace BaggyBot.DataProcessors
 					case "333": // Ignore names list
 					case "366":
 						break;
+					case "253": // RPL_LUSERUNKNOWN
+						break;
 					case "375": // RPL_MOTDSTART
 					case "376": // RPL_ENDOFMOTD
 					case "372": // RPL_MOTD
+					case "451": // ERR_NOTREGISTERED
 						Logger.Log(this, $"{line.FinalArgument}", LogLevel.Irc);
 						break;
 					case "MODE":
@@ -190,6 +193,7 @@ namespace BaggyBot.DataProcessors
 		internal void HandleNickChange(IrcUser user, string newNick)
 		{
 			var message = $"{user.Nick} is now known as {newNick}";
+			user.Client.StatsDatabase.HandleNickChange(user, newNick);
 			DisplayEvent(message, user, CHANNEL_NICK_CHANGE);
 		}
 		internal void DisplayEvent(string message, IrcUser sender, string channel)
