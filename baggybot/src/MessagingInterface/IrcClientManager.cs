@@ -99,7 +99,16 @@ namespace BaggyBot.MessagingInterface
 					verifyServerCertificate = verify
 				});
 
-				clients.Add(server.ServerName, wrapper);
+				try
+				{
+					clients.Add(server.ServerName, wrapper);
+				}
+				catch (ArgumentException)
+				{
+					Logger.Log(this, "Failed to add the IRC server: a server with the same name already exists.", LogLevel.Error);
+					client.Disconnect();
+					return false;
+				}
 				return true;
 			}
 			catch (SocketException e)
@@ -161,7 +170,16 @@ namespace BaggyBot.MessagingInterface
 
 				if (reason == DisconnectReason.Other)
 				{
-					Logger.Log(client, $"Connection to {serverName} lost ({ex.GetType()}: {ex.Message}) Attempting to reconnect...", LogLevel.Error);
+					if (ex == null)
+					{
+						Logger.Log(client, $"Connection to {serverName} lost ({ex.GetType()}: {ex.Message}) Attempting to reconnect...", LogLevel.Error);
+					}
+					else
+					{
+						// If the client quits, we shouldn't try to reconnect.
+						Logger.Log(client, $"Connection to {serverName} lost (Client Quit).", LogLevel.Error);
+						return;
+					}
 				}
 				else
 				{

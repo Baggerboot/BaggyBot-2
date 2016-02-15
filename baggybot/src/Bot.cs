@@ -137,7 +137,7 @@ namespace BaggyBot
 			if (!ircClientManager.ConnectIrc(server))
 			{
 				Logger.Log(this, "FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
-				Environment.Exit(1);
+				Shutdown();
 			}
 		}
 
@@ -164,10 +164,13 @@ namespace BaggyBot
 			}
 		}*/
 
-		public void Connect(ServerCfg server)
+		public void Connect(ServerCfg[] servers)
 		{
-			TryConnectIrc(server);
-			ircClientManager[server.ServerName].JoinChannels(server.AutoJoinChannels);
+			foreach (var server in servers)
+			{
+				TryConnectIrc(server);
+				ircClientManager[server.ServerName].JoinChannels(server.AutoJoinChannels);
+			}
 
 			OnPostConnect();
 
@@ -215,8 +218,7 @@ namespace BaggyBot
 
 			using (var bot = new Bot())
 			{
-				var server = ConfigManager.Config.Servers.First();
-				bot.Connect(server);
+				bot.Connect(ConfigManager.Config.Servers);
 			}
 		}
 	}
