@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BaggyBot.Database;
+using BaggyBot.Monitoring;
 using IRCSharp;
 using IRCSharp.IRC;
 
@@ -51,6 +52,7 @@ namespace BaggyBot.MessagingInterface
 
 		public NickservInformation NickservLookup(string nick)
 		{
+			Logger.Log(this, $"Performing NickServ lookup for {nick}.");
 			return client.NickservLookup(nick);
 		}
 
