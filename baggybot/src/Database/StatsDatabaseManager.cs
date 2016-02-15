@@ -499,9 +499,8 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					matches.First().Uses++;
-					matches.First().LastUsedById = user;
-					Update(matches.First());
+					matches.Set(m => m.Uses, m => m.Uses + 1)
+						.Set(m => m.LastUsedById, user).Update();
 				}
 				Logger.Log(this, "Incremented emoticon count with emoticon: " + emoticon + ".");
 			}
@@ -529,8 +528,7 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					matches.First().Value = amount;
-					Update(matches.First());
+					matches.Set(m => m.Value, amount).Update();
 					Logger.Log(this, "Changed keyvaluepair with key: " + key + ".");
 				}
 			}
@@ -558,8 +556,9 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					matches.First().Value += amount;
-					Update(matches.First());
+					var m = matches.First();
+					m.Value += amount;
+					Update(m);
 				}
 			}
 			lockObj.LockMessage = "None";
@@ -661,10 +660,10 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					matches.First().Uses++;
-					matches.First().LastUsage = usage;
-					matches.First().LastUsedById = user;
-					Update(matches.First());
+					matches.Set(m => m.Uses, m => m.Uses + 1)
+						.Set(m => m.LastUsage, usage)
+						.Set(m => m.LastUsedById, user)
+						.Update();
 				}
 				Logger.Log(this, "Incremented URL count with URL: " + url + ".");
 			}
