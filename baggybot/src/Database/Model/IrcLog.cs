@@ -25,5 +25,10 @@ namespace BaggyBot.Database.Model
 
 		[Column(Name = "message"), NotNull]
 		public string Message { get; set; }
+
+		public override string ToString()
+		{
+			return $"[{Channel}] <{Nick}> {Message}";
+        }
 	}
 }
