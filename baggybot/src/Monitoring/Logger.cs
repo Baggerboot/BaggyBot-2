@@ -32,6 +32,7 @@ namespace BaggyBot.Monitoring
 		public const string LogFileName = "baggybot.log";
 		private static bool disposed;
 		private static string prefix = string.Empty;
+		private static object lockObj = new object();
 		private const int prefixLength = 52;
 
 		public static event LogEvent OnLogEvent;
@@ -125,13 +126,16 @@ namespace BaggyBot.Monitoring
 			}
 			lineBuilder.Append(message);
 
-			WriteToConsole(lineColour, level, lineBuilder);
-
-			if ((level == LogLevel.Error || level == LogLevel.Warning))
+			lock (lockObj)
 			{
-				OnLogEvent?.Invoke(lineBuilder.ToString(), level);
+				WriteToConsole(lineColour, level, lineBuilder);
+
+				if ((level == LogLevel.Error || level == LogLevel.Warning))
+				{
+					OnLogEvent?.Invoke(lineBuilder.ToString(), level);
+				}
+				WriteToLogFile(lineBuilder, writeLine);
 			}
-			WriteToLogFile(lineBuilder, writeLine);
 		}
 
 		private static void WriteToLogFile(StringBuilder lineBuilder, bool writeLine)
