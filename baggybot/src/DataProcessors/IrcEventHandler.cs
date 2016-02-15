@@ -99,7 +99,7 @@ namespace BaggyBot.DataProcessors
 		internal void ProcessNotice(IrcUser sender, string notice)
 		{
 			Logger.Log(this, notice, LogLevel.Irc);
-			sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, "ALL", sender.Hostmask, notice);
+			sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, "ALL", sender.Nick, notice);
 		}
 
 		/// <summary>
