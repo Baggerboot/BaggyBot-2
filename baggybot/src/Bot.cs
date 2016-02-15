@@ -81,7 +81,7 @@ namespace BaggyBot
 
 		public void NotifyOperator(string message)
 		{
-			//TODO: implement NotifyOperators
+			ircClientManager.NotifyOperators(message);
 		}
 		
 		~Bot()

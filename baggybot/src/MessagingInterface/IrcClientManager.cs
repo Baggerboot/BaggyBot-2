@@ -220,5 +220,17 @@ namespace BaggyBot.MessagingInterface
 				client.Value.Dispose();
 			}
 		}
+
+		public void NotifyOperators(string message)
+		{
+			foreach (var client in clients)
+			{
+				var serverCfg = ConfigManager.Config.Servers.First(srv => srv.ServerName == client.Value.ServerName);
+				foreach (var op in serverCfg.Operators)
+				{
+					client.Value.SendMessage(op.Nick, message);
+				}
+			}
+		}
 	}
 }
