@@ -597,6 +597,7 @@ namespace BaggyBot.Database
 					{
 						Logger.Log(this, $"Unable to handle nick change for {user.Nick} to {newNick}: Invalid amount of Uids received: {uids.Length}", LogLevel.Warning);
 					}
+					else
 					{
 						var nickserv = GetNickserv(uids[0]);
 						Logger.Log(this, $"Adding new credentials row for nick change: {user.Nick} -> {newNick}");
