@@ -20,5 +20,10 @@ namespace BaggyBot.Configuration
 		public bool UseTls { get; set; } = false;
 		public bool UseUnicode { get; set; } = true;
 		public bool UseNickserv { get; set; } = true;
+
+		public override string ToString()
+		{
+			return $"{ServerName} ({Identity.Nick}@{Host}:{Port}) unicode:{UseUnicode} tls:{UseTls} nickserv:{UseNickserv}";
+        }
 	}
 }
