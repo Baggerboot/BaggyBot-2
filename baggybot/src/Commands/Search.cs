@@ -1,14 +1,50 @@
-﻿namespace BaggyBot.Commands
+﻿using System.Linq;
+using BaggyBot.CommandParsing;
+using BaggyBot.Tools;
+
+namespace BaggyBot.Commands
 {
 	internal class Search : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
-		public override string Usage => "";
-		public override string Description => "Search for what?";
+		public override string Usage => "[-n|--max-results] <search query>";
+		public override string Description => "Search the IRC backlog for a message. Limits the number of displayed results to 1 by default. Use -n (--max-results) to display more results.";
 		
 		public override void Use(CommandArgs command)
 		{
-			// TODO: Reimplement the search command
+			var parser = new CommandParser(new Operation().AddKey("max-results", "1", 'n').AddRestArgument());
+
+			var result = parser.Parse(command.FullArgument);
+			var numDisplayed = int.Parse(result.Keys["max-results"]);
+			if (numDisplayed > 3 && !UserTools.Validate(command.Sender))
+			{
+				command.Reply("only bot operators may request more than three results.");
+				return;
+			}
+			var query = result.RestArgument;
+
+			var matches = command.Client.StatsDatabase.FindLine(query);
+			switch (matches.Count)
+			{
+				case 0:
+					command.Reply("no matches found.");
+					break;
+				case 1:
+					command.Reply("1 match found: " + matches[0]);
+					break;
+				default:
+					if (numDisplayed == 1)
+						command.Reply($"{matches.Count} matches (1 displayed): {matches[0]}");
+					else
+					{
+						int matchNumber = 0;
+						foreach (var match in matches.Take(numDisplayed))
+						{
+							command.Reply($"match {++matchNumber} of {numDisplayed}: {match}");
+						}
+					}
+					break;
+			}
 		}
 	}
 }
