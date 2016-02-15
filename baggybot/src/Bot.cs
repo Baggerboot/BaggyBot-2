@@ -33,7 +33,7 @@ namespace BaggyBot
 		public const string Version = "4.3";
 		// Version number of the database. This is checked against the 'version' key in the metadata table. If they do not match,
 		// the DB connection is closed, and the user will be required to update the DB by hand, as automatic updates are not yet supported.
-		public const string DatabaseVersion = "1.2.1";
+		public const string DatabaseVersion = "1.2.2";
 		public const string ConfigVersion = "0.1";
 
 		public bool QuitRequested

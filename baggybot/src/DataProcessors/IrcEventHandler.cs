@@ -1,6 +1,7 @@
 ﻿using BaggyBot.Collections.Generic;
 using System;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using BaggyBot.Monitoring;
 using IRCSharp.IRC;
@@ -11,6 +12,15 @@ namespace BaggyBot.DataProcessors
 {
 	internal class IrcEventHandler
 	{
+		// Not all logged events can be accurately represented as messages that were sent to channels.
+		// In such cases, the channel name will instead be set to one of the following values.
+		// Events originating from users will be prefixed with USER_
+		// Events originating from the server will be prefixed with SERVER_
+		// All non-channel events will always start with @
+		private const string CHANNEL_MISC = "@MISC";
+		private const string CHANNEL_NOTICE = "@SERVER_NOTICE";
+		private const string CHANNEL_NICK_CHANGE = "@USER_NICK_CHANGE";
+		private const string CHANNEL_QUIT = "@USER_QUIT";
 		// Handles parsing and executing commands
 		private readonly CommandHandler commandHandler;
 		// Handles the generation of statistics from incoming messages
@@ -98,7 +108,7 @@ namespace BaggyBot.DataProcessors
 		internal void ProcessNotice(IrcUser sender, string notice)
 		{
 			Logger.Log(this, notice, LogLevel.Irc);
-			sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, "ALL", sender.Nick, notice);
+			sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, CHANNEL_NOTICE, sender.Nick, notice);
 		}
 
 		/// <summary>
@@ -125,14 +135,14 @@ namespace BaggyBot.DataProcessors
 			{
 				switch (line.Command)
 				{
-					case "001":
-					case "002":
+					case "001": // RPL_WELCOME
+					case "002": // RPL_YOURHOST
 						Logger.Log(this, $"{line.FinalArgument}", LogLevel.Irc);
 						break;
-					case "003":
+					case "003": // RPL_CREATED
 						Logger.Log(this, $"{line.Sender}: {line.FinalArgument}", LogLevel.Irc);
 						break;
-					case "332":
+					case "332": // RPL_TOPIC
 						Logger.Log(this, $"Topic for {line.Arguments[1]}: {line.FinalArgument}", LogLevel.Irc);
 						break;
 					case "333": // Ignore names list
@@ -144,7 +154,7 @@ namespace BaggyBot.DataProcessors
 						Logger.Log(this, $"{line.FinalArgument}", LogLevel.Irc);
 						break;
 					case "MODE":
-						// TODO: Figure out the difference between these two and document it.
+						// TODO: Figure out the difference between these two and document it. Probably channel/user
 						if (line.FinalArgument != null)
 						{
 							Logger.Log(this, $"{line.Sender} sets mode {line.FinalArgument} for {line.Arguments[0]}", LogLevel.Irc);
@@ -155,6 +165,7 @@ namespace BaggyBot.DataProcessors
 						}
 						break;
 					default:
+						Debugger.Break();
 						Logger.Log(this, line.ToString(), LogLevel.Irc);
 						break;
 				}
@@ -179,9 +190,9 @@ namespace BaggyBot.DataProcessors
 		internal void HandleNickChange(IrcUser user, string newNick)
 		{
 			var message = $"{user.Nick} is now known as {newNick}";
-			DisplayEvent(message, user);
+			DisplayEvent(message, user, CHANNEL_NICK_CHANGE);
 		}
-		internal void DisplayEvent(string message, IrcUser sender, string channel = "ALL")
+		internal void DisplayEvent(string message, IrcUser sender, string channel)
 		{
 			Logger.Log(this, message, LogLevel.Irc);
 			if (sender.Client.StatsDatabase.ConnectionState == ConnectionState.Open)
@@ -198,7 +209,7 @@ namespace BaggyBot.DataProcessors
 
 		internal void HandleQuit(IrcUser user, string reason)
 		{
-			DisplayEvent(user + " has quit (" + reason + ")", user);
+			DisplayEvent(user + " has quit (" + reason + ")", user, CHANNEL_QUIT);
 		}
 	}
 }
