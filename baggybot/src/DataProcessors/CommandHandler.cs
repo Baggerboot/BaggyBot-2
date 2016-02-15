@@ -25,6 +25,7 @@ namespace BaggyBot.DataProcessors
 				{"bf", new Bf()},
 				{"convert", new Convert()},
 				{"feature", new Feature()},
+				{ "g", new GoogleSearch()},
 				{"get", new Get()},
 				{"html", new Html()},
 				{"http", new HttpInterface()},

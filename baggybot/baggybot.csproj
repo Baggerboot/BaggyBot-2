@@ -140,6 +140,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Commands\GoogleSearch.cs" />
     <Compile Include="src\Configuration\Backend.cs" />
     <Compile Include="src\Configuration\Configuration.cs" />
     <Compile Include="src\Configuration\Identity.cs" />
