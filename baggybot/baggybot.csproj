@@ -152,6 +152,7 @@
     <Compile Include="src\Configuration\Quotes.cs" />
     <Compile Include="src\Configuration\ServerCfg.cs" />
     <Compile Include="src\Configuration\WolframAlpha.cs" />
+    <Compile Include="src\CommandParsing\CommandComponent.cs" />
     <Compile Include="src\DataProcessors\IMessageHandler.cs" />
     <Compile Include="src\MessagingInterface\IrcClientManager.cs" />
     <Compile Include="src\MessagingInterface\IrcMessage.cs" />
@@ -174,7 +175,6 @@
     <Compile Include="src\Commands\Bf.cs" />
     <Compile Include="src\Commands\Convert.cs" />
     <Compile Include="src\Commands\Cs.cs" />
-    <Compile Include="src\Commands\Html.cs" />
     <Compile Include="src\Commands\HttpInterface.cs" />
     <Compile Include="src\Commands\Interpreters\Brainfuck\BrainfuckInterpreter.cs" />
     <Compile Include="src\Commands\Interpreters\Brainfuck\MemoryCell.cs" />

@@ -22,9 +22,11 @@ namespace BaggyBot.CommandParsing
 			}
 		}
 
-		public void AddArgument(string value)
+		public bool IsFull => currentIndex >= arguments.Count;
+
+		public void AssignArgument(string value)
 		{
-			if (arguments.Count <= currentIndex)
+			if (currentIndex >= arguments.Count)
 			{
 				throw new InvalidCommandException("Unexpected command parameter.", value);
 			}

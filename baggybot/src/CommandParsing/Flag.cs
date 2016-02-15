@@ -2,6 +2,6 @@
 {
 	public class Flag : Option
 	{
-		protected Flag(string longForm, char? shortForm = null) : base(longForm, shortForm){ }
+		public Flag(string longForm, char? shortForm = null) : base(longForm, shortForm){ }
 	}
 }

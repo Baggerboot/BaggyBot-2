@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Microsoft.Scripting.Actions.Calls;
 
 namespace BaggyBot.CommandParsing
 {
@@ -8,6 +10,8 @@ namespace BaggyBot.CommandParsing
 	{
 		private readonly List<Option> options;
 		private readonly List<Argument> arguments;
+		private bool hasRestArgument;
+		private string restArgumentDefaultValue;
 
 		public Operation()
 		{
@@ -23,6 +27,26 @@ namespace BaggyBot.CommandParsing
 		public Operation AddArgument(string name, string defaultValue)
 		{
 			arguments.Add(new Argument(name, defaultValue));
+			return this;
+		}
+		public Operation AddRestArgument(string defaultValue = null)
+		{
+			hasRestArgument = true;
+			restArgumentDefaultValue = defaultValue;
+			return this;
+		}
+
+		public Operation AddFlag(string longForm, char? shortForm = null)
+		{
+			if (options.Count(opt => opt.Short != null && opt.Short == shortForm) > 0)
+			{
+				throw new InvalidOperationException($"An option with the short form \"-{shortForm}\" has already been defined.");
+			}
+			if (options.Count(opt => opt.Long != null && opt.Long == longForm) > 0)
+			{
+				throw new InvalidOperationException($"An option with the long form \"--{longForm}\" has already been defined.");
+			}
+			options.Add(new Flag(longForm, shortForm));
 			return this;
 		}
 
@@ -116,7 +140,7 @@ namespace BaggyBot.CommandParsing
 
 		private OperationResult BuildDefaultResult(string operationName)
 		{
-			var result = new OperationResult(operationName);
+			var result = new OperationResult(operationName, restArgumentDefaultValue);
 
 			foreach (var option in options)
 			{
@@ -142,7 +166,7 @@ namespace BaggyBot.CommandParsing
 			return result;
 		}
 
-		internal OperationResult Parse(IEnumerable<string> components, string operationName)
+		internal OperationResult Parse(IEnumerable<CommandComponent> components, string operationName, string fullCommand)
 		{
 			var result = BuildDefaultResult(operationName);
 
@@ -156,34 +180,42 @@ namespace BaggyBot.CommandParsing
 			{
 				if (currentKey != null)
 				{
-					result.Keys[currentKey.Long] = component;
+					result.Keys[currentKey.Long] = component.Value;
 					currentKey = null;
 				}
-				if (component.StartsWith("--"))
+				else if (component.Value.StartsWith("--"))
 				{
 					// It looks like a long-form option, let's see if it is one.
-					var option = GetLongOption(component.Substring(2));
+					var option = GetLongOption(component.Value.Substring(2));
 
 					if (option == null)
 					{
 						// Guess not. It might be an argument though, so let's return it.
-						result.Arguments.AddArgument(component);
+						if (result.Arguments.IsFull && hasRestArgument)
+						{
+							result.RestArgument = fullCommand.Substring(component.Position);
+							break;
+						}
+						else
+						{
+							result.Arguments.AssignArgument(component.Value);
+						}
 					}
 					else
 					{
 						currentKey = SetOption(option, result);
 					}
 				}
-				else if (component.StartsWith("-"))
+				else if (component.Value.StartsWith("-"))
 				{
 					// It looks like a short-form option.
-					var shortOptions = component.Substring(1).ToCharArray();
+					var shortOptions = component.Value.Substring(1).ToCharArray();
 					foreach (var shortOption in shortOptions)
 					{
 						var option = GetShortOption(shortOption);
 						if (option == null)
 						{
-							result.Arguments.AddArgument(component);
+							result.Arguments.AssignArgument(component.Value);
 						}
 						else
 						{
@@ -194,7 +226,15 @@ namespace BaggyBot.CommandParsing
 				else
 				{
 					// This doesn't look like an option at all, so it's probably an argument.
-					result.Arguments.AddArgument(component);
+					if (result.Arguments.IsFull && hasRestArgument)
+					{
+						result.RestArgument = fullCommand.Substring(component.Position);
+						break;
+					}
+					else
+					{
+						result.Arguments.AssignArgument(component.Value);
+					}
 				}
 			}
 			return result;

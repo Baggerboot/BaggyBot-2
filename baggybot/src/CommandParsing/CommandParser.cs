@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BaggyBot.Database.Model;
 
 namespace BaggyBot.CommandParsing
 {
@@ -25,22 +26,31 @@ namespace BaggyBot.CommandParsing
 			{
 				return new OperationResult("default");
 			}
-			var components = arguments.Split((char[]) null, StringSplitOptions.RemoveEmptyEntries);
-			if (components.Length == 0)
+
+			var components = new List<CommandComponent>();
+			var tokens = arguments.Split((char[]) null, StringSplitOptions.RemoveEmptyEntries);
+			int currentIndex = 0;
+			foreach (var token in tokens)
+			{
+				currentIndex = arguments.IndexOf(token, currentIndex, StringComparison.Ordinal);
+				components.Add(new CommandComponent(currentIndex, token));
+			}
+
+			if (components.Count == 0)
 			{
 				return new OperationResult("default");
 			}
-			if (components[0].StartsWith("-"))
+			if (components[0].Value.StartsWith("-"))
 			{
-				return operations["default"].Parse(components, "default");
+				return operations["default"].Parse(components, "default", arguments);
 			}
-			if (!operations.ContainsKey(components[0]))
+			if (!operations.ContainsKey(components[0].Value))
 			{
-				return operations["default"].Parse(components, "default");
+				return operations["default"].Parse(components, "default", arguments);
 			}
 			else
 			{
-				return operations[components[0]].Parse(components.Skip(1), components[0]);
+				return operations[components[0].Value].Parse(components.Skip(1), components[0].Value, arguments);
 			}
 		}
 	}
