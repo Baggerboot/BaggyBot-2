@@ -25,11 +25,9 @@ namespace BaggyBot
 
 		// Any message prefixed with this character will be interpreted as a command
 		public const string CommandIdentifier = "-";
-		// The versioning system used is Revision.Update.Bugfix, where 'revision' means a large revision of the application's inner workings,
-		// often coupled with a change in the environment that the bot functions in. Example: changing the way the database is structured,
-		// changing the platforms the bot can run on, etc.
+		// The versioning system used is Milestone.Update.Bugfix, where 'milestone' means a significant revision or update to the bot.
 		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
-		// Any update which doesn't add new features, and therefore only fixes issues with the bot or its dependencies is considered a bugfix.
+		// Any update which doesn't add new features, and therefore only fixes issues or adds minor improvements counts as a 'bugfix'.
 		public const string Version = "5.0-rc1";
 		// Version number of the database. This is checked against the 'version' key in the metadata table,
 		// and a database upgrade is attempted if they do not match.
