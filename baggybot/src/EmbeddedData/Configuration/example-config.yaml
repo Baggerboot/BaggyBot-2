@@ -1,5 +1,14 @@
-# Example configuration file for BaggyBot
+# Example configuration file for BaggyBot. 
 
+# Many configuration options can be left out, 
+# in which case their default values will be used.
+# For a full overview of all available options, see 
+# https://github.com/Baggykiin/BaggyBot-2/blob/master/baggybot/src/Configuration/Configuration.cs
+# Note that the properties in these classes are PascalCase, 
+# and get converted to hyphenated YAML properties.
+
+# A backend is a storage medium in which BaggyBot can store its statistics.
+# Currently, only PostgreSQL databases are supported.
 backends:
   - &default
     connection-string: "Host=127.0.0.1;Database=baggybot;Username=baggybot;Password=baggybot;"
@@ -16,31 +25,38 @@ interpreters:
   # If set to false, there will not be any way to enable them at runtime.
   enabled: true
   # The security level the interpreters will be set to on startup.
-  # Can be either `block`, `notify` or `allow`.
-  # `block` blocks all non-operators from using them.
-  # `notify` allows anyone to use them, but notifies the operators
+  # Can be either `Block`, `Notify` or `Allow`.
+  # `Block` blocks all non-operators from using them.
+  # `Notify` allows anyone to use them, but notifies the operators
   # if a non-operator user uses them.
-  # `allow` allows anyone to use them.
+  # `Allow` allows anyone to use them.
+  # Please be aware that these values are case-sensitive.
   # Regardless of this setting, no one except bot operators will ever be
-  # able to use the interpreters inside query channels.
+  # able to use the interpreters inside query (user-to-user, "PM") channels.
   startup-security-level: Block
 
+# API integrations, used by some of BaggyBot's commands. If you'd like to use
+# these APIs, you should generate app IDs for them, and enter them here.
 integrations:
   wolfram-alpha:
     app-id: ""
 
 logging:
   log-file: baggybot.log
+  # Set to true if you want log messages with the Debug log level to be logged
+  # to standard output. Regardless of this setting, debug messages are always
+  # logged to the log file.
   show-debug: true
 
 # An identity is a set of credentials BaggyBot uses to connect to an IRC server
-# The `ident`, `name` and `real-name` tags do not have to be specified. 
-# If they are unspecified, default values will be used.
-identities: 
+identities:
   - &baggybot 
     ident: Dredger
     nick: BaggyBot
     real-name: BaggyBot
+    # Set to false if you don't want the bot to set the +i flag on itself.
+    # Defaults to true if unspecified.
+    hidden: true
 
 # An operator match is a set of rules that will be matched against a user
 # in order to determine whether they're allowed to use operator commands.
@@ -54,32 +70,38 @@ identities:
 # so be sure to specify at least some rules, unless you want everyone to have
 # operator rights.
 operators:
-  - &baggerboot
-    nick: baggerboot
-    ident: ~Baggykiin
-    host: hubble.jgeluk.net
+  - &you
+    nick: yourNickname
+    ident: ~yourIdent
+    host: 127.0.0.1
     uid: 1
-  - &johan
-    nick: johan
-    ident: johan
+  - &your-friend
+    nick: friendsNickname
+    ident: ~friendsIdent
+    host: unafilliated/yourFriend
+    uid: 2
 
 # A list of servers BaggyBot should connect to on startup.
+# An example configuration for espernet is provided here.
 servers:
-  - host: irc.esper.net
+  - 
+    # A unique name used for internal identification
+    server-name: espernet
+    host: irc.esper.net
     port: 6697
-	# A unique name used for internal identification
-	server-name EsperNet
-    use-tls: true
-	use-unicode: true
-    verify-certificate: true
-	backend: *default
-    identity: *baggybot
-    auto-join-channels: ["#baggy"]
 
-    operators: [*baggerboot]
+    backend: *default
+    identity: *baggybot
+    operators: [*you, *your-friend]
+    auto-join-channels: ["#baggybot"]
+    compat-modes: []
+
+    use-tls: true
+    use-unicode: true
+    use-nickserv: true
+    verify-certificate: true
 
 # Currently not used.
 metadata:
   bot-version: 4.1.6
   config-version: 0.1
-
