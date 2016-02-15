@@ -8,7 +8,7 @@ namespace BaggyBot.Commands
 		public override string Usage => "";
 		public override string Description => "";
 
-		public void Use(CommandArgs command)
+		public override void Use(CommandArgs command)
 		{
 
 		}

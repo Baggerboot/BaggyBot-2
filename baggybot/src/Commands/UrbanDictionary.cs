@@ -27,50 +27,36 @@ namespace BaggyBot.Commands
 			var text = new StreamReader(response.GetResponseStream()).ReadToEnd();
 			dynamic obj = JObject.Parse(text);
 
-			string name;
-			string definition;
-			var example = string.Empty;
-
-			name = (string)obj.list[0].word;
-
-			try
+			if (obj.result_type == "no_results")
 			{
-				definition = (string)obj.list[0].definition;
+				command.Reply("no results found.");
 			}
-			catch (Exception)
+			else
 			{
-				command.Reply("unable to find a definition for \"{0}\"", command.FullArgument);
-				return;
-			}
+				string name = obj.list[0].word;
+				string definition = obj.list[0].definition;
+				string example = obj.list[0].example;
+				string permalink = obj.list[0].permalink;
+				name = Regex.Replace(name, @"\t|\n|\r", " ");
+				definition = Regex.Replace(definition, @"\t|\n|\r", " ");
+				example = Regex.Replace(example, @"\t|\n|\r", " ");
 
-			try
-			{
-				example = (string)obj.list[0].example;
-			}
-			catch (Exception)
-			{
-				// ignored
-			}
+				if (definition.Length > 255)
+				{
+					definition = definition.Substring(0, 250);
+					definition += " (...)";
+				}
 
-			name = Regex.Replace(name, @"\t|\n|\r", " ");
-			definition = Regex.Replace(definition, @"\t|\n|\r", " ");
-			example = Regex.Replace(example, @"\t|\n|\r", " ");
+				if (example.Length > 255)
+				{
+					example = example.Substring(0, 250);
+					example += " (...)";
+				}
+				var exampleString = string.IsNullOrWhiteSpace(example) ? string.Empty : $" - \u001d{example}\u001d";
 
-			if (definition.Length > 255)
-			{
-				definition = definition.Substring(0, 250);
-				definition += " (...)";
+
+				command.ReturnMessage("\u0002{0}\u0002: {1}{2} - {3}", name, definition, exampleString, permalink);
 			}
-
-			if (example.Length > 255)
-			{
-				example = example.Substring(0, 250);
-				example += " (...)";
-			}
-			var exampleString = string.IsNullOrWhiteSpace(example) ? string.Empty : $" - \u001d{example}\u001d";
-
-			var permalink = (string) obj.list[0].permalink;
-			command.ReturnMessage("\u0002{0}\u0002: {1}{2} - {3}", name, definition, exampleString, permalink);
 		}
 	}
 }
