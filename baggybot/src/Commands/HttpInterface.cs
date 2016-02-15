@@ -30,7 +30,6 @@ namespace BaggyBot.Commands
 				client.Headers.Add("User-Agent", $"BaggyBot/{Bot.Version} ({Environment.OSVersion}) IRC stats bot");
 				try
 				{
-					// TODO: Check whether uploading data with a GET request can be considered valid
 					if (method == "GET")
 					{
 						response = client.DownloadString(url);
