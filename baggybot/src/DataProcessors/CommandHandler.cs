@@ -76,7 +76,7 @@ namespace BaggyBot.DataProcessors
 		private void ProcessCommand(CommandArgs cmdInfo)
 		{
 			// Inject bot information, but do not return.
-			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(cmdInfo.Command.ToLower()))
+			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(cmdInfo.Command.ToLower()) && cmdInfo.Args.Length == 0)
 			{
 				cmdInfo.ReturnMessage(string.Format(Messages.CmdGeneralInfo, Bot.Version));
 			}
