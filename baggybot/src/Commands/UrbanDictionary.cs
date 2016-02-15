@@ -69,7 +69,8 @@ namespace BaggyBot.Commands
 			}
 			var exampleString = string.IsNullOrWhiteSpace(example) ? string.Empty : $" - \u001d{example}\u001d";
 
-			command.ReturnMessage("\u0002{0}\u0002: {1}{2} - http://urbandictionary.com/{3}", name, definition, exampleString, term);
+			var permalink = (string) obj.list[0].permalink;
+			command.ReturnMessage("\u0002{0}\u0002: {1}{2} - {3}", name, definition, exampleString, permalink);
 		}
 	}
 }
