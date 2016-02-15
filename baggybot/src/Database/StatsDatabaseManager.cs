@@ -241,7 +241,7 @@ namespace BaggyBot.Database
 				};
 
 				sqlConnector.Insert(cred);
-				Logger.Log(this, "Addecd credentials row for " + user.Nick + ".");
+				Logger.Log(this, $"Added credentials row for {user.ToString()}, (ns: {nickserv}) (uid: {uid}).");
 
 				if ((from n in sqlConnector.Users
 					 where n.Id == uid
@@ -256,7 +256,7 @@ namespace BaggyBot.Database
 					name.Name = user.Nick;
 
 					sqlConnector.Insert(name);
-					Logger.Log(this, "Added name row for " + user.Nick + ".");
+					Logger.Log(this, $"Added name row for {user.Nick}, uid {uid}.");
 
 					ret = uid;
 				}
@@ -370,7 +370,7 @@ namespace BaggyBot.Database
 				// Look for a nickname match first
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 				var results = from n in sqlConnector.Users
-							  where string.Equals(n.Name, nick, StringComparison.InvariantCultureIgnoreCase)
+							  where n.Name.ToLower() == nick.ToLower()
 							  select n.Id;
 
 				var count = results.Count();
@@ -600,7 +600,8 @@ namespace BaggyBot.Database
 					}
 					{
 						var nickserv = GetNickserv(uids[0]);
-						AddCredCombination(new IrcUser(user.Client, newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
+						Logger.Log(this, $"Adding new credentials row for nick change: {user.Nick} -> {newNick}");
+                        AddCredCombination(new IrcUser(user.Client, newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
 					}
 				}
 				else if (count == 1)
@@ -728,18 +729,19 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
-		public void SetNsLogin(int uid, string nickserv)
+		public int SetNsLogin(int uid, string nickserv)
 		{
+			int changes;
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
-				var cred = (from c in sqlConnector.UserCredentials
-							where c.UserId == uid
-							select c).First();
-				cred.NickservLogin = nickserv;
-				Update(cred);
+
+				changes = sqlConnector.UserCredentials.Where(cred => cred.UserId == uid)
+					.Set(cred => cred.NickservLogin, nickserv)
+					.Update();
 			}
 			lockObj.LockMessage = "None";
+			return changes;
 		}
 
 		public DateTime? GetLastQuotedLine(int userId)
