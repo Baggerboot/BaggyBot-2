@@ -1,6 +1,11 @@
 
 BaggyBot is an IRC bot built for collecting statistics in an IRC channel.
-In addition, it provides various other features to the users.
+He also has an elaborate command system, providing features such as searching
+Wolfram Alpha and Urban Dictionary, interactive interpreters for Python and C#,
+performing DNS queries, and many others, allowing him to additionally function
+as a general 'utility' IRC bot.
+He also has a Slack compatibility mode, allowing him to connect to a Slack IRC
+server.
 
 Features
 --------
