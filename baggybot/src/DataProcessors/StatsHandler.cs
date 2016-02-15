@@ -36,24 +36,19 @@ namespace BaggyBot.DataProcessors
 		}
 		public void ProcessMessage(IrcMessage message)
 		{
+			// Can't save statistics if we don't have a DB connection!
 			if (message.Client.StatsDatabase.ConnectionState == ConnectionState.Closed) return;
 
-			Logger.Log(this, "Processing message for " + message.Sender.Nick);
-
-			int userId = message.Client.StatsDatabase.GetIdFromUser(message.Sender);
-
+			var userId = message.Client.StatsDatabase.GetIdFromUser(message.Sender);
+			Logger.Log(this, $"Processing message for {message.Sender.Nick} (uid: {userId})");
 			AddMessageToIrcLog(message, userId);
 
-			var words = WordTools.GetWords(message.Message);
-
 			if (message.Action)
-			{
 				message.Client.StatsDatabase.IncrementActions(userId);
-			}
 			else
-			{
 				message.Client.StatsDatabase.IncrementLineCount(userId);
-			}
+
+			var words = WordTools.GetWords(message.Message);
 			message.Client.StatsDatabase.IncrementWordCount(userId, words.Count);
 
 			message.Client.StatsDatabase.IncrementVar("global_line_count");
