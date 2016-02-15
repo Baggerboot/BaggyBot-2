@@ -40,7 +40,10 @@ namespace BaggyBot.Commands
 					throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
 				case "uid":
 					var uid = command.Client.StatsDatabase.GetIdFromNick(result.Arguments["user"]);
-					command.Reply("Your user Id is " + uid);
+					if (uid == -2)
+						command.Reply($"I don't know a user with {result.Arguments["user"]} as their primary name");
+					else
+						command.Reply($"the user Id belonging to {result.Arguments["user"]} is {uid}");
 					break;
 				case "users":
 					var channel = result.Arguments["channel"];
