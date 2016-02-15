@@ -187,9 +187,10 @@ namespace BaggyBot
 
 		public static void Main(string[] args)
 		{
-			var parser = new CommandParser(new Operation()
+			// TODO: parse program arguments
+			/*var parser = new CommandParser(new Operation()
 				.AddKey("config", "baggybot-settings.yaml", 'c')
-				.AddKey("colours", "Ansi", 'C'));
+				.AddKey("colours", "Ansi", 'C'));*/
 
 			var result = ConfigManager.Load("baggybot-settings.yaml");
 			switch (result)

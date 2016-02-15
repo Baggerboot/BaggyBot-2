@@ -10,7 +10,6 @@ namespace BaggyBot.Collections.Generic
 	/// <typeparam name="T"></typeparam>
 	internal class FixedSizeConcurrentQueue<T> : ConcurrentQueue<T>
 	{
-		private readonly object syncObject = new object();
 		public int Size { get; }
 
 		public FixedSizeConcurrentQueue(int size)

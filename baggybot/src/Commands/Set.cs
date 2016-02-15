@@ -36,14 +36,14 @@ namespace BaggyBot.Commands
 					}
 					break;
 				case "-s":
-					string data;
+					/*string data;
 					if (command.Args.Length > 3)
 					{
 						data = string.Join(" ", command.Args.Skip(2));
 					}
 					else {
 						data = command.Args[2];
-					}
+					}*/
 
 					throw new NotImplementedException("Runtime modification of the settings file is not supported yet.");
 

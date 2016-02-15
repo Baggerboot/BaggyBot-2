@@ -8,12 +8,6 @@ namespace BaggyBot.Commands
 		public override string Usage => "[--no-dl]";
 		public override string Description => "Downloads a new update and makes me restart to apply it.";
 
-		private readonly Bot bot;
-		public Update(Bot bot)
-		{
-			this.bot = bot;
-		}
-
 		public override void Use(CommandArgs command)
 		{
 			// TODO: Implemenent self-updating

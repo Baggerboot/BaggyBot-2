@@ -17,8 +17,6 @@ namespace BaggyBot.Configuration
 			NewFileCreated
 		}
 
-		private static string fileName;
-
 		public static Configuration Config { get; private set; } = new Configuration();
 		//private static Configuration ConfigOnDisk;
 
@@ -42,7 +40,6 @@ namespace BaggyBot.Configuration
 
 				return LoadResult.NewFileCreated;
 			}
-			ConfigManager.fileName = fileName;
 
 			var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention(), ignoreUnmatched: false);
 			using (var reader = File.OpenText(fileName))

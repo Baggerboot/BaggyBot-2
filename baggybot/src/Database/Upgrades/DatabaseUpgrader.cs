@@ -36,7 +36,7 @@ namespace BaggyBot.Database.Upgrades
 		private string UpgradeFrom1_2()
 		{
 			var miscData = connection.GetTable<MiscData>();
-			var res = miscData
+			miscData
 				.Where(s => s.Type == "rem")
 				.Set(s => s.Value, s => "say " + s.Value)
 				.Set(s => s.Type, "alias")

@@ -8,12 +8,12 @@ namespace BaggyBot.Commands
 		public override string Usage => "";
 		public override string Description => "Regenerates the graphs on the stats page.";
 
-		private const double MinWaitTime = 10; // In seconds
-		private DateTime lastUsage;
+		//private const double MinWaitTime = 10; // In seconds
+		//private DateTime lastUsage;
 		
 		public RegenerateGraphs()
 		{
-			lastUsage = DateTime.Now.AddSeconds(MinWaitTime * -1);
+			//lastUsage = DateTime.Now.AddSeconds(MinWaitTime * -1);
 		}
 
 		public override void Use(CommandArgs command)
