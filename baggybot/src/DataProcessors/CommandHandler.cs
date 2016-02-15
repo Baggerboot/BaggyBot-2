@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 using BaggyBot.Commands;
 using BaggyBot.Configuration;
-using BaggyBot.Database;
 using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using BaggyBot.Monitoring;
 
 namespace BaggyBot.Commands
 {

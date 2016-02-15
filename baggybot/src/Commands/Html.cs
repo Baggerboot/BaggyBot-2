@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {

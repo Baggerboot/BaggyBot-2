@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BaggyBot.Configuration;
+﻿using BaggyBot.Configuration;
 using BaggyBot.Database;
-using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands.Interpreters
 {

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using BaggyBot.Monitoring;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;

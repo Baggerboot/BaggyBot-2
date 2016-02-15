@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using BaggyBot.Commands.Interpreters.Brainfuck;
 
 namespace BaggyBot.Commands

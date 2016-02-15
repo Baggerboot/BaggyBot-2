@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Timers;
-using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Monitoring.Diagnostics
 {

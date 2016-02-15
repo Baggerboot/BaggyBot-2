@@ -2,7 +2,6 @@
 using System;
 using System.Data;
 using System.Linq;
-using BaggyBot.Database;
 using BaggyBot.Monitoring;
 using IRCSharp.IRC;
 using IrcMessage = BaggyBot.MessagingInterface.IrcMessage;

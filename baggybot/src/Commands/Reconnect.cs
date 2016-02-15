@@ -1,6 +1,4 @@
-﻿using BaggyBot.DataProcessors;
-
-namespace BaggyBot.Commands
+﻿namespace BaggyBot.Commands
 {
 	internal class Reconnect : Command
 	{

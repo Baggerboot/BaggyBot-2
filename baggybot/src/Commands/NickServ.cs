@@ -1,6 +1,4 @@
-﻿using BaggyBot.Database;
-using BaggyBot.DataProcessors;
-using BaggyBot.EmbeddedData;
+﻿using BaggyBot.EmbeddedData;
 using BaggyBot.Tools;
 
 namespace BaggyBot.Commands

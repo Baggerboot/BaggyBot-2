@@ -1,9 +1,5 @@
-﻿using System;
-using System.Linq;
-using BaggyBot.Database;
-using BaggyBot.DataProcessors;
+﻿using System.Linq;
 using BaggyBot.Monitoring;
-using IRCSharp;
 
 namespace BaggyBot.Commands
 {

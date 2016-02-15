@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 /*using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;*/
-using Microsoft.CSharp.RuntimeBinder;
 
 namespace BaggyBot.Commands.Interpreters.Roslyn
 {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BaggyBot.Commands.Interpreters.Brainfuck
+﻿namespace BaggyBot.Commands.Interpreters.Brainfuck
 {
 	internal class MemoryCell
 	{

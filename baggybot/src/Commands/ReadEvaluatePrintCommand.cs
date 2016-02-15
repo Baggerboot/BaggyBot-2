@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using BaggyBot.Configuration;
-using BaggyBot.DataProcessors;
 using BaggyBot.Tools;
 
 namespace BaggyBot.Commands

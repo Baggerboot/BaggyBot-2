@@ -1,7 +1,5 @@
 ﻿using System;
 using BaggyBot.CommandParsing;
-using BaggyBot.Database;
-using BaggyBot.DataProcessors;
 
 namespace BaggyBot.Commands
 {

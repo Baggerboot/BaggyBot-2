@@ -1,5 +1,4 @@
-﻿using BaggyBot.DataProcessors;
-using BaggyBot.Tools;
+﻿using BaggyBot.Tools;
 using IronPython.Hosting;
 using IronPython.Runtime;
 using IronPython.Runtime.Exceptions;
@@ -11,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using BaggyBot.Database;
 
 namespace BaggyBot.Commands
 {

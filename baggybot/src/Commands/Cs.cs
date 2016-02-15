@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using BaggyBot.Commands.Interpreters;
 using BaggyBot.Commands.Interpreters.CSharp;
-using BaggyBot.DataProcessors;
 using BaggyBot.Tools;
 using Mono.CSharp;
 

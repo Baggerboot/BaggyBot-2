@@ -1,17 +1,10 @@
 ﻿using BaggyBot.Configuration;
-using BaggyBot.Database;
 using BaggyBot.DataProcessors;
 using BaggyBot.Tools;
-using IRCSharp;
-using IRCSharp.IrcCommandProcessors.Quirks;
 using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 using BaggyBot.CommandParsing;
-using BaggyBot.Commands.Interpreters;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Monitoring.Diagnostics;

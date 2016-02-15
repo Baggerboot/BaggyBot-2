@@ -1,7 +1,4 @@
-﻿using BaggyBot.Database;
-using BaggyBot.DataProcessors;
-
-namespace BaggyBot.Commands
+﻿namespace BaggyBot.Commands
 {
 	internal class Search : Command
 	{

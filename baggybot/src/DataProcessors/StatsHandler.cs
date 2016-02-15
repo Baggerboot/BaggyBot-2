@@ -9,7 +9,6 @@ using BaggyBot.Database;
 using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
-using Mono.CSharp;
 
 #if postgresql
 

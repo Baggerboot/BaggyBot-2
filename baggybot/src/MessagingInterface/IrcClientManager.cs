@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
-using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 using BaggyBot.Configuration;
@@ -12,7 +11,6 @@ using BaggyBot.DataProcessors;
 using BaggyBot.Monitoring;
 using IRCSharp;
 using IRCSharp.IrcCommandProcessors.Quirks;
-using Mono.CSharp;
 
 namespace BaggyBot.MessagingInterface
 {

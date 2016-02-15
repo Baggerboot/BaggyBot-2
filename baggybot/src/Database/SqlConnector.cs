@@ -1,5 +1,4 @@
-﻿using BaggyBot.Configuration;
-using BaggyBot.Database.Model;
+﻿using BaggyBot.Database.Model;
 using BaggyBot.Database.Upgrades;
 using LinqToDB;
 using LinqToDB.Data;
