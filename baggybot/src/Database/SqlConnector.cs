@@ -52,10 +52,6 @@ namespace BaggyBot.Database
 			connection.Insert(row);
 		}
 
-		public void SubmitChanges()
-		{
-		}
-
 		private void HandleConnectionFailure()
 		{
 			internalState = ConnectionState.Closed;
@@ -230,7 +226,7 @@ namespace BaggyBot.Database
 			return data;
 		}
 
-		public void Update<T>(T match)
+		public void Update<T>(T match) where T:Poco
 		{
 			connection.Update(match);
 		}
