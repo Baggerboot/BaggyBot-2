@@ -10,7 +10,7 @@
 
 		public void InformUsage(CommandArgs cmd)
 		{
-			cmd.Reply($"usage: {Bot.CommandIdentifier}{cmd.Command} {Usage}");
+			cmd.Reply($"usage: {Bot.CommandIdentifier}{cmd.Command} {Usage} -- {Description}");
 		}
 	}
 }
