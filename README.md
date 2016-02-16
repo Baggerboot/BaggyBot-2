@@ -43,7 +43,8 @@ want to use `xbuild` instead), you'll have to build `baggybot-mono.sln` instead,
 task is removed, as xbuild does not support this task. 
 
 An easy (linux-only) way to run this task is by running `build.sh`, which generates the right
-version number, inserts it into `Version.cs`, and then builds `baggybot-mono.sln` with xbuild as normal.
+version number, inserts it into `Version.cs`, and then builds `baggybot-mono.sln` with xbuild under
+the release configuration.
 
 Now you can build the project, running either `xbuild` or `msbuild`, depending on whether you want
 to build the project using the Mono or the Microsoft compiler. No additional arguments are required.
