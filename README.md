@@ -40,9 +40,10 @@ you'll have to restore all referenced packages first. In the repository root, ru
 On Windows, you can simply build the project with `msbuild`. On Linux, however (and Windows too, if you
 want to use `xbuild` instead), you'll have to build `baggybot-mono.sln` instead, which references
 `baggybot-mono.csproj`, which differs from `baggybot.csproj` in that the version number generation
-task is removed, as xbuild does not support this task. An easy (linux-only) way to run this task is by
-running `build.sh`, which generates the right version number, inserts it into `Version.cs`, and then
-builds `baggybot-mono.sln` with xbuild as normal.
+task is removed, as xbuild does not support this task. 
+
+An easy (linux-only) way to run this task is by running `build.sh`, which generates the right
+version number, inserts it into `Version.cs`, and then builds `baggybot-mono.sln` with xbuild as normal.
 
 Now you can build the project, running either `xbuild` or `msbuild`, depending on whether you want
 to build the project using the Mono or the Microsoft compiler. No additional arguments are required.
