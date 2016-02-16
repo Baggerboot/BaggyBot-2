@@ -31,7 +31,7 @@ namespace BaggyBot.Commands
 			
 			dynamic result = obj.responseData.results[0];
 
-			command.ReturnMessage($"{result.url} - \x02{result.titleNoFormatting}\x02");
+			command.ReturnMessage($"{result.unescapedUrl} - \x02{result.titleNoFormatting}\x02");
 		}
 	}
 }
