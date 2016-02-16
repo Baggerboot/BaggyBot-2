@@ -53,7 +53,7 @@ TODO
    It is better to store help for each command in the class belonging to that command, and 
    have the help command grab the correct help information from that class.~~ **(Done)**
  - Create a generic argument parsing class to help with efficient, exception-less argument parsing
-   for commands (ideally this should be done for process arguments as well). **(Needs more work)**
+   for commands (ideally this should be done for process arguments as well). **(Testing)**
  - Improve user matching code. It should be less reluctant to try a NickServ match, and more conservative
    when determining whether a user matches another, already known user.
  - Better finetuning of permissions. Allow specifying multiple bot operators, and allow specifying permissions
