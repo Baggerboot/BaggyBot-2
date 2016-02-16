@@ -20,6 +20,11 @@ namespace BaggyBot.Commands
 		public override void Use(CommandArgs command)
 		{
 			var query = command.FullArgument;
+			if (query == null)
+			{
+				InformUsage(command);
+				return;
+			}
 
 			var rq = WebRequest.Create($@"https://ajax.googleapis.com/ajax/services/search/web?v=1.0&q={Uri.EscapeDataString(query)}&rsz=1&hl=en");
 			dynamic obj;
@@ -28,7 +33,7 @@ namespace BaggyBot.Commands
 				var text = new StreamReader(response.GetResponseStream()).ReadToEnd();
 				obj = JObject.Parse(text);
 			}
-			
+
 			dynamic result = obj.responseData.results[0];
 
 			command.ReturnMessage($"{result.url} - \x02{WebUtility.HtmlDecode((string)result.titleNoFormatting)}\x02");

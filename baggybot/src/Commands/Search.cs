@@ -12,6 +12,12 @@ namespace BaggyBot.Commands
 		
 		public override void Use(CommandArgs command)
 		{
+			if(command.FullArgument == null)
+			{
+				InformUsage(command);
+				return;
+			}
+
 			var parser = new CommandParser(new Operation().AddKey("max-results", "1", 'n').AddRestArgument());
 
 			var result = parser.Parse(command.FullArgument);
