@@ -81,8 +81,16 @@ namespace BaggyBot.Commands
 					var fromCurrency = match.Groups[2].Value.ToUpper();
 					var toCurrency = match.Groups[3].Value.ToUpper();
 
-					if (!exchangeRates.ContainsKey(toCurrency))
+					if(toCurrency != "EUR" && !exchangeRates.ContainsKey(toCurrency))
+					{
 						command.Reply($"I don't know the exchange rate of {toCurrency}");
+						return;
+					}
+					if (fromCurrency != "EUR" && !exchangeRates.ContainsKey(fromCurrency))
+					{
+						command.Reply($"I don't know the exchange rate of {fromCurrency}");
+						return;
+					}
 					decimal result;
 					// The base currency is EUR, so if we're converting to or from EUR, no additional conversion is necessary.
 					if (fromCurrency == "EUR")
@@ -96,8 +104,6 @@ namespace BaggyBot.Commands
 					// First convert from the source currency to EUR, then convert from EUR to the target currency.
 					else
 					{
-						if (!exchangeRates.ContainsKey(fromCurrency))
-							command.Reply($"I don't know the exchange rate of {fromCurrency}");
 						result = fromAmount / exchangeRates[fromCurrency] * exchangeRates[toCurrency];
 					}
 					command.Reply($"{fromAmount} {fromCurrency} = {result:F} {toCurrency}");
