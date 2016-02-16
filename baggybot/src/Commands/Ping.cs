@@ -10,7 +10,7 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "[server] [count]";
-		public override string Description => "Returns \"Pong!\" when no arguments are given. When [server] is specified, tries to ping that IrcServer once, or as many times as specified in [count].";
+		public override string Description => "Returns \"Pong!\" when no arguments are given. When [server] is specified, tries to ping that server once, or as many times as specified in [count].";
 
 		private string Colour(int? code)
 		{
