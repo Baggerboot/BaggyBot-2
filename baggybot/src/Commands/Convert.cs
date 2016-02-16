@@ -47,7 +47,7 @@ namespace BaggyBot.Commands
 					exchangeRates[prop.Name] = (decimal)prop.Value;
 				}
 				Logger.Log(this, $"Exchange rates for {exchangeRates.Count + 1} currencies have been updated.");
-            }
+			}
 			catch (Exception e)
 			{
 				Logger.LogException(this, e, "updating the currency exchange rates");
@@ -84,17 +84,21 @@ namespace BaggyBot.Commands
 					if (!exchangeRates.ContainsKey(toCurrency))
 						command.Reply($"I don't know the exchange rate of {toCurrency}");
 					decimal result;
-					// The base currency is EUR, so if we're converting from EUR, no additional conversion is necessary.
+					// The base currency is EUR, so if we're converting to or from EUR, no additional conversion is necessary.
 					if (fromCurrency == "EUR")
 					{
-						result = fromAmount*exchangeRates[toCurrency];
+						result = fromAmount * exchangeRates[toCurrency];
+					}
+					else if (toCurrency == "EUR")
+					{
+						result = fromAmount / exchangeRates[fromCurrency];
 					}
 					// First convert from the source currency to EUR, then convert from EUR to the target currency.
 					else
 					{
 						if (!exchangeRates.ContainsKey(fromCurrency))
 							command.Reply($"I don't know the exchange rate of {fromCurrency}");
-						result = fromAmount/exchangeRates[fromCurrency]*exchangeRates[toCurrency];
+						result = fromAmount / exchangeRates[fromCurrency] * exchangeRates[toCurrency];
 					}
 					command.Reply($"{fromAmount} {fromCurrency} = {result:F} {toCurrency}");
 				}
