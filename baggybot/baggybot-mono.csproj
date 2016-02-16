@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{82D7AE98-082C-4E8B-86A1-ADE631720E55}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BaggyBot</RootNamespace>
+    <AssemblyName>baggybot</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Background</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>false</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>true</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AllowedReferenceRelatedFileExtensions>
+      <!-- Prevent default XML and PDB files copied to output in RELEASE.
+           Only *.allowedextension files will be included, which doesn't exist in my case.
+       -->
+      .allowedextension
+    </AllowedReferenceRelatedFileExtensions>
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>7001F16F4765BFC676CB6C4B637048F7E3715E98</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>BaggyBot 2.0_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="IronPython, Version=2.7.5.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.5\lib\Net45\IronPython.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IronPython.Modules, Version=2.7.5.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.5\lib\Net45\IronPython.Modules.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="linq2db, Version=1.0.7.3, Culture=neutral, PublicKeyToken=f19f8aed7feff67e, processorArchitecture=MSIL">
+      <HintPath>..\packages\linq2db.1.0.7.3\lib\net45\linq2db.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.5\lib\Net45\Microsoft.Dynamic.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.5\lib\Net45\Microsoft.Scripting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.AspNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.5\lib\Net45\Microsoft.Scripting.AspNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.5\lib\Net45\Microsoft.Scripting.Metadata.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.CSharp.4.0.0.143\lib\4.5\Mono.CSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Npgsql, Version=3.0.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="YamlDotNet, Version=3.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.3.8.0\lib\net35\YamlDotNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\Commands\GoogleSearch.cs" />
+    <Compile Include="src\Configuration\Backend.cs" />
+    <Compile Include="src\Configuration\Configuration.cs" />
+    <Compile Include="src\Configuration\Identity.cs" />
+    <Compile Include="src\Configuration\Integrations.cs" />
+    <Compile Include="src\Configuration\Interpreters.cs" />
+    <Compile Include="src\Configuration\Logging.cs" />
+    <Compile Include="src\Configuration\Metadata.cs" />
+    <Compile Include="src\Configuration\Operator.cs" />
+    <Compile Include="src\Configuration\Quotes.cs" />
+    <Compile Include="src\Configuration\ServerCfg.cs" />
+    <Compile Include="src\Configuration\WolframAlpha.cs" />
+    <Compile Include="src\CommandParsing\CommandComponent.cs" />
+    <Compile Include="src\DataProcessors\IMessageHandler.cs" />
+    <Compile Include="src\MessagingInterface\IrcClientManager.cs" />
+    <Compile Include="src\MessagingInterface\IrcMessage.cs" />
+    <Compile Include="src\MessagingInterface\IrcClientWrapper.cs" />
+    <Compile Include="src\MessagingInterface\IrcUser.cs" />
+    <Compile Include="src\Monitoring\Diagnostics\BotDiagnostics.cs" />
+    <Compile Include="src\Collections\Generic\FixedSizeConcurrentQueue.cs" />
+    <Compile Include="src\CommandParsing\ArgumentList.cs" />
+    <Compile Include="src\CommandParsing\Flag.cs" />
+    <Compile Include="src\CommandParsing\InvalidCommandException.cs" />
+    <Compile Include="src\CommandParsing\NonexistentOptionException.cs" />
+    <Compile Include="src\CommandParsing\OperationResult.cs" />
+    <Compile Include="src\CommandParsing\CommandParser.cs" />
+    <Compile Include="src\CommandParsing\Option.cs" />
+    <Compile Include="src\CommandParsing\Key.cs" />
+    <Compile Include="src\CommandParsing\Operation.cs" />
+    <Compile Include="src\CommandParsing\OptionType.cs" />
+    <Compile Include="src\CommandParsing\Argument.cs" />
+    <Compile Include="src\Commands\Alias.cs" />
+    <Compile Include="src\Commands\Bf.cs" />
+    <Compile Include="src\Commands\Convert.cs" />
+    <Compile Include="src\Commands\Cs.cs" />
+    <Compile Include="src\Commands\HttpInterface.cs" />
+    <Compile Include="src\Commands\Interpreters\Brainfuck\BrainfuckInterpreter.cs" />
+    <Compile Include="src\Commands\Interpreters\Brainfuck\MemoryCell.cs" />
+    <Compile Include="src\Commands\Interpreters\CodeFormatter.cs" />
+    <Compile Include="src\Commands\Interpreters\InterpreterContext.cs" />
+    <Compile Include="src\Commands\Interpreters\Roslyn\RoslynInterpreter.cs" />
+    <Compile Include="src\Commands\Notify.cs" />
+    <Compile Include="src\Commands\ProducerConsumerStream.cs" />
+    <Compile Include="src\Commands\Py.cs" />
+    <Compile Include="src\Commands\ReadEvaluatePrintCommand.cs" />
+    <Compile Include="src\Commands\Reconnect.cs" />
+    <Compile Include="src\Commands\ResolveReverse.cs" />
+    <Compile Include="src\Commands\RoslynExec.cs" />
+    <Compile Include="src\Commands\Search.cs" />
+    <Compile Include="src\Commands\Sql.cs" />
+    <Compile Include="src\Commands\Topics.cs" />
+    <Compile Include="src\Commands\Update.cs" />
+    <Compile Include="src\Commands\Uptime.cs" />
+    <Compile Include="src\Commands\UrbanDictionary.cs" />
+    <Compile Include="src\Commands\Wikipedia.cs" />
+    <Compile Include="src\Commands\WolframAlpha.cs" />
+    <Compile Include="src\Database\Model\Metadata.cs" />
+    <Compile Include="src\Database\Model\MiscData.cs" />
+    <Compile Include="src\Database\Model\Poco.cs" />
+    <Compile Include="src\Database\Model\UsedEmoticon.cs" />
+    <Compile Include="src\Database\Model\IrcLog.cs" />
+    <Compile Include="src\Database\Model\KeyValuePair.cs" />
+    <Compile Include="src\Database\Model\Quote.cs" />
+    <Compile Include="src\Database\Model\LinkedUrl.cs" />
+    <Compile Include="src\Database\Model\UsedWord.cs" />
+    <Compile Include="src\Database\Model\User.cs" />
+    <Compile Include="src\Database\Model\UserCredential.cs" />
+    <Compile Include="src\Database\Model\UserStatistic.cs" />
+    <Compile Include="src\Database\Upgrades\DatabaseUpgrader.cs" />
+    <Compile Include="src\DataProcessors\CommandHandler.cs" />
+    <Compile Include="src\Commands\CommandArgs.cs" />
+    <Compile Include="src\Version.cs" />
+    <None Include="src\Commands\Example.cs" />
+    <Compile Include="src\Commands\Feature.cs" />
+    <Compile Include="src\Commands\Get.cs" />
+    <Compile Include="src\Commands\Help.cs" />
+    <Compile Include="src\Commands\Command.cs" />
+    <Compile Include="src\Commands\Join.cs" />
+    <Compile Include="src\Commands\NickServ.cs" />
+    <Compile Include="src\Commands\Part.cs" />
+    <Compile Include="src\Commands\PermissionLevel.cs" />
+    <Compile Include="src\Commands\Ping.cs" />
+    <Compile Include="src\Commands\RegenerateGraphs.cs" />
+    <Compile Include="src\Commands\Resolve.cs" />
+    <Compile Include="src\Commands\Say.cs" />
+    <Compile Include="src\Commands\Set.cs" />
+    <Compile Include="src\Commands\Shutdown.cs" />
+    <Compile Include="src\Commands\Snag.cs" />
+    <Compile Include="src\Commands\Version.cs" />
+    <Compile Include="src\ControlVariables.cs" />
+    <Compile Include="src\Database\StatsDatabaseManager.cs" />
+    <Compile Include="src\EmbeddedData\Emoticons.cs" />
+    <Compile Include="src\Configuration\ConfigManager.cs" />
+    <Compile Include="src\DataProcessors\IrcEventHandler.cs" />
+    <Compile Include="src\Monitoring\Logger.cs" />
+    <Compile Include="src\EmbeddedData\Messages.cs" />
+    <Compile Include="src\Monitoring\Diagnostics\PerformanceLogger.cs" />
+    <Compile Include="src\Bot.cs" />
+    <Compile Include="src\Monitoring\Diagnostics\PerformanceObject.cs" />
+    <Compile Include="src\Commands\Interpreters\CSharp\IrcReportPrinter.cs" />
+    <Compile Include="src\Database\LockObject.cs" />
+    <Compile Include="properties\AssemblyInfo.cs" />
+    <Compile Include="src\Database\SqlConnector.cs" />
+    <Compile Include="src\DataProcessors\StatsHandler.cs" />
+    <Compile Include="src\Tools\ExtensionMethods.cs" />
+    <Compile Include="src\Tools\MiscTools.cs" />
+    <Compile Include="src\Tools\PythonFunction.cs" />
+    <Compile Include="src\Tools\PythonTools.cs" />
+    <Compile Include="src\Tools\UserTools.cs" />
+    <Compile Include="src\Tools\WordTools.cs" />
+    <EmbeddedResource Include="src\EmbeddedData\Configuration\example-config.yaml" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets
+  below and uncomment it. Other similar extension points exist, see
+  Microsoft.Common.targets.-->
+  <ItemGroup>
+    <Folder Include="src\Commands\Interpreters\Python\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\csnetlib2\CsNetLib2\CsNetLib2.csproj">
+      <Project>{68170802-5de7-4f66-99c7-136b3c7dd93c}</Project>
+      <Name>CsNetLib2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ircsharp\IRCSharp\IRCSharp.csproj">
+      <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
+      <Name>IRCSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
