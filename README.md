@@ -46,11 +46,6 @@ An easy (linux-only) way to run this task is by running `build.sh`, which genera
 version number, inserts it into `Version.cs`, and then builds `baggybot-mono.sln` with xbuild under
 the release configuration.
 
-Now you can build the project, running either `xbuild` or `msbuild`, depending on whether you want
-to build the project using the Mono or the Microsoft compiler. No additional arguments are required.
-
-To build for the release configuration, run `(x/ms)build /p:Configuration=Release`
-
 TODO
 --------
 
