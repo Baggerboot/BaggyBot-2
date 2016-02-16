@@ -6,7 +6,7 @@ namespace BaggyBot.Commands
 	internal class Bf : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
-		public override string Usage => "<Brainfuck code>";
+		public override string Usage => "<brainfuck code>";
 		public override string Description => "Executes the given Brainfuck code and prints its result to IRC. The interpreter additionally supports reading/writing a single register with `r` and `w`.";
 
 		private readonly BrainfuckInterpreter interpreter = new BrainfuckInterpreter();
@@ -15,7 +15,7 @@ namespace BaggyBot.Commands
 		{
 			if (command.Args.Length == 0)
 			{
-				command.Reply("usage: -bf <brainfuck code>");
+				InformUsage(command);
 			}
 			else
 			{

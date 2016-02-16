@@ -24,7 +24,7 @@ namespace BaggyBot.Commands
 			}
 			else
 			{
-				command.Reply("usage: -alias <key> <command> [parameters ...]");
+				InformUsage(command);
 			}
 		}
 
