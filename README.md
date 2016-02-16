@@ -28,14 +28,21 @@ He's meant to be used with a script (or website) that retrieves those statistics
 
 Building
 --------
-The build process is fairly straighforward. However, because this repository uses submodules,
-you should, after cloning this repository, first set them up. Navigate to the repository root,
-then run `git submodule init` and then clone the submodule repositories with `git submodule update`.
+As this repository uses submodules, you should, after cloning this repository, first set them up. 
+Navigate to the repository root, then run `git submodule init` and then clone the submodule
+repositories with `git submodule update`.
 
 Occasionally, as the submodules get updated, you might have to run that command again.
 
 To build BaggyBot from VS, no additional steps are required. To build him from commandline,
 you'll have to restore all referenced packages first. In the repository root, run `nuget restore`.
+
+On Windows, you can simply build the project with `msbuild`. On Linux, however (and Windows too, if you
+want to use `xbuild` instead), you'll have to run build `baggybot-mono.sln` instead, which references
+`baggybot-mono.csproj`, which differs from `baggybot.csproj` in that the version number generation
+task is removed, as xbuild does not support this task. An easy (linux-only) way to run this task is by
+running `build.sh`, which generates the right version number, inserts it into `Version.cs`, and then
+builds `baggybot-mono.sln` with xbuild as normal.
 
 Now you can build the project, running either `xbuild` or `msbuild`, depending on whether you want
 to build the project using the Mono or the Microsoft compiler. No additional arguments are required.
