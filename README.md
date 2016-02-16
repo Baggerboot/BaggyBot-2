@@ -37,8 +37,8 @@ Occasionally, as the submodules get updated, you might have to run that command 
 To build BaggyBot from VS, no additional steps are required. To build him from commandline,
 you'll have to restore all referenced packages first. In the repository root, run `nuget restore`.
 
-On Windows, you can simply build the project with `msbuild`. On Linux, however (and Windows too, if you
-want to use `xbuild` instead), you'll have to build `baggybot-mono.sln` instead, which references
+On Windows, you can simply build the project with msbuild. On Linux, however (and Windows too, if you
+want to use xbuild instead), you'll have to build `baggybot-mono.sln` instead, which references
 `baggybot-mono.csproj`, which differs from `baggybot.csproj` in that the version number generation
 task is removed, as xbuild does not support this task. 
 
