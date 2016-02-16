@@ -47,7 +47,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AllowedReferenceRelatedFileExtensions>
-      <!-- Prevent default XML and PDB files copied to output in RELEASE. 
+      <!-- Prevent default XML and PDB files copied to output in RELEASE.
            Only *.allowedextension files will be included, which doesn't exist in my case.
        -->
       .allowedextension
@@ -211,6 +211,7 @@
     <Compile Include="src\Database\Upgrades\DatabaseUpgrader.cs" />
     <Compile Include="src\DataProcessors\CommandHandler.cs" />
     <Compile Include="src\Commands\CommandArgs.cs" />
+    <Compile Include="src\Version.cs" />
     <None Include="src\Commands\Example.cs" />
     <Compile Include="src\Commands\Feature.cs" />
     <Compile Include="src\Commands\Get.cs" />
@@ -275,13 +276,21 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
   </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
+  <!-- To modify your build process, add your task inside one of the targets
+  below and uncomment it. Other similar extension points exist, see
+  Microsoft.Common.targets.-->
   <Target Name="BeforeBuild">
+    <Exec Command="git describe --tags" ConsoleToMSBuild="true">
+        <Output TaskParameter="ConsoleOutput" PropertyName="BotVersion" />
+    </Exec>
+    <WriteLinesToFile
+    Condition=" '$(BotVersion)' != '' "
+    File="src\Version.cs"
+    Overwrite="True"
+    Lines="namespace BaggyBot{public sealed partial class Bot{public static string Version => &quot;$(BotVersion)&quot;%3b}}"/>
   </Target>
   <Target Name="AfterBuild">
   </Target>
-  -->
   <ItemGroup>
     <Folder Include="src\Commands\Interpreters\Python\" />
   </ItemGroup>

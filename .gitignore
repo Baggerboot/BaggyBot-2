@@ -1,3 +1,7 @@
+# Ignore the Version.cs file, as it is auto-generated on build:
+baggybot/src/Version.cs
+
+
 #################
 ## Visual Studio
 #################

@@ -8,10 +8,11 @@ using BaggyBot.CommandParsing;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Monitoring.Diagnostics;
+using System.Reflection;
 
 namespace BaggyBot
 {
-	public sealed class Bot : IDisposable
+	public sealed partial class Bot : IDisposable
 	{
 		// Manages multiple IRC Clients by handling events and forwarding messages
 		private readonly IrcClientManager ircClientManager;
@@ -25,10 +26,6 @@ namespace BaggyBot
 
 		// Any message prefixed with this character will be interpreted as a command
 		public const string CommandIdentifier = "-";
-		// The versioning system used is Milestone.Update.Bugfix, where 'milestone' means a significant revision or update to the bot.
-		// Any change that exposes new features to the users of the bot (including the administrator) counts as an update.
-		// Any update which doesn't add new features, and therefore only fixes issues or adds minor improvements counts as a 'bugfix'.
-		public const string Version = "5.0-rc1#7";
 		// Version number of the database. This is checked against the 'version' key in the metadata table,
 		// and a database upgrade is attempted if they do not match.
 		public const string DatabaseVersion = "1.2.2";
