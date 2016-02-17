@@ -91,7 +91,7 @@ namespace BaggyBot.Database
 
 				sqlConnector.UserStatistics
 					.Where(stat => stat.UserId == uid)
-					.Set(stat => stat.Words, stat => stat.Words + 1)
+					.Set(stat => stat.Words, stat => stat.Words + words)
 					.Update();
 			}
 			lockObj.LockMessage = "None";
