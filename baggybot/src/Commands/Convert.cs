@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
-using Microsoft.CSharp.RuntimeBinder;
-using Mono.CSharp;
 using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
