@@ -16,8 +16,10 @@ namespace BaggyBot.MessagingInterface
 	{
 		private readonly IrcClient client;
 		public IReadOnlyList<IrcChannel> Channels => client.Channels;
+		public bool Connected => client.Connected;
 		public string ServerName { get; }
 		public StatsDatabaseManager StatsDatabase { get; }
+		
 
 		internal IrcClientWrapper(IrcClient client, StatsDatabaseManager database, string serverName)
 		{
