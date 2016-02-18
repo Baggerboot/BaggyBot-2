@@ -4,11 +4,9 @@ using BaggyBot.Tools;
 using System;
 using System.Diagnostics;
 using System.Threading;
-using BaggyBot.CommandParsing;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Monitoring.Diagnostics;
-using System.Reflection;
 
 namespace BaggyBot
 {

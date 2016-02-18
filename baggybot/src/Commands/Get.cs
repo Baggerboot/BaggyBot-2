@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using BaggyBot.CommandParsing;
 using BaggyBot.Configuration;
 using BaggyBot.EmbeddedData;
 using BaggyBot.Tools;
-using Microsoft.Scripting.Utils;
 
 namespace BaggyBot.Commands
 {

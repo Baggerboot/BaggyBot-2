@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Microsoft.Scripting.Actions.Calls;
 
 namespace BaggyBot.CommandParsing
 {
