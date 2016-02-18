@@ -225,10 +225,13 @@ namespace BaggyBot.MessagingInterface
 		{
 			foreach (var client in clients)
 			{
-				var serverCfg = ConfigManager.Config.Servers.First(srv => srv.ServerName == client.Value.ServerName);
-				foreach (var op in serverCfg.Operators)
+				if (client.Value.Connected)
 				{
-					client.Value.SendMessage(op.Nick, message);
+					var serverCfg = ConfigManager.Config.Servers.First(srv => srv.ServerName == client.Value.ServerName);
+					foreach (var op in serverCfg.Operators)
+					{
+						client.Value.SendMessage(op.Nick, message);
+					}
 				}
 			}
 		}
