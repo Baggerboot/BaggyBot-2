@@ -299,4 +299,7 @@
       <Name>IRCSharp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="maintenace-queries\update-word-count.sql" />
+  </ItemGroup>
 </Project>
