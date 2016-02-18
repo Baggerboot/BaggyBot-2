@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -21,6 +22,27 @@ namespace BaggyBot.Tools
 			var sf = st.GetFrame(1);
 
 			return sf.GetMethod().Name;
+		}
+
+		/// <summary>
+		/// Dynamically and recursively looks up properties on an object.
+		/// For instance, the mapping { "TimeOfDay", "Hours" }, when performed on a DateTime object,
+		/// will return the value of object.TimeOfDay.Hours.
+		/// </summary>
+		/// <param name="mapping">An array of property names that should be traversed</param>
+		/// <param name="obj">The root object from which the first property should be looked up</param>
+		/// <returns></returns>
+		public static dynamic GetDynamic(string[] mapping, object obj)
+		{
+			var objType = obj.GetType();
+			var propertyName = mapping[0];
+			// If we're trying to look up an empty or null property on the current object,
+			// it makes the most sense to simply return the current object.
+			if (string.IsNullOrEmpty(propertyName)) return obj;
+			var property = objType.GetProperty(propertyName);
+			if (property == null) return null;
+			if (mapping.Length == 1) return property.GetValue(obj);
+			return GetDynamic(mapping.Skip(1).ToArray(), property.GetValue(obj));
 		}
 
 		public static JObject GetJson(string requestUri, string method = "GET")
@@ -50,8 +72,8 @@ namespace BaggyBot.Tools
 		public static DateTime RetrieveLinkerTimestamp()
 		{
 			var filePath = Assembly.GetCallingAssembly().Location;
-			const int c_PeHeaderOffset = 60;
-			const int c_LinkerTimestampOffset = 8;
+			const int peHeaderOffset = 60;
+			const int linkerTimestampOffset = 8;
 			var b = new byte[2048];
 			Stream s = null;
 
@@ -62,14 +84,11 @@ namespace BaggyBot.Tools
 			}
 			finally
 			{
-				if (s != null)
-				{
-					s.Close();
-				}
+				s?.Close();
 			}
 
-			var i = BitConverter.ToInt32(b, c_PeHeaderOffset);
-			var secondsSince1970 = BitConverter.ToInt32(b, i + c_LinkerTimestampOffset);
+			var i = BitConverter.ToInt32(b, peHeaderOffset);
+			var secondsSince1970 = BitConverter.ToInt32(b, i + linkerTimestampOffset);
 			var dt = new DateTime(1970, 1, 1, 0, 0, 0);
 			dt = dt.AddSeconds(secondsSince1970);
 			dt = dt.AddHours(TimeZone.CurrentTimeZone.GetUtcOffset(dt).Hours);

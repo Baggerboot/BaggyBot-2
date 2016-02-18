@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Linq;
 using BaggyBot.CommandParsing;
+using BaggyBot.Configuration;
+using BaggyBot.EmbeddedData;
+using BaggyBot.Tools;
+using Microsoft.Scripting.Utils;
 
 namespace BaggyBot.Commands
 {
@@ -7,13 +12,13 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "<property> [key]";
-		public override string Description => "Retrieves the value of a property, or the value of a key belonging to that property.";
+		public override string Description => "Retrieves the value of a property, or the value of a key belonging to that property. Valid properties: [cfg, uid, users]";
 
 		public override void Use(CommandArgs command)
 		{
 			var cmdParser = new CommandParser(new Operation())
 				.AddOperation("cfg", new Operation()
-					.AddArgument("config-key", null))
+					.AddArgument("config-key", string.Empty))
 				.AddOperation("uid", new Operation()
 					.AddArgument("user", command.Sender.Nick))
 				.AddOperation("users", new Operation()
@@ -36,8 +41,15 @@ namespace BaggyBot.Commands
 					InformUsage(command);
 					break;
 				case "cfg":
-					// TODO: Allow settings lookup for new settings format, disallow lookup of settings that should not be exposed
-					throw new NotImplementedException("Dynamic YAML settings lookup is not supported yet.");
+					if (!UserTools.Validate(command.Sender))
+					{
+						command.Reply(Messages.CmdNotAuthorised);
+						return;
+					}
+					var key = result.Arguments["config-key"];
+					var value = MiscTools.GetDynamic(key.Split('.').Select(k => k.ToPascalCase()).ToArray(), ConfigManager.Config);
+					command.Reply($"{(string.IsNullOrEmpty(key)? "config" : "config." + key)} = {value}");
+					break;
 				case "uid":
 					var uid = command.Client.StatsDatabase.GetIdFromNick(result.Arguments["user"]);
 					if (uid == -2)

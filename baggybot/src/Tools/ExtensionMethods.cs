@@ -13,6 +13,7 @@ namespace BaggyBot.Tools
 
 		private static string ToCamelOrPascalCase(string str, Func<char, char> firstLetterTransform)
 		{
+			if (string.IsNullOrWhiteSpace(str)) return str;
 			var input = str;
 			var pattern = "([_\\-])(?<char>[a-z])";
 			var num = 1;
