@@ -5,6 +5,7 @@ namespace BaggyBot.Configuration
 		public bool DebugMode { get; set; } = false;
 		public bool LogPerformance { get; set; } = false;
 		public int FloodLimit { get; set; } = 4;
+		public string StatsPage { get; set; } = "None configured";
 
 		public Interpreters Interpreters { get; private set; } = new Interpreters();
 		public Backend[] Backends { get; private set; } = new Backend[0];
