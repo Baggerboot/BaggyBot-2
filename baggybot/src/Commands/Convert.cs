@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
 using Newtonsoft.Json.Linq;
@@ -43,6 +45,11 @@ namespace BaggyBot.Commands
 				}
 				Logger.Log(this, $"Exchange rates for {exchangeRates.Count + 1} currencies have been updated.");
 			}
+			catch (WebException e) when (e.Message == "The request timed out" || e.Message == "The remote server returned an error: (500) Internal Server Error.")
+			{
+				Logger.Log(this, $"A server error occurred while updating the currency exhange rates. Retrying in {attemptNumber} seconds...");
+				Task.Delay(TimeSpan.FromSeconds(attemptNumber)).ContinueWith(_ => RequestExchangeRates(++attemptNumber));
+			}
 			catch (Exception e)
 			{
 				Logger.LogException(this, e, "updating the currency exchange rates");
@@ -76,7 +83,7 @@ namespace BaggyBot.Commands
 					var fromCurrency = match.Groups[2].Value.ToUpper();
 					var toCurrency = match.Groups[3].Value.ToUpper();
 
-					if(toCurrency != "EUR" && !exchangeRates.ContainsKey(toCurrency))
+					if (toCurrency != "EUR" && !exchangeRates.ContainsKey(toCurrency))
 					{
 						command.Reply($"I don't know the exchange rate of {toCurrency}");
 						return;
