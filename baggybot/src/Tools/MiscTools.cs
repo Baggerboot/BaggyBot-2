@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Tools
 {
@@ -19,6 +21,16 @@ namespace BaggyBot.Tools
 			var sf = st.GetFrame(1);
 
 			return sf.GetMethod().Name;
+		}
+
+		public static JObject GetJson(string requestUri, string method = "GET")
+		{
+			var request = WebRequest.Create(requestUri);
+			request.Method = method;
+			using (var reader = new StreamReader(request.GetResponse().GetResponseStream()))
+			{
+				return JObject.Parse(reader.ReadToEnd());
+			}
 		}
 
 		public static double NthRoot(double baseValue, int n)

@@ -94,7 +94,7 @@ namespace BaggyBot.DataProcessors
 			{
 				message.Client.StatsDatabase.IncrementWord(cword);
 			}
-			else if (WordTools.IsProfanity(lword))
+			if (WordTools.IsProfanity(lword))
 			{
 				message.Client.StatsDatabase.IncrementProfanities(sender);
 			}
