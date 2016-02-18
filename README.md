@@ -27,7 +27,7 @@ as well as the name of the last user who said it.
 
 Finally, BaggyBot is able to grab random quotes from users, and store these in the database as well.
 
-He's meant to be used with a script (or website) that retrieves those statistics from the database and visualises them.
+He's meant to be used with a script (or website (such as https://github.com/Baggykiin/baggybot-stats)) that retrieves those statistics from the database and visualises them.
 
 Building
 --------
