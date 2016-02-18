@@ -4,6 +4,7 @@ He also has an elaborate command system, providing features such as searching
 Wolfram Alpha and Urban Dictionary, interactive interpreters for Python and C#,
 performing DNS queries, and many others, allowing him to additionally function
 as a general 'utility' IRC bot.
+
 He also has a Slack compatibility mode, allowing him to connect to a Slack IRC
 server and handling it as if it's a regular IRC server (by stripping the URLs
 Slack adds to messages and translating IRC formatting codes to Slack formatting
