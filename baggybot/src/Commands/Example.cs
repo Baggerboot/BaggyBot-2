@@ -4,7 +4,7 @@ namespace BaggyBot.Commands
 {
 	class Example : Command
 	{
-		public override PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "";
 		public override string Description => "";
 
