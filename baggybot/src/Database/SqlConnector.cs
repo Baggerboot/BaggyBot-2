@@ -47,14 +47,67 @@ namespace BaggyBot.Database
 			}
 		}
 
-		public void Insert<T>(T row)
+		public int Insert<T>(T row)
 		{
-			connection.Insert(row);
+			return connection.Insert(row);
+		}
+
+		public int InsertOrReplace<T>(T row)
+		{
+			return connection.InsertOrReplace(row);
 		}
 
 		private void HandleConnectionFailure()
 		{
 			internalState = ConnectionState.Closed;
+		}
+
+		public void Reset()
+		{
+			Logger.Log(this, "Resetting tables...", LogLevel.Warning);
+			DropTables();
+			CreateTables();
+			Logger.Log(this, "Writing metadata...", LogLevel.Info);
+			AddMetadata();
+		}
+
+		private void DropTables()
+		{
+			connection.DropTable<UserCredential>();
+			connection.DropTable<Quote>();
+			connection.DropTable<UserStatistic>();
+			connection.DropTable<UsedEmoticon>();
+			connection.DropTable<KeyValuePair>();
+			connection.DropTable<LinkedUrl>();
+			connection.DropTable<User>();
+			connection.DropTable<UsedWord>();
+			connection.DropTable<IrcLog>();
+			connection.DropTable<Metadata>();
+			connection.DropTable<MiscData>();
+		}
+
+		private void CreateTables()
+		{
+			connection.CreateTable<UserCredential>();
+			connection.CreateTable<Quote>();
+			connection.CreateTable<UserStatistic>();
+			connection.CreateTable<UsedEmoticon>();
+			connection.CreateTable<KeyValuePair>();
+			connection.CreateTable<LinkedUrl>();
+			connection.CreateTable<User>();
+			connection.CreateTable<UsedWord>();
+			connection.CreateTable<IrcLog>();
+			connection.CreateTable<Metadata>();
+			connection.CreateTable<MiscData>();
+		}
+
+		private void AddMetadata()
+		{
+			Insert(new Metadata
+			{
+				Key = "version",
+				Value = Bot.DatabaseVersion
+			});
 		}
 
 		public bool OpenConnection(string connectionString)
@@ -102,17 +155,7 @@ namespace BaggyBot.Database
 					Logger.Log(this, "Metadata table not found. A new tableset will be created.", LogLevel.Warning);
 					try
 					{
-						connection.CreateTable<UserCredential>();
-						connection.CreateTable<Quote>();
-						connection.CreateTable<UserStatistic>();
-						connection.CreateTable<UsedEmoticon>();
-						connection.CreateTable<KeyValuePair>();
-						connection.CreateTable<LinkedUrl>();
-						connection.CreateTable<User>();
-						connection.CreateTable<UsedWord>();
-						connection.CreateTable<IrcLog>();
-						connection.CreateTable<Metadata>();
-						connection.CreateTable<MiscData>();
+						CreateTables();
 					}
 					catch (NpgsqlException f)
 					{
@@ -120,12 +163,8 @@ namespace BaggyBot.Database
 						HandleConnectionFailure();
 						return false;
 					}
-					Logger.Log(this, "The database has been populated. Writing metadata...", LogLevel.Info);
-					Insert(new Metadata
-					{
-						Key = "version",
-						Value = Bot.DatabaseVersion
-					});
+					AddMetadata();
+					Logger.Log(this, "Writing metadata...", LogLevel.Info);
 				}
 				else
 				{

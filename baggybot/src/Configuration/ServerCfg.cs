@@ -5,6 +5,7 @@ namespace BaggyBot.Configuration
 	public class ServerCfg
 	{
 		public string ServerName { get; set; } = Guid.NewGuid().ToString();
+		public string ServerType { get; set; } = "irc";
 		public string Host { get; set; }
 		public int Port { get; set; } = 6667;
 		public string Password { get; set; } = null;

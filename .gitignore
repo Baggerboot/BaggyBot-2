@@ -16,6 +16,7 @@ baggybot/src/Version.cs
 *.sln.docstates
 *.StyleCop
 *.vscode
+.idea
 
 # Build results
 

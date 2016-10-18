@@ -13,8 +13,8 @@ namespace BaggyBot.Commands
 		private void ShowTopics(string nick, string channel, CommandArgs command, bool showDebugInfo)
 		{
 			Logger.Log(this, "Showing topics for " + nick);
-			var userId = command.Client.StatsDatabase.GetIdFromNick(nick);
-			var topics = command.Client.StatsDatabase.FindTopics(userId, channel);
+			var user = command.Client.StatsDatabase.GetUserByNickname(nick);
+			var topics = command.Client.StatsDatabase.FindTopics(user.Id, channel);
 
 			if (topics == null)
 			{
@@ -45,7 +45,7 @@ namespace BaggyBot.Commands
 			}
 			if (command.Args.Length == 0)
 			{
-				ShowTopics(command.Sender.Nick, command.Channel, command, showDebugInfo);
+				ShowTopics(command.Sender.Nickname, command.Channel.Identifier, command, showDebugInfo);
 			}
 			else if (command.Args.Length > 2)
 			{
@@ -53,10 +53,10 @@ namespace BaggyBot.Commands
 			}
 			else if (command.Args.Length == 2)
 			{
-				ShowTopics(command.Args[0], command.Args[1], command, showDebugInfo);
+				ShowTopics(command.Args[0], command.Client.FindChannel(command.Args[1]).Identifier, command, showDebugInfo);
 			}
 			else {
-				ShowTopics(command.Args[0], command.Channel, command, showDebugInfo);
+				ShowTopics(command.Args[0], command.Channel.Identifier, command, showDebugInfo);
 			}
 		}
 	}

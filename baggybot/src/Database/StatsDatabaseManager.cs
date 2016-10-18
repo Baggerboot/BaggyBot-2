@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using BaggyBot.Database.Model;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
+using IRCSharp.IRC;
 using LinqToDB;
 
 namespace BaggyBot.Database
@@ -59,6 +61,7 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
+		// TODO: validate that these are used correctly
 		public int ExecuteStatement(string statement)
 		{
 			int result;
@@ -71,6 +74,7 @@ namespace BaggyBot.Database
 			return result;
 		}
 
+		// TODO: validate that these are used correctly
 		public List<object[]> ExecuteQuery(string query)
 		{
 			List<object[]> results = null;
@@ -81,6 +85,127 @@ namespace BaggyBot.Database
 			}
 			lockObj.LockMessage = "None";
 			return results;
+		}
+
+		public User GetUserById(int uid)
+		{
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				var matches = sqlConnector.Users.Where(u => u.Id == uid).ToArray();
+				if (matches.Length == 0) throw new ArgumentException("Nonexistent userid");
+				if (matches.Length == 1) return matches[0];
+				throw new CorruptedDatabaseException($"Userid {uid} is not unique");
+			}
+		}
+
+		public User[] GetUsersByNickname(string nickname)
+		{
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				var matches = sqlConnector.Users.Where(u => u.Nickname == nickname).ToArray();
+				return matches;
+			}
+		}
+
+		public User GetUserByNickname(string nickname)
+		{
+			var matches = GetUsersByNickname(nickname);
+			if (matches.Length == 0) throw new ArgumentException($"No user with nickname \"{nickname}\" known.");
+			if (matches.Length == 1) return matches[1];
+			throw new ArgumentException($"Multiple matches found for nickname \"{nickname}\"");
+		}
+
+		public User MapUser(ChatUser user)
+		{
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				if (user.HasTemporallyUniqueId)
+				{
+					// The user's UniqueId is guaranteed to be correct, so we can simply match on that
+					var matches = sqlConnector.Users.Where(u => u.UniqueId == user.UniqueId).ToArray();
+					if (matches.Length == 0) throw new ArgumentException("Nonexistent UniqueId");
+					if (matches.Length == 1) return matches[0];
+					throw new CorruptedDatabaseException($"Multiple users with the same UniqueId (\"{user.UniqueId}\") found");
+				}
+				else
+				{
+					throw new NotImplementedException("IRC user mapping is not supported yet");
+				}
+			}
+		}
+
+		public User UpsertUser(ChatUser user)
+		{
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				if (user.HasTemporallyUniqueId)
+				{
+					// The user's UniqueId is guaranteed to be correct, so we can simply match on that
+					var matches = sqlConnector.Users.Where(u => u.UniqueId == user.UniqueId).ToArray();
+					if (matches.Length == 0)
+					{
+						Logger.Log(this, $"Adding new user {user} to the database");
+						var dbUser = new User
+						{
+							AddressableName = user.AddressableName,
+							Nickname = user.Nickname,
+							OriginalNickname = user.Nickname,
+							UniqueId = user.UniqueId
+						};
+						sqlConnector.Insert(dbUser);
+						return dbUser;
+					}
+					if (matches.Length == 1)
+					{
+						var dbUser = matches[0];
+						dbUser.AddressableName = user.AddressableName;
+						dbUser.Nickname = user.Nickname;
+						Update(dbUser);
+						return matches[0];
+					}
+					throw new CorruptedDatabaseException($"Multiple users with the same UniqueId (\"{user.UniqueId}\") found");
+				}
+				else
+				{
+					throw new NotImplementedException("IRC user mapping is not supported yet");
+				}
+			}
+		}
+
+		public void UpdateUser(ChatUser newUser)
+		{
+			var dbUser = MapUser(newUser);
+
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				if (dbUser.Nickname != newUser.Nickname)
+				{
+					Logger.Log(this, $"Updated nickname for {newUser}: {dbUser.Nickname} -> {newUser.Nickname}");
+					dbUser.Nickname = newUser.Nickname;
+				}
+				if (dbUser.AddressableName != newUser.AddressableName)
+				{
+					Logger.Log(this, $"Updated addressable name for {newUser}: {dbUser.AddressableName} -> {newUser.AddressableName}");
+					dbUser.AddressableName = newUser.AddressableName;
+				}
+				Update(dbUser);
+			}
+		}
+
+		public void UpdateUser(User newUser)
+		{
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				Update(newUser);
+			}
 		}
 
 		public void IncrementWordCount(int uid, int words)
@@ -116,14 +241,14 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
-		public List<IrcLog> FindLine(string search, string username = null)
+		public List<IrcLog> FindLine(string search, int uid = 0)
 		{
 			List<IrcLog> ret;
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 				IQueryable<IrcLog> matches;
-				if (username == null)
+				if (uid == 0)
 				{
 					matches =
 						from line in sqlConnector.IrcLog
@@ -132,7 +257,6 @@ namespace BaggyBot.Database
 				}
 				else
 				{
-					var uid = GetIdFromNick(username);
 					matches =
 						from line in sqlConnector.IrcLog
 						where line.Message.ToLower().Contains(search.ToLower())
@@ -164,107 +288,109 @@ namespace BaggyBot.Database
 			return ret;
 		}
 
-		internal void Snag(IrcMessage message)
+		internal void Snag(ChatMessage message)
 		{
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
-				var uid = GetIdFromUser(message.Sender);
+				var uid = MapUser(message.Sender).Id;
 				var q = new Quote();
 				q.Text = message.Message;
 				q.AuthorId = uid;
 				q.TakenAt = DateTime.Now;
 
 				sqlConnector.Insert(q);
-				Logger.Log(this, "Added quote for " + message.Sender.Nick + ".");
+				Logger.Log(this, "Added quote for " + message.Sender.Nickname + ".");
 			}
 			lockObj.LockMessage = "None";
 		}
 
-		/// <summary>
-		/// Attempts to find the User IDs for an IRC user, if the provided credentials combination already exists.
-		/// </summary>
-		/// <returns>a list of User ID matches</returns>
-		public int[] GetUids(IrcUser ircUser)
-		{
-			int[] ret;
-			lock (lockObj)
-			{
-				lockObj.LockMessage = MiscTools.GetCurrentMethod();
-				var results = from res in sqlConnector.UserCredentials
-							  where res.Nick == ircUser.Nick
-									&& res.Ident == ircUser.Ident
-									&& res.Hostmask == ircUser.Hostmask
-							  select res.UserId;
+		///// <summary>
+		///// Attempts to find the User IDs for an IRC user, if the provided credentials combination already exists.
+		///// </summary>
+		///// <returns>a list of User ID matches</returns>
+		//public int[] GetUids(ChatUser chatUser)
+		//{
+		//	int[] ret;
+		//	lock (lockObj)
+		//	{
+		//		lockObj.LockMessage = MiscTools.GetCurrentMethod();
+		//		var results = from res in sqlConnector.UserCredentials
+		//					  where res.Nick == chatUser.Nickname
+		//							&& res.Ident == chatUser.Ident
+		//							&& res.Hostmask == chatUser.Hostmask
+		//					  select res.UserId;
 
-				ret = results.Distinct().ToArray();
-			}
-			lockObj.LockMessage = "None";
-			return ret;
-		}
+		//		ret = results.Distinct().ToArray();
+		//	}
+		//	lockObj.LockMessage = "None";
+		//	return ret;
+		//}
 
-		/// <summary>
-		/// Adds a user credentials combination to the dbo.usercreds table.
-		/// </summary>
-		/// <param name="user">The user to draw the credentials from</param>
-		/// <param name="nickserv">The nickserv account used by the user</param>
-		/// <param name="uid">The user ID to be used. Set to -1 (default value) if the credentials belong to a new user</param>
-		/// <returns>The user id belonging to the new credentials combination</returns>
-		public int AddCredCombination(IrcUser user, string nickserv = null, int uid = -1)
-		{
-			// TODO: Split this up into AddCredCombination and AddUser
-			int ret;
-			lock (lockObj)
-			{
-				lockObj.LockMessage = MiscTools.GetCurrentMethod();
-				if (uid == -1)
-				{
-					var results = from c in sqlConnector.UserCredentials
-								  select c.UserId;
-					if (!results.Any())
-					{
-						uid = 1;
-					}
-					else
-					{
-						uid = results.Max() + 1;
-					}
-				}
+		///// <summary>
+		///// Adds a user credentials combination to the dbo.usercreds table.
+		///// </summary>
+		///// <param name="user">The user to draw the credentials from</param>
+		///// <param name="nickserv">The nickserv account used by the user</param>
+		///// <param name="uid">The user ID to be used. Set to -1 (default value) if the credentials belong to a new user</param>
+		///// <returns>The user id belonging to the new credentials combination</returns>
+		//public int AddCredCombination(ChatUser user, string nickserv = null, int uid = -1)
+		//{
+		//	// TODO: Split this up into AddCredCombination and AddUser
+		//	int ret;
+		//	lock (lockObj)
+		//	{
+		//		lockObj.LockMessage = MiscTools.GetCurrentMethod();
+		//		if (uid == -1)
+		//		{
+		//			var results = from c in sqlConnector.UserCredentials
+		//						  select c.UserId;
+		//			if (!results.Any())
+		//			{
+		//				uid = 1;
+		//			}
+		//			else
+		//			{
+		//				uid = results.Max() + 1;
+		//			}
+		//		}
 
-				var cred = new UserCredential
-				{
-					Nick = user.Nick,
-					Ident = user.Ident,
-					Hostmask = user.Hostmask,
-					NickservLogin = nickserv,
-					UserId = uid
-				};
+		//		var cred = new UserCredential
+		//		{
+		//			Nick = user.Nickname,
+		//			Ident = user.Ident,
+		//			Hostmask = user.Hostmask,
+		//			NickservLogin = nickserv,
+		//			UserId = uid
+		//		};
 
-				sqlConnector.Insert(cred);
-				Logger.Log(this, $"Added credentials row for {user.ToString()}, (ns: {nickserv}) (uid: {uid}).");
+		//		sqlConnector.Insert(cred);
+		//		Logger.Log(this, $"Added credentials row for {user.ToString()}, (ns: {nickserv}) (uid: {uid}).");
 
-				if ((from n in sqlConnector.Users
-					 where n.Id == uid
-					 select n).Any())
-				{
-					ret = uid;
-				}
-				else
-				{
-					var name = new User();
-					name.Id = uid;
-					name.Name = user.Nick;
+		//		if ((from n in sqlConnector.Users
+		//			 where n.Id == uid
+		//			 select n).Any())
+		//		{
+		//			ret = uid;
+		//		}
+		//		else
+		//		{
+		//			var name = new User();
+		//			name.Id = uid;
+		//			name.Name = user.Nickname;
 
-					sqlConnector.Insert(name);
-					Logger.Log(this, $"Added name row for {user.Nick}, uid {uid}.");
+		//			sqlConnector.Insert(name);
+		//			Logger.Log(this, $"Added name row for {user.Nickname}, uid {uid}.");
 
-					ret = uid;
-				}
-			}
-			lockObj.LockMessage = "None";
-			return ret;
-		}
+		//			ret = uid;
+		//		}
+		//	}
+		//	lockObj.LockMessage = "None";
+		//	return ret;
+		//}
 
+		/*
+		// TODO: We might want to keep this
 		internal bool SetPrimary(string oldName, string newName)
 		{
 			bool ret;
@@ -297,6 +423,7 @@ namespace BaggyBot.Database
 				var results = from n in sqlConnector.Users
 							  where n.Id == uid
 							  select n;
+				
 				if (results.Any())
 				{
 					results.First().Name = name;
@@ -314,7 +441,7 @@ namespace BaggyBot.Database
 				Logger.Log(this, $"Changed name for {uid} to {name}.");
 			}
 			lockObj.LockMessage = "None";
-		}
+		}*/
 
 		public string GetNickserv(int uid)
 		{
@@ -322,6 +449,8 @@ namespace BaggyBot.Database
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				// TODO: pretty sure this code is straight up wrong
 				ret = (from c in sqlConnector.UserCredentials
 					   where c.UserId == uid
 					   select c.NickservLogin).First();
@@ -330,15 +459,18 @@ namespace BaggyBot.Database
 			return ret;
 		}
 
+
+		/* Old user matching code
+
 		#region Match Levels
-		private int[] GetMatchesFirstLevel(IrcUser sender)
+		private int[] GetMatchesFirstLevel(ChatUser sender)
 		{
 			return GetUids(sender);
 		}
-		private int[] GetMatchesSecondLevel(IrcUser sender)
+		private int[] GetMatchesSecondLevel(ChatUser sender)
 		{
 			return (from c in sqlConnector.UserCredentials
-					where c.Nick == sender.Nick
+					where c.Nick == sender.Nickname
 					&& c.Ident == sender.Ident
 					select c.UserId).Distinct().ToArray();
 		}
@@ -348,7 +480,7 @@ namespace BaggyBot.Database
 					where c.NickservLogin == nickserv
 					select c.UserId).Distinct().ToArray();
 		}
-		private int[] GetMatchesFourthLevel(IrcUser sender)
+		private int[] GetMatchesFourthLevel(ChatUser sender)
 		{
 			return (from c in sqlConnector.UserCredentials
 					where c.Hostmask == sender.Hostmask
@@ -400,7 +532,7 @@ namespace BaggyBot.Database
 		}
 
 		private delegate int Level();
-		public int GetIdFromUser(IrcUser user)
+		public int GetIdFromUser(ChatUser user)
 		{
 			// TODO: Improve user matching code
 			int ret;
@@ -427,7 +559,9 @@ namespace BaggyBot.Database
 				// Check for a nickserv match
 				Level l3 = () =>
 				{
-					var nickserv = allowNickservLookup ? user.Client.NickservLookup(user.Nick) : null;
+					// TODO: re-enable nickserv lookup
+					//var nickserv = allowNickservLookup ? user.Client.NickservLookup(user.Nickname) : null;
+					NickservInformation nickserv = null;
 
 					if (nickserv == null) // No nickserv info available, try a level 4 instead
 					{
@@ -478,8 +612,9 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 			return ret;
 		}
+		*/
 
-		public void IncrementEmoticon(string emoticon, int user)
+		public void IncrementEmoticon(string emoticon, int uid)
 		{
 			lock (lockObj)
 			{
@@ -492,7 +627,7 @@ namespace BaggyBot.Database
 					var insert = new UsedEmoticon
 					{
 						Emoticon = emoticon,
-						LastUsedById = user,
+						LastUsedById = uid,
 						Uses = 1
 					};
 					sqlConnector.Insert(insert);
@@ -500,7 +635,7 @@ namespace BaggyBot.Database
 				else
 				{
 					matches.Set(m => m.Uses, m => m.Uses + 1)
-						.Set(m => m.LastUsedById, user).Update();
+						.Set(m => m.LastUsedById, uid).Update();
 				}
 				Logger.Log(this, "Incremented emoticon count with emoticon: " + emoticon + ".");
 			}
@@ -564,10 +699,11 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
+		/*
 		/// <summary>
 		/// Processes a user's credentials when they change their nickname, adding a new credentials entry when necessary.
 		/// </summary>
-		public void HandleNickChange(IrcUser user, string newNick)
+		public void HandleNickChange(ChatUser user, string newNick)
 		{
 			lock (lockObj)
 			{
@@ -591,26 +727,26 @@ namespace BaggyBot.Database
 					// It looks like this user does not have a database entry yet, so we can ignore them.
 					if (uids.Length == 0)
 					{
-						Logger.Log(this, $"Dropped nick change event for {user.Nick} to {newNick} - they do not have a database entry yet.");
+						Logger.Log(this, $"Dropped nick change event for {user.Nickname} to {newNick} - they do not have a database entry yet.");
 					}
 					else if (uids.Length > 1)
 					{
-						Logger.Log(this, $"Unable to handle nick change for {user.Nick} to {newNick}: Invalid amount of Uids received: {uids.Length}", LogLevel.Warning);
+						Logger.Log(this, $"Unable to handle nick change for {user.Nickname} to {newNick}: Invalid amount of Uids received: {uids.Length}", LogLevel.Warning);
 					}
 					else
 					{
 						var nickserv = GetNickserv(uids[0]);
-						Logger.Log(this, $"Adding new credentials row for nick change: {user.Nick} -> {newNick}");
-                        AddCredCombination(new IrcUser(user.Client, newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
+						Logger.Log(this, $"Adding new credentials row for nick change: {user.Nickname} -> {newNick}");
+                        AddCredCombination(new ChatUser(user.Client, newNick, user.Ident, user.Hostmask), nickserv, uids[0]);
 					}
 				}
 				else if (count == 1)
 				{
-					Logger.Log(this, $"Nick change event for {user.Nick} to {newNick} ignored - they already have a database entry");
+					Logger.Log(this, $"Nick change event for {user.Nickname} to {newNick} ignored - they already have a database entry");
 				}
 			}
 			lockObj.LockMessage = "None";
-		}
+		}*/
 
 		public void UpsertMiscData(string type, string key, string value)
 		{
@@ -639,7 +775,7 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
-		public void IncrementUrl(string url, int user, string usage)
+		public void IncrementUrl(string url, int uid, string usage)
 		{
 			lock (lockObj)
 			{
@@ -653,7 +789,7 @@ namespace BaggyBot.Database
 					var u = new LinkedUrl
 					{
 						LastUsage = usage,
-						LastUsedById = user,
+						LastUsedById = uid,
 						Url = url,
 						Uses = 1
 					};
@@ -663,7 +799,7 @@ namespace BaggyBot.Database
 				{
 					matches.Set(m => m.Uses, m => m.Uses + 1)
 						.Set(m => m.LastUsage, usage)
-						.Set(m => m.LastUsedById, user)
+						.Set(m => m.LastUsedById, uid)
 						.Update();
 				}
 				Logger.Log(this, "Incremented URL count with URL: " + url + ".");
@@ -699,32 +835,32 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
-		public void IncrementProfanities(int sender)
+		public void IncrementProfanities(int uid)
 		{
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 				var stat = (from s in sqlConnector.UserStatistics
-							where s.UserId == sender
+							where s.UserId == uid
 							select s).First();
 				stat.Profanities++;
 				Update(stat);
-				Logger.Log(this, "Incremented profanities for " + sender + ".");
+				Logger.Log(this, "Incremented profanities for " + uid + ".");
 			}
 			lockObj.LockMessage = "None";
 		}
 
-		public void IncrementActions(int sender)
+		public void IncrementActions(int uid)
 		{
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 				var stat = (from s in sqlConnector.UserStatistics
-							where s.UserId == sender
+							where s.UserId == uid
 							select s).First();
 				stat.Actions++;
 				Update(stat);
-				Logger.Log(this, "Incremented actions for " + sender + ".");
+				Logger.Log(this, "Incremented actions for " + uid + ".");
 			}
 			lockObj.LockMessage = "None";
 		}
@@ -788,7 +924,7 @@ namespace BaggyBot.Database
 			}
 		}
 
-		internal IOrderedEnumerable<Topic> FindTopics(int userId, string channel)
+		internal IOrderedEnumerable<Topic> FindTopics(int uid, string channel)
 		{
 			lock (lockObj)
 			{
@@ -802,7 +938,7 @@ namespace BaggyBot.Database
 
 				Logger.Log(this, "finding sentences");
 				var userSentencesQuery = (from sentence in sqlConnector.IrcLog
-										  where sentence.SenderId == userId
+										  where sentence.SenderId == uid
 												&& sentence.Channel == channel
 										  select sentence.Message).ToList();
 
@@ -891,6 +1027,11 @@ namespace BaggyBot.Database
 		public void Dispose()
 		{
 			sqlConnector.Dispose();
+		}
+
+		public void Reset()
+		{
+			sqlConnector.Reset();
 		}
 	}
 

@@ -19,7 +19,8 @@ namespace BaggyBot.Database.Upgrades
 			upgrades = new Dictionary<string, Func<string>>
 			{
 				["1.1"] = UpgradeFrom1_1,
-				["1.2"] = UpgradeFrom1_2
+				["1.2"] = UpgradeFrom1_2,
+				["1.2.2"] = UpgradeFrom1_2_2
 			};
 		}
 
@@ -31,6 +32,14 @@ namespace BaggyBot.Database.Upgrades
 		public string UpgradeFrom(string version)
 		{
 			return upgrades[version]();
+		}
+
+		private string UpgradeFrom1_2_2()
+		{
+			var cmd = connection.CreateCommand();
+			cmd.CommandText = "ALTER TABLE used_word ADD COLUMN is_ignored boolean NOT NULL DEFAULT false; ALTER TABLE used_word ALTER COLUMN is_ignored DROP DEFAULT;";
+			cmd.ExecuteNonQuery();
+			return "1.3";
 		}
 
 		private string UpgradeFrom1_2()

@@ -1,4 +1,5 @@
-﻿using LinqToDB.Mapping;
+﻿using System;
+using LinqToDB.Mapping;
 
 namespace BaggyBot.Database.Model
 {
@@ -11,7 +12,7 @@ namespace BaggyBot.Database.Model
 		[Column(Name = "user_id"), NotNull]
 		public int UserId { get; set; }
 		//[Association(ThisKey = "user", OtherKey = "id")]
-		//public User IrcUser { get; set; }
+		//public User ChatUser { get; set; }
 
 		[Column(Name = "nick"), NotNull]
 		public string Nick { get; set; }
@@ -24,5 +25,8 @@ namespace BaggyBot.Database.Model
 
 		[Column(Name = "nickserv_login")]
 		public string NickservLogin { get; set; }
+
+		[Column(Name = "added_on")]
+		public DateTime AddedOn { get; set; }
 	}
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using BaggyBot.Database;
+using BaggyBot.Database.Model;
 
 namespace BaggyBot.Commands
 {
@@ -19,20 +21,19 @@ namespace BaggyBot.Commands
 			{
 				case "name":
 					int uid;
+					User user;
 					if (int.TryParse(command.Args[1], out uid))
 					{
-						command.Client.StatsDatabase.SetPrimary(uid, command.Args[2]);
-						command.Reply("Done.");
+						user = command.Client.StatsDatabase.GetUserById(uid);
 					}
-					else {
-						if (command.Client.StatsDatabase.SetPrimary(command.Args[1], command.Args[2]))
-						{
-							command.Reply("Done.");
-						}
-						else {
-							command.ReturnMessage("Name entry not found. Did you spell the username correctly?");
-						}
+					else
+					{
+						user = command.Client.StatsDatabase.GetUserByNickname(command.Args[1]);
 					}
+					user.AddressableNameOverride = command.Args[2];
+					command.Client.StatsDatabase.UpdateUser(user);
+					command.Reply("Done.");
+
 					break;
 				case "-s":
 					/*string data;

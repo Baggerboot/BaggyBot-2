@@ -22,6 +22,7 @@ namespace BaggyBot.DataProcessors
 	internal class StatsHandler
 	{
 		private readonly Random rand;
+		private readonly Regex textOnly = new Regex("[^a-z]");
 
 		// Non-exhaustive list of shared idents that are commonly used by multiple people, often because they are standard values for their respective IRC clients.
 		/*
@@ -34,13 +35,14 @@ namespace BaggyBot.DataProcessors
 		{
 			rand = new Random();
 		}
-		public void ProcessMessage(IrcMessage message)
+		public void ProcessMessage(ChatMessage message)
 		{
 			// Can't save statistics if we don't have a DB connection!
 			if (message.Client.StatsDatabase.ConnectionState == ConnectionState.Closed) return;
 
-			var userId = message.Client.StatsDatabase.GetIdFromUser(message.Sender);
-			Logger.Log(this, $"Processing message for {message.Sender.Nick} (uid: {userId})");
+			var user = message.Client.StatsDatabase.UpsertUser(message.Sender);
+			var userId = user.Id;
+			Logger.Log(this, $"Processing message for {message.Sender.Nickname} (uid: {userId})");
 			AddMessageToIrcLog(message, userId);
 
 			if (message.Action)
@@ -62,17 +64,17 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		private void AddMessageToIrcLog(IrcMessage message, int userId)
+		private void AddMessageToIrcLog(ChatMessage message, int userId)
 		{
-			message.Client.StatsDatabase.AddIrcMessage(DateTime.Now, userId, message.Channel, message.Sender.Nick,
+			message.Client.StatsDatabase.AddIrcMessage(DateTime.Now, userId, message.Channel.Identifier, message.Sender.Nickname,
 				message.Action
-				? $"*{message.Sender.Nick} {message.Message}*"
+				? $"*{message.Sender.Nickname} {message.Message}*"
 				: message.Message);
 		}
 
-		private void ProcessRandomEvents(IrcMessage message)
+		private void ProcessRandomEvents(ChatMessage message)
 		{
-			if (message.Sender.Nick == "Ralph" && message.Message.ToLower().Contains("baggybot"))
+			if (message.Sender.Nickname == "Ralph" && message.Message.ToLower().Contains("baggybot"))
 			{
 				message.ReturnMessage("Shut up you fool");
 			}
@@ -82,25 +84,28 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		private void ProcessWord(IrcMessage message, string word, int sender)
+		private void ProcessWord(ChatMessage message, string word, int sender)
 		{
+			// In order to count word occurrence correctly, all words are transformed to
+			// lowercase, and all non-latin characters are removed. This is done because
+			// people commonly say "its" when they mean "it's", and it is very difficult
+			// to determine which one they meant, so instead, they are considered equal.
 			var lword = word.ToLower();
 			var cword = textOnly.Replace(lword, string.Empty);
 			if (word.StartsWith("http://") || word.StartsWith("https://"))
 			{
 				message.Client.StatsDatabase.IncrementUrl(word, sender, message.Message);
 			}
-			else if (!WordTools.IsIgnoredWord(cword) && cword.Length >= 3)
+			else
 			{
-				message.Client.StatsDatabase.IncrementWord(cword);
+				var ignored = WordTools.IsIgnoredWord(cword) || cword.Length < 3;
+					message.Client.StatsDatabase.IncrementWord(cword);
 			}
 			if (WordTools.IsProfanity(lword))
 			{
 				message.Client.StatsDatabase.IncrementProfanities(sender);
 			}
 		}
-
-		private readonly Regex textOnly = new Regex("[^a-z]");
 
 		private void GetEmoticons(StatsDatabaseManager statsDb, int userId, IEnumerable<string> words)
 		{
@@ -112,11 +117,11 @@ namespace BaggyBot.DataProcessors
 				}
 			}
 		}
-		private void GenerateRandomQuote(IrcMessage message, List<string> words, int userId)
+		private void GenerateRandomQuote(ChatMessage message, List<string> words, int userId)
 		{
 			if (message.Action)
 			{
-				message.Message = "*" + message.Sender.Nick + " " + message.Message + "*";
+				message.Message = "*" + message.Sender.Nickname + " " + message.Message + "*";
 			}
 
 			if (ControlVariables.SnagNextLine)
@@ -126,7 +131,7 @@ namespace BaggyBot.DataProcessors
 				message.ReturnMessage("Snagged line on request.");
 				return;
 			}
-			if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nick)
+			if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nickname)
 			{
 				ControlVariables.SnagNextLineBy = null;
 				message.Client.StatsDatabase.Snag(message);
@@ -137,7 +142,7 @@ namespace BaggyBot.DataProcessors
 			TryTakeQuote(message, words, userId);
 		}
 
-		private void TryTakeQuote(IrcMessage message, List<string> words, int userId)
+		private void TryTakeQuote(ChatMessage message, List<string> words, int userId)
 		{
 			var last = message.Client.StatsDatabase.GetLastQuotedLine(userId);
 			if (last.HasValue)
@@ -178,7 +183,7 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		private void TakeQuote(IrcMessage message, string snagMessage)
+		private void TakeQuote(ChatMessage message, string snagMessage)
 		{
 			message.ReturnMessage(snagMessage);
 			message.Client.StatsDatabase.Snag(message);

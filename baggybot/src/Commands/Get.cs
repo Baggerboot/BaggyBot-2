@@ -18,9 +18,9 @@ namespace BaggyBot.Commands
 				.AddOperation("cfg", new Operation()
 					.AddArgument("config-key", string.Empty))
 				.AddOperation("uid", new Operation()
-					.AddArgument("user", command.Sender.Nick))
+					.AddArgument("user", command.Sender.Nickname))
 				.AddOperation("users", new Operation()
-					.AddArgument("channel", command.Channel));
+					.AddArgument("channel", command.Channel.Identifier));
 
 			OperationResult result;
 			try
@@ -49,19 +49,19 @@ namespace BaggyBot.Commands
 					command.Reply($"{(string.IsNullOrEmpty(key)? "config" : "config." + key)} = {value}");
 					break;
 				case "uid":
-					var uid = command.Client.StatsDatabase.GetIdFromNick(result.Arguments["user"]);
-					if (uid == -2)
+					var users = command.Client.StatsDatabase.GetUsersByNickname(result.Arguments["user"]);
+					if (users.Length == 0)
 						command.Reply($"I don't know a user with {result.Arguments["user"]} as their primary name");
 					else
-						command.Reply($"the user Id belonging to {result.Arguments["user"]} is {uid}");
+						command.Reply($"the user Id belonging to {result.Arguments["user"]} is {users[0].Id}");
 					break;
 				case "users":
 					var channel = result.Arguments["channel"];
 					
 					if (command.Client.InChannel(channel))
 					{
-						var ircChannel = command.Client.GetChannel(channel);
-						command.Reply($"users in {channel}: {string.Join(", ", ircChannel.UserCount)}");
+						var ircChannel = command.Client.FindChannel(channel);
+						command.Reply($"users in {channel}: {string.Join(", ", ircChannel.Users.Count)}");
 					}
 					else
 					{

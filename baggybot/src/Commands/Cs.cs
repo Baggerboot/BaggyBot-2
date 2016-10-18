@@ -39,7 +39,7 @@ namespace BaggyBot.Commands
 
 		protected override void GetBuffer(CommandArgs command)
 		{
-			command.ReturnMessage($"{command.Sender.Nick}, \"{commandBuilders[command.Sender.Nick].ToString().Replace('\n', '\\')}\"");
+			command.ReturnMessage($"{command.Sender.Nickname}, \"{commandBuilders[command.Sender.Nickname].ToString().Replace('\n', '\\')}\"");
 		}
 
 		protected override void Threads(CommandArgs command)
@@ -49,7 +49,7 @@ namespace BaggyBot.Commands
 
 		private bool RestrictionsCheck(CommandArgs command)
 		{
-			if (!command.Channel.StartsWith("#"))
+			if (command.Channel.IsPrivateMessage)
 			{
 				command.ReturnMessage("Only the bot operator is allowed to execute Python code in non-channels");
 				return false;
@@ -62,7 +62,7 @@ namespace BaggyBot.Commands
 			if (Security == InterpreterSecurity.Notify)
 			{
 				// Do not return anything yet, but do notify the bot operator.
-				bot.NotifyOperator("-cs used by " + command.Sender.Nick + ": " + command.FullArgument);
+				bot.NotifyOperator("-cs used by " + command.Sender.Nickname + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
 			{
@@ -91,9 +91,9 @@ namespace BaggyBot.Commands
 		{
 			var isOperator = UserTools.Validate(command.Sender);
 
-			if (!commandBuilders.ContainsKey(command.Sender.Nick))
+			if (!commandBuilders.ContainsKey(command.Sender.Nickname))
 			{
-				commandBuilders.Add(command.Sender.Nick, new StringBuilder());
+				commandBuilders.Add(command.Sender.Nickname, new StringBuilder());
 			}
 
 			if (command.FullArgument == null)
@@ -113,14 +113,13 @@ namespace BaggyBot.Commands
 			}
 			if (command.FullArgument.StartsWith("--"))
 			{
-				command.FullArgument = command.FullArgument.Substring(2);
-				ProcessControlCommand(command);
+				ProcessControlCommand(CommandArgs.FromPrevious(command.Command, command.FullArgument.Substring(2), command));
 				return;
 			}
 
 			try
 			{
-				var fullInput = commandBuilders[command.Sender.Nick] + " " + command.FullArgument;
+				var fullInput = commandBuilders[command.Sender.Nickname] + " " + command.FullArgument;
 				fullInput = fullInput.TrimStart();
 				bool resultSet;
 				object result;
@@ -130,7 +129,7 @@ namespace BaggyBot.Commands
 				{
 					var output = CodeFormatter.PrettyPrint(result);
 					command.ReturnMessage("--> " + output);
-					commandBuilders[command.Sender.Nick].Clear();
+					commandBuilders[command.Sender.Nickname].Clear();
 				}
 				else if (input == null)
 				{
@@ -146,11 +145,11 @@ namespace BaggyBot.Commands
 					{
 						command.ReturnMessage("Done (No result)");
 					}
-					commandBuilders[command.Sender.Nick].Clear();
+					commandBuilders[command.Sender.Nickname].Clear();
 				}
 				else
 				{
-					commandBuilders[command.Sender.Nick].Append(input);
+					commandBuilders[command.Sender.Nickname].Append(input);
 					command.ReturnMessage(">>>");
 				}
 			}

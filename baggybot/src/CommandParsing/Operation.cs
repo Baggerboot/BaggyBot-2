@@ -168,7 +168,7 @@ namespace BaggyBot.CommandParsing
 		{
 			var result = BuildDefaultResult(operationName);
 
-			if (!components.Any())
+			if (components == null || !components.Any())
 			{
 				return result;
 			}

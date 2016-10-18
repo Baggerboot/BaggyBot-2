@@ -12,6 +12,12 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
+			if (command.Args.Length < 2)
+			{
+				InformUsage(command);
+				return;
+			}
+
 			var method = command.Args[0].ToUpper();
 			var url = command.Args[1];
 			if (url.StartsWith("file://"))

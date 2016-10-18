@@ -3,14 +3,14 @@ using System;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using BaggyBot.DataProcessors.Mapping;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using IRCSharp.IRC;
-using IrcMessage = BaggyBot.MessagingInterface.IrcMessage;
-using IrcUser = BaggyBot.MessagingInterface.IrcUser;
 
 namespace BaggyBot.DataProcessors
 {
-	internal class IrcEventHandler
+	internal class ChatClientEventHandler
 	{
 		// Not all logged events can be accurately represented as messages that were sent to channels.
 		// In such cases, the channel name will instead be set to one of the following values.
@@ -42,60 +42,31 @@ namespace BaggyBot.DataProcessors
 			"250" /*RPL_STATSCONN*/
 		};
 
-		public IrcEventHandler(CommandHandler commandHandler, StatsHandler statsHandler)
+		public ChatClientEventHandler(CommandHandler commandHandler, StatsHandler statsHandler)
 		{
 			this.commandHandler = commandHandler;
 			this.statsHandler = statsHandler;
 		}
-
-
-
-		// This is what we call a God Method. It's like a God Object, only it's a method.
-		// It does way too fucking much, this really needs to be cleaned up sometime.
-		// TODO: Clean up ProcessMessage()
-		internal void ProcessMessage(IrcMessage message)
+		
+		internal void ProcessMessage(ChatMessage message)
 		{
 			recentMessages.Enqueue(message.Message);
 
 			// Display the message in the log
 			if (message.Action)
 			{
-				Logger.Log(this, $"*{message.Sender.Nick} {message.Message}*", LogLevel.Message);
+				Logger.Log(this, $"*{message.Sender.Nickname} {message.Message}*", LogLevel.Message);
 			}
 			else
 			{
-				Logger.Log(this, message.Sender.Nick + ": " + message.Message, LogLevel.Message);
+				Logger.Log(this, message.Sender.Nickname + ": " + message.Message, LogLevel.Message);
 			}
-
-			// TODO: The usefulness of this is rather doubtful. Probably it should just be removed.
-			// For now, we'll simply disable it.
-			/*// Perform simple substitution: s/word/replacement
-			var rgx = new Regex(@"^s\/([^\/]{1,})\/([^\/]*)", RegexOptions.IgnoreCase);
-			Match match;
-			if ((match = rgx.Match(message.Message)).Success)
-			{
-				var needle = match.Groups[1].Value;
-				var replacement = match.Groups[2].Value;
-
-				var haystack = Enumerable.Reverse(recentMessages.ToArray()).First(msg => msg.Contains(needle) && msg != message.Message);
-
-				ircInterface.SendMessage(message.Channel, message.Sender.Nick + ", " + haystack.Replace(needle, replacement));
-				return;
-			}*/
-
+			
 			// TODO: Process query console messages directly inside the commandhandler
-			// It is obvious now that the CommandHandler class will have to parse all messages, and determine for itself whether it needs to act on them or not.
-			// Handle query console messages
-			/*if (ControlVariables.QueryConsole && message.Channel == ConfigManager.Config.Operators.First().Nick && !message.Message.StartsWith("-py"))
-			{
-				Logger.Log(this, "Processing Query Console python command");
-				message.Message = "-py " + message.Message;
-				commandHandler.ProcessMessage(message);
-				return;
-			}*/
 
-			// Handle regular commands and messages
-			if (message.Message.StartsWith(Bot.CommandIdentifier))
+			// Either process the message as a command, or as a message for which statistics should be generated.
+			// In other words, commands do not end up in the stats DB.
+			if(Bot.CommandIdentifiers.Any(identifier => message.Message.StartsWith(identifier)))
 			{
 				commandHandler.ProcessMessage(message);
 			}
@@ -105,10 +76,10 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		internal void ProcessNotice(IrcUser sender, string notice)
+		internal void ProcessNotice(ChatUser sender, string notice)
 		{
 			Logger.Log(this, notice, LogLevel.Irc);
-			sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, CHANNEL_NOTICE, sender.Nick, notice);
+			sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, CHANNEL_NOTICE, sender.Nickname, notice);
 		}
 
 		/// <summary>
@@ -116,6 +87,7 @@ namespace BaggyBot.DataProcessors
 		/// </summary>
 		internal void ProcessFormattedLine(IrcLine line)
 		{
+			//TODO: where's the nickserv code gone?
 			// This IRC server does not have a NickServ service.
 			/*if (line.Command.Equals("401") && ircInterface.HasNickservCall && line.FinalArgument.ToLower().Contains("nickserv: no such nick"))
 			{
@@ -175,34 +147,34 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		internal void HandleJoin(IrcUser user, string channel)
+		internal void HandleJoin(ChatUser user, ChatChannel channel)
 		{
 			var message = $"{user} has joined {channel}";
 			DisplayEvent(message, user, channel);
 		}
-		internal void HandlePart(IrcUser user, string channel)
+		internal void HandlePart(ChatUser user, ChatChannel channel)
 		{
 			var message = $"{user} has left {channel}";
 			DisplayEvent(message, user, channel);
 		}
-		internal void HandleKick(string kickee, string channel, string reason, IrcUser kicker)
+		internal void HandleKick(ChatUser kickee, ChatChannel channel, string reason, ChatUser kicker)
 		{
-			var message = $"{kickee} was kicked by {kicker.Nick} from {channel} ({reason})";
+			var message = $"{kickee} was kicked by {kicker.Nickname} from {channel} ({reason})";
 			DisplayEvent(message, kicker, channel);
 		}
-		internal void HandleNickChange(IrcUser user, string newNick)
+		internal void HandleNickChange(ChatUser user, ChatUser newNick)
 		{
-			var message = $"{user.Nick} is now known as {newNick}";
-			user.Client.StatsDatabase.HandleNickChange(user, newNick);
-			DisplayEvent(message, user, CHANNEL_NICK_CHANGE);
+			var message = $"{user.Nickname} is now known as {newNick.Nickname}";
+			user.Client.StatsDatabase.UpdateUser(newNick);
+			DisplayEvent(message, user, new ChatChannel(CHANNEL_NICK_CHANGE));
 		}
-		internal void DisplayEvent(string message, IrcUser sender, string channel)
+		internal void DisplayEvent(string message, ChatUser sender, ChatChannel channel)
 		{
 			Logger.Log(this, message, LogLevel.Irc);
 			if (sender.Client.StatsDatabase.ConnectionState == ConnectionState.Open)
 			{
-				var uid = sender.Client.StatsDatabase.GetIdFromUser(sender);
-				sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, uid, channel, "NOTICE", message);
+				var uid = sender.Client.StatsDatabase.MapUser(sender).Id;
+				sender.Client.StatsDatabase.AddIrcMessage(DateTime.Now, uid, channel.Identifier, "NOTICE", message);
 			}
 		}
 
@@ -211,9 +183,9 @@ namespace BaggyBot.DataProcessors
 			Logger.Log(this, "--" + line, LogLevel.Irc);
 		}
 
-		internal void HandleQuit(IrcUser user, string reason)
+		internal void HandleQuit(ChatUser user, string reason)
 		{
-			DisplayEvent(user + " has quit (" + reason + ")", user, CHANNEL_QUIT);
+			DisplayEvent(user + " has quit (" + reason + ")", user, new ChatChannel(CHANNEL_QUIT));
 		}
 	}
 }

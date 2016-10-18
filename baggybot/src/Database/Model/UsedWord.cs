@@ -13,5 +13,8 @@ namespace BaggyBot.Database.Model
 
 		[Column(Name = "uses"), NotNull]
 		public int Uses { get; set; }
+
+		[Column(Name="is_ignored"), NotNull]
+		public bool IsIgnored { get; set; }
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using BaggyBot.MessagingInterface;
-using IRCSharp;
+using BaggyBot.Plugins;
 
 namespace BaggyBot.Commands
 {
@@ -9,22 +9,22 @@ namespace BaggyBot.Commands
 		public string Command { get; private set; }
 		// TODO: CommandArgs.Args should be made into a get-only accessor.
 		public string[] Args { get; set; }
-		public IrcUser Sender { get;}
-		public string Channel { get;}
-		// TODO: CommandArgs.FullArgument should be made into a get-only accessor.
-		public string FullArgument { get; set; }
-		public IrcClientWrapper Client => Sender.Client;
+		public ChatUser Sender { get;}
+		public ChatChannel Channel { get;}
+		public string FullArgument { get; }
+		public Plugin Client { get; }
 
 		/// <summary>
 		/// Creates a new CommandArgs object, containing information about a command invocation.
 		/// </summary>
 		/// <param name="command">The name of the requested command.</param>
 		/// <param name="args">An array of arguments to be passed to the command.</param>
-		/// <param name="sender">The <see cref="IrcUser"/> who sent the command.</param>
+		/// <param name="sender">The <see cref="ChatUser"/> who sent the command.</param>
 		/// <param name="channel">The channel the command was sent in.</param>
 		/// <param name="fullArgument">All arguments that were passed to the command, as a single string.</param>
-		public CommandArgs(string command, string[] args, IrcUser sender, string channel, string fullArgument)
+		public CommandArgs(Plugin client, string command, string[] args, ChatUser sender, ChatChannel channel, string fullArgument)
 		{
+			Client = client;
 			Command = command;
 			Args = args;
 			Sender = sender;
@@ -46,6 +46,7 @@ namespace BaggyBot.Commands
 		/// <returns></returns>
 		public static CommandArgs FromPrevious(string newCommand, CommandArgs context)
 		{
+			// TODO: this should probably be dropped
 			var line = newCommand.Substring(1);
 
 			var args = line.Split(' ');
@@ -53,9 +54,15 @@ namespace BaggyBot.Commands
 			args = args.Skip(1).ToArray();
 
 			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
+			return new CommandArgs(context.Client, command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
 		}
 		
+		public static CommandArgs FromPrevious(string newCommand, string newArguments, CommandArgs context)
+		{
+			var args = newArguments.Split(' ');
+			return new CommandArgs(context.Client, newCommand, args, context.Sender, context.Channel, newArguments);
+		}
+
 		/// <summary>
 		/// Generates a new CommandArgs object from an IRC message. Assumes that the
 		/// first character of the message is the command identifier and removes it.
@@ -64,9 +71,9 @@ namespace BaggyBot.Commands
 		/// </summary>
 		/// <param name="message">The IRC message from which the command should be
 		/// constructed.</param>
-		/// <returns>A CommandArgs object generated from the supplied IrcMessage.
+		/// <returns>A CommandArgs object generated from the supplied ChatMessage.
 		/// </returns>
-		public static CommandArgs FromMessage(IrcMessage message)
+		public static CommandArgs FromMessage(ChatMessage message)
 		{
 			var line = message.Message.Substring(1);
 
@@ -75,7 +82,7 @@ namespace BaggyBot.Commands
 			args = args.Skip(1).ToArray();
 
 			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
+			return new CommandArgs(message.Client, command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
 		}
 
 		/// <summary>
@@ -89,8 +96,8 @@ namespace BaggyBot.Commands
 		/// the status of the message that was sent.</returns>
 		public MessageSendResult Reply(string format, params object[] args)
 		{
-			var message = Sender.Nick + ", " + string.Format(format, args);
-			return Sender.Client.SendMessage(Channel, message);
+			var message = Sender.AddressableName + ", " + string.Format(format, args);
+			return Client.SendMessage(Channel, message);
 		}
 
 		/// <summary>
@@ -103,7 +110,7 @@ namespace BaggyBot.Commands
 		/// the status of the message that was sent.</returns>
 		public MessageSendResult ReturnMessage(string format, params object[] args)
 		{
-			return Sender.Client.SendMessage(Channel, args.Length == 0 ? format : string.Format(format, args));
+			return Client.SendMessage(Channel, args.Length == 0 ? format : string.Format(format, args));
 		}
 	}
 }

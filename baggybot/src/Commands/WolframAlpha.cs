@@ -129,8 +129,10 @@ namespace BaggyBot.Commands
 
 			var appid = ConfigManager.Config.Integrations.WolframAlpha.AppId;
 
-			var uri =
-				$"http://api.wolframalpha.com/v2/query?appid={appid}&input={Uri.EscapeDataString(command.FullArgument)}&ip={command.Sender.Hostmask}&format=plaintext&units=metric";
+
+			var uri = $"http://api.wolframalpha.com/v2/query?appid={appid}&input={Uri.EscapeDataString(command.FullArgument)}&format=plaintext&units=metric";
+			// TODO: find out a way to get a user's IP address from their messages when it makes sense
+			//var uri = $"http://api.wolframalpha.com/v2/query?appid={appid}&input={Uri.EscapeDataString(command.FullArgument)}&ip={command.Sender.Hostmask}&format=plaintext&units=metric";
 			//var escaped = Uri.EscapeDataString(uri);
 
 			var rq = WebRequest.Create(uri);

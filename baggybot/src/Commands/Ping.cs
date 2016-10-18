@@ -40,7 +40,16 @@ namespace BaggyBot.Commands
 			{
 				var target = command.Args[0];
 
-				var reply = new System.Net.NetworkInformation.Ping().Send(target);
+				PingReply reply;
+				try
+				{
+					reply = new System.Net.NetworkInformation.Ping().Send(target);
+				}
+				catch (PingException e)
+				{
+					command.ReturnMessage($"Unable to ping {target}: {e.InnerException.Message}");
+					return;
+				}
 
 				if (reply.Status == IPStatus.Success)
 				{

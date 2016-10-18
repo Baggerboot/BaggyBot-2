@@ -67,7 +67,7 @@ namespace BaggyBot.Commands
 
 		protected override void GetBuffer(CommandArgs command)
 		{
-			command.ReturnMessage($"{command.Sender.Nick}, \"{commandBuilder}\"");
+			command.ReturnMessage($"{command.Sender.Nickname}, \"{commandBuilder}\"");
 		}
 
 		/// <summary>
@@ -77,7 +77,7 @@ namespace BaggyBot.Commands
 		/// <returns>True if the user is allowed to execute the command, false if only the bot operator may execute it.</returns>
 		private bool RestrictionsCheck(CommandArgs command)
 		{
-			if (!command.Channel.StartsWith("#"))
+			if (command.Channel.IsPrivateMessage)
 			{
 				command.ReturnMessage("Only the bot operator is allowed to execute Python code in non-channels");
 				return false;
@@ -90,7 +90,7 @@ namespace BaggyBot.Commands
 			if (Security == InterpreterSecurity.Notify)
 			{
 				// Do not return anything yet, but do notify the bot operator.
-				bot.NotifyOperator("-py used by " + command.Sender.Nick + ": " + command.FullArgument);
+				bot.NotifyOperator("-py used by " + command.Sender.Nickname + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
 			{
@@ -132,8 +132,7 @@ namespace BaggyBot.Commands
 			{
 				if (command.FullArgument.StartsWith("--"))
 				{
-					command.FullArgument = command.FullArgument.Substring(2);
-					ProcessControlCommand(command);
+					ProcessControlCommand(CommandArgs.FromPrevious(command.Command, command.FullArgument.Substring(2), command));
 					return;
 				}
 				if (command.FullArgument.EndsWith(":") || command.FullArgument.StartsWith("    "))

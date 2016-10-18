@@ -3,30 +3,35 @@ using BaggyBot.DataProcessors;
 using BaggyBot.Tools;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Hosting;
 using System.Threading;
+using BaggyBot.InternalPlugins.Curse;
+using BaggyBot.InternalPlugins.Discord;
+using BaggyBot.InternalPlugins.Irc;
+using BaggyBot.InternalPlugins.Slack;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Monitoring.Diagnostics;
+using BaggyBot.Plugins;
+using Microsoft.Scripting.Utils;
 
 namespace BaggyBot
 {
 	public sealed partial class Bot : IDisposable
 	{
-		// Manages multiple IRC Clients by handling events and forwarding messages
-		private readonly IrcClientManager ircClientManager;
-		//private IrcClient clientWrapper;
-		// Provides an interface to the IRC client for sending data
-		//private readonly IrcInterface ircInterface;
-		// Handles IRC events, passing them on the the appropriate data processors if neccessary
-		//private readonly IrcEventHandler ircEventHandler;
+		// Manages multiple chat clients by handling events and forwarding messages
+		private readonly ChatClientManager chatClientManager;
 		// Collects performance statistics
 		private readonly BotDiagnostics botDiagnostics;
 
 		// Any message prefixed with this character will be interpreted as a command
-		public const string CommandIdentifier = "-";
+		public static string[] CommandIdentifiers = {"-", "/"};
 		// Version number of the database. This is checked against the 'version' key in the metadata table,
 		// and a database upgrade is attempted if they do not match.
-		public const string DatabaseVersion = "1.2.2";
+		public const string DatabaseVersion = "2.0";
 		public const string ConfigVersion = "0.1";
 
 		public bool QuitRequested
@@ -68,20 +73,13 @@ namespace BaggyBot
 			ConfigManager.Config.Metadata.BotVersion = Version;
 			Logger.Log("");*/
 			
-			ircClientManager = new IrcClientManager(new IrcEventHandler(new CommandHandler(this), new StatsHandler()));
+			chatClientManager = new ChatClientManager(new ChatClientEventHandler(new CommandHandler(this), new StatsHandler()));
 			botDiagnostics = new BotDiagnostics(this);
-
-			//ircEventHandler = new IrcEventHandler(dataFunctionSet, ircInterface, this);
 		}
 
 		public void NotifyOperator(string message)
 		{
-			ircClientManager.NotifyOperators(message);
-		}
-		
-		~Bot()
-		{
-			Debugger.Break();
+			chatClientManager.NotifyOperators(message);
 		}
 
 		public void OnPostConnect()
@@ -100,7 +98,7 @@ namespace BaggyBot
 		public void Dispose()
 		{
 			botDiagnostics.Dispose();
-			ircClientManager.Dispose();
+			chatClientManager.Dispose();
 		}
 
 		private void EnterMainLoop()
@@ -110,52 +108,19 @@ namespace BaggyBot
 				Thread.Sleep(1000);
 			}
 			Logger.Log(this, "Preparing to shut down", LogLevel.Info);
-			ircClientManager.Disconnect("Shutting down");
-			ircClientManager.Dispose();
+			chatClientManager.Disconnect("Shutting down");
+			chatClientManager.Dispose();
 			Logger.Log(this, "Disposed SQL server connection object", LogLevel.Info);
 			Logger.Dispose();
 			Console.WriteLine("Goodbye.");
 			Environment.Exit(0);
 		}
 
-		private void TryConnectIrc(ServerCfg server)
-		{
-			if (!ircClientManager.ConnectIrc(server))
-			{
-				Logger.Log(this, "FATAL: IRC Connection failed. Application will now exit.", LogLevel.Error);
-				Shutdown();
-			}
-			ircClientManager[server.ServerName].JoinChannels(server.AutoJoinChannels);
-		}
-
-		/*private void JoinInitialChannels(string[] channels)
-		{
-			foreach (var channel in channels)
-			{
-				// NOTE: Join might fail if the server does not accept JOIN commands before it has sent the entire MOTD to the client
-				if (string.IsNullOrWhiteSpace(channel))
-				{
-					Logger.Log(this, $"Unable to join {channel}: invalid channel name.", LogLevel.Error);
-				}
-				else
-				{
-					if (ircInterface.JoinChannel(channel))
-					{
-						Logger.Log(this, $"Ready to collect statistics in {channel}.", LogLevel.Info);
-					}
-					else
-					{
-						Logger.Log(this, $"Auto-joining {channel} failed.");
-					}
-				}
-			}
-		}*/
-
 		public void Connect(ServerCfg[] servers)
 		{
 			foreach (var server in servers)
 			{
-				TryConnectIrc(server);
+				TryConnect(server);
 			}
 
 			OnPostConnect();
@@ -165,6 +130,74 @@ namespace BaggyBot
 				NotifyOperator($"Succesfully updated from version {previousVersion} to version {Version}");
 			}
 			EnterMainLoop();
+		}
+
+		private void TryConnect(ServerCfg server)
+		{
+			if (server.ServerType == "irc")
+			{
+				if (!chatClientManager.ConnectUsingPlugin(server, new IrcPlugin(server)))
+				{
+					Logger.Log(this, "FATAL: IRC connection failed. Application will now exit.", LogLevel.Error);
+					Shutdown();
+				}
+			}
+			else if (server.ServerType == "slack")
+			{
+				if (!chatClientManager.ConnectUsingPlugin(server, new SlackPlugin(server)))
+				{
+					Logger.Log(this, "FATAL: Slack connection failed. Application will now exit.", LogLevel.Error);
+					Shutdown();
+				}
+			}
+			else if (server.ServerType == "discord")
+			{
+				if (!chatClientManager.ConnectUsingPlugin(server, new DiscordPlugin(server)))
+				{
+					Logger.Log(this, "FATAL: Discord connection failed. Application will now exit.", LogLevel.Error);
+					Shutdown();
+				}
+			}
+			else if (server.ServerType == "curse")
+			{
+				if (!chatClientManager.ConnectUsingPlugin(server, new CursePlugin(server)))
+				{
+					Logger.Log(this, "FATAL: Curse connection failed. Application will now exit.", LogLevel.Error);
+					Shutdown();
+				}
+			}
+			else
+			{
+				Logger.Log(this, $"Attempting to load a plugin for server type '{server.ServerType}'");
+				Directory.CreateDirectory("plugins");
+
+				bool success = false;
+				foreach (var dll in Directory.GetFiles("plugins", "*.dll", SearchOption.TopDirectoryOnly))
+				{
+					var loadedDll = Assembly.LoadFile(Path.GetFullPath(dll));
+					foreach (var type in loadedDll.GetExportedTypes().Where(type => typeof(Plugin).IsAssignableFrom(type)))
+					{
+						// Matching type found, create an instance of it
+						var instance = (Plugin)Activator.CreateInstance(type, server);
+
+						chatClientManager.ConnectUsingPlugin(server, (Plugin)instance);
+						success = true;
+						break;
+					}
+					if (success) break;
+				}
+				if (!success)
+				{
+					Logger.Log(this, $"Unable to find a plugin for server type '{server.ServerType}'. The server connection {server.ServerName} will be skipped.", LogLevel.Error);
+					return;
+				}
+
+			}
+
+			foreach (var channel in server.AutoJoinChannels)
+			{
+				chatClientManager[server.ServerName].JoinChannel(new ChatChannel(channel));
+			}
 		}
 
 		public static void ShutdownNow()
@@ -182,6 +215,12 @@ namespace BaggyBot
 
 		public static void Main(string[] args)
 		{
+			Console.BufferWidth = 160;
+			Console.WindowWidth = 160;
+			Console.BufferHeight = 200;
+
+			AppDomain.CurrentDomain.AppendPrivatePath(@"plugins");
+
 			// TODO: parse program arguments
 			/*var parser = new CommandParser(new Operation()
 				.AddKey("config", "baggybot-settings.yaml", 'c')

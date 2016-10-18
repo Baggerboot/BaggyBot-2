@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using BaggyBot.Commands.Interpreters.Brainfuck;
+using BaggyBot.Formatting;
 
 namespace BaggyBot.Commands
 {
@@ -7,7 +8,7 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "<brainfuck code>";
-		public override string Description => "Executes the given Brainfuck code and prints its result to IRC. The interpreter additionally supports reading/writing a single register with `r` and `w`.";
+		public override string Description => $"Executes the given Brainfuck code and prints its result to IRC. The interpreter additionally supports reading/writing a single register with {Frm.C}r{Frm.C} and {Frm.C}w{Frm.C}.";
 
 		private readonly BrainfuckInterpreter interpreter = new BrainfuckInterpreter();
 

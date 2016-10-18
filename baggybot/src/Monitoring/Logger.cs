@@ -138,6 +138,14 @@ namespace BaggyBot.Monitoring
 			}
 		}
 
+		internal static void Assert(bool condition, string description)
+		{
+			if (!condition)
+			{
+				Log(null, $"Assert \"{description}\" failed: ", LogLevel.Error);
+			}
+		}
+
 		private static void WriteToLogFile(StringBuilder lineBuilder, bool writeLine)
 		{
 			if (disposed) return;

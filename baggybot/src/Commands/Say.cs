@@ -8,6 +8,11 @@
 
 		public override void Use(CommandArgs command)
 		{
+			if (command.FullArgument == null)
+			{
+				InformUsage(command);
+				return;
+			}
 			command.ReturnMessage(command.FullArgument);
 		}
 	}

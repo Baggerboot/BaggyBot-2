@@ -35,6 +35,7 @@ namespace BaggyBot.DataProcessors
 				{"reconnect", new Reconnect()},
 				{"rdns", new ResolveReverse()},
 				{"regen", new RegenerateGraphs()},
+				{"reset", new ResetDb()},
 				{"resolve", new Resolve()},
 				{"say", new Say()},
 				{"search", new Search()},
@@ -65,10 +66,11 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		public void ProcessMessage(IrcMessage message)
+		public void ProcessMessage(ChatMessage message)
 		{
 			Logger.Log(this, "Processing command: " + message.Message);
-			if (message.Message.Equals(Bot.CommandIdentifier)) return;
+
+			if(Bot.CommandIdentifiers.Any(id => id == message.Message)) return;
 
 			var cmdInfo = CommandArgs.FromMessage(message);
 			ProcessCommand(cmdInfo);
@@ -90,7 +92,7 @@ namespace BaggyBot.DataProcessors
 					var value = cmdInfo.Args.ToList();
 					value.Insert(1, "say");
 					((Alias)commands["alias"]).Use(
-						new CommandArgs("alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value)));
+						new CommandArgs(cmdInfo.Client, "alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value)));
 				}
 				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Client.StatsDatabase, cmdInfo.Command))
 				{
@@ -105,8 +107,8 @@ namespace BaggyBot.DataProcessors
 					}
 					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
 
-					ProcessCommand(CommandArgs.FromMessage(new IrcMessage(cmdInfo.Client, cmdInfo.Sender, cmdInfo.Channel, "-" + aliasedCommand)));
-					//ProcessCommand(new IrcMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.ReplyCallback, message.Action));
+					ProcessCommand(CommandArgs.FromMessage(new ChatMessage(cmdInfo.Client, cmdInfo.Sender, cmdInfo.Channel, "-" + aliasedCommand)));
+					//ProcessCommand(new ChatMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.ReplyCallback, message.Action));
 				}
 				return;
 			}

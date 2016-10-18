@@ -23,7 +23,8 @@ namespace BaggyBot.CommandParsing
 		{
 			if (arguments == null)
 			{
-				return new OperationResult("default");
+				return operations["default"].Parse(null, "default", null);
+				//return new OperationResult("default");
 			}
 
 			var components = new List<CommandComponent>();

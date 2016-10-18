@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
@@ -14,7 +15,7 @@ namespace BaggyBot.Commands
 		public override void Use(CommandArgs command)
 		{
 			var uri = new Uri(
-				$"http://en.wikipedia.org/w/api.php?format=json&action=query&titles={command.FullArgument}&prop=revisions&rvprop=content");
+				$"http://en.wikipedia.org/w/api.php?format=json&action=query&titles={command.FullArgument}&prop=info&inprop=url");
 
 			var rq = WebRequest.Create(uri);
 			var response = rq.GetResponse();
@@ -23,8 +24,27 @@ namespace BaggyBot.Commands
 			{
 				var data = sr.ReadToEnd();
 				dynamic jsonObj = JObject.Parse(data);
-				Console.WriteLine("Title: " + jsonObj.query.pages[0].title);
+
+				var page = ((JObject)jsonObj.query.pages).First.First;
+
+				var title = page["title"];
+
+
+				command.ReturnMessage($"{title} ({page["canonicalurl"]}): {GetContent(page["canonicalurl"].ToString())}");
 			}
+		}
+
+		private string GetContent(string url)
+		{
+			var rq = WebRequest.Create(url + "?action=render");
+			var rs = rq.GetResponse();
+			var doc = new HtmlDocument();
+			doc.Load(rs.GetResponseStream());
+
+			var firstParagraph = doc.DocumentNode.SelectSingleNode("/p[1]");
+
+			return firstParagraph.InnerText;
+
 		}
 	}
 }

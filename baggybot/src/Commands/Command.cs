@@ -1,4 +1,6 @@
-﻿namespace BaggyBot.Commands
+﻿using System.Linq;
+
+namespace BaggyBot.Commands
 {
 	public abstract class Command
 	{
@@ -10,7 +12,7 @@
 
 		public void InformUsage(CommandArgs cmd)
 		{
-			cmd.Reply($"usage: {Bot.CommandIdentifier}{cmd.Command} {Usage} -- {Description}");
+			cmd.Reply($"usage: {Bot.CommandIdentifiers.First()}{cmd.Command} {Usage} -- {Description}");
 		}
 	}
 }

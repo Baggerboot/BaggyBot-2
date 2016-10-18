@@ -15,6 +15,8 @@
     <TargetFrameworkProfile />
     <ProductVersion>12.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -30,11 +32,9 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>false</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -82,7 +82,34 @@
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Discord.Net, Version=0.9.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Discord.Net.0.9.6\lib\net45\Discord.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.4.9.5\lib\Net45\HtmlAgilityPack.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="IronPython, Version=2.7.5.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\IronPython.2.7.5\lib\Net45\IronPython.dll</HintPath>
       <Private>True</Private>
@@ -115,13 +142,32 @@
       <HintPath>..\packages\Mono.CSharp.4.0.0.143\lib\4.5\Mono.CSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nito.AsyncEx, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Concurrent, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.Concurrent.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Enlightenment, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.Enlightenment.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Npgsql, Version=3.0.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SlackAPI, Version=1.0.4.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SlackAPI.1.0.5.1\lib\net45\SlackAPI.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -133,6 +179,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="YamlDotNet, Version=3.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\YamlDotNet.3.8.0\lib\net35\YamlDotNet.dll</HintPath>
       <Private>True</Private>
@@ -140,6 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Commands\GoogleSearch.cs" />
+    <Compile Include="src\Commands\ResetDb.cs" />
     <Compile Include="src\Configuration\Backend.cs" />
     <Compile Include="src\Configuration\Configuration.cs" />
     <Compile Include="src\Configuration\Identity.cs" />
@@ -152,11 +203,35 @@
     <Compile Include="src\Configuration\ServerCfg.cs" />
     <Compile Include="src\Configuration\WolframAlpha.cs" />
     <Compile Include="src\CommandParsing\CommandComponent.cs" />
+    <Compile Include="src\Database\CorruptedDatabaseException.cs" />
     <Compile Include="src\DataProcessors\IMessageHandler.cs" />
-    <Compile Include="src\MessagingInterface\IrcClientManager.cs" />
-    <Compile Include="src\MessagingInterface\IrcMessage.cs" />
-    <Compile Include="src\MessagingInterface\IrcClientWrapper.cs" />
-    <Compile Include="src\MessagingInterface\IrcUser.cs" />
+    <Compile Include="src\DataProcessors\Mapping\DbMappedMessage.cs" />
+    <Compile Include="src\DataProcessors\Mapping\DbMappedUser.cs" />
+    <Compile Include="src\Formatting\Formatting.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\CurseApi.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\CurseClient.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\LoginResponse.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\LoginSession.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\RequestObject.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\SessionResponse.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\User.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\WebSocketSession.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketApi.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\LoginRequest.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CursePlugin.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\MessageType.cs" />
+    <Compile Include="src\InternalPlugins\Curse\CurseApi\ExtensionMethods\WebSocketExtensions.cs" />
+    <Compile Include="src\InternalPlugins\Discord\DiscordExtensionMethods.cs" />
+    <Compile Include="src\InternalPlugins\Discord\DiscordPlugin.cs" />
+    <Compile Include="src\InternalPlugins\Irc\IrcChatUser.cs" />
+    <Compile Include="src\InternalPlugins\Slack\SlackMessageFormatter.cs" />
+    <Compile Include="src\InternalPlugins\Slack\SlackPlugin.cs" />
+    <Compile Include="src\MessagingInterface\ChatChannel.cs" />
+    <Compile Include="src\MessagingInterface\IChatClient.cs" />
+    <Compile Include="src\MessagingInterface\ChatClientManager.cs" />
+    <Compile Include="src\MessagingInterface\ChatMessage.cs" />
+    <Compile Include="src\InternalPlugins\Irc\IrcPlugin.cs" />
+    <Compile Include="src\MessagingInterface\ChatUser.cs" />
     <Compile Include="src\Monitoring\Diagnostics\BotDiagnostics.cs" />
     <Compile Include="src\Collections\Generic\FixedSizeConcurrentQueue.cs" />
     <Compile Include="src\CommandParsing\ArgumentList.cs" />
@@ -210,7 +285,16 @@
     <Compile Include="src\Database\Upgrades\DatabaseUpgrader.cs" />
     <Compile Include="src\DataProcessors\CommandHandler.cs" />
     <Compile Include="src\Commands\CommandArgs.cs" />
+    <Compile Include="src\Plugins\DisconnectReason.cs" />
+    <Compile Include="src\Plugins\Events.cs" />
+    <Compile Include="src\Plugins\MessageFormatters\IMessageFormatter.cs" />
+    <Compile Include="src\Plugins\MessageFormatters\MarkdownMessageFormatter.cs" />
+    <Compile Include="src\Plugins\Plugin.cs" />
+    <Compile Include="src\Plugins\MessageSendResult.cs" />
+    <Compile Include="src\Tools\BingSearchContainer.cs" />
+    <Compile Include="src\Tools\PluginWrapper.cs" />
     <Compile Include="src\Version.cs" />
+    <None Include="app.config" />
     <None Include="src\Commands\Example.cs" />
     <Compile Include="src\Commands\Feature.cs" />
     <Compile Include="src\Commands\Get.cs" />
@@ -232,7 +316,7 @@
     <Compile Include="src\Database\StatsDatabaseManager.cs" />
     <Compile Include="src\EmbeddedData\Emoticons.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
-    <Compile Include="src\DataProcessors\IrcEventHandler.cs" />
+    <Compile Include="src\DataProcessors\ChatClientEventHandler.cs" />
     <Compile Include="src\Monitoring\Logger.cs" />
     <Compile Include="src\EmbeddedData\Messages.cs" />
     <Compile Include="src\Monitoring\Diagnostics\PerformanceLogger.cs" />
