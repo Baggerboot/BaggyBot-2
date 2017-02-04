@@ -102,10 +102,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Curse.NET, Version=0.1.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Curse.NET.0.1.4\lib\net45\Curse.NET.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Discord.Net, Version=0.9.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Discord.Net.0.9.6\lib\net45\Discord.Net.dll</HintPath>
       <Private>True</Private>
@@ -371,6 +367,10 @@
     <ProjectReference Include="..\csnetlib2\CsNetLib2\CsNetLib2.csproj">
       <Project>{68170802-5de7-4f66-99c7-136b3c7dd93c}</Project>
       <Name>CsNetLib2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Curse.NET\Curse.NET\Curse.NET.csproj">
+      <Project>{de4f3c8f-749d-4d26-a481-5ab8a5293622}</Project>
+      <Name>Curse.NET</Name>
     </ProjectReference>
     <ProjectReference Include="..\ircsharp\IRCSharp\IRCSharp.csproj">
       <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
