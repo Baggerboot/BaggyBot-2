@@ -20,7 +20,7 @@ namespace BaggyBot.InternalPlugins.Curse.CurseApi.SocketModel
 		{
 			return new SocketRequest
 			{
-				TypeID = MessageType.LoginRequest,
+				TypeID = RequestType.Login,
 				Body = new LoginRequest
 				{
 					ClientVersion = "7.0.140",
@@ -30,16 +30,5 @@ namespace BaggyBot.InternalPlugins.Curse.CurseApi.SocketModel
 				}
 			};
 		}
-	}
-
-	public abstract class RequestBody
-	{
-		public int Status { get; set; } = 1;
-	}
-
-	public class SocketRequest
-	{
-		public MessageType TypeID { get; set; }
-		public RequestBody Body { get; set; }
 	}
 }

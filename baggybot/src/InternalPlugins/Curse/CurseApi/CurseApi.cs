@@ -14,6 +14,7 @@ namespace BaggyBot.InternalPlugins.Curse.CurseApi
 	{
 		public string AuthToken { get; set; }
 
+
 		public T Post<T>(string url, string payload)
 		{
 			var rq = WebRequest.CreateHttp(url);
@@ -31,7 +32,8 @@ namespace BaggyBot.InternalPlugins.Curse.CurseApi
 			}
 		}
 
-		public T Post<T>(string url, RequestObject obj)
+
+		public string Post(string url, RequestObject obj)
 		{
 			var rq = WebRequest.CreateHttp(url);
 			rq.Method = "POST";
@@ -44,7 +46,31 @@ namespace BaggyBot.InternalPlugins.Curse.CurseApi
 			var response = rq.GetResponse();
 			using (var reader = new StreamReader(response.GetResponseStream()))
 			{
-				return JsonConvert.DeserializeObject<T>(reader.ReadToEnd());
+				return reader.ReadToEnd();
+			}
+		}
+
+		public T Post<T>(string url, RequestObject obj)
+		{
+			return JsonConvert.DeserializeObject<T>(Post(url, obj));
+		}
+
+		public T Get<T>(string url)
+		{
+			return JsonConvert.DeserializeObject<T>(Get(url));
+		}
+
+		public string Get(string url)
+		{
+			var rq = WebRequest.CreateHttp(url);
+			rq.Method = "GET";
+			rq.ContentType = "application/json";
+			rq.Headers["AuthenticationToken"] = AuthToken;
+			var response = rq.GetResponse();
+			using (var reader = new StreamReader(response.GetResponseStream()))
+			{
+				var responseText = reader.ReadToEnd();
+				return responseText;
 			}
 		}
 	}

@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using BaggyBot.Configuration;
 using BaggyBot.InternalPlugins.Curse.CurseApi;
-using BaggyBot.InternalPlugins.Curse.CurseApi.Model;
+using BaggyBot.InternalPlugins.Curse.CurseApi.SocketModel;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Plugins;
-using Mono.CSharp.Linq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using MessageReceivedEvent = BaggyBot.Plugins.MessageReceivedEvent;
 
 namespace BaggyBot.InternalPlugins.Curse
 {
@@ -43,11 +34,21 @@ namespace BaggyBot.InternalPlugins.Curse
 		public CursePlugin(ServerCfg config) : base(config)
 		{
 			loginCredentials = new NetworkCredential(config.Identity.Nick, config.Password);
+			client.OnMessageReceived += HandleMessage;
+		}
+
+		private void HandleMessage(MessageResponse message)
+		{
+			var channel = new ChatChannel(message.ConversationID, client.ChannelMap[message.ConversationID].GroupTitle);
+			var sender = new ChatUser(this, message.SenderName, message.SenderID.ToString());
+			var msg = new ChatMessage(this, sender, channel, message.Body);
+			OnMessageReceived?.Invoke(msg);
 		}
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
-			throw new NotImplementedException();
+			client.SendMessage(client.ChannelMap[target.Identifier], message);
+			return MessageSendResult.Success;
 		}
 
 		public override bool JoinChannel(ChatChannel channel)
