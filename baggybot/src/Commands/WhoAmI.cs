@@ -24,8 +24,7 @@ namespace BaggyBot.Commands
 			{
 				sb.Append($"Your nickname appears to be {user.Nickname}, though you prefer to call yourself {user.Name}.");
 			}
-			sb.Append(
-				$"Your unique userID is {user.UniqueId}, and you're posting in the channel \"{command.Channel.Name}\" ({command.Channel.Identifier}).");
+			sb.Append($" Your unique userID is {user.UniqueId}, and you're posting in the channel \"{command.Channel.Name}\" ({command.Channel.Identifier}).");
 			command.ReturnMessage(sb.ToString());
 		}
 	}
