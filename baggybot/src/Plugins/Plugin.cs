@@ -42,6 +42,7 @@ namespace BaggyBot.Plugins
 		public List<IMessageFormatter> MessageFormatters { get; } = new List<IMessageFormatter>();
 		public string ServerName { get; }
 		public StatsDatabaseManager StatsDatabase { get; set; }
+		public bool AtMention { get; protected set; }
 
 		public bool InChannel(string name) => InChannel(FindChannel(name));
 		public bool InChannel(ChatChannel channel) => Channels.Contains(channel);

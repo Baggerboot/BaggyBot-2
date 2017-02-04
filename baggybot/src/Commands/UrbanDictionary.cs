@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using BaggyBot.Formatting;
 using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
@@ -51,10 +52,10 @@ namespace BaggyBot.Commands
 					example = example.Substring(0, 250);
 					example += " (...)";
 				}
-				var exampleString = string.IsNullOrWhiteSpace(example) ? string.Empty : $" - \u001d{example}\u001d";
+				var exampleString = string.IsNullOrWhiteSpace(example) ? string.Empty : $" - {Frm.I}{example}{Frm.I}";
 
 
-				command.ReturnMessage("\u0002{0}\u0002: {1}{2} - {3}", name, definition, exampleString, permalink);
+				command.ReturnMessage($"\u0002{name}\u0002: {definition}{exampleString} - {permalink}");
 			}
 		}
 	}

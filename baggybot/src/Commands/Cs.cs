@@ -56,7 +56,7 @@ namespace BaggyBot.Commands
 			}
 			if (Security == InterpreterSecurity.Block)
 			{
-				command.ReturnMessage("For security reasons, the interactive C# interpreter is currently blocked. Please try again later or ask baggerboot to unblock it.");
+				command.ReturnMessage("For security reasons, the interactive C# interpreter is currently blocked. Please try again later or ask Baggykiin to unblock it.");
 				return false;
 			}
 			if (Security == InterpreterSecurity.Notify)

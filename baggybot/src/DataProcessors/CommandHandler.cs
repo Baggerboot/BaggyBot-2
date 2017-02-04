@@ -48,6 +48,7 @@ namespace BaggyBot.DataProcessors
 				{"version", new Version()},
 				{"wa", new WolframAlpha()},
 				{"wiki", new Wikipedia()},
+				{"whoami", new WhoAmI()},
 				{"topics", new Topics()}
 			};
 			// Command list must be initialised before we can pass a reference to it to the Help command.
@@ -70,7 +71,7 @@ namespace BaggyBot.DataProcessors
 		{
 			Logger.Log(this, "Processing command: " + message.Message);
 
-			if(Bot.CommandIdentifiers.Any(id => id == message.Message)) return;
+			if (Bot.CommandIdentifiers.Any(id => id == message.Message)) return;
 
 			var cmdInfo = CommandArgs.FromMessage(message);
 			ProcessCommand(cmdInfo);
@@ -97,7 +98,7 @@ namespace BaggyBot.DataProcessors
 				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Client.StatsDatabase, cmdInfo.Command))
 				{
 					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Client.StatsDatabase, cmdInfo.Command);
-					if(cmdInfo.FullArgument == null)
+					if (cmdInfo.FullArgument == null)
 					{
 						aliasedCommand = aliasedCommand.Replace(" $args", "");
 					}
@@ -133,7 +134,7 @@ namespace BaggyBot.DataProcessors
 						// Previously, debugging information (filename and line number) were put in the error message.
 						// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
 						Logger.LogException(commands[cmdInfo.Command], e, $"processing the command \"{cmdInfo.Command} {cmdInfo.FullArgument}\"");
-                    }
+					}
 				}
 			}
 			else

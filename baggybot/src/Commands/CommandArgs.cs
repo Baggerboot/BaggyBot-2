@@ -96,7 +96,7 @@ namespace BaggyBot.Commands
 		/// the status of the message that was sent.</returns>
 		public MessageSendResult Reply(string format, params object[] args)
 		{
-			var message = Sender.AddressableName + ", " + string.Format(format, args);
+			var message = (Sender.Client.AtMention ? "@" : "") + Sender.AddressableName + ", " + string.Format(format, args);
 			return Client.SendMessage(Channel, message);
 		}
 
