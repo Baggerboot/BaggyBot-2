@@ -102,6 +102,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Curse.NET, Version=0.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Curse.NET.0.1.4\lib\net45\Curse.NET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Discord.Net, Version=0.9.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Discord.Net.0.9.6\lib\net45\Discord.Net.dll</HintPath>
       <Private>True</Private>
@@ -191,6 +195,7 @@
   <ItemGroup>
     <Compile Include="src\Commands\GoogleSearch.cs" />
     <Compile Include="src\Commands\ResetDb.cs" />
+    <Compile Include="src\Commands\WhoAmI.cs" />
     <Compile Include="src\Configuration\Backend.cs" />
     <Compile Include="src\Configuration\Configuration.cs" />
     <Compile Include="src\Configuration\Identity.cs" />
@@ -208,33 +213,7 @@
     <Compile Include="src\DataProcessors\Mapping\DbMappedMessage.cs" />
     <Compile Include="src\DataProcessors\Mapping\DbMappedUser.cs" />
     <Compile Include="src\Formatting\Formatting.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\CurseApi.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\CurseClient.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\ExtensionMethods\DateTimeExtensions.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\MicrosecondEpochConverter.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\ContactsRequest.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\ConversationsRequest.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\ModelExtensions.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\LoginResponse.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\RequestObject.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\SendMessageRequest.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\SessionRequest.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\User.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\Model\WebSocketSession.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketApi.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\ChannelReferenceResponse.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\FriendshipResponse.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\LoginRequest.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\LoginResponse.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\MessageResponse.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\RequestBody.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\ResponseBody.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\SocketRequest.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\SocketResponse.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\UnknownChangeResponse.cs" />
     <Compile Include="src\InternalPlugins\Curse\CursePlugin.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\SocketModel\MessageType.cs" />
-    <Compile Include="src\InternalPlugins\Curse\CurseApi\ExtensionMethods\WebSocketExtensions.cs" />
     <Compile Include="src\InternalPlugins\Discord\DiscordExtensionMethods.cs" />
     <Compile Include="src\InternalPlugins\Discord\DiscordPlugin.cs" />
     <Compile Include="src\InternalPlugins\Irc\IrcChatUser.cs" />
@@ -302,6 +281,7 @@
     <Compile Include="src\Plugins\DisconnectReason.cs" />
     <Compile Include="src\Plugins\Events.cs" />
     <Compile Include="src\Plugins\MessageFormatters\IMessageFormatter.cs" />
+    <Compile Include="src\Plugins\MessageFormatters\CurseMessageFormatter.cs" />
     <Compile Include="src\Plugins\MessageFormatters\MarkdownMessageFormatter.cs" />
     <Compile Include="src\Plugins\Plugin.cs" />
     <Compile Include="src\Plugins\MessageSendResult.cs" />

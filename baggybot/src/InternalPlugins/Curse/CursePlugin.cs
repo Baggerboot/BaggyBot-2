@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Net;
 using BaggyBot.Configuration;
-using BaggyBot.InternalPlugins.Curse.CurseApi;
-using BaggyBot.InternalPlugins.Curse.CurseApi.SocketModel;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Plugins;
+using BaggyBot.Plugins.MessageFormatters;
+using Curse.NET;
 using MessageReceivedEvent = BaggyBot.Plugins.MessageReceivedEvent;
+using Curse.NET.Model;
+using Curse.NET.SocketModel;
+using Group = Curse.NET.Model.Group;
 
 namespace BaggyBot.InternalPlugins.Curse
 {
@@ -33,20 +36,26 @@ namespace BaggyBot.InternalPlugins.Curse
 
 		public CursePlugin(ServerCfg config) : base(config)
 		{
+			AtMention = true;
+			MessageFormatters.Add(new CurseMessageFormatter());
 			loginCredentials = new NetworkCredential(config.Identity.Nick, config.Password);
-			client.OnMessageReceived += HandleMessage;
+			client.MessageReceived += HandleMessage;
 		}
 
-		private void HandleMessage(MessageResponse message)
+		private void HandleMessage(Group server, Channel channel, MessageResponse message)
 		{
-			var channel = new ChatChannel(message.ConversationID, client.ChannelMap[message.ConversationID].GroupTitle);
+			var chatChannel = new ChatChannel(message.ConversationID, channel.GroupTitle);
 			var sender = new ChatUser(this, message.SenderName, message.SenderID.ToString());
-			var msg = new ChatMessage(this, sender, channel, message.Body);
+			var msg = new ChatMessage(this, sender, chatChannel, message.Body);
 			OnMessageReceived?.Invoke(msg);
 		}
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
+			foreach (var formatter in MessageFormatters)
+			{
+				message = formatter.ProcessOutgoingMessage(message);
+			}
 			client.SendMessage(client.ChannelMap[target.Identifier], message);
 			return MessageSendResult.Success;
 		}
