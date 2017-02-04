@@ -159,7 +159,8 @@ namespace BaggyBot.Database
 							UniqueId = user.UniqueId
 						};
 						sqlConnector.Insert(dbUser);
-						return dbUser;
+						// Grab the newly added user from the database so we know their ID.
+						return sqlConnector.Users.First(u => u.UniqueId == user.UniqueId);
 					}
 					if (matches.Length == 1)
 					{
@@ -1031,7 +1032,11 @@ namespace BaggyBot.Database
 
 		public void Reset()
 		{
-			sqlConnector.Reset();
+			lock (lockObj)
+			{
+				lockObj.LockMessage = MiscTools.GetCurrentMethod();
+				sqlConnector.Reset();
+			}
 		}
 	}
 
