@@ -4,3 +4,6 @@
 [submodule "ircsharp"]
 	path = ircsharp
 	url = https://github.com/baggykiin/ircsharp.git
+[submodule "Curse.NET"]
+	path = Curse.NET
+	url = https://github.com/Baggykiin/Curse.NET.git
