@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BaggyBot.Tools
@@ -16,16 +17,7 @@ namespace BaggyBot.Tools
 
 		public static List<string> GetWords(string message)
 		{
-			var words = message.Trim().Split(' ').ToList<string>();
-			for (var i = 0; i < words.Count; i++)
-			{
-				words[i] = words[i].Trim();
-				if (words[i] == string.Empty)
-				{
-					words.RemoveAt(i);
-					i--;
-				}
-			}
+			var words = message.Trim().Split(new [] {' '}, StringSplitOptions.RemoveEmptyEntries).ToList();
 			return words;
 		}
 
