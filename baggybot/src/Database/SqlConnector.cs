@@ -185,6 +185,26 @@ namespace BaggyBot.Database
 			IrcLog = connection.GetTable<IrcLog>();
 			MiscData = connection.GetTable<MiscData>();
 
+			try
+			{
+				UserCredentials.FirstOrDefault();
+				Quotes.FirstOrDefault();
+				UserStatistics.FirstOrDefault();
+				Emoticons.FirstOrDefault();
+				KeyValuePairs.FirstOrDefault();
+				LinkedUrls.FirstOrDefault();
+				Users.FirstOrDefault();
+				Words.FirstOrDefault();
+				IrcLog.FirstOrDefault();
+				MiscData.FirstOrDefault();
+			}
+			catch (Exception e)
+			{
+				Logger.Log(this, $"Database integrity check failed ({e.GetType().Name}: {e.Message})", LogLevel.Error);
+				HandleConnectionFailure();
+				return false;
+			}
+
 			return true;
 		}
 
