@@ -48,6 +48,7 @@ namespace BaggyBot.InternalPlugins.Slack
 
 		public SlackPlugin(ServerCfg serverCfg) : base(serverCfg)
 		{
+			AllowsMultilineMessages = true;
 			MessageFormatters.Add(new SlackMessageFormatter());
 			MessageFormatters.Add(new MarkdownMessageFormatter());
 			token = serverCfg.Password;
@@ -113,7 +114,24 @@ namespace BaggyBot.InternalPlugins.Slack
 				// called once the RTM client has connected
 			});
 			client.OnMessageReceived += MessageReceivedCallback;
-			return clientReady.Wait(TimeSpan.FromSeconds(10));
+			if (!clientReady.Wait(TimeSpan.FromSeconds(10)))
+			{
+				return false;
+			}
+			Channels = client.Channels.Select(ToChatChannel).ToList();
+			Channels = Channels.Concat(client.Groups.Select(ToChatChannel)).ToList();
+			Channels = Channels.Concat(client.DirectMessages.Select(ToChatChannel)).ToList();
+			return true;
+		}
+
+		private ChatChannel ToChatChannel(Channel ch)
+		{
+			return new ChatChannel(ch.id, ch.name);
+		}
+
+		private ChatChannel ToChatChannel(DirectMessageConversation dm)
+		{
+			return new ChatChannel(dm.id, client.UserLookup[dm.user].name, true);
 		}
 
 		private void MessageReceivedCallback(NewMessage message)
@@ -125,23 +143,10 @@ namespace BaggyBot.InternalPlugins.Slack
 
 			var user = client.UserLookup[message.user];
 
-			ChatChannel chatChannel;
-			switch (message.channel[0])
-			{
-				case 'D':
-					var dm = client.DirectMessageLookup[message.channel];
-					chatChannel = new ChatChannel(dm.id, dm.user, true);
-					break;
-				case 'C':
-					var ch = client.ChannelLookup[message.channel];
-					chatChannel = new ChatChannel(ch.id, ch.IsPrivateGroup);
-					break;
-				default:
-					throw new InvalidOperationException("Unrecognised channel");
-			}
+			var channel = GetChannel(message.channel);
 
 			var chatUser = new ChatUser(this, user.name, user.id, name: user.profile.first_name);
-			var chatMessage = new ChatMessage(this, chatUser, chatChannel, message.text);
+			var chatMessage = new ChatMessage(this, chatUser, channel, message.text);
 			OnMessageReceived?.Invoke(chatMessage);
 		}
 
