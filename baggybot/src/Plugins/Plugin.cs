@@ -65,9 +65,10 @@ namespace BaggyBot.Plugins
 		/// <summary>
 		/// Lookup a channel by its ID
 		/// </summary>
-		public ChatChannel GetChannel(string id)
+		public ChatChannel GetChannel(string channelId)
 		{
-			return Channels.First(c => c.Identifier == id);
+			if( channelId  == null) throw new ArgumentNullException(nameof(channelId));
+			return Channels.First(c => c.Identifier == channelId);
 		}
 
 		protected Plugin(ServerCfg config)
