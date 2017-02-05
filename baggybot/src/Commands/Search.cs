@@ -21,7 +21,7 @@ namespace BaggyBot.Commands
 			var parser = new CommandParser(new Operation().AddKey("max-results", "1", 'n').AddRestArgument());
 
 			var result = parser.Parse(command.FullArgument);
-			var numDisplayed = int.Parse(result.Keys["max-results"]);
+			var numDisplayed = result.GetKey<int>("max-results");
 			if (numDisplayed > 3 && !UserTools.Validate(command.Sender))
 			{
 				command.Reply("only bot operators may request more than three results.");

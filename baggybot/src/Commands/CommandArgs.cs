@@ -46,15 +46,12 @@ namespace BaggyBot.Commands
 		/// <returns></returns>
 		public static CommandArgs FromPrevious(string newCommand, CommandArgs context)
 		{
-			// TODO: this should probably be dropped
-			var line = newCommand.Substring(1);
-
-			var args = line.Split(' ');
+			var args = newCommand.Split(' ');
 			var command = args[0];
 			args = args.Skip(1).ToArray();
 
-			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(context.Client, command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
+			var cmdIndex = newCommand.IndexOf(' ');
+			return new CommandArgs(context.Client, command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : newCommand.Substring(cmdIndex + 1));
 		}
 		
 		public static CommandArgs FromPrevious(string newCommand, string newArguments, CommandArgs context)

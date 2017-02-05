@@ -4,16 +4,23 @@ namespace BaggyBot.CommandParsing
 {
 	class OperationResult
 	{
-		public Dictionary<string, string> Keys { get; private set; } = new Dictionary<string, string>();
-		public Dictionary<string, bool> Flags { get; private set; } = new Dictionary<string, bool>();
-		public ArgumentList Arguments { get; private set; } = new ArgumentList();
+		public Dictionary<string, object> Keys { get; } = new Dictionary<string, object>();
+		public Dictionary<string, bool> Flags { get; } = new Dictionary<string, bool>();
+		public ArgumentList Arguments { get; } = new ArgumentList();
 		public string RestArgument { get; set; }
-		public string OperationName { get; private set; }
+		public string OperationName { get; }
 
 		public OperationResult(string operationName, string restArgument = null)
 		{
 			RestArgument = restArgument;
 			OperationName = operationName;
+		}
+
+		public T GetKey<T>(string key)
+		{
+			var k = Keys[key];
+
+			return (T) k;
 		}
 	}
 }

@@ -22,7 +22,6 @@ namespace BaggyBot.Commands.Interpreters
 	{
 		public StatsDatabaseManager Db { get; internal set; }
 		public Configuration.Configuration Cfg => ConfigManager.Config;
-		// TODO: Expose IRC access
 		public Bot Bot { get; internal set; }
 	}
 }

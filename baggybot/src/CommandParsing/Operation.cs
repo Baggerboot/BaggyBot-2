@@ -55,7 +55,17 @@ namespace BaggyBot.CommandParsing
 			return this;
 		}
 
+		public Operation AddKey(string longForm, int defaultValue, char? shortForm = null)
+		{
+			return AddKey(longForm, defaultValue, typeof(int), shortForm);
+		}
+
 		public Operation AddKey(string longForm, string defaultValue, char? shortForm = null)
+		{
+			return AddKey(longForm, defaultValue, typeof(string), shortForm);
+		}
+
+		public Operation AddKey(string longForm, object defaultValue, Type defaultValueType, char? shortForm = null)
 		{
 			if (options.Count(opt => opt.Short != null && opt.Short == shortForm) > 0)
 			{
@@ -65,7 +75,7 @@ namespace BaggyBot.CommandParsing
 			{
 				throw new InvalidOperationException($"An option with the long form \"--{longForm}\" has already been defined.");
 			}
-			options.Add(new Key(longForm, defaultValue, shortForm));
+			options.Add(new Key(longForm, defaultValue, defaultValueType, shortForm));
 			return this;
 		}
 
@@ -104,7 +114,7 @@ namespace BaggyBot.CommandParsing
 				return matches[0];
 			}
 		}*/
-		
+
 		private Option GetLongOption(string option)
 		{
 			var matches = options.Where(opt => opt.Long == option).ToArray();
@@ -185,7 +195,8 @@ namespace BaggyBot.CommandParsing
 			{
 				if (currentKey != null)
 				{
-					result.Keys[currentKey.Long] = component.Value;
+					// We've just parsed a key, now we can assign its value
+					result.Keys[currentKey.Long] = ConvertString(component.Value, currentKey.ValueType);
 					currentKey = null;
 				}
 				else if (component.Value.StartsWith("--"))
@@ -251,6 +262,15 @@ namespace BaggyBot.CommandParsing
 				}
 			}
 			return result;
+		}
+
+		private static object ConvertString(string value, Type type)
+		{
+			if (type == typeof(string)) return value;
+			if (type == typeof(int)) return Convert.ToInt32(value);
+			if (type == typeof(double)) return Convert.ToDouble(value);
+			if (type == typeof(DateTime)) return Convert.ToDateTime(value);
+			throw new ArgumentException($"Unsupported argument type: {type}");
 		}
 
 		private Key SetOption(Option option, OperationResult result)
