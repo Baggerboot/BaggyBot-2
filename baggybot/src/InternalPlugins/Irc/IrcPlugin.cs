@@ -33,7 +33,7 @@ namespace BaggyBot.InternalPlugins.Irc
 		public override event PartChannelEvent OnPartChannel;
 
 		private readonly IrcClient client;
-		public override IReadOnlyList<ChatChannel> Channels { get; }
+		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.Connected;
 		private readonly ServerCfg serverCfg;
 

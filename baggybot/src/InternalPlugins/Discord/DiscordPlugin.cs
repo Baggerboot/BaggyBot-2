@@ -77,7 +77,7 @@ namespace BaggyBot.InternalPlugins.Discord
 			return true;
 		}
 
-		public override IReadOnlyList<ChatChannel> Channels { get; }
+		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected { get; }
 		public new StatsDatabaseManager StatsDatabase { get; set; }
 

@@ -41,7 +41,7 @@ namespace BaggyBot.InternalPlugins.Slack
 		public override event PartChannelEvent OnPartChannel;
 		public override event NameChangeEvent OnNameChange;
 
-		public override IReadOnlyList<ChatChannel> Channels { get; }
+		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.IsConnected;
 		private SlackSocketClient client;
 		private readonly string token;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
@@ -27,8 +28,7 @@ namespace BaggyBot.InternalPlugins.Curse
 
 		public override string ServerType => "curse";
 
-		public override IReadOnlyList<ChatChannel> Channels { get; }
-
+		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected { get; }
 
 		private CurseClient client = new CurseClient();
@@ -78,6 +78,7 @@ namespace BaggyBot.InternalPlugins.Curse
 		public override bool Connect()
 		{
 			client.Connect(loginCredentials.UserName, loginCredentials.Password);
+			Channels = client.ChannelMap.Values.Select(ch => new ChatChannel(ch.GroupID, ch.GroupTitle)).ToList();
 			return true;
 		}
 

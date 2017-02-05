@@ -22,7 +22,7 @@ namespace BaggyBot.Plugins
 
 		// inherited properties
 		public abstract string ServerType { get; }
-		public abstract IReadOnlyList<ChatChannel> Channels { get; }
+		public abstract IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public abstract bool Connected { get; }
 
 		// inherited methods
@@ -51,12 +51,23 @@ namespace BaggyBot.Plugins
 
 		public abstract ChatUser FindUser(string name);
 
+		/// <summary>
+		/// Lookup a channel by its name
+		/// </summary>
 		public ChatChannel FindChannel(string name)
 		{
 			var matches = Channels.Where(c => c.Name == name).ToArray();
 			if (matches.Length == 0) throw new ArgumentException("Invalid channel name.");
 			if (matches.Length == 1) return matches[0];
 			throw new ArgumentException("Ambiguous channel name");
+		}
+
+		/// <summary>
+		/// Lookup a channel by its ID
+		/// </summary>
+		public ChatChannel GetChannel(string id)
+		{
+			return Channels.First(c => c.Identifier == id);
 		}
 
 		public Plugin(ServerCfg config)
