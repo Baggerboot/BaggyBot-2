@@ -20,9 +20,9 @@ namespace BaggyBot.Commands
 				.AddOperation("uid", new Operation()
 					.AddArgument("user", command.Sender.Nickname))
 				.AddOperation("users", new Operation()
-					.AddArgument("channel", command.Channel.Identifier))
+					.AddArgument("channel", command.Channel.Name))
 				.AddOperation("channel", new Operation()
-					.AddArgument("channel-id"));
+					.AddArgument("channel-id", command.Channel.Identifier));
 
 			OperationResult result;
 			try
@@ -79,7 +79,7 @@ namespace BaggyBot.Commands
 		private void GetUsers(CommandArgs command, OperationResult result)
 		{
 			var channel = result.Arguments["channel"];
-			if (command.Client.InChannel(channel))
+			if (command.Client.InChannel(command.Client.FindChannel(channel)))
 			{
 				var ircChannel = command.Client.FindChannel(channel);
 				command.Reply($"users in {channel}: {string.Join(", ", ircChannel.Users.Count)}");
