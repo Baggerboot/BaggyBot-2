@@ -115,32 +115,49 @@ namespace BaggyBot.DataProcessors
 				return;
 			}
 
-			if (commands[cmdInfo.Command].Permissions == PermissionLevel.All || commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator && UserTools.Validate(cmdInfo.Sender))
+			bool isValid = false;
+			if (commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator)
 			{
-				// Don't gobble up exceptions when debugging
-				if (ConfigManager.Config.DebugMode)
+				try
 				{
-					commands[cmdInfo.Command].Use(cmdInfo);
+					isValid = UserTools.Validate(cmdInfo.Sender);
+
 				}
-				else
+				catch (Exception e)
 				{
-					try
-					{
-						commands[cmdInfo.Command].Use(cmdInfo);
-					}
-					catch (Exception e)
-					{
-						var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\"";
-						cmdInfo.ReturnMessage(exceptionMessage);
-						// Previously, debugging information (filename and line number) were put in the error message.
-						// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
-						Logger.LogException(commands[cmdInfo.Command], e, $"processing the command \"{cmdInfo.Command} {cmdInfo.FullArgument}\"");
-					}
+					cmdInfo.Reply("I am unable to validate your account.");
+					return;
 				}
 			}
 			else
 			{
+				isValid = true;
+			}
+			if (!isValid)
+			{
 				cmdInfo.ReturnMessage(Messages.CmdNotAuthorised);
+				return;
+			}
+
+			// Don't gobble up exceptions when debugging
+			if (ConfigManager.Config.DebugMode)
+			{
+				commands[cmdInfo.Command].Use(cmdInfo);
+			}
+			else
+			{
+				try
+				{
+					commands[cmdInfo.Command].Use(cmdInfo);
+				}
+				catch (Exception e)
+				{
+					var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\"";
+					cmdInfo.ReturnMessage(exceptionMessage);
+					// Previously, debugging information (filename and line number) were put in the error message.
+					// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
+					Logger.LogException(commands[cmdInfo.Command], e, $"processing the command \"{cmdInfo.Command} {cmdInfo.FullArgument}\"");
+				}
 			}
 		}
 	}
