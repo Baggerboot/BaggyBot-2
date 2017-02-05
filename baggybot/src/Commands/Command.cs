@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using BaggyBot.Formatting;
 
 namespace BaggyBot.Commands
 {
@@ -12,7 +13,7 @@ namespace BaggyBot.Commands
 
 		public void InformUsage(CommandArgs cmd)
 		{
-			cmd.Reply($"usage: {Bot.CommandIdentifiers.First()}{cmd.Command} {Usage} -- {Description}");
+			cmd.Reply($"usage: {Frm.C}{Bot.CommandIdentifiers.First()}{cmd.Command} {Usage}{Frm.C} -- {Description}");
 		}
 	}
 }

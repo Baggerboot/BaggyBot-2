@@ -101,8 +101,7 @@ namespace BaggyBot.Commands
 
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{
-				command.Reply(
-					"Usage: '-wa <WolframAlpha query>' -- Displays information acquired from http://www.wolframalpha.com. In addition to this, you can use the command '-wa more' to display additional information about the last subject");
+				InformUsage(command);
 				return;
 			}
 
