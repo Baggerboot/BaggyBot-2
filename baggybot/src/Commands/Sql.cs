@@ -32,7 +32,9 @@ namespace BaggyBot.Commands
 			var columnLengths = GetColumnLengths(table, maxRows);
 			if (command.Client.AllowsMultilineMessages)
 			{
-				command.ReturnMessage($"{Frm.CodeBlockStart}{PrintHeader(table, columnLengths)}\n{PrintBody(table, columnLengths, maxRows)}{Frm.CodeBlockEnd}");
+				var dividerLength = columnLengths.Sum() + (columnLengths.Length - 1) * " | ".Length;
+				var divider = string.Concat(Enumerable.Repeat('=', dividerLength));
+				command.ReturnMessage($"{Frm.CodeBlockStart}{PrintHeader(table, columnLengths)}\n{divider}\n{PrintBody(table, columnLengths, maxRows)}{Frm.CodeBlockEnd}");
 			}
 			else
 			{
