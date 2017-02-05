@@ -70,7 +70,7 @@ namespace BaggyBot.Plugins
 			return Channels.First(c => c.Identifier == id);
 		}
 
-		public Plugin(ServerCfg config)
+		protected Plugin(ServerCfg config)
 		{
 			ServerName = config.ServerName;
 			Operators = config.Operators;
