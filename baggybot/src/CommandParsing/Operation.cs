@@ -27,6 +27,13 @@ namespace BaggyBot.CommandParsing
 			arguments.Add(new Argument(name, defaultValue));
 			return this;
 		}
+
+		public Operation AddArgument(string name)
+		{
+			arguments.Add(new Argument(name));
+			return this;
+		}
+
 		public Operation AddRestArgument(string defaultValue = null)
 		{
 			hasRestArgument = true;
@@ -233,6 +240,14 @@ namespace BaggyBot.CommandParsing
 					{
 						result.Arguments.AssignArgument(component.Value);
 					}
+				}
+			}
+			// Ensure all required arguments have been assigned
+			foreach (var arg in arguments.Where(a => a.Required))
+			{
+				if (result.Arguments[arg.Name] == arg.DefaultValue)
+				{
+					throw new ArgumentException($"Required argument \"{arg.Name}\" was not assigned.");
 				}
 			}
 			return result;
