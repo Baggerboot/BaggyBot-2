@@ -205,7 +205,7 @@ namespace BaggyBot
 			// If we're running on Windows, the application was most likely started by double-clicking the executable.
 			// This creates a command prompt window that will immediately disappear when the bot exits.
 			// For this reason, we should wait for user input so they can read the messages that have just been displayed.
-			if (Environment.OSVersion.Platform.ToString().Contains("Win32"))
+			if (Environment.OSVersion.VersionString.Contains("Microsoft Windows"))
 			{
 				Console.WriteLine("Press any key to exit... ");
 				Console.ReadKey();
@@ -215,9 +215,15 @@ namespace BaggyBot
 
 		public static void Main(string[] args)
 		{
-			Console.BufferWidth = 160;
-			Console.WindowWidth = 160;
-			Console.BufferHeight = 200;
+			if (Environment.OSVersion.VersionString.Contains("Microsoft Windows"))
+			{
+				// If we're running on Windows, we're likely running in a tiny console window.
+				// Resize it to prevent most lines from wrapping around.
+				Console.BufferWidth = 160;
+				Console.WindowWidth = 160;
+				Console.BufferHeight = 200;
+			}
+
 
 			AppDomain.CurrentDomain.AppendPrivatePath(@"plugins");
 
