@@ -1,15 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Text.RegularExpressions;
 
 namespace BaggyBot.Tools
 {
-    public static class StringExtensions
-    {
-        public static string Truncate(this string value, int maxLength)
-        {
-            if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
-        }
+	public static class StringExtensions
+	{
+		public static IEnumerable<string> GetColumnNames(this DataTable table)
+		{
+			foreach (DataColumn col in table.Columns)
+			{
+				yield return col.ColumnName;
+			}
+		}
+
+		public static IEnumerable<DataColumn> GetColumns(this DataTable table)
+		{
+			foreach (DataColumn col in table.Columns)
+			{
+				yield return col;
+			}
+		}
+
+		public static string Truncate(this string value, int maxLength)
+		{
+			if (string.IsNullOrEmpty(value)) return value;
+			return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+		}
 
 		private static string ToCamelOrPascalCase(string str, Func<char, char> firstLetterTransform)
 		{

@@ -42,6 +42,7 @@ namespace BaggyBot.DataProcessors
 				{"set", new Set()},
 				{"shutdown", new Shutdown(bot)},
 				{"snag", new Snag()},
+				{"sql", new Sql() },
 				{"ur", new UrbanDictionary()},
 				{"update", new Update()},
 				{"uptime", new Uptime()},

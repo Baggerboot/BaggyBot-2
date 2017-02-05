@@ -43,6 +43,7 @@ namespace BaggyBot.Plugins
 		public string ServerName { get; }
 		public StatsDatabaseManager StatsDatabase { get; set; }
 		public bool AtMention { get; protected set; }
+		public bool AllowsMultilineMessages { get; protected set; }
 
 		public bool InChannel(string name) => InChannel(FindChannel(name));
 		public bool InChannel(ChatChannel channel) => Channels.Contains(channel);

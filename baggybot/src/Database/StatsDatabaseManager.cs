@@ -75,9 +75,9 @@ namespace BaggyBot.Database
 		}
 
 		// TODO: validate that these are used correctly
-		public List<object[]> ExecuteQuery(string query)
+		public DataTable ExecuteQuery(string query)
 		{
-			List<object[]> results = null;
+			DataTable results;
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();

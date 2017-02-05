@@ -36,6 +36,7 @@ namespace BaggyBot.InternalPlugins.Curse
 
 		public CursePlugin(ServerCfg config) : base(config)
 		{
+			AllowsMultilineMessages = true;
 			AtMention = true;
 			MessageFormatters.Add(new CurseMessageFormatter());
 			loginCredentials = new NetworkCredential(config.Identity.Nick, config.Password);

@@ -12,5 +12,7 @@ namespace BaggyBot.Formatting
 		public const string B = "\u0002";
 		public const string U = "\u001f";
 		public const string C = "`";
+		public static string CodeBlockStart = "```\n";
+		public static string CodeBlockEnd = "\n```";
 	}
 }

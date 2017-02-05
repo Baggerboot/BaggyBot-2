@@ -243,26 +243,18 @@ namespace BaggyBot.Database
 			return cmd.ExecuteNonQuery();
 		}
 
-		internal List<object[]> ExecuteQuery(string query)
+		internal DataTable ExecuteQuery(string query)
 		{
-			var data = new List<object[]>();
 			using (var cmd = connection.CreateCommand())
 			{
 				cmd.CommandText = query;
 				using (var reader = cmd.ExecuteReader())
 				{
-					while (reader.Read())
-					{
-						var row = new object[reader.FieldCount];
-						for (var i = 0; i < reader.FieldCount; i++)
-						{
-							row[i] = reader[i];
-						}
-						data.Add(row);
-					}
+					var table = new DataTable();
+					table.Load(reader);
+					return table;
 				}
 			}
-			return data;
 		}
 
 		public void Update<T>(T match) where T:Poco
