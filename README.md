@@ -48,19 +48,3 @@ task is removed, as xbuild does not support this task.
 An easy (linux-only) way to run this task is by running `build.sh`, which generates the right
 version number, inserts it into `Version.cs`, and then builds `baggybot-mono.sln` with xbuild under
 the release configuration.
-
-TODO
---------
-
- - ~~Improve the help command. Help information is currently stored in the Help command's class.
-   It is better to store help for each command in the class belonging to that command, and 
-   have the help command grab the correct help information from that class.~~ **(Done)**
- - Create a generic argument parsing class to help with efficient, exception-less argument parsing
-   for commands (ideally this should be done for process arguments as well). **(Testing)**
- - Improve user matching code. It should be less reluctant to try a NickServ match, and more conservative
-   when determining whether a user matches another, already known user.
- - Better finetuning of permissions. Allow specifying multiple bot operators, and allow specifying permissions
-   on a per-channel, per-command basis, overriding the default permissions for each command.
- - Additionally, create another permission level for channel operators, and give them access to a few more
-   commands if it makes sense.
- - ~~Allow connecting to multiple servers simultaneously.~~ **(Done)**
