@@ -356,7 +356,7 @@
     <Exec Command="git describe --tags" ConsoleToMSBuild="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="BotVersion" />
     </Exec>
-    <WriteLinesToFile Condition=" '$(BotVersion)' != '' " File="src\Version.cs" Overwrite="True" Lines="namespace BaggyBot{public sealed partial class Bot{public static string Version =&gt; &quot;$(BotVersion)&quot;%3b}}" />
+    <WriteLinesToFile Condition=" '$(BotVersion)' != '' " File="src\Version.cs" Overwrite="True" Lines="namespace BaggyBot{public sealed partial class Bot{public const string Version = &quot;$(BotVersion)&quot;%3b}}" />
   </Target>
   <Target Name="AfterBuild">
   </Target>
