@@ -1,14 +1,14 @@
 
-BaggyBot is an IRC bot built for collecting statistics in an IRC channel.
+BaggyBot is an chat bot built for collecting statistics in one or multile channels.
 He also has an elaborate command system, providing features such as searching
 Wolfram Alpha and Urban Dictionary, interactive interpreters for Python and C#,
 performing DNS queries, and many others, allowing him to additionally function
-as a general 'utility' IRC bot.
+as a general 'utility' bot.
 
-He also has a Slack compatibility mode, allowing him to connect to a Slack IRC
-server and handling it as if it's a regular IRC server (by stripping the URLs
-Slack adds to messages and translating IRC formatting codes to Slack formatting
-codes.
+Originally developed as an IRC bot, BaggyBot now has an abstraction layer
+and plugin system that allows him to connect to all kinds of servers.
+Plugins for Slack, Discord and Curse are already implemented, and external
+plugins can be developed as well.
 
 Features
 --------
