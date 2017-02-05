@@ -45,7 +45,6 @@ namespace BaggyBot.Plugins
 		public bool AtMention { get; protected set; }
 		public bool AllowsMultilineMessages { get; protected set; }
 
-		public bool InChannel(string name) => InChannel(FindChannel(name));
 		public bool InChannel(ChatChannel channel) => Channels.Contains(channel);
 		public bool JoinChannel(string name) => JoinChannel(FindChannel(name));
 		public void Part(string name, string reason = null) => Part(FindChannel(name), reason);
