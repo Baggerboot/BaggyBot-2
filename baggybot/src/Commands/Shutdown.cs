@@ -6,16 +6,16 @@
 		public override string Usage => "";
 		public override string Description => "Makes me shut down.";
 
-		private readonly Bot program;
+		private readonly Bot bot;
 
 		public Shutdown(Bot prg)
 		{
-			program = prg;
+			bot = prg;
 		}
 
 		public override void Use(CommandArgs command)
 		{
-			program.Shutdown();
+			bot.Shutdown();
 		}
 	}
 }
