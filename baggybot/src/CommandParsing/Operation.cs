@@ -187,6 +187,7 @@ namespace BaggyBot.CommandParsing
 
 			if (components == null || !components.Any())
 			{
+				EnsureArgumentsAssigned(result);
 				return result;
 			}
 			
@@ -253,15 +254,19 @@ namespace BaggyBot.CommandParsing
 					}
 				}
 			}
-			// Ensure all required arguments have been assigned
+			EnsureArgumentsAssigned(result);
+			return result;
+		}
+
+		private void EnsureArgumentsAssigned(OperationResult result)
+		{
 			foreach (var arg in arguments.Where(a => a.Required))
 			{
 				if (result.Arguments[arg.Name] == arg.DefaultValue)
 				{
-					throw new ArgumentException($"Required argument \"{arg.Name}\" was not assigned.");
+					throw new InvalidCommandException("A required argument was not assigned.", arg.Name);
 				}
 			}
-			return result;
 		}
 
 		private static object ConvertString(string value, Type type)
