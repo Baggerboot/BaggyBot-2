@@ -12,13 +12,27 @@ namespace BaggyBot.Commands
 	internal class Sql : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
-		public override string Usage => "[<-r|--rows> <rows>] <SQL code>";
+		public override string Usage => "[-t|--tables]|[<-r|--rows> <rows>] <SQL code>";
 		public override string Description => "Execute arbitrary SQL code and return its result.";
 
 		public override void Use(CommandArgs command)
 		{
-			var parser = new CommandParser(new Operation().AddKey("rows", 3, 'r').AddRestArgument(string.Empty));
+			var parser = new CommandParser(new Operation()
+				.AddKey("rows", 3, 'r')
+				.AddFlag("tables", 't')
+				.AddRestArgument(string.Empty));
 			var parsed = parser.Parse(command.FullArgument);
+
+			if (parsed.Flags["tables"])
+			{
+				command.Reply($"the following tables are available: {string.Join(", ", command.Client.StatsDatabase.GetTableNames())}");
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(parsed.RestArgument))
+			{
+				InformUsage(command);
+				return;
+			}
 
 			var table = command.Client.StatsDatabase.ExecuteQuery(parsed.RestArgument);
 			if (table.Rows.Count == 0)

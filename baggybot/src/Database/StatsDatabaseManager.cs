@@ -29,6 +29,17 @@ namespace BaggyBot.Database
 			lockObj = new LockObject();
 		}
 
+		public IEnumerable<string> GetTableNames()
+		{
+			return
+				typeof(SqlConnector).GetProperties()
+					.Where(p => p.PropertyType.Name == "ITable`1")
+					.Select(p => p.PropertyType.GenericTypeArguments.First()
+						.CustomAttributes.First(attr => attr.AttributeType == typeof(LinqToDB.Mapping.TableAttribute))
+						.NamedArguments.First(arg => arg.MemberName == "Name")
+						.TypedValue.Value.ToString());
+		}
+
 		private void Update<T>(T match) where T : Poco
 		{
 			sqlConnector.Update(match);
