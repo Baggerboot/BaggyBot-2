@@ -18,6 +18,7 @@ namespace BaggyBot.MessagingInterface
 		{
 			IsPrivateMessage = isPrivateMessage;
 			Identifier = identifier;
+			Name = identifier;
 		}
 		public ChatChannel(string identifier,string name, bool isPrivateMessage = false)
 		{
