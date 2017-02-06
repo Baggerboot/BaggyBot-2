@@ -205,9 +205,8 @@
     <Compile Include="src\Configuration\WolframAlpha.cs" />
     <Compile Include="src\CommandParsing\CommandComponent.cs" />
     <Compile Include="src\Database\CorruptedDatabaseException.cs" />
-    <Compile Include="src\DataProcessors\IMessageHandler.cs" />
-    <Compile Include="src\DataProcessors\Mapping\DbMappedMessage.cs" />
-    <Compile Include="src\DataProcessors\Mapping\DbMappedUser.cs" />
+    <Compile Include="src\DataProcessors\ChatClientEventHandler.cs" />
+    <Compile Include="src\DataProcessors\ChatClientEventHandlerManager.cs" />
     <Compile Include="src\Formatting\Formatting.cs" />
     <Compile Include="src\InternalPlugins\Curse\CursePlugin.cs" />
     <Compile Include="src\InternalPlugins\Discord\DiscordExtensionMethods.cs" />
@@ -306,7 +305,7 @@
     <Compile Include="src\Database\StatsDatabaseManager.cs" />
     <Compile Include="src\EmbeddedData\Emoticons.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
-    <Compile Include="src\DataProcessors\ChatClientEventHandler.cs" />
+    <Compile Include="src\DataProcessors\LogHandler.cs" />
     <Compile Include="src\Monitoring\Logger.cs" />
     <Compile Include="src\EmbeddedData\Messages.cs" />
     <Compile Include="src\Monitoring\Diagnostics\PerformanceLogger.cs" />

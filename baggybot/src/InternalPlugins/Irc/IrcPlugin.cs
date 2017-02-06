@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using BaggyBot.Configuration;
@@ -8,6 +9,7 @@ using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Plugins;
 using IRCSharp.IrcCommandProcessors.Quirks;
+using IRCSharp.IRC;
 using IrcClient = IRCSharp.IrcClient;
 using NickservInformation = IRCSharp.IRC.NickservInformation;
 using ConnectionInfo = IRCSharp.ConnectionInfo;
@@ -37,12 +39,35 @@ namespace BaggyBot.InternalPlugins.Irc
 		public override bool Connected => client.Connected;
 		private readonly ServerCfg serverCfg;
 
+		// These IRC commands are not handled in any way, as the information contained in them
+		// is not considered useful for the bot.
+		private readonly string[] ignoredCommands =
+		{
+			"004" /*RPL_MYINFO*/,
+			"005" /*RPL_ISUPPORT*/,
+			"251" /*RPL_LUSERCLIENT*/,
+			"254" /*RPL_LUSERCHANNELS*/,
+			"252" /*RPL_LUSEROP*/,
+			"255" /*RPL_LUSERME*/,
+			"265" /*RPL_LOCALUSERS*/,
+			"266" /*RPL_GLOBALUSERS*/,
+			"250" /*RPL_STATSCONN*/
+		};
+
 
 		internal IrcPlugin(ServerCfg config) : base(config)
 		{
 			client = new IrcClient();
 			client.OnNetLibDebugLog += (sender, message) => Logger.Log(sender, "[NL#]" + message, LogLevel.Info);
+			client.OnMessageReceived += MessageReceivedHandler;
 			serverCfg = config;
+		}
+
+		private void MessageReceivedHandler(IrcMessage message)
+		{
+			var sender = new ChatUser(this, message.Sender.Nick, message.Sender.ToString(), false);
+			var channel = new ChatChannel(message.Channel);
+			OnMessageReceived?.Invoke(new ChatMessage(this, sender, channel, message.Message, message.Action));
 		}
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
@@ -172,6 +197,74 @@ namespace BaggyBot.InternalPlugins.Irc
 				return false;
 			}
 			return true;
+		}
+
+
+
+		/// <summary>
+		/// Custom code for checking whether a user has registered with NickServ. Ugly, but it works.
+		/// </summary>
+		private void ProcessFormattedLine(IrcLine line)
+		{
+			//TODO: where's the nickserv code gone?
+			// This IRC server does not have a NickServ service.
+			/*if (line.Command.Equals("401") && ircInterface.HasNickservCall && line.FinalArgument.ToLower().Contains("nickserv: no such nick"))
+			{
+				ircInterface.DisableNickservCalls();
+				// Proess reply to WHOIS call.
+			}*/
+
+			/*else if (line.Command.Equals("464"))
+			{
+				//throw new NotImplementedException("Unable to supply the password from the IRC Event Handler.");
+				Logger.Log(this, "Password required by server.", LogLevel.Info);
+				var msg = "PASS " + ircInterface.Password;
+				Logger.Log(this, "Replying with " + msg, LogLevel.Info);
+				ircInterface.SendRaw(msg);
+			}*/
+			if (!ignoredCommands.Contains(line.Command))
+			{
+				// TODO: handle formatted lines
+				switch (line.Command)
+				{
+					case "001": // RPL_WELCOME
+					case "002": // RPL_YOURHOST
+						Logger.Log(this, $"{line.FinalArgument}", LogLevel.Irc);
+						break;
+					case "003": // RPL_CREATED
+						Logger.Log(this, $"{line.Sender}: {line.FinalArgument}", LogLevel.Irc);
+						break;
+					case "332": // RPL_TOPIC
+						Logger.Log(this, $"Topic for {line.Arguments[1]}: {line.FinalArgument}", LogLevel.Irc);
+						break;
+					case "333": // Ignore names list
+					case "366":
+						break;
+					case "253": // RPL_LUSERUNKNOWN
+						break;
+					case "375": // RPL_MOTDSTART
+					case "376": // RPL_ENDOFMOTD
+					case "372": // RPL_MOTD
+					case "451": // ERR_NOTREGISTERED
+						Logger.Log(this, $"{line.FinalArgument}", LogLevel.Irc);
+						break;
+					case "MODE":
+						// TODO: Figure out the difference between these two and document it. Probably channel/user
+						if (line.FinalArgument != null)
+						{
+							Logger.Log(this, $"{line.Sender} sets mode {line.FinalArgument} for {line.Arguments[0]}", LogLevel.Irc);
+						}
+						else
+						{
+							Logger.Log(this, $"{line.Sender} sets mode {line.Arguments[1]} for {line.Arguments[0]}");
+						}
+						break;
+					default:
+						Debugger.Break();
+						Logger.Log(this, line.ToString(), LogLevel.Irc);
+						break;
+				}
+			}
 		}
 
 		public override void Disconnect()

@@ -73,7 +73,7 @@ namespace BaggyBot
 			ConfigManager.Config.Metadata.BotVersion = Version;
 			Logger.Log("");*/
 			
-			chatClientManager = new ChatClientManager(new ChatClientEventHandler(new CommandHandler(this), new StatsHandler()));
+			chatClientManager = new ChatClientManager();
 			botDiagnostics = new BotDiagnostics(this);
 		}
 
@@ -224,8 +224,9 @@ namespace BaggyBot
 				Console.BufferHeight = 200;
 			}
 
-
-			AppDomain.CurrentDomain.AppendPrivatePath(@"plugins");
+			//AppDomain.CurrentDomain.AppendPrivatePath(@"plugins");
+			// TODO: verify that this is the correct way to append a directory to the private bin path
+			AppDomain.CurrentDomain.SetupInformation.PrivateBinPath = $"{AppDomain.CurrentDomain.SetupInformation.PrivateBinPath}{Path.PathSeparator}plugins";
 
 			// TODO: parse program arguments
 			/*var parser = new CommandParser(new Operation()

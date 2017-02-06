@@ -7,13 +7,10 @@ using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
-using Convert = BaggyBot.Commands.Convert;
-using Version = BaggyBot.Commands.Version;
-using WolframAlpha = BaggyBot.Commands.WolframAlpha;
 
 namespace BaggyBot.DataProcessors
 {
-	internal class CommandHandler
+	internal class CommandHandler : ChatClientEventHandler
 	{
 		private readonly Dictionary<string, Command> commands;
 
@@ -23,7 +20,7 @@ namespace BaggyBot.DataProcessors
 			{
 				{"alias", new Alias()},
 				{"bf", new Bf()},
-				{"convert", new Convert()},
+				{"convert", new Commands.Convert()},
 				{"feature", new Feature()},
 				{ "g", new GoogleSearch()},
 				{"get", new Get()},
@@ -46,8 +43,8 @@ namespace BaggyBot.DataProcessors
 				{"ur", new UrbanDictionary()},
 				{"update", new Update()},
 				{"uptime", new Uptime()},
-				{"version", new Version()},
-				{"wa", new WolframAlpha()},
+				{"version", new Commands.Version()},
+				{"wa", new Commands.WolframAlpha()},
 				{"wiki", new Wikipedia()},
 				{"whoami", new WhoAmI()},
 				{"topics", new Topics()}
@@ -68,54 +65,22 @@ namespace BaggyBot.DataProcessors
 			}
 		}
 
-		public void ProcessMessage(ChatMessage message)
+		public override bool HandleMessage(ChatMessage message)
 		{
-			Logger.Log(this, "Processing command: " + message.Message);
+			var match = Bot.CommandIdentifiers.FirstOrDefault(id => message.Message.StartsWith(id));
 
-			if (Bot.CommandIdentifiers.Any(id => id == message.Message)) return;
-
-			var cmdInfo = CommandArgs.FromMessage(message);
-			ProcessCommand(cmdInfo);
+			if (match == null)
+			{
+				// Do not consume the message if it does not look like a command
+				return false;
+			}
+			var cmdInfo = CommandArgs.FromMessage(match, message);
+			return ProcessCommand(cmdInfo);
 		}
 
-		private void ProcessCommand(CommandArgs cmdInfo)
+		private void HandleExistingCommand(CommandArgs cmdInfo)
 		{
-			// Inject bot information, but do not return.
-			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(cmdInfo.Command.ToLower()) && cmdInfo.Args.Length == 0)
-			{
-				cmdInfo.ReturnMessage(string.Format(Messages.CmdGeneralInfo, Bot.Version, ConfigManager.Config.StatsPage));
-			}
-
-			if (!commands.ContainsKey(cmdInfo.Command))
-			{
-				if (cmdInfo.Command == "rem")
-				{
-					Logger.Log(this, "Saving rem");
-					var value = cmdInfo.Args.ToList();
-					value.Insert(1, "say");
-					((Alias)commands["alias"]).Use(
-						new CommandArgs(cmdInfo.Client, "alias", value.ToArray(), cmdInfo.Sender, cmdInfo.Channel, string.Join(" ", value)));
-				}
-				else if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Client.StatsDatabase, cmdInfo.Command))
-				{
-					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Client.StatsDatabase, cmdInfo.Command);
-					if (cmdInfo.FullArgument == null)
-					{
-						aliasedCommand = aliasedCommand.Replace(" $args", "");
-					}
-					else
-					{
-						aliasedCommand = aliasedCommand.Replace("$args", cmdInfo.FullArgument);
-					}
-					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
-
-					ProcessCommand(CommandArgs.FromMessage(new ChatMessage(cmdInfo.Client, cmdInfo.Sender, cmdInfo.Channel, "-" + aliasedCommand)));
-					//ProcessCommand(new ChatMessage(message.Sender, message.Channel, "-" + aliasedCommand, message.ReplyCallback, message.Action));
-				}
-				return;
-			}
-
-			bool isValid = false;
+			bool isValid;
 			if (commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator)
 			{
 				try
@@ -123,7 +88,7 @@ namespace BaggyBot.DataProcessors
 					isValid = UserTools.Validate(cmdInfo.Sender);
 
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					cmdInfo.Reply("I am unable to validate your account.");
 					return;
@@ -158,6 +123,56 @@ namespace BaggyBot.DataProcessors
 					// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
 					Logger.LogException(commands[cmdInfo.Command], e, $"processing the command \"{cmdInfo.Command} {cmdInfo.FullArgument}\"");
 				}
+			}
+		}
+
+		private bool ProcessCommand(CommandArgs cmdInfo)
+		{
+			// Inject bot information, but do not return.
+			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(cmdInfo.Command.ToLower()) && cmdInfo.Args.Length == 0)
+			{
+				cmdInfo.ReturnMessage(string.Format(Messages.CmdGeneralInfo, Bot.Version, ConfigManager.Config.StatsPage));
+			}
+
+			if (commands.ContainsKey(cmdInfo.Command))
+			{
+				HandleExistingCommand(cmdInfo);
+				// The command exists, so the event should be consumed.
+				return true;
+			}
+			else
+			{
+				// This doesn't look like a valid command. Is it a rem being set?
+				if (cmdInfo.Command == "rem")
+				{
+					Logger.Log(this, "Saving rem");
+					var value = cmdInfo.Args.ToList();
+					value.Insert(1, "say");
+					((Alias) commands["alias"]).Use(new CommandArgs(cmdInfo.Client, "alias", value.ToArray(), cmdInfo.Sender,
+						cmdInfo.Channel, string.Join(" ", value)));
+					return true;
+				}
+				// Or perhaps an alias?
+				if (((Alias) commands["alias"]).ContainsKey(cmdInfo.Client.StatsDatabase, cmdInfo.Command))
+				{
+					var aliasedCommand = ((Alias) commands["alias"]).GetAlias(cmdInfo.Client.StatsDatabase, cmdInfo.Command);
+					if (cmdInfo.FullArgument == null)
+					{
+						aliasedCommand = aliasedCommand.Replace(" $args", "");
+					}
+					else
+					{
+						aliasedCommand = aliasedCommand.Replace("$args", cmdInfo.FullArgument);
+					}
+					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
+
+					ProcessCommand(
+						CommandArgs.FromMessage(new ChatMessage(cmdInfo.Client, cmdInfo.Sender, cmdInfo.Channel, aliasedCommand)));
+					return true;
+				}
+				// If it's neither a rem nor an alias, it's not a valid command,
+				// so we do not consume the event.
+				return false;
 			}
 		}
 	}

@@ -13,18 +13,11 @@ using BaggyBot.Plugins;
 
 namespace BaggyBot.MessagingInterface
 {
-	class ChatClientManager : IDisposable
+	internal class ChatClientManager : IDisposable
 	{
-		private readonly ChatClientEventHandler chatClientEventHandler;
 		private readonly Dictionary<string, Plugin> clients = new Dictionary<string, Plugin>();
-
+		private readonly ChatClientEventHandlerManager chatClientEventHandler = new ChatClientEventHandlerManager();
 		internal IChatClient this[string identifier] => clients[identifier];
-
-		public ChatClientManager(ChatClientEventHandler chatClientEventHandler)
-		{
-			this.chatClientEventHandler = chatClientEventHandler;
-		}
-
 
 		/// <summary>
 		/// Connects the bot to the SQL database.
@@ -52,7 +45,7 @@ namespace BaggyBot.MessagingInterface
 			Logger.Log(this, $"Connecting plugin: {plugin.ServerType}:{plugin.ServerName}");
 
 			var statsDatabaseManager = new StatsDatabaseManager(ConnectDatabase(serverConfiguration.Backend), serverConfiguration.UseNickserv);
-			// TODO: Associate the StatsDatabase to the plugin in a different manner
+			// TODO: Associate the StatsDatabase with the plugin in a different manner
 			plugin.StatsDatabase = statsDatabaseManager;
 
 			AttachEventHandlers(plugin);
@@ -87,21 +80,8 @@ namespace BaggyBot.MessagingInterface
 				{
 					formatter.ProcessIncomingMessage(message);
 				}
-				try
-				{
-					chatClientEventHandler.ProcessMessage(message);
-				}
-				catch (Exception e)
-				{
-					Logger.LogException(this, e, "processing a message");
-					if (Debugger.IsAttached)
-					{
-						Debugger.Break();
-					}
-				}
+				chatClientEventHandler.HandleMessage(message);
 			});
-			// TODO: handle formatted lines
-			//plugin.OnFormattedLineReceived += chatClientEventHandler.ProcessFormattedLine;
 			plugin.OnConnectionLost += (reason, exception) => HandleConnectionLoss(plugin, reason, exception);
 			plugin.OnKicked += (channel, reason, kicker) => Logger.Log(this, $"I was kicked from {channel} by {kicker.Nickname} ({reason})", LogLevel.Warning);
 			plugin.OnDebugLog += (sender, message) => Logger.Log(sender, "[PLG]" + message, LogLevel.Warning);
