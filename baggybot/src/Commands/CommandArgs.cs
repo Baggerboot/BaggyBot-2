@@ -61,8 +61,28 @@ namespace BaggyBot.Commands
 		}
 
 		/// <summary>
-		/// Generates a new CommandArgs object from an IRC message. Assumes that the
-		/// first character of the message is the command identifier and removes it.
+		/// Generates a new CommandArgs object from an IRC message.
+		/// Drops the commandIdentifier from the beginning of the message, splits the
+		/// rest of the message on spaces, using the first substring as the command
+		/// name, and considers the rest to be arguments.
+		/// </summary>
+		/// <param name="message">The IRC message from which the command should be
+		/// constructed.</param>
+		/// <returns>A CommandArgs object generated from the supplied ChatMessage.
+		/// </returns>
+		public static CommandArgs FromMessage(string commandIdentifier, ChatMessage message)
+		{
+			var line = message.Message.Substring(commandIdentifier.Length);
+			var args = line.Split(' ');
+			var command = args[0];
+			args = args.Skip(1).ToArray();
+
+			var cmdIndex = line.IndexOf(' ');
+			return new CommandArgs(message.Client, command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
+		}
+
+		/// <summary>
+		/// Generates a new CommandArgs object from an IRC message.
 		/// Splits the message on spaces, using the first substring as the command
 		/// name, and considers the rest to be arguments.
 		/// </summary>
@@ -72,14 +92,7 @@ namespace BaggyBot.Commands
 		/// </returns>
 		public static CommandArgs FromMessage(ChatMessage message)
 		{
-			var line = message.Message.Substring(1);
-
-			var args = line.Split(' ');
-			var command = args[0];
-			args = args.Skip(1).ToArray();
-
-			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(message.Client, command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
+			return FromMessage(string.Empty, message);
 		}
 
 		/// <summary>
