@@ -10,7 +10,6 @@ namespace BaggyBot.Plugins
 	public abstract class Plugin : IChatClient
 	{
 		// events
-		public abstract event DebugLogEvent OnDebugLog;
 		public abstract event MessageReceivedEvent OnMessageReceived;
 		public abstract event NameChangeEvent OnNameChange;
 		public abstract event KickEvent OnKick;
