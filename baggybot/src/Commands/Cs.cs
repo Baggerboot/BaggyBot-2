@@ -14,14 +14,12 @@ namespace BaggyBot.Commands
 		public override string Usage => "<C# code>";
 		public override string Description => "Executes the given C# code and prints its result to IRC.";
 
-		private readonly Bot bot;
 		private readonly Evaluator evaluator;
 		private readonly IrcReportPrinter reportPrinter = new IrcReportPrinter();
 		private readonly Dictionary<string, StringBuilder> commandBuilders = new Dictionary<string, StringBuilder>();
 		
-		public Cs(Bot bot)
+		public Cs()
 		{
-			this.bot = bot;
 			evaluator = new Evaluator(new CompilerContext(new CompilerSettings { Unsafe = true }, reportPrinter))
 			{
 				DescribeTypeExpressions = true,
@@ -62,7 +60,7 @@ namespace BaggyBot.Commands
 			if (Security == InterpreterSecurity.Notify)
 			{
 				// Do not return anything yet, but do notify the bot operator.
-				bot.NotifyOperator("-cs used by " + command.Sender.Nickname + ": " + command.FullArgument);
+				command.Client.NotifyOperators("-cs used by " + command.Sender.Nickname + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
 			{

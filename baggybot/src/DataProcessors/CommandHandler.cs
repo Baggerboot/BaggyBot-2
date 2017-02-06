@@ -57,8 +57,8 @@ namespace BaggyBot.DataProcessors
 
 			if (ConfigManager.Config.Interpreters.Enabled)
 			{
-				commands.Add("py", new Py(bot));
-				commands.Add("cs", new Cs(bot));
+				commands.Add("py", new Py());
+				commands.Add("cs", new Cs());
 				commands.Add("roslyn", new RoslynExec());
 			}
 			else

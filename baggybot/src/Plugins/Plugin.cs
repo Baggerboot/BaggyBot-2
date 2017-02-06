@@ -38,18 +38,28 @@ namespace BaggyBot.Plugins
 		public abstract void Dispose();
 
 		// newly exposed properties
-		public IReadOnlyList<Operator> Operators { get; }
+		public ServerCfg ServerConfiguration;
+		public IReadOnlyList<Operator> Operators => ServerConfiguration.Operators;
+		public string ServerName => ServerConfiguration.ServerName;
+
 		public List<IMessageFormatter> MessageFormatters { get; } = new List<IMessageFormatter>();
-		public string ServerName { get; }
 		public StatsDatabaseManager StatsDatabase { get; set; }
+
+		// Capabilities
 		public bool AtMention { get; protected set; }
 		public bool AllowsMultilineMessages { get; protected set; }
 
+		// Helper methods
 		public bool InChannel(ChatChannel channel) => Channels.Contains(channel);
 		public bool JoinChannel(string name) => JoinChannel(FindChannel(name));
 		public void Part(string name, string reason = null) => Part(FindChannel(name), reason);
 
 		public abstract ChatUser FindUser(string name);
+
+		protected Plugin(ServerCfg config)
+		{
+			ServerConfiguration = config;
+		}
 
 		/// <summary>
 		/// Lookup a channel by its name
@@ -71,10 +81,12 @@ namespace BaggyBot.Plugins
 			return Channels.First(c => c.Identifier == channelId);
 		}
 
-		protected Plugin(ServerCfg config)
+		public void NotifyOperators(string message)
 		{
-			ServerName = config.ServerName;
-			Operators = config.Operators;
+			foreach (var op in Operators)
+			{
+				SendMessage(FindChannel(op.Nick), message);
+			}
 		}
 	}
 }
