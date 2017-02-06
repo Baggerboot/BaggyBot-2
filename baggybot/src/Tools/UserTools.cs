@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using BaggyBot.Configuration;
-using BaggyBot.Database.Model;
-using BaggyBot.DataProcessors.Mapping;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 
@@ -21,12 +19,16 @@ namespace BaggyBot.Tools
 
 		private static bool Validate(ChatUser user, Operator op)
 		{
-			var dbUser = user.Client.StatsDatabase.MapUser(user);
 
 			Func<string, string, bool> match = (input, reference) => (reference.Equals("*") || input.Equals(reference));
 			var nickM = match(user.Nickname, op.Nick);
 			var identM = match(user.UniqueId, op.UniqueId);
-			var uidM = match(dbUser.Id.ToString(), op.Uid);
+			var uidM = true;
+			if (op.Uid != "*")
+			{
+				var dbUser = user.Client.StatsDatabase.MapUser(user);
+				uidM = match(dbUser.Id.ToString(), op.Uid);
+			}
 
 			return nickM && identM && uidM;
 		}
