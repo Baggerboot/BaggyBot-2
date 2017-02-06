@@ -206,7 +206,7 @@
     <Compile Include="src\CommandParsing\CommandComponent.cs" />
     <Compile Include="src\Database\CorruptedDatabaseException.cs" />
     <Compile Include="src\DataProcessors\ChatClientEventHandler.cs" />
-    <Compile Include="src\DataProcessors\ChatClientEventHandlerManager.cs" />
+    <Compile Include="src\DataProcessors\ChatClientEventManager.cs" />
     <Compile Include="src\Formatting\Formatting.cs" />
     <Compile Include="src\InternalPlugins\Curse\CursePlugin.cs" />
     <Compile Include="src\InternalPlugins\Discord\DiscordExtensionMethods.cs" />

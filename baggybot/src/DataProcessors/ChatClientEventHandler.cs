@@ -35,6 +35,11 @@ namespace BaggyBot.DataProcessors
 			
 		}
 
+		public virtual void HandleKicked(ChatUser kicker, ChatChannel channel, string reason)
+		{
+			
+		}
+
 		public virtual void HandleQuit(ChatUser user, string reason)
 		{
 			

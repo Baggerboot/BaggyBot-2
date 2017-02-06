@@ -56,6 +56,11 @@ namespace BaggyBot.DataProcessors
 			DisplayEvent(message, kicker, channel);
 		}
 
+		public override void HandleKicked(ChatUser kicker, ChatChannel channel, string reason)
+		{
+			Logger.Log(this, $"I was kicked from {channel} by {kicker.Nickname} ({reason})", LogLevel.Warning);
+		}
+
 		public override void HandleNickChange(ChatUser user, ChatUser newNick)
 		{
 			var message = $"{user.Nickname} is now known as {newNick.Nickname}";

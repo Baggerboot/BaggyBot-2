@@ -7,36 +7,41 @@ using BaggyBot.MessagingInterface;
 
 namespace BaggyBot.DataProcessors
 {
-	class ChatClientEventHandlerManager
+	class ChatClientEventManager
 	{
 		public void HandleNickChange(ChatUser oldName, ChatUser newName)
 		{
-			
+
 		}
 
 		public void HandleMessage(ChatMessage message)
 		{
-			
+
 		}
 
 		public void HandleJoin(ChatUser user, ChatChannel channel)
 		{
-			
+
 		}
 
 		public void HandlePart(ChatUser user, ChatChannel channel)
 		{
-			
+
 		}
 
 		public void HandleKick(ChatUser kickee, ChatChannel channel, string reason, ChatUser kicker)
 		{
-			
+
+		}
+
+		public void HandleKicked(ChatChannel channel, string reason, ChatUser kicker)
+		{
+
 		}
 
 		public void HandleQuit(ChatUser user, string reason)
 		{
-			
+
 		}
 	}
 }

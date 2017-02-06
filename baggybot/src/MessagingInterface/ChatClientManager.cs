@@ -16,7 +16,7 @@ namespace BaggyBot.MessagingInterface
 	internal class ChatClientManager : IDisposable
 	{
 		private readonly Dictionary<string, Plugin> clients = new Dictionary<string, Plugin>();
-		private readonly ChatClientEventHandlerManager chatClientEventHandler = new ChatClientEventHandlerManager();
+		private readonly ChatClientEventManager eventManager = new ChatClientEventManager();
 		internal IChatClient this[string identifier] => clients[identifier];
 
 		/// <summary>
@@ -73,22 +73,22 @@ namespace BaggyBot.MessagingInterface
 
 		private void AttachEventHandlers(Plugin plugin)
 		{
-			plugin.OnNameChange += (sender, newNick) => chatClientEventHandler.HandleNickChange(sender, newNick);
+			plugin.OnNameChange += (sender, newNick) => eventManager.HandleNickChange(sender, newNick);
 			plugin.OnMessageReceived += message => Task.Run(() =>
 			{
 				foreach (var formatter in plugin.MessageFormatters)
 				{
 					formatter.ProcessIncomingMessage(message);
 				}
-				chatClientEventHandler.HandleMessage(message);
+				eventManager.HandleMessage(message);
 			});
 			plugin.OnConnectionLost += (reason, exception) => HandleConnectionLoss(plugin, reason, exception);
-			plugin.OnKicked += (channel, reason, kicker) => Logger.Log(this, $"I was kicked from {channel} by {kicker.Nickname} ({reason})", LogLevel.Warning);
+			plugin.OnKicked += eventManager.HandleKicked;
 			plugin.OnDebugLog += (sender, message) => Logger.Log(sender, "[PLG]" + message, LogLevel.Warning);
-			plugin.OnJoinChannel += chatClientEventHandler.HandleJoin;
-			plugin.OnPartChannel += chatClientEventHandler.HandlePart;
-			plugin.OnKick += chatClientEventHandler.HandleKick;
-			plugin.OnQuit += chatClientEventHandler.HandleQuit;
+			plugin.OnJoinChannel += eventManager.HandleJoin;
+			plugin.OnPartChannel += eventManager.HandlePart;
+			plugin.OnKick += eventManager.HandleKick;
+			plugin.OnQuit += eventManager.HandleQuit;
 		}
 
 		private void HandleConnectionLoss(Plugin client, string reason, Exception ex)
