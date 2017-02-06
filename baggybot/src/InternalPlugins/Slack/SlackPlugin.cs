@@ -1,29 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using BaggyBot.Configuration;
-using BaggyBot.Database;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Monitoring;
 using BaggyBot.Plugins;
 using BaggyBot.Plugins.MessageFormatters;
-using IRCSharp;
-using IRCSharp.IRC;
 using SlackAPI;
 using SlackAPI.WebSocketMessages;
-using DebugLogEvent = BaggyBot.Plugins.DebugLogEvent;
-using JoinChannelEvent = BaggyBot.Plugins.JoinChannelEvent;
-using KickedEvent = BaggyBot.Plugins.KickedEvent;
-using KickEvent = BaggyBot.Plugins.KickEvent;
-using MessageReceivedEvent = BaggyBot.Plugins.MessageReceivedEvent;
-using MessageSendResult = BaggyBot.Plugins.MessageSendResult;
-using PartChannelEvent = BaggyBot.Plugins.PartChannelEvent;
-using QuitEvent = BaggyBot.Plugins.QuitEvent;
 
 namespace BaggyBot.InternalPlugins.Slack
 {
@@ -75,11 +59,6 @@ namespace BaggyBot.InternalPlugins.Slack
 		public override bool JoinChannel(ChatChannel channel)
 		{
 			throw new NotImplementedException();
-		}
-
-		public NickservInformation NickservLookup(string nick)
-		{
-			return null;
 		}
 
 		public ChatUser DoWhoisCall(string nick)

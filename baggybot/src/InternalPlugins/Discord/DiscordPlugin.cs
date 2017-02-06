@@ -81,11 +81,6 @@ namespace BaggyBot.InternalPlugins.Discord
 		public override bool Connected { get; }
 		public new StatsDatabaseManager StatsDatabase { get; set; }
 
-		public bool InChannel(ChatChannel channel)
-		{
-			throw new NotImplementedException();
-		}
-
 		public override ChatUser FindUser(string name)
 		{
 			var matches = server.FindUsers(name).ToArray();
