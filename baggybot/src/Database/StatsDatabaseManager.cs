@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
+using BaggyBot.Configuration;
 using BaggyBot.Database.Model;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
-using IRCSharp.IRC;
 using LinqToDB;
 
 namespace BaggyBot.Database
@@ -155,7 +154,8 @@ namespace BaggyBot.Database
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 
-				if (user.HasTemporallyUniqueId)
+				// TODO: implement IRC user mapping
+				if (user.HasTemporallyUniqueId || true)
 				{
 					// The user's UniqueId is guaranteed to be correct, so we can simply match on that
 					var matches = sqlConnector.Users.Where(u => u.UniqueId == user.UniqueId).ToArray();
@@ -1022,6 +1022,21 @@ namespace BaggyBot.Database
 					return results.First();
 				}
 			}
+		}
+
+		public bool Validate(ChatUser user, Operator op)
+		{
+			Func<string, string, bool> match = (input, reference) => (reference.Equals("*") || input.Equals(reference));
+			var nickM = match(user.Nickname, op.Nick);
+			var identM = match(user.UniqueId, op.UniqueId);
+			var uidM = true;
+			if (op.Uid != "*")
+			{
+				var dbUser = MapUser(user);
+				uidM = match(dbUser.Id.ToString(), op.Uid);
+			}
+
+			return nickM && identM && uidM;
 		}
 
 		public bool MiscDataContainsKey(string type, string key)

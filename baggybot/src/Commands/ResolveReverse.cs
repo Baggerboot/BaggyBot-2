@@ -7,6 +7,7 @@ namespace BaggyBot.Commands
 	internal class ResolveReverse : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "rdns";
 		public override string Usage => "<IP address>";
 		public override string Description => "Performs a reverse DNS lookup on a given IP address, and returns the associated hostname.";
 
@@ -14,7 +15,7 @@ namespace BaggyBot.Commands
 		{
 			if (command.Args.Length != 1)
 			{
-				command.Reply("Usage: -rdns <ip>");
+				InformUsage(command);
 				return;
 			}
 			IPAddress hostIpAddress;

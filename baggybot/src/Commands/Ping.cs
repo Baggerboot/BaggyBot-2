@@ -9,6 +9,7 @@ namespace BaggyBot.Commands
 	internal class Ping : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "ping";
 		public override string Usage => "[server] [count]";
 		public override string Description => "Returns \"Pong!\" when no arguments are given. When [server] is specified, tries to ping that server once, or as many times as specified in [count].";
 
@@ -53,11 +54,11 @@ namespace BaggyBot.Commands
 
 				if (reply.Status == IPStatus.Success)
 				{
-					command.ReturnMessage("Reply from {0} in {1}ms{2}", reply.Address.ToString(), Colourise(reply.RoundtripTime) + reply.RoundtripTime, Colour(null));
+					command.ReturnMessage($"Reply from {reply.Address} in {Colourise(reply.RoundtripTime)}ms{reply.RoundtripTime}{Colour(null)}");
 				}
 				else
 				{
-					command.ReturnMessage("Ping failed ({0})", reply.Status);
+					command.ReturnMessage($"Ping failed ({reply.Status})");
 				}
 			}
 			else if (command.Args.Length == 2)
@@ -89,7 +90,7 @@ namespace BaggyBot.Commands
 				var word = successCount == 1 ? "reply" : "replies";
 				var address = pings[0].Address == null ? "Unknown IP Address" : pings[0].Address.ToString();
 				var number = double.IsNaN(average) ? "NaN " : average.ToString();
-				command.ReturnMessage("{0} {1} from {2}, averaging {3} ({4})", successCount, word, address, Colourise(average) + number + "ms" + Colour(null), raw);
+				command.ReturnMessage($"{successCount} {word} from {address}, averaging {Colourise(average) + number + "ms" + Colour(null)} ({raw})");
 			}
 			else
 			{

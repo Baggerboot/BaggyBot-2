@@ -1,7 +1,6 @@
-﻿
-using Discord;
+﻿using Discord;
 
-namespace BaggyBot.InternalPlugins.Discord
+namespace BaggyBot.Plugins.Internal.Discord
 {
 	internal static class DiscordExtensionMethods
 	{

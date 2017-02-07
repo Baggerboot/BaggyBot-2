@@ -12,6 +12,7 @@ namespace BaggyBot.Commands
 	internal class Sql : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Name => "sql";
 		public override string Usage => "[-t|--tables]|[<-r|--rows> <rows>] <SQL code>";
 		public override string Description => "Execute arbitrary SQL code and return its result.";
 
@@ -25,7 +26,7 @@ namespace BaggyBot.Commands
 
 			if (parsed.Flags["tables"])
 			{
-				command.Reply($"the following tables are available: {string.Join(", ", command.Client.StatsDatabase.GetTableNames())}");
+				command.Reply($"the following tables are available: {string.Join(", ", StatsDatabase.GetTableNames())}");
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(parsed.RestArgument))
@@ -34,7 +35,7 @@ namespace BaggyBot.Commands
 				return;
 			}
 
-			var table = command.Client.StatsDatabase.ExecuteQuery(parsed.RestArgument);
+			var table = StatsDatabase.ExecuteQuery(parsed.RestArgument);
 			if (table.Rows.Count == 0)
 			{
 				command.Reply("done.");
@@ -44,7 +45,7 @@ namespace BaggyBot.Commands
 			var maxRows = parsed.GetKey<int>("rows");
 
 			var columnLengths = GetColumnLengths(table, maxRows);
-			if (command.Client.AllowsMultilineMessages)
+			if (Client.AllowsMultilineMessages)
 			{
 				var dividerLength = columnLengths.Sum() + (columnLengths.Length - 1) * " | ".Length;
 				var divider = string.Concat(Enumerable.Repeat('=', dividerLength));

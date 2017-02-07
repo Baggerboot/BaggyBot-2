@@ -1,35 +1,42 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Security.Cryptography;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Plugins;
 
 namespace BaggyBot.Commands
 {
-	public struct CommandArgs
+	internal struct CommandArgs
 	{
-		public string Command { get; private set; }
-		// TODO: CommandArgs.Args should be made into a get-only accessor.
-		public string[] Args { get; set; }
-		public ChatUser Sender { get;}
-		public ChatChannel Channel { get;}
+		public string Command { get; }
+		public string[] Args { get; }
+		public ChatUser Sender { get; }
+		public ChatChannel Channel { get; }
 		public string FullArgument { get; }
-		public Plugin Client { get; }
+		private readonly Func<string, MessageSendResult> replyCallback;
+		private readonly Func<string, MessageSendResult> returnMessageCallback;
 
 		/// <summary>
 		/// Creates a new CommandArgs object, containing information about a command invocation.
 		/// </summary>
 		/// <param name="command">The name of the requested command.</param>
 		/// <param name="args">An array of arguments to be passed to the command.</param>
-		/// <param name="sender">The <see cref="ChatUser"/> who sent the command.</param>
+		/// <param name="sender">The user who sent the command.</param>
 		/// <param name="channel">The channel the command was sent in.</param>
 		/// <param name="fullArgument">All arguments that were passed to the command, as a single string.</param>
-		public CommandArgs(Plugin client, string command, string[] args, ChatUser sender, ChatChannel channel, string fullArgument)
+		/// <param name="replyCallback">A callback method used to post a message to the channel
+		/// the command was sent from, replying to the sender of the command.</param>
+		/// <param name="returnMessageCallback">A callback methodd used to post a message to the channel
+		/// the command was sent from.</param>
+		public CommandArgs(string command, string[] args, ChatUser sender, ChatChannel channel, string fullArgument, Func<string, MessageSendResult> replyCallback, Func<string, MessageSendResult> returnMessageCallback)
 		{
-			Client = client;
 			Command = command;
 			Args = args;
 			Sender = sender;
 			Channel = channel;
 			FullArgument = fullArgument;
+			this.replyCallback = replyCallback;
+			this.returnMessageCallback = returnMessageCallback;
 			//ReplyCallback = replyCallback;
 		}
 
@@ -51,76 +58,52 @@ namespace BaggyBot.Commands
 			args = args.Skip(1).ToArray();
 
 			var cmdIndex = newCommand.IndexOf(' ');
-			return new CommandArgs(context.Client, command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : newCommand.Substring(cmdIndex + 1));
+			return new CommandArgs(command, args, context.Sender, context.Channel, cmdIndex == -1 ? null : newCommand.Substring(cmdIndex + 1), context.replyCallback, context.returnMessageCallback);
 		}
-		
+
 		public static CommandArgs FromPrevious(string newCommand, string newArguments, CommandArgs context)
 		{
 			var args = newArguments.Split(' ');
-			return new CommandArgs(context.Client, newCommand, args, context.Sender, context.Channel, newArguments);
+			return new CommandArgs(newCommand, args, context.Sender, context.Channel, newArguments, context.replyCallback, context.returnMessageCallback);
 		}
 
 		/// <summary>
 		/// Generates a new CommandArgs object from an IRC message.
-		/// Drops the commandIdentifier from the beginning of the message, splits the
+		/// Drops the commandPrefix from the beginning of the message, splits the
 		/// rest of the message on spaces, using the first substring as the command
 		/// name, and considers the rest to be arguments.
 		/// </summary>
+		/// <param name="commandPrefix">The command prefix matching this command.</param>
 		/// <param name="message">The IRC message from which the command should be
 		/// constructed.</param>
 		/// <returns>A CommandArgs object generated from the supplied ChatMessage.
 		/// </returns>
-		public static CommandArgs FromMessage(string commandIdentifier, ChatMessage message)
+		public static CommandArgs FromMessage(string commandPrefix, ChatMessage message)
 		{
-			var line = message.Message.Substring(commandIdentifier.Length);
+			var line = message.Message.Substring(commandPrefix.Length);
 			var args = line.Split(' ');
 			var command = args[0];
 			args = args.Skip(1).ToArray();
 
 			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(message.Client, command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1));
-		}
-
-		/// <summary>
-		/// Generates a new CommandArgs object from an IRC message.
-		/// Splits the message on spaces, using the first substring as the command
-		/// name, and considers the rest to be arguments.
-		/// </summary>
-		/// <param name="message">The IRC message from which the command should be
-		/// constructed.</param>
-		/// <returns>A CommandArgs object generated from the supplied ChatMessage.
-		/// </returns>
-		public static CommandArgs FromMessage(ChatMessage message)
-		{
-			return FromMessage(string.Empty, message);
+			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), message.ReplyCallback, message.ReturnMessageCallback);
 		}
 
 		/// <summary>
 		/// Replies to the sender of a command, mentioning their nickname.
 		/// The message will be sent to the same target the command was sent to.
 		/// </summary>
-		/// <param name="format">A format string, see <see cref="string.Format"/></param>
-		/// <param name="args">An object array that contains zero or more objects
-		/// to format, see <see cref="string.Format"/></param>
-		/// <returns>A <see cref="MessageSendResult"/> containing information about
-		/// the status of the message that was sent.</returns>
-		public MessageSendResult Reply(string format, params object[] args)
+		public MessageSendResult Reply(string format)
 		{
-			var message = (Sender.Client.AtMention ? "@" : "") + Sender.AddressableName + ", " + string.Format(format, args);
-			return Client.SendMessage(Channel, message);
+			return replyCallback(format);
 		}
 
 		/// <summary>
 		/// Sends a message to the target the command was sent to.
 		/// </summary>
-		/// <param name="format">A format string, see <see cref="string.Format"/></param>
-		/// <param name="args">An object array that contains zero or more objects
-		/// to format, see <see cref="string.Format"/></param>
-		/// <returns>A <see cref="MessageSendResult"/> containing information about
-		/// the status of the message that was sent.</returns>
-		public MessageSendResult ReturnMessage(string format, params object[] args)
+		public MessageSendResult ReturnMessage(string format)
 		{
-			return Client.SendMessage(Channel, args.Length == 0 ? format : string.Format(format, args));
+			return returnMessageCallback(format);
 		}
 	}
 }

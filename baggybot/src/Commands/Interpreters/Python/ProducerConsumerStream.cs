@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace BaggyBot.Commands
+namespace BaggyBot.Commands.Interpreters.Python
 {
 	internal class ProducerConsumerStream : Stream
 	{

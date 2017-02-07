@@ -2,6 +2,7 @@
 using BaggyBot.CommandParsing;
 using BaggyBot.Configuration;
 using BaggyBot.EmbeddedData;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
@@ -9,6 +10,7 @@ namespace BaggyBot.Commands
 	internal class Get : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "get";
 		public override string Usage => "<property> [key]";
 		public override string Description => "Retrieves the value of a property, or the value of a key belonging to that property. Valid properties: [cfg, uid, users, channel]";
 
@@ -57,7 +59,7 @@ namespace BaggyBot.Commands
 
 		private void GetCfg(CommandArgs command, OperationResult result)
 		{
-			if (!UserTools.Validate(command.Sender))
+			if (!Client.Validate(command.Sender))
 			{
 				command.Reply(Messages.CmdNotAuthorised);
 				return;
@@ -69,7 +71,7 @@ namespace BaggyBot.Commands
 
 		private void GetUid(CommandArgs command, OperationResult result)
 		{
-			var users = command.Client.StatsDatabase.GetUsersByNickname(result.Arguments["user"]);
+			var users = StatsDatabase.GetUsersByNickname(result.Arguments["user"]);
 			if (users.Length == 0)
 				command.Reply($"I don't know a user with {result.Arguments["user"]} as their primary name");
 			else
@@ -79,9 +81,9 @@ namespace BaggyBot.Commands
 		private void GetUsers(CommandArgs command, OperationResult result)
 		{
 			var channel = result.Arguments["channel"];
-			if (command.Client.InChannel(command.Client.FindChannel(channel)))
+			if (Client.InChannel(Client.FindChannel(channel)))
 			{
-				var ircChannel = command.Client.FindChannel(channel);
+				var ircChannel = Client.FindChannel(channel);
 				command.Reply($"users in {channel}: {string.Join(", ", ircChannel.Users.Count)}");
 			}
 			else
@@ -93,7 +95,7 @@ namespace BaggyBot.Commands
 		private void GetChannel(CommandArgs command, OperationResult result)
 		{
 			var id = result.Arguments["channel-id"];
-			var channel = command.Client.GetChannel(id);
+			var channel = Client.GetChannel(id);
 			command.Reply($"{id} maps to {channel.Name} {(channel.IsPrivateMessage ? "(private message)" : "")}");
 		}
 	}

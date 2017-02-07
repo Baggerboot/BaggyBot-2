@@ -9,6 +9,7 @@ namespace BaggyBot.Commands
 	class WhoAmI : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "whoami";
 		public override string Usage => "";
 		public override string Description => "Displays some information about your message.";
 

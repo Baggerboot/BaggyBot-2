@@ -9,6 +9,7 @@ namespace BaggyBot.Commands
 	internal class UrbanDictionary : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "ur";
 		public override string Usage => "<search term>";
 		public override string Description => "Searches Urban Dictionary for a given term.";
 

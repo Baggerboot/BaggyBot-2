@@ -10,12 +10,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using BaggyBot.Commands.Interpreters.Python;
 
 namespace BaggyBot.Commands
 {
 	internal class Py : ReadEvaluatePrintCommand, IDisposable
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "py";
 		public override string Usage => "<python code>";
 		public override string Description => "Executes the given Python code and prints its result to IRC.";
 
@@ -87,7 +89,7 @@ namespace BaggyBot.Commands
 			if (Security == InterpreterSecurity.Notify)
 			{
 				// Do not return anything yet, but do notify the bot operator.
-				command.Client.NotifyOperators("-py used by " + command.Sender.Nickname + ": " + command.FullArgument);
+				Client.NotifyOperators("-py used by " + command.Sender.Nickname + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
 			{
@@ -119,7 +121,7 @@ namespace BaggyBot.Commands
 		public override void Use(CommandArgs command)
 		{
 			ThreadId++;
-			var isOperator = UserTools.Validate(command.Sender);
+			var isOperator = Client.Validate(command.Sender);
 
 			if (!(isOperator || RestrictionsCheck(command)))
 			{

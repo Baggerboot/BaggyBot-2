@@ -11,6 +11,7 @@ namespace BaggyBot.Commands
 	internal class Cs : ReadEvaluatePrintCommand
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "cs";
 		public override string Usage => "<C# code>";
 		public override string Description => "Executes the given C# code and prints its result to IRC.";
 
@@ -60,7 +61,7 @@ namespace BaggyBot.Commands
 			if (Security == InterpreterSecurity.Notify)
 			{
 				// Do not return anything yet, but do notify the bot operator.
-				command.Client.NotifyOperators("-cs used by " + command.Sender.Nickname + ": " + command.FullArgument);
+				Client.NotifyOperators("-cs used by " + command.Sender.Nickname + ": " + command.FullArgument);
 			}
 			if (command.FullArgument != null && (command.FullArgument.ToLower().Contains("ircinterface") || command.FullArgument.ToLower().Contains("datafunctionset")))
 			{
@@ -87,7 +88,7 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			var isOperator = UserTools.Validate(command.Sender);
+			var isOperator = Client.Validate(command.Sender);
 
 			if (!commandBuilders.ContainsKey(command.Sender.Nickname))
 			{

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BaggyBot.MessagingInterface;
+﻿using BaggyBot.MessagingInterface;
 
-namespace BaggyBot.Plugins
+namespace BaggyBot.Plugins.MessageFormatters
 {
 	public interface IMessageFormatter
 	{

@@ -5,6 +5,7 @@ namespace BaggyBot.Commands
 	internal class Feature : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Name => "feature";
 		public override string Usage => "<search string>";
 		public override string Description => "Feature a quote I've taken.";
 		
@@ -12,7 +13,7 @@ namespace BaggyBot.Commands
 		{
 			var search = command.FullArgument;
 
-			var searchResults = command.Client.StatsDatabase.FindQuote(search);
+			var searchResults = StatsDatabase.FindQuote(search);
 
 			if (searchResults == null)
 			{
@@ -47,7 +48,7 @@ namespace BaggyBot.Commands
 				return;
 			}
 			command.ReturnMessage("The following quote has been featured: \"" + searchResults[0].Text + "\"");
-			command.Client.StatsDatabase.SetVar("featured_quote", searchResults[0].Id);
+			StatsDatabase.SetVar("featured_quote", searchResults[0].Id);
 		}
 	}
 }

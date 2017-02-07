@@ -19,21 +19,16 @@ namespace BaggyBot.CommandParsing
 			return this;
 		}
 
-		public OperationResult Parse(string arguments)
+		public OperationResult Parse(string[] tokens)
 		{
-			if (arguments == null)
-			{
-				return operations["default"].Parse(null, "default", null);
-				//return new OperationResult("default");
-			}
-
+			var fullCommand = string.Join(" ", tokens);
 			var components = new List<CommandComponent>();
-			var tokens = arguments.Split((char[]) null, StringSplitOptions.RemoveEmptyEntries);
-			int currentIndex = 0;
+			var currentIndex = 0;
 			foreach (var token in tokens)
 			{
-				currentIndex = arguments.IndexOf(token, currentIndex, StringComparison.Ordinal);
+				currentIndex = fullCommand.IndexOf(token, currentIndex, StringComparison.Ordinal);
 				components.Add(new CommandComponent(currentIndex, token));
+				currentIndex += token.Length;
 			}
 
 			if (components.Count == 0)
@@ -42,16 +37,29 @@ namespace BaggyBot.CommandParsing
 			}
 			if (components[0].Value.StartsWith("-"))
 			{
-				return operations["default"].Parse(components, "default", arguments);
+				return operations["default"].Parse(components, "default", fullCommand);
 			}
 			if (!operations.ContainsKey(components[0].Value))
 			{
-				return operations["default"].Parse(components, "default", arguments);
+				return operations["default"].Parse(components, "default", fullCommand);
 			}
 			else
 			{
-				return operations[components[0].Value].Parse(components.Skip(1), components[0].Value, arguments);
+				return operations[components[0].Value].Parse(components.Skip(1), components[0].Value, fullCommand);
 			}
+		}
+
+		public OperationResult Parse(string arguments)
+		{
+			if (arguments == null)
+			{
+				return operations["default"].Parse(null, "default", null);
+				//return new OperationResult("default");
+			}
+
+			var tokens = arguments.Split((char[]) null, StringSplitOptions.RemoveEmptyEntries);
+
+			return Parse(tokens);
 		}
 	}
 }

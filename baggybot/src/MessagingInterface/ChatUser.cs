@@ -6,9 +6,6 @@ namespace BaggyBot.MessagingInterface
 {
 	public class ChatUser
 	{
-		// The chat client (chat plugin) this user belongs to.
-		public Plugin Client { get; }
-
 		// A users's nickname is their primary handle. 
 		// It's generally the name that shows up next to their chat messages,
 		// and the name that is used to refer to them. It may or may not be unique.
@@ -32,12 +29,11 @@ namespace BaggyBot.MessagingInterface
 		public string AddressableName => Name ?? Nickname;
 
 
-		public ChatUser(Plugin client, string nickname, string uniqueId, bool hasTemporallyUniqueId = true, string name = null)
+		public ChatUser(string nickname, string uniqueId, bool hasTemporallyUniqueId = true, string name = null)
 		{
 			if(nickname == null) throw new ArgumentNullException(nameof(nickname));
 			if(uniqueId == null) throw new ArgumentNullException(nameof(uniqueId));
 
-			Client = client;
 			Nickname = nickname;
 			UniqueId = uniqueId;
 			HasTemporallyUniqueId = hasTemporallyUniqueId;

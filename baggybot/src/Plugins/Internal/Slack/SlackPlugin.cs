@@ -9,21 +9,20 @@ using BaggyBot.Plugins.MessageFormatters;
 using SlackAPI;
 using SlackAPI.WebSocketMessages;
 
-namespace BaggyBot.InternalPlugins.Slack
+namespace BaggyBot.Plugins.Internal.Slack
 {
 	public class SlackPlugin : Plugin
 	{
 		public override string ServerType => "slack";
 
-		public override event DebugLogEvent OnDebugLog;
-		public override event MessageReceivedEvent OnMessageReceived;
-		public override event KickEvent OnKick;
-		public override event KickedEvent OnKicked;
-		public override event ConnectionLostEvent OnConnectionLost;
-		public override event QuitEvent OnQuit;
-		public override event JoinChannelEvent OnJoinChannel;
-		public override event PartChannelEvent OnPartChannel;
-		public override event NameChangeEvent OnNameChange;
+		public override event Action<ChatMessage> OnMessageReceived;
+		public override event Action<ChatUser, ChatUser> OnNameChange;
+		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
+		public override event Action<ChatChannel, ChatUser, string> OnKicked;
+		public override event Action<string, Exception> OnConnectionLost;
+		public override event Action<ChatUser, string> OnQuit;
+		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
+		public override event Action<ChatUser, ChatChannel> OnPartChannel;
 
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.IsConnected;
@@ -40,11 +39,6 @@ namespace BaggyBot.InternalPlugins.Slack
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
-			foreach (var formatter in MessageFormatters)
-			{
-				message = formatter.ProcessOutgoingMessage(message);
-			}
-
 			var ev = new ManualResetEvent(false);
 			var success = false;
 			client.SendMessage(received =>
@@ -56,7 +50,7 @@ namespace BaggyBot.InternalPlugins.Slack
 			return success ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
 
-		public override bool JoinChannel(ChatChannel channel)
+		public override void JoinChannel(ChatChannel channel)
 		{
 			throw new NotImplementedException();
 		}
@@ -124,8 +118,8 @@ namespace BaggyBot.InternalPlugins.Slack
 
 			var channel = GetChannel(message.channel);
 
-			var chatUser = new ChatUser(this, user.name, user.id, name: user.profile.first_name);
-			var chatMessage = new ChatMessage(this, chatUser, channel, message.text);
+			var chatUser = new ChatUser(user.name, user.id, name: user.profile.first_name);
+			var chatMessage = new ChatMessage(chatUser, channel, message.text);
 			OnMessageReceived?.Invoke(chatMessage);
 		}
 

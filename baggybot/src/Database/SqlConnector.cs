@@ -5,11 +5,9 @@ using LinqToDB.Data;
 using LinqToDB.DataProvider.PostgreSQL;
 using Npgsql;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using BaggyBot.Monitoring;
-using Metadata = BaggyBot.Database.Model.Metadata;
 
 namespace BaggyBot.Database
 {
@@ -27,7 +25,6 @@ namespace BaggyBot.Database
 		public ITable<Quote> Quotes { get; private set; }
 		public ITable<UsedWord> Words { get; private set; }
 		public ITable<MiscData> MiscData { get; private set; }
-
 		private ITable<Metadata> metadata;
 
 		private ConnectionState internalState;

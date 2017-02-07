@@ -9,6 +9,7 @@ namespace BaggyBot.Commands
 	internal class Wikipedia : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "wiki";
 		public override string Usage => "<search term>";
 		public override string Description => "Searches for an article on Wikipedia.";
 

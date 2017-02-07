@@ -10,21 +10,20 @@ using Discord;
 using Mono.CSharp;
 
 
-namespace BaggyBot.InternalPlugins.Discord
+namespace BaggyBot.Plugins.Internal.Discord
 {
 	public class DiscordPlugin : Plugin
 	{
 		public override string ServerType => "discord";
 
-		public override event DebugLogEvent OnDebugLog;
-		public override event MessageReceivedEvent OnMessageReceived;
-		public override event NameChangeEvent OnNameChange;
-		public override event KickEvent OnKick;
-		public override event KickedEvent OnKicked;
-		public override event ConnectionLostEvent OnConnectionLost;
-		public override event QuitEvent OnQuit;
-		public override event JoinChannelEvent OnJoinChannel;
-		public override event PartChannelEvent OnPartChannel;
+		public override event Action<ChatMessage> OnMessageReceived;
+		public override event Action<ChatUser, ChatUser> OnNameChange;
+		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
+		public override event Action<ChatChannel, ChatUser, string> OnKicked;
+		public override event Action<string, Exception> OnConnectionLost;
+		public override event Action<ChatUser, string> OnQuit;
+		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
+		public override event Action<ChatUser, ChatChannel> OnPartChannel;
 
 		private DiscordClient client;
 		private Server server;
@@ -40,10 +39,9 @@ namespace BaggyBot.InternalPlugins.Discord
 				{
 					var user = BuildUser(e.User);
 					var channel = BuildChannel(e.Channel);
-					OnMessageReceived?.Invoke(new ChatMessage(this, user, channel, e.Message.Text));
+					OnMessageReceived?.Invoke(new ChatMessage(user, channel, e.Message.Text));
 				}
 			};
-
 		}
 
 		private ChatChannel BuildChannel(Channel discordChannel)
@@ -52,7 +50,7 @@ namespace BaggyBot.InternalPlugins.Discord
 		}
 		private ChatUser BuildUser(User discordUser)
 		{
-			return new ChatUser(this, discordUser.Name, discordUser.Id.ToString(), name: discordUser.Nickname);
+			return new ChatUser(discordUser.Name, discordUser.Id.ToString(), name: discordUser.Nickname);
 		}
 
 		public override void Disconnect()
@@ -96,7 +94,7 @@ namespace BaggyBot.InternalPlugins.Discord
 			return MessageSendResult.Success;
 		}
 
-		public override bool JoinChannel(ChatChannel channel)
+		public override void JoinChannel(ChatChannel channel)
 		{
 			throw new NotImplementedException();
 		}

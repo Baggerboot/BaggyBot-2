@@ -5,16 +5,17 @@ using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {
-	public abstract class ReadEvaluatePrintCommand : Command
+	public enum InterpreterSecurity
+	{
+		Allow,
+		Notify,
+		Block,
+	}
+
+	internal abstract class ReadEvaluatePrintCommand : Command
 	{
 		protected int ThreadId { get; set; } = 0;
 		protected InterpreterSecurity Security { get; set; }
-		public enum InterpreterSecurity
-		{
-			Allow,
-			Notify,
-			Block,
-		}
 
 		protected ReadEvaluatePrintCommand()
 		{
@@ -30,7 +31,7 @@ namespace BaggyBot.Commands
 		protected abstract void GetBuffer(CommandArgs command);
 		protected void ProcessControlCommand(CommandArgs command)
 		{
-			if (!UserTools.Validate(command.Sender))
+			if (!Client.Validate(command.Sender))
 			{
 				command.ReturnMessage("Python Interpreter control commands may only be used by the bot operator");
 				return;

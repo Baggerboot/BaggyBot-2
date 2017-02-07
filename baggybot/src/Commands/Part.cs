@@ -1,8 +1,11 @@
-﻿namespace BaggyBot.Commands
+﻿using BaggyBot.MessagingInterface;
+
+namespace BaggyBot.Commands
 {
 	internal class Part : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Name => "part";
 		public override string Usage => "<channel>";
 		public override string Description => "Makes me leave an IRC channel.";
 
@@ -13,7 +16,7 @@
 				command.ReturnMessage("usage: -part <channel> [reason]");
 			}
 			else {
-				command.Client.Part(command.Args[0], command.Args.Length == 2 ? command.Args[1] : null);
+				Client.Part(command.Args[0], command.Args.Length == 2 ? command.Args[1] : null);
 			}
 		}
 	}

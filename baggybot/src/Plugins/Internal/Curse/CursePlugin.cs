@@ -7,24 +7,22 @@ using BaggyBot.MessagingInterface;
 using BaggyBot.Plugins;
 using BaggyBot.Plugins.MessageFormatters;
 using Curse.NET;
-using MessageReceivedEvent = BaggyBot.Plugins.MessageReceivedEvent;
 using Curse.NET.Model;
 using Curse.NET.SocketModel;
 using Group = Curse.NET.Model.Group;
 
-namespace BaggyBot.InternalPlugins.Curse
+namespace BaggyBot.Plugins.Internal.Curse
 {
-	class CursePlugin : Plugin
+	internal class CursePlugin : Plugin
 	{
-		public override event DebugLogEvent OnDebugLog;
-		public override event MessageReceivedEvent OnMessageReceived;
-		public override event NameChangeEvent OnNameChange;
-		public override event KickEvent OnKick;
-		public override event KickedEvent OnKicked;
-		public override event ConnectionLostEvent OnConnectionLost;
-		public override event QuitEvent OnQuit;
-		public override event JoinChannelEvent OnJoinChannel;
-		public override event PartChannelEvent OnPartChannel;
+		public override event Action<ChatMessage> OnMessageReceived;
+		public override event Action<ChatUser, ChatUser> OnNameChange;
+		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
+		public override event Action<ChatChannel, ChatUser, string> OnKicked;
+		public override event Action<string, Exception> OnConnectionLost;
+		public override event Action<ChatUser, string> OnQuit;
+		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
+		public override event Action<ChatUser, ChatChannel> OnPartChannel;
 
 		public override string ServerType => "curse";
 
@@ -46,22 +44,18 @@ namespace BaggyBot.InternalPlugins.Curse
 		private void HandleMessage(Group server, Channel channel, MessageResponse message)
 		{
 			var chatChannel = new ChatChannel(message.ConversationID, channel.GroupTitle);
-			var sender = new ChatUser(this, message.SenderName, message.SenderID.ToString());
-			var msg = new ChatMessage(this, sender, chatChannel, message.Body);
+			var sender = new ChatUser(message.SenderName, message.SenderID.ToString());
+			var msg = new ChatMessage(sender, chatChannel, message.Body);
 			OnMessageReceived?.Invoke(msg);
 		}
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
-			foreach (var formatter in MessageFormatters)
-			{
-				message = formatter.ProcessOutgoingMessage(message);
-			}
 			client.SendMessage(client.ChannelMap[target.Identifier], message);
 			return MessageSendResult.Success;
 		}
 
-		public override bool JoinChannel(ChatChannel channel)
+		public override void JoinChannel(ChatChannel channel)
 		{
 			throw new NotImplementedException();
 		}

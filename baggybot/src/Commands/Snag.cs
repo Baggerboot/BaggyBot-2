@@ -3,6 +3,7 @@
 	internal class Snag : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Name => "snag";
 		public override string Usage => "[username]";
 		public override string Description => "Makes me quote the next message that's written to this channel, or the next message written by the user specified.";
 

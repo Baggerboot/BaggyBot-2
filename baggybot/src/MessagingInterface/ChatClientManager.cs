@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 using BaggyBot.Configuration;
-using BaggyBot.Database;
-using BaggyBot.DataProcessors;
+using BaggyBot.Handlers;
 using BaggyBot.Monitoring;
 using BaggyBot.Plugins;
 
@@ -15,43 +9,21 @@ namespace BaggyBot.MessagingInterface
 {
 	internal class ChatClientManager : IDisposable
 	{
-		private readonly Dictionary<string, Plugin> clients = new Dictionary<string, Plugin>();
-		private readonly ChatClientEventManager eventManager = new ChatClientEventManager();
-		internal IChatClient this[string identifier] => clients[identifier];
+		private readonly Dictionary<string, ChatClient> clients = new Dictionary<string, ChatClient>();
+		internal ChatClient this[string identifier] => clients[identifier];
 
-		/// <summary>
-		/// Connects the bot to the SQL database.
-		/// </summary>
-		private SqlConnector ConnectDatabase(Backend backend)
+		public ChatClientManager()
 		{
-			var sqlConnector = new SqlConnector();
-			Logger.Log(this, "Connecting to the database", LogLevel.Info);
-			try
-			{
-				if (sqlConnector.OpenConnection(backend.ConnectionString))
-					Logger.Log(this, "Database connection established", LogLevel.Info);
-				else
-					Logger.Log(this, "Database connection not established. Statistics collection will not be possible.", LogLevel.Warning);
-			}
-			catch (Exception e)
-			{
-				Logger.LogException(this, e, "trying to connect to the database");
-			}
-			return sqlConnector;
+
 		}
 
 		public bool ConnectUsingPlugin(ServerCfg serverConfiguration, Plugin plugin)
 		{
 			Logger.Log(this, $"Connecting plugin: {plugin.ServerType}:{plugin.ServerName}");
 
-			var statsDatabaseManager = new StatsDatabaseManager(ConnectDatabase(serverConfiguration.Backend), serverConfiguration.UseNickserv);
-			// TODO: Associate the StatsDatabase with the plugin in a different manner
-			plugin.StatsDatabase = statsDatabaseManager;
 
-			AttachEventHandlers(plugin);
-
-			Logger.Log(this, "Waiting for the plugin to connect to its server..");
-			var result = plugin.Connect();
+			var client = new ChatClient(plugin, serverConfiguration);
+			var result = client.Connect();
 			if (!result)
 			{
 				Logger.Log(this, $"Unable to connect to {plugin.ServerType}:{plugin.ServerName}", LogLevel.Error);
@@ -60,7 +32,7 @@ namespace BaggyBot.MessagingInterface
 			Logger.Log(this, "Plugin connection successful.");
 			try
 			{
-				clients.Add(serverConfiguration.ServerName, plugin);
+				clients.Add(serverConfiguration.ServerName, client);
 			}
 			catch (ArgumentException)
 			{
@@ -71,27 +43,7 @@ namespace BaggyBot.MessagingInterface
 			return true;
 		}
 
-		private void AttachEventHandlers(Plugin plugin)
-		{
-			plugin.OnNameChange += (sender, newNick) => eventManager.HandleNickChange(sender, newNick);
-			plugin.OnMessageReceived += message => Task.Run(() =>
-			{
-				foreach (var formatter in plugin.MessageFormatters)
-				{
-					formatter.ProcessIncomingMessage(message);
-				}
-				eventManager.HandleMessage(message);
-			});
-			plugin.OnConnectionLost += (reason, exception) => HandleConnectionLoss(plugin, reason, exception);
-			plugin.OnKicked += eventManager.HandleKicked;
-			plugin.OnDebugLog += (sender, message) => Logger.Log(sender, "[PLG]" + message, LogLevel.Warning);
-			plugin.OnJoinChannel += eventManager.HandleJoin;
-			plugin.OnPartChannel += eventManager.HandlePart;
-			plugin.OnKick += eventManager.HandleKick;
-			plugin.OnQuit += eventManager.HandleQuit;
-		}
-
-		private void HandleConnectionLoss(Plugin client, string reason, Exception ex)
+		private void HandleConnectionLoss(ChatClient client, string reason, Exception ex)
 		{
 			if (reason == null)
 			{
@@ -108,44 +60,38 @@ namespace BaggyBot.MessagingInterface
 			{
 				Logger.Log(client, $"Connection to {client.ServerName} lost ({reason}) Attempting to reconnect...", LogLevel.Warning);
 			}
-			bool success;
+			client.Dispose();
 
-			do
-			{
-				success = ConnectUsingPlugin(ConfigManager.Config.Servers.First(server => server.ServerName == client.ServerName), client);
-				if (success) continue;
-				Logger.Log(this, "Reconnection attempt failed. Retrying in 5 seconds.", LogLevel.Warning);
-				Thread.Sleep(5000);
-			} while (!success);
+			throw new NotImplementedException("Reconnect is not implemented yet ");
 
 			Logger.Log(this, $"Successfully reconnected to {client.ServerName}.", LogLevel.Warning);
 		}
 
 		public void Disconnect(string reason)
 		{
-			foreach (var client in clients)
+			foreach (var client in clients.Values)
 			{
-				client.Value.Quit(reason);
+				client.Quit(reason);
 			}
 		}
 
 		public void Dispose()
 		{
-			foreach (var client in clients)
+			foreach (var client in clients.Values)
 			{
-				client.Value.Dispose();
+				client.Dispose();
 			}
 		}
 
 		public void NotifyOperators(string message)
 		{
-			foreach (var client in clients)
+			foreach (var client in clients.Values)
 			{
-				if (client.Value.Connected)
+				if (client.Connected)
 				{
-					foreach (var op in client.Value.Operators)
+					foreach (var op in client.Operators)
 					{
-						client.Value.SendMessage(new ChatChannel(op.Nick, true), message);
+						client.SendMessage(new ChatChannel(op.Nick, true), message);
 					}
 				}
 			}

@@ -7,6 +7,7 @@ namespace BaggyBot.Commands
 	internal class Search : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "search";
 		public override string Usage => "[-n|--max-results] <search query>";
 		public override string Description => "Search the IRC backlog for a message. Limits the number of displayed results to 1 by default. Use -n (--max-results) to display more results.";
 		
@@ -22,14 +23,14 @@ namespace BaggyBot.Commands
 
 			var result = parser.Parse(command.FullArgument);
 			var numDisplayed = result.GetKey<int>("max-results");
-			if (numDisplayed > 3 && !UserTools.Validate(command.Sender))
+			if (numDisplayed > 3 && !Client.Validate(command.Sender))
 			{
 				command.Reply("only bot operators may request more than three results.");
 				return;
 			}
 			var query = result.RestArgument;
 
-			var matches = command.Client.StatsDatabase.FindLine(query);
+			var matches = StatsDatabase.FindLine(query);
 			switch (matches.Count)
 			{
 				case 0:

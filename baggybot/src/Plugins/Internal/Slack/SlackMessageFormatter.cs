@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins;
+using BaggyBot.Plugins.MessageFormatters;
 
-namespace BaggyBot.InternalPlugins.Slack
+namespace BaggyBot.Plugins.Internal.Slack
 {
 	class SlackMessageFormatter : IMessageFormatter
 	{

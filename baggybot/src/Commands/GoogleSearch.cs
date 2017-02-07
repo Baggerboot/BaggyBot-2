@@ -10,6 +10,7 @@ namespace BaggyBot.Commands
 	internal class GoogleSearch : Command
 	{
 		public override PermissionLevel Permissions { get { return PermissionLevel.All; } }
+		public override string Name => "g";
 		public override string Usage => "<search term>";
 		public override string Description => "Searches Google for the given term, and returns the first result.";
 

@@ -5,6 +5,7 @@ namespace BaggyBot.Commands
 	internal class RegenerateGraphs : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "regen";
 		public override string Usage => "";
 		public override string Description => "Regenerates the graphs on the stats page.";
 

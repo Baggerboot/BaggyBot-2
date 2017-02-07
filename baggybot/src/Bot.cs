@@ -1,22 +1,19 @@
 ﻿using BaggyBot.Configuration;
-using BaggyBot.DataProcessors;
 using BaggyBot.Tools;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Hosting;
 using System.Threading;
-using BaggyBot.InternalPlugins.Curse;
-using BaggyBot.InternalPlugins.Discord;
-using BaggyBot.InternalPlugins.Irc;
-using BaggyBot.InternalPlugins.Slack;
+using BaggyBot.CommandParsing;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Monitoring.Diagnostics;
 using BaggyBot.Plugins;
-using Microsoft.Scripting.Utils;
+using BaggyBot.Plugins.Internal.Curse;
+using BaggyBot.Plugins.Internal.Discord;
+using BaggyBot.Plugins.Internal.Irc;
+using BaggyBot.Plugins.Internal.Slack;
 
 namespace BaggyBot
 {
@@ -28,13 +25,14 @@ namespace BaggyBot
 		private readonly BotDiagnostics botDiagnostics;
 
 		// Any message prefixed with this character will be interpreted as a command
-		public static string[] CommandIdentifiers = {"-", "/"};
+		public static string[] CommandIdentifiers = { "-", "/" };
 		// Version number of the database. This is checked against the 'version' key in the metadata table,
 		// and a database upgrade is attempted if they do not match.
 		public const string DatabaseVersion = "2.0";
 		public const string ConfigVersion = "0.1";
+		public static string PreviousVersion { get; private set; }
 
-		public bool QuitRequested
+		public static bool QuitRequested
 		{
 			get;
 			private set;
@@ -52,6 +50,7 @@ namespace BaggyBot
 		{
 			Logger.ClearLog();
 
+
 			//previousVersion = ConfigManager.Config.Metadata.BotVersion;
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
 			Logger.Log(this, "Starting BaggyBot version " + Version, LogLevel.Info);
@@ -65,14 +64,6 @@ namespace BaggyBot
 				}
 			};
 
-			// TODO: Check for version changes in a different way
-			/*if (previousVersion != null && previousVersion != Version)
-			{
-				Logger.Log(this, "Updated from version {0} to version {1}", LogLevel.Info, true, previousVersion, Version);
-			}
-			ConfigManager.Config.Metadata.BotVersion = Version;
-			Logger.Log("");*/
-			
 			chatClientManager = new ChatClientManager();
 			botDiagnostics = new BotDiagnostics(this);
 		}
@@ -90,7 +81,7 @@ namespace BaggyBot
 			}
 		}
 
-		public void Shutdown()
+		public static void Shutdown()
 		{
 			QuitRequested = true;
 		}
@@ -228,12 +219,14 @@ namespace BaggyBot
 			// TODO: verify that this is the correct way to append a directory to the private bin path
 			AppDomain.CurrentDomain.SetupInformation.PrivateBinPath = $"{AppDomain.CurrentDomain.SetupInformation.PrivateBinPath}{Path.PathSeparator}plugins";
 
-			// TODO: parse program arguments
-			/*var parser = new CommandParser(new Operation()
-				.AddKey("config", "baggybot-settings.yaml", 'c')
-				.AddKey("colours", "Ansi", 'C'));*/
+			var parser = new CommandParser(new Operation()
+				.AddKey("previous-version", 'p')
+				.AddKey("config", "baggybot-settings.yaml", 'c'));
 
-			var result = ConfigManager.Load("baggybot-settings.yaml");
+			var opts = parser.Parse(args);
+			PreviousVersion = opts.GetKey<string>("previous-version") ?? Version;
+
+			var result = ConfigManager.Load(opts.GetKey<string>("config"));
 			switch (result)
 			{
 				case ConfigManager.LoadResult.Success:

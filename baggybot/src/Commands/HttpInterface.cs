@@ -7,6 +7,7 @@ namespace BaggyBot.Commands
 	internal class HttpInterface : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "http";
 		public override string Usage => "<method> <URL> [request body ...]";
 		public override string Description => "Performs an HTTP request against the given URL, using the given method. You may optionally specify the body of a request as well.";
 
@@ -30,12 +31,12 @@ namespace BaggyBot.Commands
 				url = "http://" + url;
 			}
 			var body = string.Join(" ", command.Args.Skip(2));
-			string response;
 			using (var client = new WebClient())
 			{
 				client.Headers.Add("User-Agent", $"BaggyBot/{Bot.Version} ({Environment.OSVersion}) IRC stats bot");
 				try
 				{
+					string response;
 					if (method == "GET")
 					{
 						response = client.DownloadString(url);
@@ -48,7 +49,7 @@ namespace BaggyBot.Commands
 				}
 				catch (WebException e)
 				{
-					command.ReturnMessage("The HTTP request failed ({0}).", e.Message);
+					command.ReturnMessage("The HTTP request failed ({e.Message}).");
 				}
 			}
 		}

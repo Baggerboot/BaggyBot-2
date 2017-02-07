@@ -8,6 +8,7 @@ namespace BaggyBot.Commands
 	internal class NickServ : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "nickserv";
 		public override string Usage => "[-f]|[update]|[set <username>]";
 		public override string Description => "Performs a NickServ lookup for your username against the database. Use `-f` to query the NickServ service instead, or use `set` to store a user's current NickServ username in the database.";
 
@@ -22,13 +23,13 @@ namespace BaggyBot.Commands
 		{
 			if (command.Args.Length == 2 && command.Args[0] == "set")
 			{
-				if (UserTools.Validate(command.Sender))
+				if (Client.Validate(command.Sender))
 				{
-					var uid = command.Client.StatsDatabase.GetUserByNickname(command.Args[1]).Id;
+					var uid = StatsDatabase.GetUserByNickname(command.Args[1]).Id;
 					var nickserv = NickservLookup(command.Args[1]);
-					command.Client.StatsDatabase.SetNsLogin(uid, nickserv.AccountName);
+					StatsDatabase.SetNsLogin(uid, nickserv.AccountName);
 
-					command.ReturnMessage("Nickserv updated to {0} for {1}.", nickserv, command.Args[1]);
+					command.ReturnMessage($"Nickserv updated to {nickserv} for {command.Args[1]}.");
 					return;
 				}
 				command.ReturnMessage(Messages.CmdNotAuthorised);
@@ -36,9 +37,9 @@ namespace BaggyBot.Commands
 			}
 			if(command.Args.Length == 1 && command.Args[0] == "update")
 			{
-				var user = command.Client.StatsDatabase.MapUser(command.Sender);
+				var user = StatsDatabase.MapUser(command.Sender);
 				var nickserv = NickservLookup(command.Sender.Nickname);
-				var rows = command.Client.StatsDatabase.SetNsLogin(user.Id, nickserv?.AccountName);
+				var rows = StatsDatabase.SetNsLogin(user.Id, nickserv?.AccountName);
 				command.Reply($"NickServ reports that your account name is '{nickserv?.AccountName}'. I've updated the database to reflect that ({rows} record(s) affected).");
                 return;
 			}
@@ -60,7 +61,7 @@ namespace BaggyBot.Commands
 				command.Reply("Usage: -ns; -ns add <username>");
 				return;
 			}
-			var ns = command.Client.StatsDatabase.GetNickserv(command.Client.StatsDatabase.MapUser(command.Sender).Id);
+			var ns = StatsDatabase.GetNickserv(StatsDatabase.MapUser(command.Sender).Id);
 			if (ns == null)
 			{
 				command.Reply("According to my database, you don't use NickServ. If that's not right, try running -ns update");

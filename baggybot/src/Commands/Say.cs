@@ -3,6 +3,7 @@
 	internal class Say : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "say";
 		public override string Usage => "<message>";
 		public override string Description => "Makes me say something.";
 

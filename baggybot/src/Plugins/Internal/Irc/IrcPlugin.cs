@@ -14,7 +14,7 @@ using IrcClient = IRCSharp.IrcClient;
 using NickservInformation = IRCSharp.IRC.NickservInformation;
 using ConnectionInfo = IRCSharp.ConnectionInfo;
 
-namespace BaggyBot.InternalPlugins.Irc
+namespace BaggyBot.Plugins.Internal.Irc
 {
 	/// <summary>
 	/// Provides a light wrapper over an IrcClient object, exposing only
@@ -24,15 +24,14 @@ namespace BaggyBot.InternalPlugins.Irc
 	{
 		public override string ServerType => "irc";
 
-		public override event DebugLogEvent OnDebugLog;
-		public override event MessageReceivedEvent OnMessageReceived;
-		public override event NameChangeEvent OnNameChange;
-		public override event KickEvent OnKick;
-		public override event KickedEvent OnKicked;
-		public override event ConnectionLostEvent OnConnectionLost;
-		public override event QuitEvent OnQuit;
-		public override event JoinChannelEvent OnJoinChannel;
-		public override event PartChannelEvent OnPartChannel;
+		public override event Action<ChatMessage> OnMessageReceived;
+		public override event Action<ChatUser, ChatUser> OnNameChange;
+		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
+		public override event Action<ChatChannel, ChatUser, string> OnKicked;
+		public override event Action<string, Exception> OnConnectionLost;
+		public override event Action<ChatUser, string> OnQuit;
+		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
+		public override event Action<ChatUser, ChatChannel> OnPartChannel;
 
 		private readonly IrcClient client;
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
@@ -65,9 +64,9 @@ namespace BaggyBot.InternalPlugins.Irc
 
 		private void MessageReceivedHandler(IrcMessage message)
 		{
-			var sender = new ChatUser(this, message.Sender.Nick, message.Sender.ToString(), false);
+			var sender = new ChatUser(message.Sender.Nick, message.Sender.ToString(), false);
 			var channel = new ChatChannel(message.Channel);
-			OnMessageReceived?.Invoke(new ChatMessage(this, sender, channel, message.Message, message.Action));
+			OnMessageReceived?.Invoke(new ChatMessage(sender, channel, message.Message, message.Action));
 		}
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
@@ -84,9 +83,9 @@ namespace BaggyBot.InternalPlugins.Irc
 					throw new ArgumentOutOfRangeException();
 			}
 		}
-		public override bool JoinChannel(ChatChannel channel)
+		public override void JoinChannel(ChatChannel channel)
 		{
-			return client.JoinChannel(channel.Identifier);
+			client.JoinChannel(channel.Identifier);
 		}
 
 		public bool JoinChannels(IEnumerable<string> channels)
@@ -126,7 +125,6 @@ namespace BaggyBot.InternalPlugins.Irc
 
 		public override void Dispose()
 		{
-			StatsDatabase.Dispose();
 		}
 
 		public override ChatUser FindUser(string name)

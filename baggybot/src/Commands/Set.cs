@@ -7,6 +7,7 @@ namespace BaggyBot.Commands
 	internal class Set : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Name => "set";
 		public override string Usage => "<property> [key] <value>";
 		public override string Description => "Sets the value of a property, or the value of a key belonging to that property.";
 		
@@ -24,14 +25,14 @@ namespace BaggyBot.Commands
 					User user;
 					if (int.TryParse(command.Args[1], out uid))
 					{
-						user = command.Client.StatsDatabase.GetUserById(uid);
+						user = StatsDatabase.GetUserById(uid);
 					}
 					else
 					{
-						user = command.Client.StatsDatabase.GetUserByNickname(command.Args[1]);
+						user = StatsDatabase.GetUserByNickname(command.Args[1]);
 					}
 					user.AddressableNameOverride = command.Args[2];
-					command.Client.StatsDatabase.UpdateUser(user);
+					StatsDatabase.UpdateUser(user);
 					command.Reply("Done.");
 
 					break;
@@ -54,7 +55,7 @@ namespace BaggyBot.Commands
 					command.ReturnMessage("New key \"{0}\" created. Value set to {1}", command.Args[1], data);
 				}*/
 				default:
-					command.ReturnMessage("The property \"{0}\" does not exist.", command.Args[0]);
+					command.ReturnMessage($"The property \"{command.Args[0]}\" does not exist.");
 					break;
 			}
 		}

@@ -14,7 +14,7 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Usage => "<query>|<more>";
-
+		public override string Name => "wa";
 		public override string Description
 			=>
 				"Makes Wolfram Alpha calculate or look up the query you've entered, and returns the result. Using the 'more' argument will print additional information about the last query you looked up."
@@ -96,7 +96,7 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			var server = ConfigManager.Config.Servers.FirstOrDefault(s => s.ServerName == command.Client.ServerName);
+			var server = ConfigManager.Config.Servers.FirstOrDefault(s => s.ServerName == Client.ServerName);
 			var useUnicode = server?.UseUnicode ?? true;
 
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
@@ -158,7 +158,7 @@ namespace BaggyBot.Commands
 					var errorCode = xmd.GetElementsByTagName("error").Item(0).FirstChild;
 					var errorMessage = errorCode.NextSibling;
 
-					command.Reply("An error occurred: Error {0}: {1}", errorCode.InnerText, errorMessage.InnerText);
+					command.Reply($"An error occurred: Error {errorCode.InnerText}: {errorMessage.InnerText}");
 				}
 				return;
 			}
@@ -174,7 +174,7 @@ namespace BaggyBot.Commands
 
 				var first = string.Join(", ", descriptions.Take(descriptions.Count - 1));
 
-				command.Reply("Ambiguity between {0} and {1}. Please try again.", first, descriptions.Last());
+				command.Reply($"Ambiguity between {first} and {descriptions.Last()}. Please try again.");
 				return;
 			}
 			var input = queryresult.FirstChild;
@@ -191,7 +191,7 @@ namespace BaggyBot.Commands
 				result += " -- " + ShowMore();
 			}
 
-			command.Reply("({0}: {1}): {2}", WaReplace(title, useUnicode), ReplaceNewlines(WaReplace(input.InnerText, useUnicode)), ReplaceNewlines(WaReplace(result, useUnicode)));
+			command.Reply($"({WaReplace(title, useUnicode)}: {ReplaceNewlines(WaReplace(input.InnerText, useUnicode))}): {ReplaceNewlines(WaReplace(result, useUnicode))}");
 		}
 
 		private static string WaReplace(string text, bool useUnicode)

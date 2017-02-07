@@ -9,12 +9,13 @@ namespace BaggyBot.Commands
 	class ResetDb : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
+		public override string Name => "resetdb";
 		public override string Usage => "";
 		public override string Description => "Completely reset the database, dropping and recreating all tables.";
 
 		public override void Use(CommandArgs command)
 		{
-			command.Client.StatsDatabase.Reset();
+			StatsDatabase.Reset();
 			command.Reply("the database has been reset successfully.");
 		}
 	}

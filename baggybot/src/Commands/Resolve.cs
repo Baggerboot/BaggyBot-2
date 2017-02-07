@@ -9,6 +9,7 @@ namespace BaggyBot.Commands
 	internal class Resolve : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "resolve";
 		public override string Usage => "<hostname>";
 		public override string Description => "Performs an A and AAAA lookup on a given hostname, and returns all associated IP addresses.";
 

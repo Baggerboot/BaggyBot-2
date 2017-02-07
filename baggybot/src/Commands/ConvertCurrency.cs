@@ -12,16 +12,17 @@ using Newtonsoft.Json.Linq;
 
 namespace BaggyBot.Commands
 {
-	internal class Convert : Command
+	internal class ConvertCurrency : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "convert";
 		public override string Usage => "<amount> <ISO Currency Code> [to] <ISO Currency Code>";
 		public override string Description => "Converts the value of a given amount of money from one currency to another.";
 		private Timer timer;
 		private Dictionary<string, decimal> exchangeRates;
 		private const int MAX_LOOKUP_ATTEMPTS = 5;
 
-		public Convert()
+		public ConvertCurrency()
 		{
 			timer = new Timer(UpdateExchangeRate, null, TimeSpan.FromSeconds(1), TimeSpan.FromHours(2));
 		}

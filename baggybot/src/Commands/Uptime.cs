@@ -5,6 +5,7 @@ namespace BaggyBot.Commands
 	internal class Uptime : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
+		public override string Name => "uptime";
 		public override string Usage => "";
 		public override string Description => "Shows how long I've been running.";
 
@@ -21,7 +22,7 @@ namespace BaggyBot.Commands
 			var h = diff.Hours + (diff.Hours == 1 ? " hour" : " hours");
 			var m = diff.Minutes + (diff.Minutes == 1 ? " minute" : " minutes");
 			var s = diff.Seconds + (diff.Seconds == 1 ? " second" : " seconds");
-			command.Reply("I have been running for {0}, {1}, {2} and {3}", d, h, m, s);
+			command.Reply($"I have been running for {d}, {h}, {m} and {s}");
 		}
 	}
 }
