@@ -9,7 +9,7 @@
 
 		public override void Use(CommandArgs command)
 		{
-			command.Reply($"I am currently running version {Bot.Version}, last updated {Bot.LastUpdate.ToUniversalTime():MMM d, yyyy a\t HH: mm} UTC.");
+			command.Reply($"I am currently running version {Bot.Version}, last updated {Bot.LastUpdate.ToUniversalTime():MMM d, yyyy a\\t HH: mm} UTC.");
 		}
 	}
 }
