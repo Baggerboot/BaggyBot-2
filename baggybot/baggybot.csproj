@@ -189,6 +189,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Commands\Diagnostics.cs" />
     <Compile Include="src\Configuration\Imgur.cs" />
     <Compile Include="src\ExternalApis\Bing.cs" />
     <Compile Include="src\Commands\GoogleSearch.cs" />
