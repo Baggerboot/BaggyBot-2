@@ -11,6 +11,7 @@ using Curse.NET.SocketModel;
 
 namespace BaggyBot.Plugins.Internal.Curse
 {
+	[ServerType("curse")]
 	internal class CursePlugin : Plugin
 	{
 		public override event Action<ChatMessage> OnMessageReceived;
@@ -21,8 +22,6 @@ namespace BaggyBot.Plugins.Internal.Curse
 		public override event Action<ChatUser, string> OnQuit;
 		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
 		public override event Action<ChatUser, ChatChannel> OnPartChannel;
-
-		public override string ServerType => "curse";
 
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected { get; }

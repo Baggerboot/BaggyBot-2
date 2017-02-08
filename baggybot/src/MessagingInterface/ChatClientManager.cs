@@ -12,17 +12,32 @@ namespace BaggyBot.MessagingInterface
 		private readonly Dictionary<string, ChatClient> clients = new Dictionary<string, ChatClient>();
 		internal ChatClient this[string identifier] => clients[identifier];
 
-		public ChatClientManager()
-		{
 
+		public bool ConnectUsingPlugin(Type pluginType, ServerCfg configuration)
+		{
+			Plugin plugin;
+			try
+			{
+				plugin = (Plugin)Activator.CreateInstance(pluginType, configuration);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(this, $"Unable to connect to {configuration.ServerName}: An exception occured while creating the plugin ({e.GetType().Name}: {e.Message})");
+				return false;
+			}
+			return ConnectUsingPlugin(plugin, configuration);
 		}
 
-		public bool ConnectUsingPlugin(ServerCfg serverConfiguration, Plugin plugin)
+		private bool ConnectUsingPlugin(Plugin plugin, ServerCfg configuration)
 		{
 			Logger.Log(this, $"Connecting plugin: {plugin.ServerType}:{plugin.ServerName}");
+			var client = new ChatClient(plugin, configuration);
 
+			// If the plugin loses  connection, we need to dispose of all the state associated with it.
+			plugin.OnConnectionLost += (_, __) => client.Dispose();
+			// When that's done, we can try reconnecting.
+			plugin.OnConnectionLost += (message, exception) => HandleConnectionLoss(plugin.GetType(), configuration, message, exception);
 
-			var client = new ChatClient(plugin, serverConfiguration);
 			var result = client.Connect();
 			if (!result)
 			{
@@ -32,7 +47,7 @@ namespace BaggyBot.MessagingInterface
 			Logger.Log(this, "Plugin connection successful.");
 			try
 			{
-				clients.Add(serverConfiguration.ServerName, client);
+				clients.Add(configuration.ServerName, client);
 			}
 			catch (ArgumentException)
 			{
@@ -43,28 +58,32 @@ namespace BaggyBot.MessagingInterface
 			return true;
 		}
 
-		private void HandleConnectionLoss(ChatClient client, string reason, Exception ex)
+		private void HandleConnectionLoss(Type plugin, ServerCfg configuration, string reason, Exception ex)
 		{
 			if (reason == null)
 			{
 				if (ex == null)
 				{
-					Logger.Log(client, $"Connection to {client.ServerName} lost. Attempting to reconnect...", LogLevel.Error);
+					Logger.Log(this, $"Connection to {configuration.ServerName} lost. Attempting to reconnect...", LogLevel.Error);
 				}
 				else
 				{
-					Logger.Log(client, $"Connection to {client.ServerName} lost ({ex.GetType()}: {ex.Message}) Attempting to reconnect...", LogLevel.Error);
+					Logger.Log(this, $"Connection to {configuration.ServerName} lost ({ex.GetType()}: {ex.Message}) Attempting to reconnect...", LogLevel.Error);
 				}
 			}
 			else
 			{
-				Logger.Log(client, $"Connection to {client.ServerName} lost ({reason}) Attempting to reconnect...", LogLevel.Warning);
+				Logger.Log(this, $"Connection to {configuration.ServerName} lost ({reason}) Attempting to reconnect...", LogLevel.Warning);
 			}
-			client.Dispose();
 
-			throw new NotImplementedException("Reconnect is not implemented yet ");
-
-			Logger.Log(this, $"Successfully reconnected to {client.ServerName}.", LogLevel.Warning);
+			if (ConnectUsingPlugin(plugin, configuration))
+			{
+				Logger.Log(this, $"Successfully reconnected to {configuration.ServerName}.", LogLevel.Warning);
+			}
+			else
+			{
+				Logger.Log(this, $"Unable to reconnect to {configuration.ServerName}.", LogLevel.Error);
+			}
 		}
 
 		public void Disconnect(string reason)

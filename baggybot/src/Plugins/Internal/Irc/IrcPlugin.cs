@@ -16,10 +16,9 @@ namespace BaggyBot.Plugins.Internal.Irc
 	/// Provides a light wrapper over an IrcClient object, exposing only
 	/// the methods required for normal operation.
 	/// </summary>
+	[ServerType("irc")]
 	public class IrcPlugin : Plugin
 	{
-		public override string ServerType => "irc";
-
 		public override event Action<ChatMessage> OnMessageReceived;
 		public override event Action<ChatUser, ChatUser> OnNameChange;
 		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;

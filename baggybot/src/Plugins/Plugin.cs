@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Plugins.MessageFormatters;
@@ -19,11 +20,7 @@ namespace BaggyBot.Plugins
 		public abstract event Action<string, Exception> OnConnectionLost;
 		public abstract event Action<ChatUser, string> OnQuit;
 
-		/// <summary>
-		/// A unique name for the server type that this plugin will connect to.
-		/// For example: 'irc', 'slack', 'curse', 'discord'.
-		/// </summary>
-		public abstract string ServerType { get; }
+		public string ServerType => GetType().GetCustomAttribute<ServerTypeAttribute>().ServerType;
 		/// <summary>
 		/// Should return true if the client is currently connected to the server.
 		/// </summary>

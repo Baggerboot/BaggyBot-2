@@ -126,62 +126,27 @@ namespace BaggyBot
 
 		private void TryConnect(ServerCfg server)
 		{
-			if (server.ServerType == "irc")
+			var intPlugins = Assembly.GetExecutingAssembly().GetTypes()
+			                              .Where(type => typeof(Plugin).IsAssignableFrom(type) && !type.IsAbstract)
+			                              .ToDictionary(type => type.GetCustomAttribute<ServerTypeAttribute>().ServerType);
+
+			var extPlugins = new Dictionary<string, Type>();
+			if (Directory.Exists("plugins"))
 			{
-				if (!chatClientManager.ConnectUsingPlugin(server, new IrcPlugin(server)))
-				{
-					Logger.Log(this, "FATAL: IRC connection failed. Application will now exit.", LogLevel.Error);
-					Shutdown();
-				}
+				extPlugins = Directory.GetFiles("plugins", "*.dll", SearchOption.TopDirectoryOnly)
+				                           .Select(file => Assembly.LoadFile(Path.GetFullPath(file)))
+				                           .SelectMany(asm => asm.GetExportedTypes()
+				                                                 .Where(type => typeof(Plugin).IsAssignableFrom(type) && !type.IsAbstract))
+				                           .ToDictionary(type => type.GetCustomAttribute<ServerTypeAttribute>().ServerType);
 			}
-			else if (server.ServerType == "slack")
+			Type pluginType;
+			if (intPlugins.TryGetValue(server.ServerType, out pluginType) || extPlugins.TryGetValue(server.ServerType, out pluginType))
 			{
-				if (!chatClientManager.ConnectUsingPlugin(server, new SlackPlugin(server)))
-				{
-					Logger.Log(this, "FATAL: Slack connection failed. Application will now exit.", LogLevel.Error);
-					Shutdown();
-				}
-			}
-			else if (server.ServerType == "discord")
-			{
-				if (!chatClientManager.ConnectUsingPlugin(server, new DiscordPlugin(server)))
-				{
-					Logger.Log(this, "FATAL: Discord connection failed. Application will now exit.", LogLevel.Error);
-					Shutdown();
-				}
-			}
-			else if (server.ServerType == "curse")
-			{
-				if (!chatClientManager.ConnectUsingPlugin(server, new CursePlugin(server)))
-				{
-					Logger.Log(this, "FATAL: Curse connection failed. Application will now exit.", LogLevel.Error);
-					Shutdown();
-				}
+				chatClientManager.ConnectUsingPlugin(pluginType, server);
 			}
 			else
 			{
-				Logger.Log(this, $"Attempting to load a plugin for server type '{server.ServerType}'");
-				Directory.CreateDirectory("plugins");
-
-				bool success = false;
-				foreach (var dll in Directory.GetFiles("plugins", "*.dll", SearchOption.TopDirectoryOnly))
-				{
-					var loadedDll = Assembly.LoadFile(Path.GetFullPath(dll));
-					foreach (var type in loadedDll.GetExportedTypes().Where(type => typeof(Plugin).IsAssignableFrom(type)))
-					{
-						// Matching type found, create an instance of it
-						var instance = (Plugin)Activator.CreateInstance(type, server);
-
-						chatClientManager.ConnectUsingPlugin(server, (Plugin)instance);
-						success = true;
-						break;
-					}
-					if (success) break;
-				}
-				if (!success)
-				{
-					Logger.Log(this, $"Unable to find a plugin for server type '{server.ServerType}'. The server connection {server.ServerName} will be skipped.", LogLevel.Error);
-				}
+				Logger.Log(this, $"Unable to connect to {server.ServerName}: no plugin of type {server.ServerType} found.");
 			}
 		}
 

@@ -11,10 +11,9 @@ using SlackAPI.WebSocketMessages;
 
 namespace BaggyBot.Plugins.Internal.Slack
 {
+	[ServerType("slack")]
 	public class SlackPlugin : Plugin
 	{
-		public override string ServerType => "slack";
-
 		public override event Action<ChatMessage> OnMessageReceived;
 		public override event Action<ChatUser, ChatUser> OnNameChange;
 		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
@@ -122,7 +121,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 		}
 		public override void Dispose()
 		{
-			throw new NotImplementedException();
+			
 		}
 
 		public override ChatUser FindUser(string name)

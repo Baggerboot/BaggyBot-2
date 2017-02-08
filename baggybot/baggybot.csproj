@@ -292,6 +292,7 @@
     <Compile Include="src\Plugins\Plugin.cs" />
     <Compile Include="src\Plugins\MessageSendResult.cs" />
     <Compile Include="src\MessagingInterface\ChatClientExtensions.cs" />
+    <Compile Include="src\Plugins\ServerTypeAttribute.cs" />
     <Compile Include="src\Tools\BingSearchContainer.cs" />
     <Compile Include="src\Version.cs" />
     <None Include="app.config" />

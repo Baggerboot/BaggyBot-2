@@ -9,6 +9,7 @@ using Discord;
 
 namespace BaggyBot.Plugins.Internal.Discord
 {
+	[ServerType("discord")]
 	public class DiscordPlugin : Plugin
 	{
 		public override event Action<ChatMessage> OnMessageReceived;
@@ -20,7 +21,6 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
 		public override event Action<ChatUser, ChatChannel> OnPartChannel;
 
-		public override string ServerType => "discord";
 		public override bool Connected => client.State == ConnectionState.Connected;
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 
