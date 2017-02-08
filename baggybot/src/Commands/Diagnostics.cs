@@ -12,7 +12,7 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			var botBit = Environment.Is64BitProcess ? "64" : "3";
+			var botBit = Environment.Is64BitProcess ? "64" : "32";
 			var osBit = Environment.Is64BitOperatingSystem ? "64" : "32";
 			var hasDebugger = Debugger.IsAttached ? "(Debugger attached)" : "";
 #if DEBUG
