@@ -1,6 +1,7 @@
 ﻿using BaggyBot.Configuration;
 using BaggyBot.Tools;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -107,7 +108,7 @@ namespace BaggyBot
 			Environment.Exit(0);
 		}
 
-		public void Connect(ServerCfg[] servers)
+		public void Connect(IEnumerable<ServerCfg> servers)
 		{
 			foreach (var server in servers)
 			{
@@ -221,10 +222,12 @@ namespace BaggyBot
 
 			var parser = new CommandParser(new Operation()
 				.AddKey("previous-version", 'p')
-				.AddKey("config", "baggybot-settings.yaml", 'c'));
+				.AddKey("config", "baggybot-settings.yaml", 'c')
+				.AddKey("server", 's'));
 
 			var opts = parser.Parse(args);
 			PreviousVersion = opts.GetKey<string>("previous-version") ?? Version;
+			var server = opts.GetKey<string>("server");
 
 			var result = ConfigManager.Load(opts.GetKey<string>("config"));
 			switch (result)
@@ -244,7 +247,14 @@ namespace BaggyBot
 
 			using (var bot = new Bot())
 			{
-				bot.Connect(ConfigManager.Config.Servers);
+				if (server == null)
+				{
+					bot.Connect(ConfigManager.Config.Servers);
+				}
+				else
+				{
+					bot.Connect(ConfigManager.Config.Servers.Where(s => s.ServerName == server));
+				}
 			}
 		}
 	}
