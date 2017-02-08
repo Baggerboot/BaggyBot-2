@@ -181,14 +181,7 @@ namespace BaggyBot
 				if (!success)
 				{
 					Logger.Log(this, $"Unable to find a plugin for server type '{server.ServerType}'. The server connection {server.ServerName} will be skipped.", LogLevel.Error);
-					return;
 				}
-
-			}
-
-			foreach (var channel in server.AutoJoinChannels)
-			{
-				chatClientManager[server.ServerName].JoinChannel(new ChatChannel(channel));
 			}
 		}
 
