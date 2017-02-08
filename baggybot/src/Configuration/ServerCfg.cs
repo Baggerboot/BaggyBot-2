@@ -6,25 +6,16 @@ namespace BaggyBot.Configuration
 	{
 		public string ServerName { get; set; } = Guid.NewGuid().ToString();
 		public string ServerType { get; set; } = "irc";
-		public string Host { get; set; }
+
+		public string Username { get; set; }
+		public string Password { get; set; }
+
+		public string Server { get; set; }
 		public int Port { get; set; } = 6667;
-		public string Password { get; set; } = null;
+		public bool UseTls { get; set; } = true;
 
 		public Backend Backend { get; set; } = null;
-		public Identity Identity { get; set; } = new Identity();
 		public Operator[] Operators { get; set; } = new Operator[0];
-
-		public string[] AutoJoinChannels { get; set; } = new string[0];
-		public string[] CompatModes { get; set; } = new string[0];
-
-		public bool VerifyCertificate { get; set; } = true;
-		public bool UseTls { get; set; } = false;
-		public bool UseUnicode { get; set; } = true;
-		public bool UseNickserv { get; set; } = true;
-
-		public override string ToString()
-		{
-			return $"{ServerName} ({Identity.Nick}@{Host}:{Port}) unicode:{UseUnicode} tls:{UseTls} nickserv:{UseNickserv}";
-        }
+		public dynamic PluginSettings { get; set; }
 	}
 }

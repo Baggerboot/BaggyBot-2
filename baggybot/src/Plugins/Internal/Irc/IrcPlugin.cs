@@ -130,15 +130,14 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public override bool Connect()
 		{
-			var host = serverCfg.Host;
+			var host = serverCfg.Server;
 			var port = serverCfg.Port;
-			var nick = serverCfg.Identity.Nick;
-			var ident = serverCfg.Identity.Ident;
-			var realname = serverCfg.Identity.RealName;
+			var nick = serverCfg.PluginSettings.Identity.Nick;
+			var ident = serverCfg.PluginSettings.Identity.Ident;
+			var realname = serverCfg.PluginSettings.Identity.RealName;
 			var password = serverCfg.Password;
 			var tls = serverCfg.UseTls;
-			var verify = serverCfg.VerifyCertificate;
-			var slackCompatMode = serverCfg.CompatModes.Contains("slack");
+			var slackCompatMode = serverCfg.PluginSettings.CompatModes.Contains("slack");
 
 			// The slack IRC server messes up domain names, because it prepends
 			// http://<domain> to everything that looks like it's a domain name
@@ -172,7 +171,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 					Password = password,
 					RealName = realname,
 					useTLS = tls,
-					verifyServerCertificate = verify
+					verifyServerCertificate = true
 				});
 			}
 			catch (SocketException e)

@@ -42,6 +42,11 @@ namespace BaggyBot.Plugins
 		/// Should be set to true if the plugin supports line feeds within messages.
 		/// </summary>
 		public bool AllowsMultilineMessages { get; protected set; }
+		/// <summary>
+		/// Should be set to false if the server does not correctly handle special
+		/// unicode characters (such as mathematical symbols).
+		/// </summary>
+		public bool SupportsUnicode { get; protected set; } = true;
 
 		/// <summary>
 		/// The operators defined for this client.

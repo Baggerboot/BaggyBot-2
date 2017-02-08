@@ -96,8 +96,7 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			var server = ConfigManager.Config.Servers.FirstOrDefault(s => s.ServerName == Client.ServerName);
-			var useUnicode = server?.UseUnicode ?? true;
+			var useUnicode = Client.SupportsUnicode;
 
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{

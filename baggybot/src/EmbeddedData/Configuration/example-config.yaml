@@ -19,6 +19,8 @@ debug-mode: true
 flood-limit: 4
 # When true, writes some performance data to performance_log.csv
 log-performance: false
+# A link to the statistics page, printed in the -help command.
+stats-page: 'None configured'
 
 interpreters:
   # Whether the interactive Python and C# interpreters should be enabled.
@@ -40,6 +42,17 @@ interpreters:
 integrations:
   wolfram-alpha:
     app-id: ""
+  bing:
+    search:
+      key: ""
+  imgur:
+    client-id: ""
+
+quotes:
+  silent-quote-chance: 0.6
+  min-delay-hours: 4
+  chance: 0.015
+  allow-quote-notifications: false
 
 logging:
   log-file: baggybot.log
@@ -48,37 +61,25 @@ logging:
   # logged to the log file.
   show-debug: true
 
-# An identity is a set of credentials BaggyBot uses to connect to an IRC server
-identities:
-  - &baggybot 
-    ident: Dredger
-    nick: BaggyBot
-    real-name: BaggyBot
-    # Set to false if you don't want the bot to set the +i flag on itself.
-    # Defaults to true if unspecified.
-    hidden: true
-
 # An operator match is a set of rules that will be matched against a user
 # in order to determine whether they're allowed to use operator commands.
 # If any of these rules fails, the match fails.
 
-# Possible tags are `nick`, `ident`, `host`, and `uid`.
-# `nick` and `ident` are matched against a user's IRC nickname and ident.
-# `host` is matched against the host/cloak portion of their hostmask.
+# Possible tags are `nick`, `unique-id`, and `uid`.
+# `nick` is matched against a user's nickname.
+# 'unique-id' is matched against a user's unique ID.
 # `uid` is matched against their User ID in the database.
 # The default value for each of these rules is `*`, which matches everything,
 # so be sure to specify at least some rules, unless you want everyone to have
-# operator rights.
+# operator rights (you don't).
 operators:
   - &you
     nick: yourNickname
-    ident: ~yourIdent
-    host: 127.0.0.1
+    unique-id: '0089e1b1'
     uid: 1
   - &your-friend
+    unique-id: '46c73d56'
     nick: friendsNickname
-    ident: ~friendsIdent
-    host: unafilliated/yourFriend
     uid: 2
 
 # A list of servers BaggyBot should connect to on startup.
@@ -87,20 +88,50 @@ servers:
   - 
     # A unique name used for internal identification
     server-name: espernet
-    host: irc.esper.net
+    # The plugin type that should be used to connect to the server.
+    # By default, 'irc', 'slack', 'discord' and 'curse' are supported,
+    # but more server types can be added by installing plugins. 
+    server-type: irc
+    # If the plugin requires a username or client ID to connect to the server,
+    # this value will be used. Otherwise, it will be ignored.
+    username: ''
+    # If the plugin requires a password or API token to connect to the server,
+    # this value will be used. Otherwise, it will be ignored.
+    password: ''
+    # The server to connect to, if applicable. Depending on the plugin, this
+    # might be a URL, or it might be a domain name.
+    server: irc.esper.net
+    # The port to connect to, if applicable.
     port: 6697
-
-    backend: *default
-    identity: *baggybot
-    operators: [*you, *your-friend]
-    auto-join-channels: ["#baggybot"]
-    compat-modes: []
-
+    # Whether the connection should be secured using TLS/SSL. Mostly relevant
+    # for IRC, where plaintext connections are still common. Many plugins may
+    # in fact ignore this setting and use TLS regardless.
     use-tls: true
-    use-unicode: true
-    use-nickserv: true
-    verify-certificate: true
 
+    # The backend (SQL DB) to connect to, as specified above
+    backend: *default
+    # A list of users with operator privileges
+    operators: [*you, *your-friend]
+
+    # This section contains plugin-specific settings which will vary depending
+    # on the plugin used to connect to the server.
+    plugin-settings:
+      # The following settings are specific to the IRC plugin.
+      # A list of channels that should be joined when a connection has been
+      # established.
+      auto-join-channels: ["#baggybot"]
+      # A set of credentials BaggyBot used to connect to an IRC server
+      identity:
+        ident: Dredger
+        nick: BaggyBot
+        real-name: BaggyBot
+        # Set to false if you don't want the bot to set the +i flag on itself.
+        hidden: true
+      # A list of compatibility modes passed to the IRC library, to improve
+      # compatibility with non-standard IRC servers.
+      compat-modes: [] 
+      use-unicode: true
+      use-nickserv: true 
 # Currently not used.
 metadata:
   bot-version: 4.1.6
