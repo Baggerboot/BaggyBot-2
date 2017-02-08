@@ -33,7 +33,7 @@ namespace BaggyBot.CommandParsing
 
 			if (components.Count == 0)
 			{
-				return new OperationResult("default");
+				return operations["default"].Parse(components, "default", fullCommand);
 			}
 			if (components[0].Value.StartsWith("-"))
 			{
