@@ -18,8 +18,9 @@ namespace BaggyBot.Handlers
 		private const string CHANNEL_NICK_CHANGE = "@USER_NICK_CHANGE";
 		private const string CHANNEL_QUIT = "@USER_QUIT";
 
-		internal void ProcessMessage(ChatMessage message)
+		public override void HandleMessage(MessageEvent ev)
 		{
+			var message = ev.Message;
 			// Display the message in the log
 			if (message.Action)
 			{
@@ -27,7 +28,7 @@ namespace BaggyBot.Handlers
 			}
 			else
 			{
-				Logger.Log(this, message.Sender.Nickname + ": " + message.Message, LogLevel.Message);
+				Logger.Log(this, $"#{message.Channel.Name} {message.Sender.Nickname}: {message.Message}", LogLevel.Message);
 			}
 			
 			// TODO: Process query console messages directly inside the commandhandler
