@@ -1,4 +1,4 @@
 language: csharp
 solution: baggybot.sln
-before_build:
+before_script:
   - bash before_build.sh
