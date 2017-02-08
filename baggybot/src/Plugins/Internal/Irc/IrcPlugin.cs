@@ -4,15 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using BaggyBot.Configuration;
-using BaggyBot.Database;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
-using BaggyBot.Plugins;
+using IRCSharp;
 using IRCSharp.IrcCommandProcessors.Quirks;
 using IRCSharp.IRC;
-using IrcClient = IRCSharp.IrcClient;
-using NickservInformation = IRCSharp.IRC.NickservInformation;
-using ConnectionInfo = IRCSharp.ConnectionInfo;
 
 namespace BaggyBot.Plugins.Internal.Irc
 {
@@ -210,15 +206,6 @@ namespace BaggyBot.Plugins.Internal.Irc
 			{
 				ircInterface.DisableNickservCalls();
 				// Proess reply to WHOIS call.
-			}*/
-
-			/*else if (line.Command.Equals("464"))
-			{
-				//throw new NotImplementedException("Unable to supply the password from the IRC Event Handler.");
-				Logger.Log(this, "Password required by server.", LogLevel.Info);
-				var msg = "PASS " + ircInterface.Password;
-				Logger.Log(this, "Replying with " + msg, LogLevel.Info);
-				ircInterface.SendRaw(msg);
 			}*/
 			if (!ignoredCommands.Contains(line.Command))
 			{

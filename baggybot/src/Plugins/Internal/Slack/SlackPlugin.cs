@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins;
 using BaggyBot.Plugins.MessageFormatters;
 using SlackAPI;
 using SlackAPI.WebSocketMessages;
@@ -26,6 +26,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.IsConnected;
+
 		private SlackSocketClient client;
 		private readonly string token;
 
@@ -50,22 +51,11 @@ namespace BaggyBot.Plugins.Internal.Slack
 			return success ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
 
-		public override void JoinChannel(ChatChannel channel)
-		{
-			throw new NotImplementedException();
-		}
+		public override void JoinChannel(ChatChannel channel) { }
 
-		public ChatUser DoWhoisCall(string nick)
-		{
-			throw new NotImplementedException();
-		}
+		public override void Part(ChatChannel channel, string reason = null) { }
 
 		public void Reconnect()
-		{
-			throw new NotImplementedException();
-		}
-
-		public override void Part(ChatChannel channel, string reason = null)
 		{
 			throw new NotImplementedException();
 		}
@@ -91,9 +81,10 @@ namespace BaggyBot.Plugins.Internal.Slack
 			{
 				return false;
 			}
-			Channels = client.Channels.Select(ToChatChannel).ToList();
-			Channels = Channels.Concat(client.Groups.Select(ToChatChannel)).ToList();
-			Channels = Channels.Concat(client.DirectMessages.Select(ToChatChannel)).ToList();
+			Channels = client.Channels.Select(ToChatChannel)
+				.Concat(client.Groups.Select(ToChatChannel))
+				.Concat(client.DirectMessages.Select(ToChatChannel))
+				.ToList();
 			return true;
 		}
 
@@ -107,25 +98,22 @@ namespace BaggyBot.Plugins.Internal.Slack
 			return new ChatChannel(dm.id, client.UserLookup[dm.user].name, true);
 		}
 
+		private ChatUser ToChatUser(User user)
+		{
+			return new ChatUser(user.name, user.id, name: user.profile.first_name);
+		}
+
 		private void MessageReceivedCallback(NewMessage message)
 		{
 			if (message.user == null && message.subtype == "bot_message")
 			{
 				return;
 			}
-
 			var user = client.UserLookup[message.user];
-
 			var channel = GetChannel(message.channel);
-
-			var chatUser = new ChatUser(user.name, user.id, name: user.profile.first_name);
+			var chatUser = ToChatUser(user);
 			var chatMessage = new ChatMessage(chatUser, channel, message.text);
 			OnMessageReceived?.Invoke(chatMessage);
-		}
-
-		private void ChannelMarkedCallback(MarkResponse markResponse)
-		{
-			;
 		}
 
 		public override void Disconnect()
@@ -139,7 +127,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		public override ChatUser FindUser(string name)
 		{
-			throw new NotImplementedException();
+			return ToChatUser(client.Users.FirstOrDefault(u => u.name == name));
 		}
 	}
 }

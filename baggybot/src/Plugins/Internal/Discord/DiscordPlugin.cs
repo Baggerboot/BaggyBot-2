@@ -5,17 +5,12 @@ using System.Threading;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins;
 using Discord;
-using Mono.CSharp;
-
 
 namespace BaggyBot.Plugins.Internal.Discord
 {
 	public class DiscordPlugin : Plugin
 	{
-		public override string ServerType => "discord";
-
 		public override event Action<ChatMessage> OnMessageReceived;
 		public override event Action<ChatUser, ChatUser> OnNameChange;
 		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
@@ -25,9 +20,13 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
 		public override event Action<ChatUser, ChatChannel> OnPartChannel;
 
-		private DiscordClient client;
+		public override string ServerType => "discord";
+		public override bool Connected => client.State == ConnectionState.Connected;
+		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
+
+		private readonly DiscordClient client;
 		private Server server;
-		private string token;
+		private readonly string token;
 
 		public DiscordPlugin(ServerCfg cfg) : base(cfg)
 		{
@@ -37,18 +36,18 @@ namespace BaggyBot.Plugins.Internal.Discord
 			{
 				if (!e.Message.IsAuthor)
 				{
-					var user = BuildUser(e.User);
-					var channel = BuildChannel(e.Channel);
+					var user = ToChatUser(e.User);
+					var channel = ToChatChannel(e.Channel);
 					OnMessageReceived?.Invoke(new ChatMessage(user, channel, e.Message.Text));
 				}
 			};
 		}
 
-		private ChatChannel BuildChannel(Channel discordChannel)
+		private ChatChannel ToChatChannel(Channel discordChannel)
 		{
 			return new ChatChannel(discordChannel.Id.ToString(), discordChannel.Name, discordChannel.IsPrivate);
 		}
-		private ChatUser BuildUser(User discordUser)
+		private ChatUser ToChatUser(User discordUser)
 		{
 			return new ChatUser(discordUser.Name, discordUser.Id.ToString(), name: discordUser.Nickname);
 		}
@@ -75,15 +74,11 @@ namespace BaggyBot.Plugins.Internal.Discord
 			return true;
 		}
 
-		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
-		public override bool Connected { get; }
-		public new StatsDatabaseManager StatsDatabase { get; set; }
-
 		public override ChatUser FindUser(string name)
 		{
 			var matches = server.FindUsers(name).ToArray();
 			if (matches.Length == 0) throw new ArgumentException("Invalid username");
-			if (matches.Length == 1)return BuildUser(matches[0]);
+			if (matches.Length == 1)return ToChatUser(matches[0]);
 			throw new ArgumentException("Ambiguous username");
 		}
 
@@ -94,25 +89,14 @@ namespace BaggyBot.Plugins.Internal.Discord
 			return MessageSendResult.Success;
 		}
 
-		public override void JoinChannel(ChatChannel channel)
-		{
-			throw new NotImplementedException();
-		}
-
-		public ChatUser DoWhoisCall(string nick)
-		{
-			throw new NotImplementedException();
-		}
+		public override void JoinChannel(ChatChannel channel) { }
 
 		public void Reconnect()
 		{
 			throw new NotImplementedException();
 		}
 
-		public override void Part(ChatChannel channel, string reason = null)
-		{
-			throw new NotImplementedException();
-		}
+		public override void Part(ChatChannel channel, string reason = null) { }
 
 		public override void Quit(string reason)
 		{

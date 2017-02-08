@@ -4,12 +4,10 @@ using System.Linq;
 using System.Net;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins;
 using BaggyBot.Plugins.MessageFormatters;
 using Curse.NET;
 using Curse.NET.Model;
 using Curse.NET.SocketModel;
-using Group = Curse.NET.Model.Group;
 
 namespace BaggyBot.Plugins.Internal.Curse
 {

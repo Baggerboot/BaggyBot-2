@@ -12,15 +12,26 @@ namespace BaggyBot.MessagingInterface
 {
 	public class ChatClient : IDisposable
 	{
-		private readonly Plugin plugin;
-		internal StatsDatabaseManager StatsDatabase { get; }
-
+		public string ServerType => plugin.ServerType;
 		public string ServerName => plugin.ServerName;
 		public bool Connected => plugin.Connected;
 		public IReadOnlyList<Operator> Operators => plugin.Operators;
 		public IReadOnlyList<ChatChannel> Channels => plugin.Channels;
 		public bool AtMention => plugin.AtMention;
 		public bool AllowsMultilineMessages => plugin.AllowsMultilineMessages;
+
+		public bool Connect() => plugin.Connect();
+		public void JoinChannel(ChatChannel channel) => plugin.JoinChannel(channel);
+		public void Quit(string reason) => plugin.Quit(reason);
+		public void Part(ChatChannel channel, string reason = null) => plugin.Part(channel, reason);
+		public ChatChannel FindChannel(string name) => plugin.FindChannel(name);
+		public ChatChannel GetChannel(string id) => plugin.GetChannel(id);
+		public void NotifyOperators(string message) => plugin.NotifyOperators(message);
+
+
+		private readonly Plugin plugin;
+		internal StatsDatabaseManager StatsDatabase { get; }
+
 
 		internal ChatClient(Plugin plugin, ServerCfg serverConfiguration)
 		{
@@ -45,19 +56,19 @@ namespace BaggyBot.MessagingInterface
 
 		private void AttachEventHandlers(ChatClientEventManager eventManager)
 		{
-			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(this, oldName, newName));
-			plugin.OnMessageReceived += message => eventManager.HandleMessage(new MessageEvent(this, message, 
+			plugin.OnMessageReceived += message => eventManager.HandleMessage(new MessageEvent(this, message,
 				reply => Reply(message.Channel, message.Sender, reply),
 				reply => SendMessage(message.Channel, reply)));
+			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(this, oldName, newName));
+			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(this, kickee, channel, kicker, reason));
 			plugin.OnKicked += (channel, kicker, reason) => eventManager.HandleKicked(new KickedEvent(this, channel, kicker, reason));
 			plugin.OnJoinChannel += (user, channel) => eventManager.HandleJoin(new JoinEvent(this, user, channel));
 			plugin.OnPartChannel += (user, channel) => eventManager.HandlePart(new PartEvent(this, user, channel));
-			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(this, kickee, channel, kicker, reason));
 			plugin.OnQuit += (user, reason) => eventManager.HandleQuit(new QuitEvent(this, user, reason));
 		}
 
 		/// <summary>
-		/// Connects the bot to the SQL database.
+		/// Connects the client to the SQL database.
 		/// </summary>
 		private SqlConnector ConnectDatabase(Backend backend)
 		{
@@ -83,10 +94,6 @@ namespace BaggyBot.MessagingInterface
 			return Operators.Any(op => StatsDatabase.Validate(user, op));
 		}
 
-		public bool Connect()
-		{
-			return plugin.Connect();
-		}
 
 		public void Dispose()
 		{
@@ -104,36 +111,6 @@ namespace BaggyBot.MessagingInterface
 		{
 			message = plugin.MessageFormatters.Aggregate(message, (current, formatter) => formatter.ProcessOutgoingMessage(current));
 			return plugin.Reply(channel, user, message);
-		}
-
-		public void JoinChannel(ChatChannel channel)
-		{
-			plugin.JoinChannel(channel);
-		}
-
-		public void Quit(string reason)
-		{
-			plugin.Quit(reason);
-		}
-
-		public void Part(ChatChannel channel, string reason = null)
-		{
-			plugin.Part(channel, reason);
-		}
-
-		public ChatChannel FindChannel(string name)
-		{
-			return plugin.FindChannel(name);
-		}
-
-		public ChatChannel GetChannel(string id)
-		{
-			return plugin.GetChannel(id);
-		}
-
-		public void NotifyOperators(string message)
-		{
-			plugin.NotifyOperators(message);
 		}
 	}
 }
