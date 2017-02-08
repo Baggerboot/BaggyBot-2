@@ -171,10 +171,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Data.Services.Client" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
@@ -371,10 +368,6 @@
   </Target>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\csnetlib2\CsNetLib2\CsNetLib2.csproj">
-      <Project>{68170802-5de7-4f66-99c7-136b3c7dd93c}</Project>
-      <Name>CsNetLib2</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Curse.NET\Curse.NET\Curse.NET.csproj">
       <Project>{de4f3c8f-749d-4d26-a481-5ab8a5293622}</Project>
       <Name>Curse.NET</Name>
