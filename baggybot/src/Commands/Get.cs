@@ -23,6 +23,7 @@ namespace BaggyBot.Commands
 					.AddArgument("user", command.Sender.Nickname))
 				.AddOperation("users", new Operation()
 					.AddArgument("channel", command.Channel.Name))
+				.AddOperation("channels", new Operation())
 				.AddOperation("channel", new Operation()
 					.AddArgument("channel-id", command.Channel.Identifier));
 
@@ -54,7 +55,16 @@ namespace BaggyBot.Commands
 				case "users":
 					GetUsers(command, result);
 					break;
+				case "channels":
+					GetChannels(command);
+					break;
 			}
+		}
+
+		private void GetChannels(CommandArgs command)
+		{
+			var channels = string.Join(", ", Client.Channels.Select(c => c.Name));
+			command.Reply("I am a member of the following channels: " + channels);
 		}
 
 		private void GetCfg(CommandArgs command, OperationResult result)
