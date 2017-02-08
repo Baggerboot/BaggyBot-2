@@ -55,6 +55,11 @@ namespace BaggyBot.CommandParsing
 			return this;
 		}
 
+		public Operation AddKey(string longForm, char? shortForm = null)
+		{
+			return AddKey(longForm, null, typeof(string), shortForm);
+		}
+
 		public Operation AddKey(string longForm, int defaultValue, char? shortForm = null)
 		{
 			return AddKey(longForm, defaultValue, typeof(int), shortForm);
