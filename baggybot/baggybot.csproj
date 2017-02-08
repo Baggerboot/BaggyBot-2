@@ -217,6 +217,7 @@
     <Compile Include="src\Handlers\ChatClientEvents\NameChangeEvent.cs" />
     <Compile Include="src\Handlers\ChatClientEvents\PartEvent.cs" />
     <Compile Include="src\Handlers\ChatClientEvents\QuitEvent.cs" />
+    <Compile Include="src\Monitoring\Diagnostics\TraceBuilder.cs" />
     <Compile Include="src\Plugins\Internal\Curse\CursePlugin.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordExtensionMethods.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordPlugin.cs" />
