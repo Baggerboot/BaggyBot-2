@@ -32,11 +32,10 @@ namespace BaggyBot.MessagingInterface
 		private readonly Plugin plugin;
 		internal StatsDatabaseManager StatsDatabase { get; }
 
-
 		internal ChatClient(Plugin plugin, ServerCfg serverConfiguration)
 		{
 			this.plugin = plugin;
-			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(serverConfiguration.Backend), serverConfiguration.UseNickserv);
+			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(serverConfiguration.Backend));
 
 			var handlers = new List<ChatClientEventHandler>
 			{

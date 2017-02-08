@@ -18,12 +18,10 @@ namespace BaggyBot.Database
 	{
 		private readonly SqlConnector sqlConnector;
 		private readonly LockObject lockObj;
-		private readonly bool allowNickservLookup;
 		public ConnectionState ConnectionState => sqlConnector.ConnectionState;
 
-		public StatsDatabaseManager(SqlConnector sqlConnector, bool allowNickservLookup)
+		public StatsDatabaseManager(SqlConnector sqlConnector)
 		{
-			this.allowNickservLookup = allowNickservLookup;
 			this.sqlConnector = sqlConnector;
 			lockObj = new LockObject();
 		}
