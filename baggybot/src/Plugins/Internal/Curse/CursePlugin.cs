@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
+using BaggyBot.Monitoring;
 using Curse.NET;
 using Curse.NET.Model;
 using Curse.NET.SocketModel;
@@ -35,6 +36,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 			MessageFormatters.Add(new CurseMessageFormatter());
 			loginCredentials = new NetworkCredential(config.Username, config.Password);
 			client.MessageReceived += HandleMessage;
+			client.WebsocketReconnected += () => Logger.Log(this, $"Websocket connction lost, but managed to reconnect.", LogLevel.Warning);
 		}
 
 		private void HandleMessage(Group server, Channel channel, MessageResponse message)
@@ -68,7 +70,15 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override bool Connect()
 		{
-			client.Connect(loginCredentials.UserName, loginCredentials.Password);
+			try
+			{
+				client.Connect(loginCredentials.UserName, loginCredentials.Password);
+			}
+			catch (CurseDotNetException e)
+			{
+				Logger.Log(this, $"Connection failed. An exception occurred ({e.GetType().Name}: {e.Message})");
+				return false;
+			}
 			Channels = client.ChannelMap.Values.Select(ch => new ChatChannel(ch.GroupID, ch.GroupTitle)).ToList();
 			return true;
 		}
