@@ -62,7 +62,7 @@ namespace BaggyBot.Monitoring.Diagnostics
 				}
 				else
 				{
-					foreach (var frame in e.StackTrace)
+					foreach (var frame in trace.GetFrames())
 					{
 						Logger.Log(this, $"{indents}  -> at {frame}", LogLevel.Error);
 					}
