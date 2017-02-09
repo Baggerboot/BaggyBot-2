@@ -29,13 +29,31 @@ namespace BaggyBot.Monitoring.Diagnostics
 		private void HandleException(UnhandledExceptionEventArgs args, Bot bot)
 		{
 			var e = (Exception)args.ExceptionObject;
+			HandleException(e, bot);
+		}
+
+		private void HandleException(Exception e, Bot bot)
+		{
 			var trace = new StackTrace(e, true);
 			var bottomFrame = trace.GetFrame(0);
 
-			var message = "A fatal unhandled exception occured: " + e.GetType().Name + " - " + e.Message + " - in file: " + bottomFrame.GetFileName() + ":" + bottomFrame.GetFileLineNumber();
-			bot.NotifyOperator(message);
-
-			Logger.Log(this, message, LogLevel.Error);
+			var aggr = e as AggregateException;
+			if (aggr != null)
+			{
+				var message = $"An unhandled AggregateException occurred in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()} - Sub-exceptions: ";
+				bot.NotifyOperator(message);
+				Logger.Log(this, message, LogLevel.Error);
+				foreach (var inner in aggr.InnerExceptions)
+				{
+					HandleException(inner, bot);
+				}
+			}
+			else
+			{
+				var message = $"An unhandled exception occured: {e.GetType().Name} - {e.Message} - in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()}";
+				bot.NotifyOperator(message);
+				Logger.Log(this, message, LogLevel.Error);
+			}
 		}
 
 		internal void StartPerformanceLogging()
