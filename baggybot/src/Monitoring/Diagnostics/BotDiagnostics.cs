@@ -60,6 +60,13 @@ namespace BaggyBot.Monitoring.Diagnostics
 				{
 					HandleException(e.InnerException, bot, ++level);
 				}
+				else
+				{
+					foreach (var frame in e.StackTrace)
+					{
+						Logger.Log(this, $"{indents}  -> at {frame}", LogLevel.Error);
+					}
+				}
 			}
 		}
 
