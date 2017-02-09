@@ -32,6 +32,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 		public SlackPlugin(ServerCfg serverCfg) : base(serverCfg)
 		{
 			AllowsMultilineMessages = true;
+			AtMention = true;
 			MessageFormatters.Add(new SlackMessagePreprocessor());
 			MessageFormatters.Add(new SlackMessageFormatter());
 			token = serverCfg.Password;
