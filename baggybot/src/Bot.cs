@@ -11,10 +11,6 @@ using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Monitoring.Diagnostics;
 using BaggyBot.Plugins;
-using BaggyBot.Plugins.Internal.Curse;
-using BaggyBot.Plugins.Internal.Discord;
-using BaggyBot.Plugins.Internal.Irc;
-using BaggyBot.Plugins.Internal.Slack;
 
 namespace BaggyBot
 {
