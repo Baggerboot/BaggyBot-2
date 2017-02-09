@@ -76,10 +76,7 @@ namespace BaggyBot
 
 		public void OnPostConnect()
 		{
-			if (ConfigManager.Config.LogPerformance)
-			{
-				botDiagnostics.StartPerformanceLogging();
-			}
+			botDiagnostics.StartPerformanceLogging();
 		}
 
 		public static void Shutdown()

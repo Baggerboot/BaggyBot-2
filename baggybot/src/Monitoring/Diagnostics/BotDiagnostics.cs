@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Timers;
+using BaggyBot.Configuration;
 
 namespace BaggyBot.Monitoring.Diagnostics
 {
@@ -13,18 +14,21 @@ namespace BaggyBot.Monitoring.Diagnostics
 		private const string PerfLogFile = "performance_log.csv";
 		private Timer taskScheduler;
 		private PerformanceCounter pc;
-		private readonly PerformanceLogger performanceLogger = new PerformanceLogger(PerfLogFile);
-
+		private readonly PerformanceLogger performanceLogger;
 		public BotDiagnostics(Bot bot)
 		{
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => HandleException(args, bot);
+			if (ConfigManager.Config.LogPerformance)
+			{
+				performanceLogger = new PerformanceLogger(PerfLogFile);
+			}
 		}
 		
 		public void Dispose()
 		{
-			pc.Dispose();
-			performanceLogger.Dispose();
-			taskScheduler.Dispose();
+			pc?.Dispose();
+			performanceLogger?.Dispose();
+			taskScheduler?.Dispose();
 		}
 
 		private void HandleException(UnhandledExceptionEventArgs args, Bot bot)
@@ -72,11 +76,17 @@ namespace BaggyBot.Monitoring.Diagnostics
 
 		internal void StartPerformanceLogging()
 		{
+			if (!ConfigManager.Config.LogPerformance)
+			{
+				return;
+			}
 			var selfProc = Process.GetCurrentProcess();
-			pc = new PerformanceCounter();
-			pc.CategoryName = "Process";
-			pc.CounterName = "Working Set - Private";
-			pc.InstanceName = selfProc.ProcessName;
+			pc = new PerformanceCounter
+			{
+				CategoryName = "Process",
+				CounterName = "Working Set - Private",
+				InstanceName = selfProc.ProcessName
+			};
 
 			Logger.Log(this, "Logging performance statistics to " + PerfLogFile, LogLevel.Info);
 
