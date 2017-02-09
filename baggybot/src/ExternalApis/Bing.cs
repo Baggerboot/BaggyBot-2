@@ -24,13 +24,16 @@ namespace BaggyBot
 		{
 			var encoded = WebUtility.UrlEncode(query);
 			var rs = Get<ImageSearchResponse>($"https://api.cognitive.microsoft.com/bing/v5.0/search?q={encoded}&mkt=en-US");
-			var image = rs.images.value.FirstOrDefault();
+
+			var image = rs?.images?.value?.FirstOrDefault();
 			return image;
 		}
 
 		private T Get<T>(string url)
 		{
-			return JsonConvert.DeserializeObject<T>(Get(url));
+			var response = Get(url);
+			var obj = JsonConvert.DeserializeObject<T>(response);
+			return obj;
 		}
 
 		private string Get(string url)
