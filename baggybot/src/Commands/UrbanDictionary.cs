@@ -17,7 +17,7 @@ namespace BaggyBot.Commands
 		{
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{
-				command.ReturnMessage("usage: -ur <search term>");
+				InformUsage(command);
 				return;
 			}
 
