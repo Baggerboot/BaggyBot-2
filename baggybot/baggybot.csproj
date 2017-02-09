@@ -148,7 +148,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="SlackAPI, Version=1.0.4.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SlackAPI.WebSocket4Net.1.0.5.2-pre\lib\net45\SlackAPI.dll</HintPath>
+      <HintPath>..\packages\SlackAPI.WebSocket4Net.1.0.5.2-pre2\lib\net45\SlackAPI.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SuperSocket.ClientEngine, Version=0.8.0.6, Culture=neutral, processorArchitecture=MSIL">
