@@ -168,7 +168,7 @@ namespace BaggyBot.CommandParsing
 				var flagOpt = option as Flag;
 				if (keyOpt != null)
 				{
-					result.Keys[keyOpt.Long] = keyOpt.DefaultValue;
+					result.InternalKeys[keyOpt.Long] = keyOpt.DefaultValue;
 				}
 				else if (flagOpt != null)
 				{
@@ -176,7 +176,7 @@ namespace BaggyBot.CommandParsing
 				}
 				else
 				{
-					throw new InvalidOperationException($"The option \"{option.ToString()}\" is of an unknown type (\"{option.GetType().Name}\")");
+					throw new InvalidOperationException($"The option \"{option}\" is of an unknown type (\"{option.GetType().Name}\")");
 				}
 			}
 			foreach (var argument in arguments)
@@ -202,7 +202,7 @@ namespace BaggyBot.CommandParsing
 				if (currentKey != null)
 				{
 					// We've just parsed a key, now we can assign its value
-					result.Keys[currentKey.Long] = ConvertString(component.Value, currentKey.ValueType);
+					result.InternalKeys[currentKey.Long] = ConvertString(component.Value, currentKey.ValueType);
 					currentKey = null;
 				}
 				else if (component.Value.StartsWith("--"))

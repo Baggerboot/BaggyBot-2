@@ -2,28 +2,28 @@
 using BaggyBot.Formatting;
 using BaggyBot.MessagingInterface;
 
-namespace BaggyBot.Plugins.Internal.Slack
+namespace BaggyBot.Plugins.Internal.Curse
 {
-	class SlackMessageFormatter : MessageFormatter
+	internal class CurseMessageFormatter : MessageFormatter
 	{
 		protected override string GetFormattingString(FormattingType type, FormattingPosition position)
 		{
 			switch (type)
 			{
 				case FormattingType.Italic:
-					return "_";
+					return "~";
 				case FormattingType.Bold:
 					return "*";
 				case FormattingType.Underline:
-					return "";
+					return "_";
 				case FormattingType.Strikethrough:
-					return "~";
+					return "-";
 				case FormattingType.Quote:
-					return ">";
+					return string.Empty;
 				case FormattingType.Monospace:
 					return "`";
 				case FormattingType.MonospaceBlock:
-					return "```";
+					return "```\n";
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
@@ -31,7 +31,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		public override void ProcessIncomingMessage(ChatMessage message)
 		{
-
+			
 		}
 	}
 }

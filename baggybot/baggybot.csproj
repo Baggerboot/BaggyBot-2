@@ -167,6 +167,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\CommandParsing\LambdaLookup.cs" />
     <Compile Include="src\Commands\Diagnostics.cs" />
     <Compile Include="src\Configuration\Imgur.cs" />
     <Compile Include="src\ExternalApis\Bing.cs" />
@@ -190,23 +191,25 @@
     <Compile Include="src\Configuration\WolframAlpha.cs" />
     <Compile Include="src\CommandParsing\CommandComponent.cs" />
     <Compile Include="src\Database\CorruptedDatabaseException.cs" />
-    <Compile Include="src\Handlers\ChatClientEventHandler.cs" />
-    <Compile Include="src\Handlers\ChatClientEventManager.cs" />
+    <Compile Include="src\Formatting\FormattingPosition.cs" />
+    <Compile Include="src\Formatting\FormattingType.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\ChatClientEventHandler.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\ChatClientEventManager.cs" />
     <Compile Include="src\Formatting\Formatting.cs" />
-    <Compile Include="src\Handlers\AdministrationHandler.cs" />
-    <Compile Include="src\Handlers\ChatClientEvents\JoinEvent.cs" />
-    <Compile Include="src\Handlers\ChatClientEvents\KickedEvent.cs" />
-    <Compile Include="src\Handlers\ChatClientEvents\KickEvent.cs" />
-    <Compile Include="src\Handlers\ChatClientEvents\MessageEvent.cs" />
-    <Compile Include="src\Handlers\ChatClientEvents\NameChangeEvent.cs" />
-    <Compile Include="src\Handlers\ChatClientEvents\PartEvent.cs" />
-    <Compile Include="src\Handlers\ChatClientEvents\QuitEvent.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\AdministrationHandler.cs" />
+    <Compile Include="src\MessagingInterface\Events\JoinEvent.cs" />
+    <Compile Include="src\MessagingInterface\Events\KickedEvent.cs" />
+    <Compile Include="src\MessagingInterface\Events\KickEvent.cs" />
+    <Compile Include="src\MessagingInterface\Events\MessageEvent.cs" />
+    <Compile Include="src\MessagingInterface\Events\NameChangeEvent.cs" />
+    <Compile Include="src\MessagingInterface\Events\PartEvent.cs" />
+    <Compile Include="src\MessagingInterface\Events\QuitEvent.cs" />
     <Compile Include="src\Monitoring\Diagnostics\TraceBuilder.cs" />
     <Compile Include="src\Plugins\Internal\Curse\CursePlugin.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordExtensionMethods.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordPlugin.cs" />
     <Compile Include="src\Plugins\Internal\Irc\IrcChatUser.cs" />
-    <Compile Include="src\Plugins\Internal\Slack\SlackMessageFormatter.cs" />
+    <Compile Include="src\Plugins\Internal\Slack\SlackMessagePreprocessor.cs" />
     <Compile Include="src\Plugins\Internal\Slack\SlackPlugin.cs" />
     <Compile Include="src\MessagingInterface\ChatChannel.cs" />
     <Compile Include="src\MessagingInterface\ChatClient.cs" />
@@ -264,17 +267,17 @@
     <Compile Include="src\Database\Model\UserCredential.cs" />
     <Compile Include="src\Database\Model\UserStatistic.cs" />
     <Compile Include="src\Database\Upgrades\DatabaseUpgrader.cs" />
-    <Compile Include="src\Handlers\CommandHandler.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\CommandHandler.cs" />
     <Compile Include="src\Commands\CommandArgs.cs" />
     <Compile Include="src\Plugins\DisconnectReason.cs" />
-    <Compile Include="src\Plugins\MessageFormatters\IMessageFormatter.cs" />
-    <Compile Include="src\Plugins\MessageFormatters\CurseMessageFormatter.cs" />
-    <Compile Include="src\Plugins\MessageFormatters\MarkdownMessageFormatter.cs" />
+    <Compile Include="src\Plugins\IMessagePreprocessor.cs" />
+    <Compile Include="src\Plugins\Internal\Curse\CurseMessageFormatter.cs" />
+    <Compile Include="src\Plugins\MessageFormatter.cs" />
+    <Compile Include="src\Plugins\Internal\Slack\SlackMessageFormatter.cs" />
     <Compile Include="src\Plugins\Plugin.cs" />
     <Compile Include="src\Plugins\MessageSendResult.cs" />
     <Compile Include="src\MessagingInterface\ChatClientExtensions.cs" />
     <Compile Include="src\Plugins\ServerTypeAttribute.cs" />
-    <Compile Include="src\Tools\BingSearchContainer.cs" />
     <Compile Include="src\Version.cs" />
     <None Include="app.config" />
     <None Include="src\Commands\Example.cs" />
@@ -298,7 +301,7 @@
     <Compile Include="src\Database\StatsDatabaseManager.cs" />
     <Compile Include="src\EmbeddedData\Emoticons.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
-    <Compile Include="src\Handlers\LogHandler.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\LogHandler.cs" />
     <Compile Include="src\Monitoring\Logger.cs" />
     <Compile Include="src\EmbeddedData\Messages.cs" />
     <Compile Include="src\Monitoring\Diagnostics\PerformanceLogger.cs" />
@@ -308,7 +311,7 @@
     <Compile Include="src\Database\LockObject.cs" />
     <Compile Include="properties\AssemblyInfo.cs" />
     <Compile Include="src\Database\SqlConnector.cs" />
-    <Compile Include="src\Handlers\StatsHandler.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\StatsHandler.cs" />
     <Compile Include="src\Tools\ExtensionMethods.cs" />
     <Compile Include="src\Tools\MiscTools.cs" />
     <Compile Include="src\Tools\PythonFunction.cs" />

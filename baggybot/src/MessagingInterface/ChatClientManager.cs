@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using BaggyBot.Configuration;
-using BaggyBot.Handlers;
 using BaggyBot.Monitoring;
 using BaggyBot.Plugins;
 

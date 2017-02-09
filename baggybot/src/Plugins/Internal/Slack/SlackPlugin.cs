@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins.MessageFormatters;
 using SlackAPI;
 using SlackAPI.WebSocketMessages;
 
@@ -33,8 +32,8 @@ namespace BaggyBot.Plugins.Internal.Slack
 		public SlackPlugin(ServerCfg serverCfg) : base(serverCfg)
 		{
 			AllowsMultilineMessages = true;
+			MessageFormatters.Add(new SlackMessagePreprocessor());
 			MessageFormatters.Add(new SlackMessageFormatter());
-			MessageFormatters.Add(new MarkdownMessageFormatter());
 			token = serverCfg.Password;
 		}
 

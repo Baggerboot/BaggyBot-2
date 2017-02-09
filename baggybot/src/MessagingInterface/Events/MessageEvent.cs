@@ -1,8 +1,7 @@
 using System;
-using BaggyBot.MessagingInterface;
 using BaggyBot.Plugins;
 
-namespace BaggyBot.Handlers.ChatClientEvents
+namespace BaggyBot.MessagingInterface.Events
 {
 	public class MessageEvent
 	{

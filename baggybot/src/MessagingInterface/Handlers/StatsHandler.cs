@@ -6,12 +6,11 @@ using System.Text.RegularExpressions;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.EmbeddedData;
-using BaggyBot.Handlers.ChatClientEvents;
-using BaggyBot.MessagingInterface;
+using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
 
-namespace BaggyBot.Handlers
+namespace BaggyBot.MessagingInterface.Handlers
 {
 	internal class StatsHandler : ChatClientEventHandler
 	{

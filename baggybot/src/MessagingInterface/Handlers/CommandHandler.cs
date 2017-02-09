@@ -5,11 +5,10 @@ using System.Reflection;
 using BaggyBot.Commands;
 using BaggyBot.Configuration;
 using BaggyBot.EmbeddedData;
-using BaggyBot.Handlers.ChatClientEvents;
+using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
-using BaggyBot.Tools;
 
-namespace BaggyBot.Handlers
+namespace BaggyBot.MessagingInterface.Handlers
 {
 	internal class CommandHandler : ChatClientEventHandler
 	{

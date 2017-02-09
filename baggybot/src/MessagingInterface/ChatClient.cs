@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
-using BaggyBot.Handlers;
-using BaggyBot.Handlers.ChatClientEvents;
+using BaggyBot.MessagingInterface.Events;
+using BaggyBot.MessagingInterface.Handlers;
 using BaggyBot.Monitoring;
 using BaggyBot.Plugins;
 

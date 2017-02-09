@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins.MessageFormatters;
 using Curse.NET;
 using Curse.NET.Model;
 using Curse.NET.SocketModel;

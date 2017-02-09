@@ -1,7 +1,6 @@
-﻿using BaggyBot.Handlers.ChatClientEvents;
-using BaggyBot.MessagingInterface;
+﻿using BaggyBot.MessagingInterface.Events;
 
-namespace BaggyBot.Handlers
+namespace BaggyBot.MessagingInterface.Handlers
 {
 	internal class AdministrationHandler : ChatClientEventHandler
 	{

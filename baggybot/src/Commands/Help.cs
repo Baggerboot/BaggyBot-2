@@ -33,7 +33,7 @@ namespace BaggyBot.Commands
 				if (commandList.ContainsKey(command.Args[0]))
 				{
 					var cmd = commandList[command.Args[0]];
-					command.Reply($"{Frm.B}{command.Args[0]}{Frm.B}: {cmd.Description} (usable by {cmd.Permissions}) -- {Frm.B}Usage{Frm.B}: {Frm.C}{command.Args[0]} {cmd.Usage}{Frm.C}");
+					command.Reply($"{Frm.B}{command.Args[0]}{Frm.B}: {cmd.Description} (usable by {cmd.Permissions}) -- {Frm.B}Usage{Frm.B}: {Frm.M}{command.Args[0]} {cmd.Usage}{Frm.M}");
 				}
 			}
 			else

@@ -18,7 +18,7 @@ namespace BaggyBot.Commands
 
 		public void InformUsage(CommandArgs cmd)
 		{
-			cmd.Reply($"usage: {Frm.C}{Bot.CommandIdentifiers.First()}{cmd.Command} {Usage}{Frm.C} -- {Description}");
+			cmd.Reply($"usage: {Frm.M}{Bot.CommandIdentifiers.First()}{cmd.Command} {Usage}{Frm.M} -- {Description}");
 		}
 	}
 }

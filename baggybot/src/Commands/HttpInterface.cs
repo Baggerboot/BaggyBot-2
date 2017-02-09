@@ -1,6 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.IO;
 using System.Net;
+using System.Text;
+using BaggyBot.CommandParsing;
+using BaggyBot.Formatting;
 
 namespace BaggyBot.Commands
 {
@@ -13,43 +15,79 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			if (command.Args.Length < 2)
+			if (command.Args.Length == 0)
 			{
 				InformUsage(command);
-				return;
 			}
+			var parser = new CommandParser(new Operation()
+				.AddArgument("method", "GET")
+				.AddArgument("url")
+				.AddFlag("follow-redirects", 'f')
+				.AddFlag("show-headers", 'h')
+				.AddKey("content-type", 'c')
+				.AddRestArgument());
 
-			var method = command.Args[0].ToUpper();
-			var url = command.Args[1];
-			if (url.StartsWith("file://"))
-			{
-				command.Reply("you sneaky bastard; you didn't think I was going to allow that, did you?");
-				return;
-			}
-			if (!url.StartsWith("http"))
+			var cmd = parser.Parse(command.FullArgument);
+
+			var url = cmd.Arguments["url"];
+			if (!url.Contains("://"))
 			{
 				url = "http://" + url;
 			}
-			var body = string.Join(" ", command.Args.Skip(2));
-			using (var client = new WebClient())
+
+			var request = WebRequest.CreateHttp(url);
+			request.Method = cmd.Arguments["method"].ToUpper();
+			request.AllowAutoRedirect = cmd.Flags["follow-redirects"];
+			request.ContentType = cmd.Keys["content-type"] ?? request.ContentType;
+			if (cmd.RestArgument != null)
 			{
-				client.Headers.Add("User-Agent", $"BaggyBot/{Bot.Version} ({Environment.OSVersion}) IRC stats bot");
-				try
+				using (var sw = new StreamWriter(request.GetRequestStream()))
 				{
-					string response;
-					if (method == "GET")
+					sw.Write(cmd.RestArgument);
+				}
+			}
+			HttpWebResponse response;
+			try
+			{
+				response = (HttpWebResponse)request.GetResponse();
+			}
+			catch (WebException e)
+			{
+				response = (HttpWebResponse)e.Response;
+			}
+			if (response == null)
+			{
+				command.Reply("failed to connect to the server.");
+			}
+			else
+			{
+				var sb = new StringBuilder();
+				if (cmd.Flags["show-headers"] || request.Method == "HEAD")
+				{
+					foreach (var header in response.Headers.AllKeys)
 					{
-						response = client.DownloadString(url);
+						sb.AppendLine($"{header}: {response.Headers[header]}");
+					}
+				}
+				using (var reader = new StreamReader(response.GetResponseStream()))
+				{
+					var text = reader.ReadToEnd();
+					if (string.IsNullOrEmpty(text))
+					{
+						sb.AppendLine("(Empty response)");
 					}
 					else
 					{
-						response = client.UploadString(url, method, body);
+						sb.AppendLine(text);
 					}
-					command.ReturnMessage("Response: " + response);
 				}
-				catch (WebException e)
+				if (Client.AllowsMultilineMessages)
 				{
-					command.ReturnMessage("The HTTP request failed ({e.Message}).");
+					command.ReturnMessage($"{Frm.MMultiline}{sb}{Frm.MMultiline}");
+				}
+				else
+				{
+					command.ReturnMessage(sb.Replace("\n", "").Replace("\r", "\n").ToString());
 				}
 			}
 		}

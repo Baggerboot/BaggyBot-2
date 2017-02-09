@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Data;
-using BaggyBot.Handlers.ChatClientEvents;
-using BaggyBot.MessagingInterface;
+using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
 
-namespace BaggyBot.Handlers
+namespace BaggyBot.MessagingInterface.Handlers
 {
 	internal class LogHandler : ChatClientEventHandler
 	{

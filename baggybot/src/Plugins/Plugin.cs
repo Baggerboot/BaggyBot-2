@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins.MessageFormatters;
 
 namespace BaggyBot.Plugins
 {
@@ -52,7 +51,7 @@ namespace BaggyBot.Plugins
 		/// <summary>
 		/// Any message formatters placed in here will format outgoing and incoming messages for this plugin.
 		/// </summary>
-		public List<IMessageFormatter> MessageFormatters { get; } = new List<IMessageFormatter>();
+		public List<IMessagePreprocessor> MessageFormatters { get; } = new List<IMessagePreprocessor>();
 		/// <summary>
 		/// Gets the unique name of this server as defined in the configuration file.
 		/// </summary>

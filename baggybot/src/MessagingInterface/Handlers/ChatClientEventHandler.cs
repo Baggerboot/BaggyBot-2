@@ -1,8 +1,7 @@
 ﻿using BaggyBot.Database;
-using BaggyBot.Handlers.ChatClientEvents;
-using BaggyBot.MessagingInterface;
+using BaggyBot.MessagingInterface.Events;
 
-namespace BaggyBot.Handlers
+namespace BaggyBot.MessagingInterface.Handlers
 {
 	public abstract class ChatClientEventHandler
 	{

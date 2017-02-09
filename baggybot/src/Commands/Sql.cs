@@ -49,7 +49,7 @@ namespace BaggyBot.Commands
 			{
 				var dividerLength = columnLengths.Sum() + (columnLengths.Length - 1) * " | ".Length;
 				var divider = string.Concat(Enumerable.Repeat('=', dividerLength));
-				command.ReturnMessage($"{Frm.CodeBlockStart}{PrintHeader(table, columnLengths)}\n{divider}\n{PrintBody(table, columnLengths, maxRows)}{Frm.CodeBlockEnd}");
+				command.ReturnMessage($"{Frm.MMultiline}{PrintHeader(table, columnLengths)}\n{divider}\n{PrintBody(table, columnLengths, maxRows)}{Frm.MMultiline}");
 			}
 			else
 			{

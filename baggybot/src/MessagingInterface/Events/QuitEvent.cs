@@ -1,6 +1,4 @@
-using BaggyBot.MessagingInterface;
-
-namespace BaggyBot.Handlers.ChatClientEvents
+namespace BaggyBot.MessagingInterface.Events
 {
 	public class QuitEvent
 	{
