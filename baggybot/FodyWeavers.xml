@@ -3,6 +3,7 @@
 	<Costura>
 		<ExcludeAssemblies>
 			CsNetLib2
+			websocket-sharp
 		</ExcludeAssemblies>
   	</Costura>
 </Weavers>
