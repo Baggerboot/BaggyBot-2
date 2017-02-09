@@ -28,6 +28,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		private SlackSocketClient client;
 		private readonly string token;
+		private Timer activityTimer;
 
 		public SlackPlugin(ServerCfg serverCfg) : base(serverCfg)
 		{
@@ -84,7 +85,17 @@ namespace BaggyBot.Plugins.Internal.Slack
 				.Concat(client.Groups.Select(ToChatChannel))
 				.Concat(client.DirectMessages.Select(ToChatChannel))
 				.ToList();
+
+			activityTimer = new Timer(UpdateActivity, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60));
 			return true;
+		}
+
+		private void UpdateActivity(object state)
+		{
+			if (client.IsConnected)
+			{
+				client.SendPresence(Presence.active);
+			}
 		}
 
 		private ChatChannel ToChatChannel(Channel ch)
@@ -121,7 +132,11 @@ namespace BaggyBot.Plugins.Internal.Slack
 		}
 		public override void Dispose()
 		{
-			
+			activityTimer?.Dispose();
+			if (client?.IsConnected ?? false)
+			{
+				client.CloseSocket();
+			}
 		}
 
 		public override ChatUser FindUser(string name)
