@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Timers;
 
 namespace BaggyBot.Monitoring.Diagnostics
@@ -32,27 +33,33 @@ namespace BaggyBot.Monitoring.Diagnostics
 			HandleException(e, bot);
 		}
 
-		private void HandleException(Exception e, Bot bot)
+		private void HandleException(Exception e, Bot bot, int level = 0)
 		{
 			var trace = new StackTrace(e, true);
 			var bottomFrame = trace.GetFrame(0);
 
+			var indents = string.Concat(Enumerable.Repeat("  ", level));
+
 			var aggr = e as AggregateException;
 			if (aggr != null)
 			{
-				var message = $"An unhandled AggregateException occurred in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()} - Sub-exceptions: ";
+				var message = $"{indents}An unhandled AggregateException occurred in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()} - Sub-exceptions: ";
 				bot.NotifyOperator(message);
 				Logger.Log(this, message, LogLevel.Error);
 				foreach (var inner in aggr.InnerExceptions)
 				{
-					HandleException(inner, bot);
+					HandleException(inner, bot, ++level);
 				}
 			}
 			else
 			{
-				var message = $"An unhandled exception occured: {e.GetType().Name} - {e.Message} - in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()}";
+				var message = $"{indents}An unhandled exception occured: {e.GetType().Name} - {e.Message} - in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()}";
 				bot.NotifyOperator(message);
 				Logger.Log(this, message, LogLevel.Error);
+				if (e.InnerException != null)
+				{
+					HandleException(e.InnerException, bot, ++level);
+				}
 			}
 		}
 
