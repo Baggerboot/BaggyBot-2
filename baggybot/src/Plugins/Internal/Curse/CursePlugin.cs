@@ -25,8 +25,8 @@ namespace BaggyBot.Plugins.Internal.Curse
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected { get; }
 
-		private CurseClient client = new CurseClient();
-		private NetworkCredential loginCredentials;
+		private readonly CurseClient client = new CurseClient();
+		private readonly NetworkCredential loginCredentials;
 
 		public CursePlugin(ServerCfg config) : base(config)
 		{
