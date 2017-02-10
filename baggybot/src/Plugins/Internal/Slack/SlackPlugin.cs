@@ -31,8 +31,9 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		public SlackPlugin(ServerCfg serverCfg) : base(serverCfg)
 		{
-			AllowsMultilineMessages = true;
-			AtMention = true;
+			Capabilities.AllowsMultilineMessages = true;
+			Capabilities.AtMention = true;
+
 			MessageFormatters.Add(new SlackMessagePreprocessor());
 			MessageFormatters.Add(new SlackMessageFormatter());
 			token = serverCfg.Password;
@@ -82,10 +83,12 @@ namespace BaggyBot.Plugins.Internal.Slack
 				return false;
 			}
 			Channels = client.Channels.Select(ToChatChannel)
-				.Concat(client.Groups.Select(ToChatChannel))
-				.Concat(client.DirectMessages.Select(ToChatChannel))
-				.ToList();
+			                          .Concat(client.Groups.Select(ToChatChannel))
+			                          .Concat(client.DirectMessages.Select(ToChatChannel))
+			                          .ToList();
+
 			client.SendPresence(Presence.active);
+			activityTimer = new Timer(state => client.SendPresence(Presence.active), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 			return true;
 		}
 

@@ -28,22 +28,10 @@ namespace BaggyBot.Plugins
 		/// A list of channels the client is currently a part of.
 		/// </summary>
 		public abstract IReadOnlyList<ChatChannel> Channels { get; protected set; }
-
 		/// <summary>
-		/// Should be set to true if users should be mentioned
-		/// by prefixing their username with '@' character.
+		/// Describes the capabilities of the chat server this plugin connects to.
 		/// </summary>
-		public bool AtMention { get; protected set; }
-		/// <summary>
-		/// Should be set to true if the plugin supports line feeds within messages.
-		/// </summary>
-		public bool AllowsMultilineMessages { get; protected set; }
-		/// <summary>
-		/// Should be set to false if the server does not correctly handle special
-		/// unicode characters (such as mathematical symbols).
-		/// </summary>
-		public bool SupportsUnicode { get; protected set; } = true;
-
+		public ServerCapabilities Capabilities { get; } = new ServerCapabilities();
 		/// <summary>
 		/// The operators defined for this client.
 		/// </summary>
@@ -117,7 +105,7 @@ namespace BaggyBot.Plugins
 		/// </summary>
 		public virtual MessageSendResult Reply(ChatChannel channel, ChatUser user, string message)
 		{
-			return SendMessage(channel, $"{(AtMention ? "@" : "")}{user.AddressableName}, {message}");
+			return SendMessage(channel, $"{(Capabilities.AtMention ? "@" : "")}{user.AddressableName}, {message}");
 		}
 	}
 }

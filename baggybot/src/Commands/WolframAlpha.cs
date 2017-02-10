@@ -96,7 +96,7 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			var useUnicode = Client.SupportsUnicode;
+			var useUnicode = Client.Capabilities.SupportsSpecialCharacters;
 
 			if (string.IsNullOrWhiteSpace(command.FullArgument))
 			{

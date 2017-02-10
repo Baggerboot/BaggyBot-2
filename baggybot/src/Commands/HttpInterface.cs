@@ -81,7 +81,7 @@ namespace BaggyBot.Commands
 						sb.AppendLine(text);
 					}
 				}
-				if (Client.AllowsMultilineMessages)
+				if (Client.Capabilities.AllowsMultilineMessages)
 				{
 					command.ReturnMessage($"{Frm.MMultiline}{sb}{Frm.MMultiline}");
 				}

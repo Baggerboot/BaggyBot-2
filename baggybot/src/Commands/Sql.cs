@@ -45,7 +45,7 @@ namespace BaggyBot.Commands
 			var maxRows = parsed.GetKey<int>("rows");
 
 			var columnLengths = GetColumnLengths(table, maxRows);
-			if (Client.AllowsMultilineMessages)
+			if (Client.Capabilities.AllowsMultilineMessages)
 			{
 				var dividerLength = columnLengths.Sum() + (columnLengths.Length - 1) * " | ".Length;
 				var divider = string.Concat(Enumerable.Repeat('=', dividerLength));

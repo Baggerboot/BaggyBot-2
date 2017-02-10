@@ -17,9 +17,7 @@ namespace BaggyBot.MessagingInterface
 		public bool Connected => plugin.Connected;
 		public IReadOnlyList<Operator> Operators => plugin.Operators;
 		public IReadOnlyList<ChatChannel> Channels => plugin.Channels;
-		public bool AtMention => plugin.AtMention;
-		public bool AllowsMultilineMessages => plugin.AllowsMultilineMessages;
-		public bool SupportsUnicode => plugin.SupportsUnicode;
+		public ServerCapabilities Capabilities => plugin.Capabilities;
 
 		public bool Connect() => plugin.Connect();
 		public void JoinChannel(ChatChannel channel) => plugin.JoinChannel(channel);
