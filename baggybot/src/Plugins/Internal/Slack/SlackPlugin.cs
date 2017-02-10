@@ -85,17 +85,8 @@ namespace BaggyBot.Plugins.Internal.Slack
 				.Concat(client.Groups.Select(ToChatChannel))
 				.Concat(client.DirectMessages.Select(ToChatChannel))
 				.ToList();
-
-			activityTimer = new Timer(UpdateActivity, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60));
+			client.SendPresence(Presence.active);
 			return true;
-		}
-
-		private void UpdateActivity(object state)
-		{
-			if (client.IsConnected)
-			{
-				client.SendPresence(Presence.active);
-			}
 		}
 
 		private ChatChannel ToChatChannel(Channel ch)
