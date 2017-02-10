@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using BaggyBot.Monitoring;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 
@@ -19,17 +20,22 @@ namespace BaggyBot.Commands
 				$"http://en.wikipedia.org/w/api.php?format=json&action=query&titles={command.FullArgument}&prop=info&inprop=url");
 
 			var rq = WebRequest.Create(uri);
-			var response = rq.GetResponse();
-
+			WebResponse response;
+			try
+			{
+				response = rq.GetResponse();
+			}
+			catch (WebException e)
+			{
+				command.Reply($"Unable to query Wikipedia. {e.Message}");
+				return;
+			}
 			using (var sr = new StreamReader(response.GetResponseStream()))
 			{
 				var data = sr.ReadToEnd();
 				dynamic jsonObj = JObject.Parse(data);
-
 				var page = ((JObject)jsonObj.query.pages).First.First;
-
 				var title = page["title"];
-
 
 				command.ReturnMessage($"{title} ({page["canonicalurl"]}): {GetContent(page["canonicalurl"].ToString())}");
 			}
@@ -37,12 +43,26 @@ namespace BaggyBot.Commands
 
 		private string GetContent(string url)
 		{
+			// TODO: Enhance Wikipedia command output
+			// - Send more text when allowed.
+			// - Attach an image.
+			// - Attach additional data.
+			// Add ChatClient capabilities as required
 			var rq = WebRequest.Create(url + "?action=render");
 			var rs = rq.GetResponse();
 			var doc = new HtmlDocument();
 			doc.Load(rs.GetResponseStream());
+			foreach (var cite in doc.DocumentNode.SelectNodes(".//sup[@class=\"reference\"]"))
+			{
+				cite.Remove();
+			}
+			foreach (var tr in doc.DocumentNode.SelectNodes("//table[@class=\"infobox\"]/tr[td][th]"))
+			{
+				var th = tr.SelectSingleNode("th").InnerText;
+				var td = tr.SelectSingleNode("td").InnerText;
+			}
 
-			var firstParagraph = doc.DocumentNode.SelectSingleNode("/p[1]");
+			var firstParagraph = doc.DocumentNode.SelectSingleNode(".//p[1]");
 
 			return firstParagraph.InnerText;
 
