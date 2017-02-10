@@ -147,10 +147,6 @@
       <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SlackAPI, Version=1.0.4.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SlackAPI.WebSocket4Net.1.0.5.2-pre2\lib\net45\SlackAPI.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="SuperSocket.ClientEngine, Version=0.8.0.6, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SuperSocket.ClientEngine.Core.0.8.0.6\lib\net45\SuperSocket.ClientEngine.dll</HintPath>
       <Private>True</Private>
@@ -364,6 +360,10 @@
     <ProjectReference Include="..\ircsharp\IRCSharp\IRCSharp.csproj">
       <Project>{06a69cbb-6e8e-4974-b99d-77221fec4a33}</Project>
       <Name>IRCSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SlackAPI\SlackAPI\SlackAPI.csproj">
+      <Project>{0c0a58a8-174e-4a4c-907b-c3569144d15d}</Project>
+      <Name>SlackAPI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

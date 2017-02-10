@@ -7,3 +7,6 @@
 [submodule "Curse.NET"]
 	path = Curse.NET
 	url = https://github.com/Baggykiin/Curse.NET.git
+[submodule "SlackAPI"]
+	path = SlackAPI
+	url = https://github.com/Baggykiin/SlackAPI
