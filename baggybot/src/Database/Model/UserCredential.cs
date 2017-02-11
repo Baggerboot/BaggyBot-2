@@ -11,8 +11,6 @@ namespace BaggyBot.Database.Model
 
 		[Column(Name = "user_id"), NotNull]
 		public int UserId { get; set; }
-		//[Association(ThisKey = "user", OtherKey = "id")]
-		//public User ChatUser { get; set; }
 
 		[Column(Name = "nick"), NotNull]
 		public string Nick { get; set; }

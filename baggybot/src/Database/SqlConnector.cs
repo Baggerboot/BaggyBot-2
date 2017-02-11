@@ -17,7 +17,7 @@ namespace BaggyBot.Database
 
 		public ITable<LinkedUrl> LinkedUrls { get; private set; }
 		public ITable<User> Users { get; private set; }
-		public ITable<UserCredential> UserCredentials { get; private set; }
+		//public ITable<UserCredential> UserCredentials { get; private set; }
 		public ITable<UserStatistic> UserStatistics { get; private set; }
 		public ITable<UsedEmoticon> Emoticons { get; private set; }
 		public ITable<ChatLog> ChatLog { get; private set; }
@@ -171,7 +171,7 @@ namespace BaggyBot.Database
 				}
 			}
 
-			UserCredentials = connection.GetTable<UserCredential>();
+			//UserCredentials = connection.GetTable<UserCredential>();
 			Quotes = connection.GetTable<Quote>();
 			UserStatistics = connection.GetTable<UserStatistic>();
 			Emoticons = connection.GetTable<UsedEmoticon>();
@@ -184,7 +184,12 @@ namespace BaggyBot.Database
 
 			try
 			{
-				UserCredentials.FirstOrDefault();
+				// These methods are actually not pure, because they'll throw an exception
+				// if their backing database tables are not found. It's a bit of a hack,
+				// but this is the easiest way to check whether those tables exist.
+
+				// ReSharper disable ReturnValueOfPureMethodIsNotUsed
+				//UserCredentials.FirstOrDefault();
 				Quotes.FirstOrDefault();
 				UserStatistics.FirstOrDefault();
 				Emoticons.FirstOrDefault();
@@ -194,6 +199,7 @@ namespace BaggyBot.Database
 				Words.FirstOrDefault();
 				ChatLog.FirstOrDefault();
 				MiscData.FirstOrDefault();
+				// ReSharper restore ReturnValueOfPureMethodIsNotUsed
 			}
 			catch (Exception e)
 			{
