@@ -87,7 +87,6 @@ namespace BaggyBot.Plugins.Internal.Slack
 			                          .Concat(client.DirectMessages.Select(ToChatChannel))
 			                          .ToList();
 
-			client.SendPresence(Presence.active);
 			activityTimer = new Timer(state => client.SendPresence(Presence.active), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 			return true;
 		}
