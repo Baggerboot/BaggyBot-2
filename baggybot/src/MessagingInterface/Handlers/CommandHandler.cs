@@ -55,13 +55,13 @@ namespace BaggyBot.MessagingInterface.Handlers
 
 		public override void HandleMessage(MessageEvent ev)
 		{
-			var match = Bot.CommandIdentifiers.FirstOrDefault(id => ev.Message.Message.StartsWith(id));
+			var match = Bot.CommandIdentifiers.FirstOrDefault(id => ev.Message.Body.StartsWith(id));
 
 			if (match == null)
 			{
 				return;
 			}
-			var cmdInfo = CommandArgs.FromMessage(match, ev.Message);
+			var cmdInfo = CommandArgs.FromMessage(match, ev);
 			ProcessCommand(cmdInfo);
 		}
 

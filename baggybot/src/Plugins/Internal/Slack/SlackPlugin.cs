@@ -103,7 +103,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		private ChatUser ToChatUser(User user)
 		{
-			return new ChatUser(user.name, user.id, name: user.profile.first_name);
+			return new ChatUser(user.name, user.id, preferredName: user.profile.first_name);
 		}
 
 		private void MessageReceivedCallback(NewMessage message)
@@ -120,7 +120,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 			var user = socketClient.UserLookup[message.user];
 			var channel = GetChannel(message.channel);
 			var chatUser = ToChatUser(user);
-			var chatMessage = new ChatMessage(chatUser, channel, message.text);
+			var chatMessage = new ChatMessage(message.ts, chatUser, channel, message.text);
 			OnMessageReceived?.Invoke(chatMessage);
 		}
 

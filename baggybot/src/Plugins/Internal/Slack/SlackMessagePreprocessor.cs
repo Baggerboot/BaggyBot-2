@@ -6,10 +6,12 @@ namespace BaggyBot.Plugins.Internal.Slack
 	class SlackMessagePreprocessor : IMessagePreprocessor
 	{
 
-		public void ProcessIncomingMessage(ChatMessage message)
+		public ChatMessage ProcessIncomingMessage(ChatMessage message)
 		{
-			message.Message = FixUrls(message.Message);
-			message.Message = message.Message.Replace("&lt;", "<").Replace("&gt;", ">");
+			var body = message.Body;
+			body = FixUrls(body);
+			body = body.Replace("&lt;", "<").Replace("&gt;", ">");
+			return message.Edit(body);
 		}
 
 		private string FixUrls(string message)

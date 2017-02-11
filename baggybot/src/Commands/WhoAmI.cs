@@ -17,13 +17,13 @@ namespace BaggyBot.Commands
 		{
 			var user = command.Sender;
 			var sb = new StringBuilder();
-			if (user.Name == null)
+			if (user.PreferredName == null)
 			{
 				sb.Append($"Your nickname appears to be {user.Nickname}.");
 			}
 			else
 			{
-				sb.Append($"Your nickname appears to be {user.Nickname}, though you prefer to call yourself {user.Name}.");
+				sb.Append($"Your nickname appears to be {user.Nickname}, though you prefer to call yourself {user.PreferredName}.");
 			}
 			sb.Append($" Your unique userID is {user.UniqueId}, and you're posting in the channel \"{command.Channel.Name}\" ({command.Channel.Identifier}).");
 			command.ReturnMessage(sb.ToString());

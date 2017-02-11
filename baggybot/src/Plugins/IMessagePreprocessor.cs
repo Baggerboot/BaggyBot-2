@@ -7,7 +7,7 @@ namespace BaggyBot.Plugins
 	/// </summary>
 	public interface IMessagePreprocessor
 	{
-		void ProcessIncomingMessage(ChatMessage message);
+		ChatMessage ProcessIncomingMessage(ChatMessage message);
 		string ProcessOutgoingMessage(string message);
 	}
 }

@@ -34,23 +34,22 @@ namespace BaggyBot.MessagingInterface.Handlers
 			// Can't save statistics if we don't have a DB connection!
 			if (StatsDatabase.ConnectionState == ConnectionState.Closed) return;
 
-			var user = StatsDatabase.UpsertUser(message.Sender);
-			var userId = user.Id;
-			Logger.Log(this, $"Processing message for {message.Sender.Nickname} (uid: {userId})");
-			AddMessageToIrcLog(message, userId);
+			StatsDatabase.AddMessage(message);
+			var userId = message.Sender.DbUser.Id;
+
 
 			if (message.Action)
 				StatsDatabase.IncrementActions(userId);
 			else
 				StatsDatabase.IncrementLineCount(userId);
 
-			var words = WordTools.GetWords(message.Message);
+			var words = WordTools.GetWords(message.Body);
 			StatsDatabase.IncrementWordCount(userId, words.Count);
 
 			StatsDatabase.IncrementVar("global_line_count");
 			StatsDatabase.IncrementVar("global_word_count", words.Count);
-			GenerateRandomQuote(message, words, userId);
-			ProcessRandomEvents(message);
+			GenerateRandomQuote(ev, words);
+			ProcessRandomEvents(ev);
 			GetEmoticons(StatsDatabase, userId, words);
 			foreach (var word in words)
 			{
@@ -58,23 +57,24 @@ namespace BaggyBot.MessagingInterface.Handlers
 			}
 		}
 
-		private void AddMessageToIrcLog(ChatMessage message, int userId)
+		/*private void AddMessageToIrcLog(ChatMessage message, int userId)
 		{
 			StatsDatabase.AddIrcMessage(DateTime.Now, userId, message.Channel.Identifier, message.Sender.Nickname,
 				message.Action
-				? $"*{message.Sender.Nickname} {message.Message}*"
-				: message.Message);
-		}
+				? $"*{message.Sender.Nickname} {message.Body}*"
+				: message.Body);
+		}*/
 
-		private void ProcessRandomEvents(ChatMessage message)
+		private void ProcessRandomEvents(MessageEvent ev)
 		{
-			if (message.Sender.Nickname == "Ralph" && message.Message.ToLower().Contains("baggybot"))
+			var message = ev.Message;
+			if (message.Sender.Nickname == "Ralph" && message.Body.ToLower().Contains("baggybot"))
 			{
-				message.ReturnMessageCallback("Shut up you fool");
+				ev.ReturnMessageCallback("Shut up you fool");
 			}
-			else if (message.Message.ToLower().Contains("fuck you baggybot"))
+			else if (message.Body.ToLower().Contains("fuck you baggybot"))
 			{
-				message.ReturnMessageCallback("pls ;___;");
+				ev.ReturnMessageCallback("pls ;___;");
 			}
 		}
 
@@ -88,7 +88,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 			var cword = textOnly.Replace(lword, string.Empty);
 			if (word.StartsWith("http://") || word.StartsWith("https://"))
 			{
-				StatsDatabase.IncrementUrl(word, sender, message.Message);
+				StatsDatabase.IncrementUrl(word, sender, message.Body);
 			}
 			else
 			{
@@ -111,34 +111,35 @@ namespace BaggyBot.MessagingInterface.Handlers
 				}
 			}
 		}
-		private void GenerateRandomQuote(ChatMessage message, List<string> words, int userId)
+		private void GenerateRandomQuote(MessageEvent ev, List<string> words)
 		{
+			var message = ev.Message;
 			if (message.Action)
 			{
-				message.Message = "*" + message.Sender.Nickname + " " + message.Message + "*";
+				message = message.Edit("*" + message.Sender.Nickname + " " + message.Body + "*");
 			}
 
 			if (ControlVariables.SnagNextLine)
 			{
 				ControlVariables.SnagNextLine = false;
 				StatsDatabase.Snag(message);
-				message.ReturnMessageCallback("Snagged line on request.");
+				ev.ReturnMessageCallback("Snagged line on request.");
 				return;
 			}
 			if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nickname)
 			{
 				ControlVariables.SnagNextLineBy = null;
 				StatsDatabase.Snag(message);
-				message.ReturnMessageCallback("Snagged line on request.");
+				ev.ReturnMessageCallback("Snagged line on request.");
 				return;
 			}
 
-			TryTakeQuote(message, words, userId);
+			TryTakeQuote(ev, words);
 		}
 
-		private void TryTakeQuote(ChatMessage message, List<string> words, int userId)
+		private void TryTakeQuote(MessageEvent ev, List<string> words)
 		{
-			var last = StatsDatabase.GetLastQuotedLine(userId);
+			var last = StatsDatabase.GetLastQuotedLine(ev.Message.Sender.DbUser.Id);
 			if (last.HasValue)
 			{
 				if ((DateTime.Now - last.Value).Hours < ConfigManager.Config.Quotes.MinDelayHours)
@@ -159,28 +160,28 @@ namespace BaggyBot.MessagingInterface.Handlers
 					if (!allowSnagMessage || hideSnagMessage)
 					{ // Check if snag message should be displayed
 						Logger.Log(this, "Silently snagging this message");
-						StatsDatabase.Snag(message);
+						StatsDatabase.Snag(ev.Message);
 					}
 					else
 					{
 						var randint = rand.Next(snagMessages.Length * 2); // Determine whether to simply say "Snagged!" or use a randomized snag message.
 						if (randint < snagMessages.Length)
 						{
-							TakeQuote(message, snagMessages[randint]);
+							TakeQuote(ev, snagMessages[randint]);
 						}
 						else
 						{
-							TakeQuote(message, "Snagged!");
+							TakeQuote(ev, "Snagged!");
 						}
 					}
 				}
 			}
 		}
 
-		private void TakeQuote(ChatMessage message, string snagMessage)
+		private void TakeQuote(MessageEvent ev, string snagMessage)
 		{
-			message.ReturnMessageCallback(snagMessage);
-			StatsDatabase.Snag(message);
+			ev.ReturnMessageCallback(snagMessage);
+			StatsDatabase.Snag(ev.Message);
 		}
 	}
 }

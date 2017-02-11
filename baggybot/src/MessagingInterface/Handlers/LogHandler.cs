@@ -23,20 +23,12 @@ namespace BaggyBot.MessagingInterface.Handlers
 			// Display the message in the log
 			if (message.Action)
 			{
-				Logger.Log(this, $"*{message.Sender.Nickname} {message.Message}*", LogLevel.Message);
+				Logger.Log(this, $"*{message.Sender.Nickname} {message.Body}*", LogLevel.Message);
 			}
 			else
 			{
-				Logger.Log(this, $"#{message.Channel.Name} {message.Sender.Nickname}: {message.Message}", LogLevel.Message);
+				Logger.Log(this, $"#{message.Channel.Name} {message.Sender.Nickname}: {message.Body}", LogLevel.Message);
 			}
-			
-			// TODO: Process query console messages directly inside the commandhandler
-		}
-
-		internal void ProcessNotice(ChatUser sender, string notice)
-		{
-			Logger.Log(this, notice, LogLevel.Irc);
-			Client.StatsDatabase.AddIrcMessage(DateTime.Now, -1, CHANNEL_NOTICE, sender.Nickname, notice);
 		}
 
 		public override void HandleJoin(JoinEvent ev)
@@ -65,17 +57,11 @@ namespace BaggyBot.MessagingInterface.Handlers
 		public override void HandleNameChange(NameChangeEvent ev)
 		{
 			var message = $"{ev.OldName.Nickname} is now known as {ev.NewName.Nickname}";
-			Client.StatsDatabase.UpdateUser(ev.NewName);
 			DisplayEvent(message, ev.NewName, new ChatChannel(CHANNEL_NICK_CHANGE));
 		}
 		internal void DisplayEvent(string message, ChatUser sender, ChatChannel channel)
 		{
 			Logger.Log(this, message, LogLevel.Irc);
-			if (Client.StatsDatabase.ConnectionState == ConnectionState.Open)
-			{
-				var uid = Client.StatsDatabase.MapUser(sender).Id;
-				Client.StatsDatabase.AddIrcMessage(DateTime.Now, uid, channel.Identifier, "NOTICE", message);
-			}
 		}
 
 		public override void HandleQuit(QuitEvent ev)

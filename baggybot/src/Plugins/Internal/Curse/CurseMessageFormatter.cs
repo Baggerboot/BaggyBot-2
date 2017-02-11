@@ -29,9 +29,9 @@ namespace BaggyBot.Plugins.Internal.Curse
 			}
 		}
 
-		public override void ProcessIncomingMessage(ChatMessage message)
+		public override ChatMessage ProcessIncomingMessage(ChatMessage message)
 		{
-			
+			return message;
 		}
 	}
 }

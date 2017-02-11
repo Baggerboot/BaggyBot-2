@@ -2,20 +2,15 @@ namespace BaggyBot.MessagingInterface.Events
 {
 	public class KickedEvent
 	{
-		public KickedEvent(ChatClient client, ChatChannel channel, ChatUser kicker, string reason)
+		public ChatChannel Channel { get; }
+		public ChatUser Kicker { get; }
+		public string Reason { get; }
+
+		public KickedEvent(ChatChannel channel, ChatUser kicker, string reason)
 		{
-			Client = client;
 			Channel = channel;
 			Kicker = kicker;
 			Reason = reason;
 		}
-
-		public ChatClient Client { get; }
-
-		public ChatChannel Channel { get; }
-
-		public ChatUser Kicker { get; }
-
-		public string Reason { get; }
 	}
 }

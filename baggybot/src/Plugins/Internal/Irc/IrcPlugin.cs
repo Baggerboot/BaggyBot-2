@@ -73,7 +73,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		private void MessageReceivedHandler(IrcMessage message)
 		{
-			OnMessageReceived?.Invoke(new ChatMessage(ToChatUser(message.Sender), ToChatChannel(message.Channel), message.Message, message.Action));
+			OnMessageReceived?.Invoke(new ChatMessage(DateTime.Now, ToChatUser(message.Sender), ToChatChannel(message.Channel), message.Message, message.Action));
 		}
 
 		private ChatChannel ToChatChannel(string name)

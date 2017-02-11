@@ -31,38 +31,32 @@ namespace BaggyBot.MessagingInterface
 		private readonly Plugin plugin;
 		internal StatsDatabaseManager StatsDatabase { get; }
 
-		internal ChatClient(Plugin plugin, ServerCfg serverConfiguration)
+		internal ChatClient(Plugin plugin, ServerCfg configuration)
 		{
 			this.plugin = plugin;
-			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(serverConfiguration.Backend));
+			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(configuration.Backend));
 
 			var handlers = new List<ChatClientEventHandler>
 			{
-				new LogHandler {Client = this},
-				new StatsHandler {Client = this},
-				new AdministrationHandler {Client = this},
-				new CommandHandler {Client = this}
+				// This handler binds ChatUsers to database users and should therefore run first
+				new BindHandler(),
+				// Logs client events to stdout and optionally the log file
+				new LogHandler(),
+				// Generates statistics
+				new StatsHandler(),
+				// Performs channel-administrative actions
+				new AdministrationHandler(),
+				// Processes commands
+				new CommandHandler()
 			};
 			foreach (var handler in handlers)
 			{
+				handler.BindClient(this);
 				handler.Initialise();
 			}
 			var eventManager = new ChatClientEventManager(handlers);
 
 			AttachEventHandlers(eventManager);
-		}
-
-		private void AttachEventHandlers(ChatClientEventManager eventManager)
-		{
-			plugin.OnMessageReceived += message => eventManager.HandleMessage(new MessageEvent(this, message,
-				reply => Reply(message.Channel, message.Sender, reply),
-				reply => SendMessage(message.Channel, reply)));
-			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(this, oldName, newName));
-			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(this, kickee, channel, kicker, reason));
-			plugin.OnKicked += (channel, kicker, reason) => eventManager.HandleKicked(new KickedEvent(this, channel, kicker, reason));
-			plugin.OnJoin += (user, channel) => eventManager.HandleJoin(new JoinEvent(this, user, channel));
-			plugin.OnPart += (user, channel) => eventManager.HandlePart(new PartEvent(this, user, channel));
-			plugin.OnQuit += (user, reason) => eventManager.HandleQuit(new QuitEvent(this, user, reason));
 		}
 
 		/// <summary>
@@ -84,6 +78,19 @@ namespace BaggyBot.MessagingInterface
 				Logger.LogException(this, e, "trying to connect to the database");
 			}
 			return sqlConnector;
+		}
+
+		private void AttachEventHandlers(ChatClientEventManager eventManager)
+		{
+			plugin.OnMessageReceived += message => eventManager.HandleMessage(new MessageEvent(message,
+				reply => Reply(message.Channel, message.Sender, reply),
+				reply => SendMessage(message.Channel, reply)));
+			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(oldName, newName));
+			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(kickee, channel, kicker, reason));
+			plugin.OnKicked += (channel, kicker, reason) => eventManager.HandleKicked(new KickedEvent(channel, kicker, reason));
+			plugin.OnJoin += (user, channel) => eventManager.HandleJoin(new JoinEvent(user, channel));
+			plugin.OnPart += (user, channel) => eventManager.HandlePart(new PartEvent(user, channel));
+			plugin.OnQuit += (user, reason) => eventManager.HandleQuit(new QuitEvent(user, reason));
 		}
 
 		public bool Validate(ChatUser user)

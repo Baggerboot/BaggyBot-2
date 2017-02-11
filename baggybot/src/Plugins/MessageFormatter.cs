@@ -39,7 +39,7 @@ namespace BaggyBot.Plugins
 		/// Handles an incoming message from the server. Should translate any server-specific formatting codes
 		/// to <see cref="Frm"/> formatting codes.
 		/// </summary>
-		public abstract void ProcessIncomingMessage(ChatMessage message);
+		public abstract ChatMessage ProcessIncomingMessage(ChatMessage message);
 
 		public string ProcessOutgoingMessage(string message)
 		{

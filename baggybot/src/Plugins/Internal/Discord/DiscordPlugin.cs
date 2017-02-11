@@ -38,7 +38,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 				{
 					var user = ToChatUser(e.User);
 					var channel = ToChatChannel(e.Channel);
-					OnMessageReceived?.Invoke(new ChatMessage(user, channel, e.Message.Text));
+					OnMessageReceived?.Invoke(new ChatMessage(e.Message.Timestamp, user, channel, e.Message.Text));
 				}
 			};
 		}
@@ -49,7 +49,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 		}
 		private ChatUser ToChatUser(User discordUser)
 		{
-			return new ChatUser(discordUser.Name, discordUser.Id.ToString(), name: discordUser.Nickname);
+			return new ChatUser(discordUser.Name, discordUser.Id.ToString(), preferredName: discordUser.Nickname);
 		}
 
 		public override void Disconnect()

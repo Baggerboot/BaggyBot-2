@@ -47,7 +47,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 		{
 			var chatChannel = new ChatChannel(message.ConversationID, channel.GroupTitle);
 			var sender = new ChatUser(message.SenderName, message.SenderID.ToString());
-			var msg = new ChatMessage(sender, chatChannel, message.Body);
+			var msg = new ChatMessage(message.Timestamp, sender, chatChannel, message.Body);
 			OnMessageReceived?.Invoke(msg);
 		}
 

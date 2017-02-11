@@ -1,13 +1,19 @@
-﻿using BaggyBot.Database;
+﻿using System;
+using BaggyBot.Database;
 using BaggyBot.MessagingInterface.Events;
 
 namespace BaggyBot.MessagingInterface.Handlers
 {
 	public abstract class ChatClientEventHandler
 	{
-		internal ChatClient Client { get; set; }
+		internal ChatClient Client { get; private set; }
 		internal StatsDatabaseManager StatsDatabase => Client.StatsDatabase;
-		
+
+		internal void BindClient(ChatClient chatClient)
+		{
+			if(Client != null) throw new InvalidOperationException("Client has already been bound.");
+			Client = chatClient;
+		}
 
 		public virtual void HandleMessage(MessageEvent ev)
 		{

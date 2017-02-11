@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using BaggyBot.Configuration;
 using BaggyBot.Database.Model;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
 using LinqToDB;
+using LinqToDB.Mapping;
 
 namespace BaggyBot.Database
 {
@@ -28,13 +30,9 @@ namespace BaggyBot.Database
 
 		public IEnumerable<string> GetTableNames()
 		{
-			return
-				typeof(SqlConnector).GetProperties()
-					.Where(p => p.PropertyType.Name == "ITable`1")
-					.Select(p => p.PropertyType.GenericTypeArguments.First()
-						.CustomAttributes.First(attr => attr.AttributeType == typeof(LinqToDB.Mapping.TableAttribute))
-						.NamedArguments.First(arg => arg.MemberName == "Name")
-						.TypedValue.Value.ToString());
+			return typeof (SqlConnector).GetProperties()
+			                            .Where(p => p.PropertyType.Name == "ITable`1")
+			                            .Select(p => p.PropertyType.GetCustomAttribute<TableAttribute>().Name);
 		}
 
 		private void Update<T>(T match) where T : Poco
@@ -153,7 +151,7 @@ namespace BaggyBot.Database
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 
 				// TODO: implement IRC user mapping
-				if (user.HasTemporallyUniqueId || true)
+				if (user.HasTemporallyUniqueId)
 				{
 					// The user's UniqueId is guaranteed to be correct, so we can simply match on that
 					var matches = sqlConnector.Users.Where(u => u.UniqueId == user.UniqueId).ToArray();
@@ -232,18 +230,22 @@ namespace BaggyBot.Database
 			lockObj.LockMessage = "None";
 		}
 
-		public void AddIrcMessage(DateTime time, int? sender, string channel, string nick, string message)
+		public void AddMessage(ChatMessage message)
 		{
+			var sender = MapUser(message.Sender);
+
 			lock (lockObj)
 			{
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 				var line = new IrcLog
 				{
-					SentAt = time,
-					SenderId = sender,
-					Channel = channel,
-					Nick = nick,
-					Message = message
+					SentAt = message.SentAt,
+					MessageType = MessageTypes.ChatMessage,
+					ChannelId = message.Channel.Identifier,
+					Channel =  message.Channel.Name,
+					SenderId = sender.Id,
+					Nick = message.Sender.Nickname,
+					Message = message.Body
 				};
 
 				sqlConnector.Insert(line);
@@ -305,7 +307,7 @@ namespace BaggyBot.Database
 				lockObj.LockMessage = MiscTools.GetCurrentMethod();
 				var uid = MapUser(message.Sender).Id;
 				var q = new Quote();
-				q.Text = message.Message;
+				q.Text = message.Body;
 				q.AuthorId = uid;
 				q.TakenAt = DateTime.Now;
 

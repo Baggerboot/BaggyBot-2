@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Cryptography;
 using BaggyBot.MessagingInterface;
+using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Plugins;
 
 namespace BaggyBot.Commands
@@ -78,15 +79,15 @@ namespace BaggyBot.Commands
 		/// constructed.</param>
 		/// <returns>A CommandArgs object generated from the supplied ChatMessage.
 		/// </returns>
-		public static CommandArgs FromMessage(string commandPrefix, ChatMessage message)
+		public static CommandArgs FromMessage(string commandPrefix, MessageEvent ev)
 		{
-			var line = message.Message.Substring(commandPrefix.Length);
+			var line = ev.Message.Body.Substring(commandPrefix.Length);
 			var args = line.Split(' ');
 			var command = args[0];
 			args = args.Skip(1).ToArray();
 
 			var cmdIndex = line.IndexOf(' ');
-			return new CommandArgs(command, args, message.Sender, message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), message.ReplyCallback, message.ReturnMessageCallback);
+			return new CommandArgs(command, args, ev.Message.Sender, ev.Message.Channel, cmdIndex == -1 ? null : line.Substring(cmdIndex + 1), ev.ReplyCallback, ev.ReturnMessageCallback);
 		}
 
 		/// <summary>

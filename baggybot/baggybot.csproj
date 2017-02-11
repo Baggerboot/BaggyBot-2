@@ -170,6 +170,7 @@
     <Compile Include="src\CommandParsing\LambdaLookup.cs" />
     <Compile Include="src\Commands\Diagnostics.cs" />
     <Compile Include="src\Configuration\Imgur.cs" />
+    <Compile Include="src\Database\Model\MessageTypes.cs" />
     <Compile Include="src\ExternalApis\Bing.cs" />
     <Compile Include="src\Commands\GoogleSearch.cs" />
     <Compile Include="src\Commands\ImageSearch.cs" />
@@ -193,6 +194,7 @@
     <Compile Include="src\Database\CorruptedDatabaseException.cs" />
     <Compile Include="src\Formatting\FormattingPosition.cs" />
     <Compile Include="src\Formatting\FormattingType.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\BindHandler.cs" />
     <Compile Include="src\MessagingInterface\Handlers\ChatClientEventHandler.cs" />
     <Compile Include="src\MessagingInterface\Handlers\ChatClientEventManager.cs" />
     <Compile Include="src\Formatting\Formatting.cs" />

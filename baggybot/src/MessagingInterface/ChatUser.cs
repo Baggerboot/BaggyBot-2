@@ -1,5 +1,6 @@
 ﻿
 using System;
+using BaggyBot.Database.Model;
 using BaggyBot.Plugins;
 
 namespace BaggyBot.MessagingInterface
@@ -20,16 +21,18 @@ namespace BaggyBot.MessagingInterface
 		// to the same user at any given point in the future. Defaults to true.
 		public bool HasTemporallyUniqueId { get; }
 
-		// The name field is a secondary field. It may contain a user's real name, but it may also contain a
+		// The PreferredName field is a secondary field. It may contain a user's real name, but it may also contain a
 		// 'second' nickname. If this field is set, BaggyBot will prefer it over [Nickname] when addressing the user.
 		// Therefore, if a user's real name is known, but that user prefers to be addressed by their nickname, this field
 		// should /not/ be set to their real name, but remain null.
-		public string Name { get; }
+		public string PreferredName { get; }
 
-		public string AddressableName => Name ?? Nickname;
+		public string AddressableName => PreferredName ?? Nickname;
+
+		public User DbUser { get; private set; }
 
 
-		public ChatUser(string nickname, string uniqueId, bool hasTemporallyUniqueId = true, string name = null)
+		public ChatUser(string nickname, string uniqueId, bool hasTemporallyUniqueId = true, string preferredName = null)
 		{
 			if(nickname == null) throw new ArgumentNullException(nameof(nickname));
 			if(uniqueId == null) throw new ArgumentNullException(nameof(uniqueId));
@@ -37,7 +40,13 @@ namespace BaggyBot.MessagingInterface
 			Nickname = nickname;
 			UniqueId = uniqueId;
 			HasTemporallyUniqueId = hasTemporallyUniqueId;
-			Name = name;
+			PreferredName = preferredName;
+		}
+
+		public void BindDbUser(User user)
+		{
+			if (DbUser == null) throw new InvalidOperationException("User has already been mapped.");
+			DbUser = user;
 		}
 
 		public override string ToString()
