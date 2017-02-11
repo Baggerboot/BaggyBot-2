@@ -56,14 +56,36 @@ namespace BaggyBot.Plugins.Internal.Irc
 			client = new IrcClient();
 			client.OnNetLibDebugLog += (sender, message) => Logger.Log(sender, "[NL#]" + message, LogLevel.Info);
 			client.OnMessageReceived += MessageReceivedHandler;
+			client.OnNickChange += NickChangeHandler;
+			client.OnQuit += QuitHandler;
 			serverCfg = config;
+		}
+
+		private void QuitHandler(IrcUser user, string reason)
+		{
+			OnQuit?.Invoke(ToChatUser(user), reason);
+		}
+
+		private void NickChangeHandler(IrcUser user, string newNick)
+		{
+			var newUser = new ChatUser(newNick, $"{newNick}!{user.Ident}@{user.Hostmask}");
+
+			OnNameChange?.Invoke(ToChatUser(user), newUser);
 		}
 
 		private void MessageReceivedHandler(IrcMessage message)
 		{
-			var sender = new ChatUser(message.Sender.Nick, message.Sender.ToString(), false);
-			var channel = new ChatChannel(message.Channel);
-			OnMessageReceived?.Invoke(new ChatMessage(sender, channel, message.Message, message.Action));
+			OnMessageReceived?.Invoke(new ChatMessage(ToChatUser(message.Sender), ToChatChannel(message.Channel), message.Message, message.Action));
+		}
+
+		private ChatChannel ToChatChannel(string name)
+		{
+			return new ChatChannel(name);
+		}
+
+		private ChatUser ToChatUser(IrcUser user)
+		{
+			return new ChatUser(user.Nick, $"{user.Nick}!{user.Ident}@{user.Hostmask}", false);
 		}
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
@@ -192,9 +214,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 			}
 			return true;
 		}
-
-
-
+		
 		/// <summary>
 		/// Custom code for checking whether a user has registered with NickServ. Ugly, but it works.
 		/// </summary>
@@ -254,7 +274,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public override void Disconnect()
 		{
-			throw new NotImplementedException();
+			client.Disconnect();
 		}
 	}
 }
