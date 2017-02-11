@@ -4,7 +4,7 @@ using LinqToDB.Mapping;
 namespace BaggyBot.Database.Model
 {
 	[Table(Name = "chat_log")]
-	public class IrcLog : Poco
+	public class ChatLog : Poco
 	{
 		[Column(Name = "id"), PrimaryKey, Identity]
 		public int Id { get; set; }
@@ -44,7 +44,7 @@ namespace BaggyBot.Database.Model
 
 		public override string ToString()
 		{
-			return $"[{Channel}] <{Nick}>: {Message}";
+			return $"[{Channel}] {Nick}: {Message}";
         }
 	}
 }

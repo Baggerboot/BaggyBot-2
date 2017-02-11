@@ -20,7 +20,7 @@ namespace BaggyBot.Database
 		public ITable<UserCredential> UserCredentials { get; private set; }
 		public ITable<UserStatistic> UserStatistics { get; private set; }
 		public ITable<UsedEmoticon> Emoticons { get; private set; }
-		public ITable<IrcLog> IrcLog { get; private set; }
+		public ITable<ChatLog> ChatLog { get; private set; }
 		public ITable<KeyValuePair> KeyValuePairs { get; private set; }
 		public ITable<Quote> Quotes { get; private set; }
 		public ITable<UsedWord> Words { get; private set; }
@@ -78,7 +78,7 @@ namespace BaggyBot.Database
 			connection.DropTable<LinkedUrl>();
 			connection.DropTable<User>();
 			connection.DropTable<UsedWord>();
-			connection.DropTable<IrcLog>();
+			connection.DropTable<ChatLog>();
 			connection.DropTable<Metadata>();
 			connection.DropTable<MiscData>();
 		}
@@ -93,7 +93,7 @@ namespace BaggyBot.Database
 			connection.CreateTable<LinkedUrl>();
 			connection.CreateTable<User>();
 			connection.CreateTable<UsedWord>();
-			connection.CreateTable<IrcLog>();
+			connection.CreateTable<ChatLog>();
 			connection.CreateTable<Metadata>();
 			connection.CreateTable<MiscData>();
 		}
@@ -179,7 +179,7 @@ namespace BaggyBot.Database
 			LinkedUrls = connection.GetTable<LinkedUrl>();
 			Users = connection.GetTable<User>();
 			Words = connection.GetTable<UsedWord>();
-			IrcLog = connection.GetTable<IrcLog>();
+			ChatLog = connection.GetTable<ChatLog>();
 			MiscData = connection.GetTable<MiscData>();
 
 			try
@@ -192,7 +192,7 @@ namespace BaggyBot.Database
 				LinkedUrls.FirstOrDefault();
 				Users.FirstOrDefault();
 				Words.FirstOrDefault();
-				IrcLog.FirstOrDefault();
+				ChatLog.FirstOrDefault();
 				MiscData.FirstOrDefault();
 			}
 			catch (Exception e)

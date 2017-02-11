@@ -169,7 +169,9 @@
   <ItemGroup>
     <Compile Include="src\CommandParsing\LambdaLookup.cs" />
     <Compile Include="src\Commands\Diagnostics.cs" />
+    <Compile Include="src\Commands\DisabledCommandAttribute.cs" />
     <Compile Include="src\Configuration\Imgur.cs" />
+    <Compile Include="src\Database\DatabaseManager.cs" />
     <Compile Include="src\Database\Model\MessageTypes.cs" />
     <Compile Include="src\ExternalApis\Bing.cs" />
     <Compile Include="src\Commands\GoogleSearch.cs" />
@@ -260,7 +262,7 @@
     <Compile Include="src\Database\Model\MiscData.cs" />
     <Compile Include="src\Database\Model\Poco.cs" />
     <Compile Include="src\Database\Model\UsedEmoticon.cs" />
-    <Compile Include="src\Database\Model\IrcLog.cs" />
+    <Compile Include="src\Database\Model\ChatLog.cs" />
     <Compile Include="src\Database\Model\KeyValuePair.cs" />
     <Compile Include="src\Database\Model\Quote.cs" />
     <Compile Include="src\Database\Model\LinkedUrl.cs" />

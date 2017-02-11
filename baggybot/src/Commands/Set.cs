@@ -1,4 +1,5 @@
 ﻿using System;
+using BaggyBot.CommandParsing;
 using BaggyBot.Database;
 using BaggyBot.Database.Model;
 
@@ -10,54 +11,51 @@ namespace BaggyBot.Commands
 		public override string Name => "set";
 		public override string Usage => "<property> [key] <value>";
 		public override string Description => "Sets the value of a property, or the value of a key belonging to that property.";
-		
+
 		public override void Use(CommandArgs command)
 		{
-			if (command.Args.Length < 3)
-			{
-				command.Reply("Usage: -set <property> [key] <value>");
-				return;
-			}
-			switch (command.Args[0])
+			var parser = new CommandParser(new Operation())
+				.AddOperation("name", new Operation()
+					.AddFlag("uid", 'u')
+					.AddArgument("match"))
+				.AddOperation("cfg", new Operation()
+					.AddArgument("key")
+					.AddRestArgument("value"));
+
+			var cmd = parser.Parse(command.FullArgument);
+
+			switch (cmd.OperationName)
 			{
 				case "name":
-					int uid;
-					User user;
-					if (int.TryParse(command.Args[1], out uid))
-					{
-						user = StatsDatabase.GetUserById(uid);
-					}
-					else
-					{
-						user = StatsDatabase.GetUserByNickname(command.Args[1]);
-					}
-					user.AddressableNameOverride = command.Args[2];
-					StatsDatabase.UpdateUser(user);
-					command.Reply("Done.");
-
+					SetName(cmd.Arguments["match"], cmd.Flags["uid"], cmd.RestArgument);
+					command.Reply("Done");
 					break;
-				case "-s":
-					/*string data;
-					if (command.Args.Length > 3)
-					{
-						data = string.Join(" ", command.Args.Skip(2));
-					}
-					else {
-						data = command.Args[2];
-					}*/
-
-					throw new NotImplementedException("Runtime modification of the settings file is not supported yet.");
-
-				//TODO: Allow runtime modification of settings file
-				/*if (Settings.Instance.SettingExists(command.Args[1])) {
-					command.Reply(command.Args[1] + " set to " + data);
-				} else {
-					command.ReturnMessage("New key \"{0}\" created. Value set to {1}", command.Args[1], data);
-				}*/
+				case "cfg":
+					SetCfg();
+					break;
 				default:
-					command.ReturnMessage($"The property \"{command.Args[0]}\" does not exist.");
+					InformUsage(command);
 					break;
 			}
+		}
+		private void SetName(string match, bool matchIsUid, string name)
+		{
+			User user;
+			if (matchIsUid)
+			{
+				user = StatsDatabase.GetUserById(int.Parse(match));
+			}
+			else
+			{
+				user = StatsDatabase.GetUserByNickname(match);
+			}
+			user.AddressableNameOverride = name.Trim();
+			StatsDatabase.UpdateUser(user);
+		}
+
+		private void SetCfg()
+		{
+			
 		}
 	}
 }

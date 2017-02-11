@@ -96,7 +96,22 @@ namespace BaggyBot.MessagingInterface
 		public bool Validate(ChatUser user)
 		{
 			Logger.Log(null, "Validating user");
-			return Operators.Any(op => StatsDatabase.Validate(user, op));
+			return Operators.Any(op => Validate(user, op));
+		}
+
+		private bool Validate(ChatUser user, Operator op)
+		{
+			Func<string, string, bool> match = (input, reference) => reference.Equals("*") || input.Equals(reference);
+
+			var nickM = match(user.Nickname, op.Nick);
+			var uniqueIdM = match(user.UniqueId, op.UniqueId);
+			var uidM = true;
+			if (op.Uid != "*")
+			{
+				uidM = match(user.DbUser.Id.ToString(), op.Uid);
+			}
+
+			return nickM && uniqueIdM && uidM;
 		}
 
 

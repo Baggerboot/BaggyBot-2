@@ -15,7 +15,7 @@ namespace BaggyBot.Commands
 
 			var searchResults = StatsDatabase.FindQuote(search);
 
-			if (searchResults == null)
+			if (searchResults.Count == 0)
 			{
 				command.ReturnMessage("No such quote found.");
 				return;

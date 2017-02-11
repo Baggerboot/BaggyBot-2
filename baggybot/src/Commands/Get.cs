@@ -84,8 +84,10 @@ namespace BaggyBot.Commands
 			var users = StatsDatabase.GetUsersByNickname(result.Arguments["user"]);
 			if (users.Length == 0)
 				command.Reply($"I don't know a user with {result.Arguments["user"]} as their primary name");
+			else if(users.Length == 1)
+				command.Reply($"I found the following user for {result.Arguments["user"]}: {users[0]}");
 			else
-				command.Reply($"the user Id belonging to {result.Arguments["user"]} is {users[0].Id}");
+				command.Reply($"Multiple matches found for {result.Arguments["user"]}: {string.Join(", ", users.Select(u => u.Id))}");
 		}
 
 		private void GetUsers(CommandArgs command, OperationResult result)

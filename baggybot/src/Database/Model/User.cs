@@ -32,5 +32,7 @@ namespace BaggyBot.Database.Model
 		// and the user will be addressed by the name specified in this column instead.
 		[Column(Name = "addressable_name_override"), Nullable]
 		public string AddressableNameOverride { get; set; }
-	}
+
+		public override string ToString() => $"{AddressableName} (uid: {Id}, unique id: {UniqueId})";
+    }
 }

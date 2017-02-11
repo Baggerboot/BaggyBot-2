@@ -8,7 +8,7 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Name => "search";
-		public override string Usage => "[-n|--max-results] <search query>";
+		public override string Usage => "[-r|--max-results][-u|--uid][-n|--nickname] <search query>";
 		public override string Description => "Search the IRC backlog for a message. Limits the number of displayed results to 1 by default. Use -n (--max-results) to display more results.";
 		
 		public override void Use(CommandArgs command)
@@ -19,7 +19,11 @@ namespace BaggyBot.Commands
 				return;
 			}
 
-			var parser = new CommandParser(new Operation().AddKey("max-results", "1", 'n').AddRestArgument());
+			var parser = new CommandParser(new Operation()
+				.AddKey("max-results", 1, 'r')
+				.AddKey("uid", -1, 'u')
+				.AddKey("nickname", null, 'n')
+				.AddRestArgument());
 
 			var result = parser.Parse(command.FullArgument);
 			var numDisplayed = result.GetKey<int>("max-results");
@@ -28,9 +32,11 @@ namespace BaggyBot.Commands
 				command.Reply("only bot operators may request more than three results.");
 				return;
 			}
+			var uid = result.GetKey<int>("uid");
+			var nickname = result.Keys["nickname"];
 			var query = result.RestArgument;
 
-			var matches = StatsDatabase.FindLine(query);
+			var matches = StatsDatabase.FindLine(query, uid, nickname);
 			switch (matches.Count)
 			{
 				case 0:
@@ -40,15 +46,10 @@ namespace BaggyBot.Commands
 					command.Reply("1 match found: " + matches[0]);
 					break;
 				default:
-					if (numDisplayed == 1)
-						command.Reply($"{matches.Count} matches (1 displayed): {matches[0]}");
-					else
+					command.Reply($"{matches.Count} matches ({numDisplayed} displayed):");
+					foreach (var match in matches.Take(numDisplayed))
 					{
-						int matchNumber = 0;
-						foreach (var match in matches.Take(numDisplayed))
-						{
-							command.Reply($"match {++matchNumber} of {numDisplayed}: {match}");
-						}
+						command.ReturnMessage($"{match}");
 					}
 					break;
 			}

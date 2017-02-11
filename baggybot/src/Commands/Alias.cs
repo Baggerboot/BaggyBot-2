@@ -29,14 +29,14 @@ namespace BaggyBot.Commands
 			}
 		}
 
-		public string GetAlias(StatsDatabaseManager db, string key)
+		public string GetAlias(string key)
 		{
-			return db.GetMiscData("alias", key);
+			return StatsDatabase.GetMiscData("alias", key);
 		}
 
-		public bool ContainsKey(StatsDatabaseManager db, string key)
+		public bool ContainsKey(string key)
 		{
-			return db.MiscDataContainsKey("alias", key);
+			return StatsDatabase.MiscDataContainsKey("alias", key);
 		}
 	}
 }
