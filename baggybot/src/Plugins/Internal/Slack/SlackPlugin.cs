@@ -13,6 +13,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 	[ServerType("slack")]
 	public class SlackPlugin : Plugin
 	{
+#pragma warning disable CS0067
 		public override event Action<ChatMessage> OnMessageReceived;
 		public override event Action<ChatUser, ChatUser> OnNameChange;
 		public override event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
@@ -21,6 +22,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 		public override event Action<ChatUser, string> OnQuit;
 		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
 		public override event Action<ChatUser, ChatChannel> OnPartChannel;
+#pragma warning restore CS0067
 
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.IsConnected;
