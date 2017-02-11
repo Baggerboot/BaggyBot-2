@@ -14,8 +14,8 @@ namespace BaggyBot.Plugins
 		public abstract event Action<ChatUser, ChatUser> OnNameChange;
 		public abstract event Action<ChatUser, ChatChannel, ChatUser, string> OnKick;
 		public abstract event Action<ChatChannel, ChatUser, string> OnKicked;
-		public abstract event Action<ChatUser, ChatChannel> OnJoinChannel;
-		public abstract event Action<ChatUser, ChatChannel> OnPartChannel;
+		public abstract event Action<ChatUser, ChatChannel> OnJoin;
+		public abstract event Action<ChatUser, ChatChannel> OnPart;
 		public abstract event Action<string, Exception> OnConnectionLost;
 		public abstract event Action<ChatUser, string> OnQuit;
 
@@ -35,7 +35,7 @@ namespace BaggyBot.Plugins
 		/// <summary>
 		/// The operators defined for this client.
 		/// </summary>
-		public IReadOnlyList<Operator> Operators => ServerConfiguration.Operators;
+		public IReadOnlyList<Operator> Operators => Configuration.Operators;
 		/// <summary>
 		/// Any message formatters placed in here will format outgoing and incoming messages for this plugin.
 		/// </summary>
@@ -43,7 +43,7 @@ namespace BaggyBot.Plugins
 		/// <summary>
 		/// Gets the unique name of this server as defined in the configuration file.
 		/// </summary>
-		public string ServerName => ServerConfiguration.ServerName;
+		public string ServerName => Configuration.ServerName;
 
 		/// <summary>
 		/// Tries to look up user based by their username.
@@ -52,7 +52,7 @@ namespace BaggyBot.Plugins
 		/// </summary>
 		public abstract ChatUser FindUser(string username);
 		public abstract MessageSendResult SendMessage(ChatChannel target, string message);
-		public abstract void JoinChannel(ChatChannel channel);
+		public abstract void Join(ChatChannel channel);
 		public abstract void Part(ChatChannel channel, string reason = null);
 		public abstract void Quit(string reason);
 		public abstract bool Connect();
@@ -62,11 +62,11 @@ namespace BaggyBot.Plugins
 		/// <summary>
 		/// The server configuration as defined in the configuration file.
 		/// </summary>
-		private ServerCfg ServerConfiguration { get; }
+		protected ServerCfg Configuration { get; }
 
 		protected Plugin(ServerCfg config)
 		{
-			ServerConfiguration = config;
+			Configuration = config;
 		}
 
 		/// <summary>

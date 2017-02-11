@@ -19,8 +19,8 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override event Action<ChatChannel, ChatUser, string> OnKicked;
 		public override event Action<string, Exception> OnConnectionLost;
 		public override event Action<ChatUser, string> OnQuit;
-		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
-		public override event Action<ChatUser, ChatChannel> OnPartChannel;
+		public override event Action<ChatUser, ChatChannel> OnJoin;
+		public override event Action<ChatUser, ChatChannel> OnPart;
 #pragma warning restore CS0067
 
 		public override bool Connected => client.State == ConnectionState.Connected;
@@ -28,11 +28,9 @@ namespace BaggyBot.Plugins.Internal.Discord
 
 		private readonly DiscordClient client;
 		private Server server;
-		private readonly string token;
 
 		public DiscordPlugin(ServerCfg cfg) : base(cfg)
 		{
-			token = cfg.Password;
 			client = new DiscordClient();
 			client.MessageReceived += (s, e) =>
 			{
@@ -66,7 +64,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 
 		public override bool Connect()
 		{
-			client.Connect(token, TokenType.Bot).Wait();
+			client.Connect(Configuration.Password, TokenType.Bot).Wait();
 
 			while (!client.Servers.Any())
 			{
@@ -91,7 +89,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 			return MessageSendResult.Success;
 		}
 
-		public override void JoinChannel(ChatChannel channel) { }
+		public override void Join(ChatChannel channel) { }
 
 		public void Reconnect()
 		{

@@ -20,7 +20,7 @@ namespace BaggyBot.MessagingInterface
 		public ServerCapabilities Capabilities => plugin.Capabilities;
 
 		public bool Connect() => plugin.Connect();
-		public void JoinChannel(ChatChannel channel) => plugin.JoinChannel(channel);
+		public void JoinChannel(ChatChannel channel) => plugin.Join(channel);
 		public void Quit(string reason) => plugin.Quit(reason);
 		public void Part(ChatChannel channel, string reason = null) => plugin.Part(channel, reason);
 		public ChatChannel FindChannel(string name) => plugin.FindChannel(name);
@@ -60,8 +60,8 @@ namespace BaggyBot.MessagingInterface
 			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(this, oldName, newName));
 			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(this, kickee, channel, kicker, reason));
 			plugin.OnKicked += (channel, kicker, reason) => eventManager.HandleKicked(new KickedEvent(this, channel, kicker, reason));
-			plugin.OnJoinChannel += (user, channel) => eventManager.HandleJoin(new JoinEvent(this, user, channel));
-			plugin.OnPartChannel += (user, channel) => eventManager.HandlePart(new PartEvent(this, user, channel));
+			plugin.OnJoin += (user, channel) => eventManager.HandleJoin(new JoinEvent(this, user, channel));
+			plugin.OnPart += (user, channel) => eventManager.HandlePart(new PartEvent(this, user, channel));
 			plugin.OnQuit += (user, reason) => eventManager.HandleQuit(new QuitEvent(this, user, reason));
 		}
 

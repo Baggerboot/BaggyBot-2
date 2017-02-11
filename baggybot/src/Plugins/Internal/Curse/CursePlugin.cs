@@ -21,12 +21,12 @@ namespace BaggyBot.Plugins.Internal.Curse
 		public override event Action<ChatChannel, ChatUser, string> OnKicked;
 		public override event Action<string, Exception> OnConnectionLost;
 		public override event Action<ChatUser, string> OnQuit;
-		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
-		public override event Action<ChatUser, ChatChannel> OnPartChannel;
+		public override event Action<ChatUser, ChatChannel> OnJoin;
+		public override event Action<ChatUser, ChatChannel> OnPart;
 #pragma warning restore CS0067
 
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
-		public override bool Connected { get; }
+		public override bool Connected => client.Connected;
 
 		private readonly CurseClient client = new CurseClient();
 		private readonly NetworkCredential loginCredentials;
@@ -57,7 +57,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 			return MessageSendResult.Success;
 		}
 
-		public override void JoinChannel(ChatChannel channel)
+		public override void Join(ChatChannel channel)
 		{
 			throw new NotImplementedException();
 		}

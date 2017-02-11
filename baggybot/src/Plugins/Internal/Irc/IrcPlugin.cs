@@ -26,14 +26,13 @@ namespace BaggyBot.Plugins.Internal.Irc
 		public override event Action<ChatChannel, ChatUser, string> OnKicked;
 		public override event Action<string, Exception> OnConnectionLost;
 		public override event Action<ChatUser, string> OnQuit;
-		public override event Action<ChatUser, ChatChannel> OnJoinChannel;
-		public override event Action<ChatUser, ChatChannel> OnPartChannel;
+		public override event Action<ChatUser, ChatChannel> OnJoin;
+		public override event Action<ChatUser, ChatChannel> OnPart;
 #pragma warning restore CS0067
 
 		private readonly IrcClient client;
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.Connected;
-		private readonly ServerCfg serverCfg;
 
 		// These IRC commands are not handled in any way, as the information contained in them
 		// is not considered useful for the bot.
@@ -58,7 +57,6 @@ namespace BaggyBot.Plugins.Internal.Irc
 			client.OnMessageReceived += MessageReceivedHandler;
 			client.OnNickChange += NickChangeHandler;
 			client.OnQuit += QuitHandler;
-			serverCfg = config;
 		}
 
 		private void QuitHandler(IrcUser user, string reason)
@@ -102,7 +100,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 					throw new ArgumentOutOfRangeException();
 			}
 		}
-		public override void JoinChannel(ChatChannel channel)
+		public override void Join(ChatChannel channel)
 		{
 			client.JoinChannel(channel.Identifier);
 		}
@@ -153,14 +151,14 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public override bool Connect()
 		{
-			var host = serverCfg.Server;
-			var port = serverCfg.Port;
-			var nick = serverCfg.PluginSettings.Identity.Nick;
-			var ident = serverCfg.PluginSettings.Identity.Ident;
-			var realname = serverCfg.PluginSettings.Identity.RealName;
-			var password = serverCfg.Password;
-			var tls = serverCfg.UseTls;
-			var slackCompatMode = serverCfg.PluginSettings.CompatModes.Contains("slack");
+			var host = Configuration.Server;
+			var port = Configuration.Port;
+			var nick = Configuration.PluginSettings.Identity.Nick;
+			var ident = Configuration.PluginSettings.Identity.Ident;
+			var realname = Configuration.PluginSettings.Identity.RealName;
+			var password = Configuration.Password;
+			var tls = Configuration.UseTls;
+			var slackCompatMode = Configuration.PluginSettings.CompatModes.Contains("slack");
 
 			// The slack IRC server messes up domain names, because it prepends
 			// http://<domain> to everything that looks like it's a domain name
