@@ -27,6 +27,11 @@ namespace BaggyBot
 		// and a database upgrade is attempted if they do not match.
 		public const string DatabaseVersion = "2.0";
 		public const string ConfigVersion = "0.1";
+
+		// If the bot is started in update mode, a previous version has to be specified.
+		// The bot will then announce whether the update was a success or a failure.
+		// To determine this, the previous version is stored in here.
+		// If the bot is not started in update mode, the value of this field remains null.
 		public static string PreviousVersion { get; private set; }
 
 		public static bool QuitRequested
@@ -36,12 +41,6 @@ namespace BaggyBot
 		}
 
 		public static DateTime LastUpdate => MiscTools.RetrieveLinkerTimestamp();
-
-		// If the bot is started in update mode, a previous version has to be specified.
-		// The bot will then announce whether the update was a success or a failure.
-		// To determine this, the previous version is stored in here.
-		// If the bot is not started in update mode, the value of this field remains null.
-		private readonly string previousVersion;
 
 		public Bot()
 		{
@@ -110,9 +109,9 @@ namespace BaggyBot
 
 			OnPostConnect();
 
-			if (previousVersion != null && previousVersion != Version)
+			if (PreviousVersion != null && PreviousVersion != Version)
 			{
-				NotifyOperator($"Succesfully updated from version {previousVersion} to version {Version}");
+				NotifyOperator($"Succesfully updated from version {PreviousVersion} to version {Version}");
 			}
 			EnterMainLoop();
 		}
