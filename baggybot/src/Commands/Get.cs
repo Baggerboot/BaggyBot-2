@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BaggyBot.CommandParsing;
 using BaggyBot.Configuration;
 using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Tools;
+using Discord.API.Client.Rest;
 
 namespace BaggyBot.Commands
 {
@@ -25,7 +27,14 @@ namespace BaggyBot.Commands
 					.AddArgument("channel", command.Channel.Name))
 				.AddOperation("channels", new Operation())
 				.AddOperation("channel", new Operation()
-					.AddArgument("channel-id", command.Channel.Identifier));
+					.AddArgument("query", command.Channel.Identifier)
+					.AddFlag("by-name"))
+				.AddOperation("messages", new Operation()
+					.AddKey("channel", null, 'c')
+					.AddKey("channel-id", command.Channel.Identifier, 'C')
+					.AddKey("count", 5, 'n')
+					.AddKey("before", DateTime.MaxValue, 'b')
+					.AddKey("after", DateTime.MinValue, 'a'));
 
 			OperationResult result;
 			try
@@ -58,7 +67,27 @@ namespace BaggyBot.Commands
 				case "channels":
 					GetChannels(command);
 					break;
+				case "messages":
+					GetMessages(command, result);
+					break;
 			}
+		}
+
+		private void GetMessages(CommandArgs command, OperationResult result)
+		{
+			var channelId = result.Keys["channel-id"];
+			var channelName = result.Keys["channel"];
+			var count = result.GetKey<int>("count");
+			var before = result.GetKey<DateTime>("before");
+			var after = result.GetKey<DateTime>("after");
+
+			var channel = channelName != null ? Client.FindChannel(channelName) : Client.GetChannel(channelId);
+
+			foreach (var message in Client.GetBacklog(channel, before, after).Take(count))
+			{
+				command.ReturnMessage($"{message}");
+			}
+			command.Reply("Done");
 		}
 
 		private void GetChannels(CommandArgs command)
@@ -84,7 +113,7 @@ namespace BaggyBot.Commands
 			var users = StatsDatabase.GetUsersByNickname(result.Arguments["user"]);
 			if (users.Length == 0)
 				command.Reply($"I don't know a user with {result.Arguments["user"]} as their primary name");
-			else if(users.Length == 1)
+			else if (users.Length == 1)
 				command.Reply($"I found the following user for {result.Arguments["user"]}: {users[0]}");
 			else
 				command.Reply($"Multiple matches found for {result.Arguments["user"]}: {string.Join(", ", users.Select(u => u.Id))}");
@@ -106,9 +135,24 @@ namespace BaggyBot.Commands
 
 		private void GetChannel(CommandArgs command, OperationResult result)
 		{
-			var id = result.Arguments["channel-id"];
-			var channel = Client.GetChannel(id);
-			command.Reply($"{id} maps to {channel.Name} {(channel.IsPrivateMessage ? "(private message)" : "")}");
+			ChatChannel channel;
+			if (result.Flags["by-name"])
+			{
+				try
+				{
+					channel = Client.FindChannel(result.Arguments["query"]);
+				}
+				catch (ArgumentException e)
+				{
+					command.Reply(e.Message);
+					return;
+				}
+			}
+			else
+			{
+				channel = Client.GetChannel(result.Arguments["query"]);
+			}
+			command.Reply($"{result.Arguments["query"]} maps to {channel.Name}:{channel.Identifier} {(channel.IsPrivateMessage ? "(private message)" : "")}");
 		}
 	}
 }

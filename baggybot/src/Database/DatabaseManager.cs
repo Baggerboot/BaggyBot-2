@@ -33,12 +33,13 @@ namespace BaggyBot.Database
 
 		protected void Update<T>(T match) where T : Poco
 		{
-			if (Monitor.TryEnter(LockObj))
+			lock (LockObj)
 			{
-				// Ensure the caller called lock(LockObj)
-				throw new InvalidOperationException("Update() cannot be called from a method that does not lock the database.");
+				var previous = LockObj.LockMessage;
+				LockObj.LockMessage = MiscTools.GetCurrentMethod();
+				SqlConnector.Update(match);
+				LockObj.LockMessage = previous;
 			}
-			SqlConnector.Update(match);
 		}
 
 		public int ExecuteStatement(string statement)

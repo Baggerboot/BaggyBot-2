@@ -5,9 +5,11 @@ using LinqToDB.Data;
 using LinqToDB.DataProvider.PostgreSQL;
 using Npgsql;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using BaggyBot.Monitoring;
+using Mono.CSharp.Linq;
 
 namespace BaggyBot.Database
 {
@@ -49,6 +51,13 @@ namespace BaggyBot.Database
 			return connection.Insert(row);
 		}
 
+
+		public long InsertMultiple<T>(IEnumerable<T> rows)
+		{
+			var result = connection.BulkCopy(rows);
+			return result.RowsCopied;
+		}
+
 		public int InsertOrReplace<T>(T row)
 		{
 			return connection.InsertOrReplace(row);
@@ -70,22 +79,34 @@ namespace BaggyBot.Database
 
 		private void DropTables()
 		{
-			connection.DropTable<UserCredential>();
-			connection.DropTable<Quote>();
-			connection.DropTable<UserStatistic>();
-			connection.DropTable<UsedEmoticon>();
-			connection.DropTable<KeyValuePair>();
-			connection.DropTable<LinkedUrl>();
-			connection.DropTable<User>();
-			connection.DropTable<UsedWord>();
-			connection.DropTable<ChatLog>();
-			connection.DropTable<Metadata>();
-			connection.DropTable<MiscData>();
+			//connection.DropTable<UserCredential>();
+			TryDropTable<Quote>();
+			TryDropTable<UserStatistic>();
+			TryDropTable<UsedEmoticon>();
+			TryDropTable<KeyValuePair>();
+			TryDropTable<LinkedUrl>();
+			TryDropTable<User>();
+			TryDropTable<UsedWord>();
+			TryDropTable<ChatLog>();
+			TryDropTable<Metadata>();
+			TryDropTable<MiscData>();
+		}
+
+		private void TryDropTable<T>() where T:Poco
+		{
+			try
+			{
+				connection.DropTable<T>();
+			}
+			catch (Exception e) when (e.Message.ToLower().Contains("does not exist"))
+			{
+				// Failing to drop a table that is already deleted is not an error
+			}
 		}
 
 		private void CreateTables()
 		{
-			connection.CreateTable<UserCredential>();
+			//connection.CreateTable<UserCredential>();
 			connection.CreateTable<Quote>();
 			connection.CreateTable<UserStatistic>();
 			connection.CreateTable<UsedEmoticon>();
@@ -152,6 +173,7 @@ namespace BaggyBot.Database
 					Logger.Log(this, "Metadata table not found. A new tableset will be created.", LogLevel.Warning);
 					try
 					{
+						DropTables();
 						CreateTables();
 					}
 					catch (NpgsqlException f)

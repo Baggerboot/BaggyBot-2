@@ -109,7 +109,7 @@ namespace BaggyBot.MessagingInterface
 				{
 					foreach (var op in client.Operators)
 					{
-						client.SendMessage(new ChatChannel(op.Nick, true), message);
+						//client.SendMessage(new ChatChannel(op.Nick, true), message);
 					}
 				}
 			}

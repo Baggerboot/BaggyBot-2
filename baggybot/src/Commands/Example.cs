@@ -2,6 +2,7 @@
 
 namespace BaggyBot.Commands
 {
+	[DisabledCommand]
 	class Example : Command
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;

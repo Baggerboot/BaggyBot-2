@@ -8,7 +8,6 @@ namespace BaggyBot.MessagingInterface
 	{
 		public ChatChannel Channel { get; }
 		public ChatUser Sender { get; }
-		// TODO: rename to MessageText/Text/Body
 		public string Body { get; }
 		public bool Action { get; }
 		public DateTime SentAt { get; }
@@ -26,5 +25,7 @@ namespace BaggyBot.MessagingInterface
 		{
 			return new ChatMessage(SentAt, Sender, Channel, body, Action);
 		}
+
+		public override string ToString() => $"[{Channel.Name}] {Sender.AddressableName}: {Body}";
 	}
 }

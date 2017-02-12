@@ -102,6 +102,25 @@ namespace BaggyBot.Plugins.Internal.Curse
 			throw new NotImplementedException();
 		}
 
+		public override IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
+		{
+			const int max = 100;
+			int returned;
+			int iteration = 1;
+			var endTimestamp = before;
+			do
+			{
+				var messages = client.GetMessages(channel.Identifier, after, endTimestamp, max);
+				returned = messages.Length;
+				foreach (var message in messages)
+				{
+					var sender = new ChatUser(message.SenderName, message.SenderID.ToString());
+					yield return new ChatMessage(message.Timestamp, sender, channel, message.Body);
+				}
+				Logger.Log(this, $"Iteration {iteration++}: {messages.Length} messages. First: {messages[0].Timestamp} Last: {messages[messages.Length-1].Timestamp}");
+				endTimestamp = messages[messages.Length - 1].Timestamp;
 
+			} while (returned == max);
+		}
 	}
 }

@@ -132,5 +132,10 @@ namespace BaggyBot.MessagingInterface
 			message = plugin.MessageFormatters.Aggregate(message, (current, formatter) => formatter.ProcessOutgoingMessage(current));
 			return plugin.Reply(channel, user, message);
 		}
+
+		public IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
+		{
+			return plugin.GetBacklog(channel, before, after);
+		}
 	}
 }

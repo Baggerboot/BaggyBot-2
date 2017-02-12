@@ -40,7 +40,7 @@ namespace BaggyBot.Commands
 		{
 			var showDebugInfo = false;
 			var args = command.Args;
-			if (command.Args[0] == "-d")
+			if (command.Args.Length > 0 && command.Args[0] == "-d")
 			{
 				args = command.Args.Skip(1).ToArray();
 				showDebugInfo = true;

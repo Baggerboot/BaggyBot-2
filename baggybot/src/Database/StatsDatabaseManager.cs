@@ -52,7 +52,7 @@ namespace BaggyBot.Database
 		{
 			var matches = GetUsersByNickname(nickname);
 			if (matches.Length == 0) throw new ArgumentException($"No user with nickname \"{nickname}\" known.");
-			if (matches.Length == 1) return matches[1];
+			if (matches.Length == 1) return matches[0];
 			throw new ArgumentException($"Multiple matches found for nickname \"{nickname}\"");
 		}
 
@@ -206,6 +206,33 @@ namespace BaggyBot.Database
 			}
 			LockObj.LockMessage = "None";
 		}
+
+		public long Import(IEnumerable<ChatMessage> messages)
+		{
+			long count;
+			lock (LockObj)
+			{
+				LockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				var chatLogs = messages.Select(message => new ChatLog
+				{
+					Flags = "C_IMPORT",
+					SentAt = message.SentAt,
+					MessageType = MessageTypes.ChatMessage,
+					ChannelId = message.Channel.Identifier,
+					Channel = message.Channel.Name,
+					SenderId = message.Sender.DbUser?.Id,
+					Nick = message.Sender.Nickname,
+					Message = message.Body
+				});
+
+				count = SqlConnector.InsertMultiple(chatLogs);
+
+			}
+			LockObj.LockMessage = "None";
+			return count;
+		}
+
 
 		public List<ChatLog> FindLine(string query, int uid = -1, string nickname = null)
 		{
@@ -599,6 +626,7 @@ namespace BaggyBot.Database
 						select pair).Any();
 			}
 		}
+
 	}
 
 	internal class Topic

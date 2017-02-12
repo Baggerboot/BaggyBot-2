@@ -11,8 +11,14 @@ namespace BaggyBot.Database.Model
 
 		[Column(Name = "sent_at"), NotNull]
 		public DateTime SentAt { get; set; }
-		
+
+
+		[Column(Name = "message_type"), NotNull]
 		public string MessageType { get; set; }
+
+
+		[Column(Name = "flags")]
+		public string Flags { get; set; }
 
 		/// <summary>
 		/// The User Id of the sender, or null if the message was not sent by a user.

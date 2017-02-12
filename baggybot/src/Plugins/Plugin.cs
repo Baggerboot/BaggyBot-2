@@ -101,6 +101,15 @@ namespace BaggyBot.Plugins
 		}
 
 		/// <summary>
+		/// Should return all the messages in the given channel within the given time range.
+		/// Throws a NotImplementedException if the 
+		/// </summary>
+		public virtual IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
+		{
+			throw new NotSupportedException("This chat server does not support looking up old messages.");
+		} 
+
+		/// <summary>
 		/// Replies to a specific user in a channel.
 		/// </summary>
 		public virtual MessageSendResult Reply(ChatChannel channel, ChatUser user, string message)

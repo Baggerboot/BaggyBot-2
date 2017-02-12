@@ -10,7 +10,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 		{
 			if (StatsDatabase.ConnectionState != ConnectionState.Open) return user;
 
-			var dbUser = StatsDatabase.MapUser(user);
+			var dbUser = StatsDatabase.UpsertUser(user);
 			user.BindDbUser(dbUser);
 			return user;
 		}

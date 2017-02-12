@@ -45,7 +45,9 @@ namespace BaggyBot.MessagingInterface
 
 		public void BindDbUser(User user)
 		{
-			if (DbUser == null) throw new InvalidOperationException("User has already been mapped.");
+			// TODO: Rebinding should probably be possible, since user objects are supposed to be reused.
+			// The alternative is not to rebind the user at all, but this means nickname changes may not be handled correctly.
+			//if (DbUser == null) throw new InvalidOperationException("User has already been mapped.");
 			DbUser = user;
 		}
 
