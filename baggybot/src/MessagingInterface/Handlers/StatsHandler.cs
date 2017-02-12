@@ -9,6 +9,7 @@ using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
+using Discord.API.Client.Rest;
 
 namespace BaggyBot.MessagingInterface.Handlers
 {
@@ -28,33 +29,90 @@ namespace BaggyBot.MessagingInterface.Handlers
 		{
 			rand = new Random();
 		}
+
 		public override void HandleMessage(MessageEvent ev)
 		{
+			if (!Client.IncludeChannel(ev.Message.Channel))
+			{
+				Logger.Log(null, "Dropping message because its channel should be excluded.");
+				return;
+			}
+
 			var message = ev.Message;
 			// Can't save statistics if we don't have a DB connection!
 			if (StatsDatabase.ConnectionState == ConnectionState.Closed) return;
 
+			// Add the message to the chat log
 			StatsDatabase.AddMessage(message);
 			var userId = message.Sender.DbUser.Id;
 
-
-			if (message.Action)
-				StatsDatabase.IncrementActions(userId);
-			else
-				StatsDatabase.IncrementLineCount(userId);
-
+			// Increment actions/lines for the user
+			if (message.Action) StatsDatabase.IncrementActions(userId);
+			else StatsDatabase.IncrementLineCount(userId);
+			// Increment words for the user
 			var words = WordTools.GetWords(message.Body);
 			StatsDatabase.IncrementWordCount(userId, words.Count);
 
+			// Increment global line/word count
 			StatsDatabase.IncrementVar("global_line_count");
 			StatsDatabase.IncrementVar("global_word_count", words.Count);
-			GenerateRandomQuote(ev, words);
-			ProcessRandomEvents(ev);
-			GetEmoticons(StatsDatabase, userId, words);
+
+			// Update emoticon usage
+			foreach (var word in words.Where(word => Emoticons.List.Contains(word)))
+			{
+				StatsDatabase.IncrementEmoticon(word, userId);
+			}
+
+			// Process individual words
 			foreach (var word in words)
 			{
 				ProcessWord(message, word, userId);
 			}
+
+			// Quote grabbing
+			GenerateRandomQuote(ev, words);
+			ProcessRandomEvents(ev);
+
+		}
+
+		private struct UsedWord
+		{
+			public int SenderId { get; }
+			public string Word { get; }
+
+			public UsedWord(int senderId, string word)
+			{
+				SenderId = senderId;
+				Word = word;
+			}
+		}
+
+		public static void ProcessBatch(StatsDatabaseManager database, IEnumerable<ChatMessage> messages)
+		{
+
+
+			//var msgs = messages.ToList();
+			//var grouped = msgs.GroupBy(m => m.Sender.DbUser.Id).ToList();
+
+			//var userActions = grouped.ToDictionary(g => g.Key, g => g.Count(m => m.Action));
+			//var userLines = grouped.ToDictionary(g => g.Key, g => g.Count(m => !m.Action));
+			//var userWords = grouped.ToDictionary(g => g.Key, g => g.SelectMany(m => WordTools.GetWords(m.Body)));
+
+			//var allWords = msgs.SelectMany(m => WordTools.GetWords(m.Body).Select(w => new UsedWord(m.Sender.DbUser.Id, w))).ToList();
+			//var emoticons = allWords.Where(w => Emoticons.List.Contains(w.Word)).GroupBy(w => w.Word);
+
+
+			// Increment actions/lines for the user
+			//database.IncrementActions(userActions);
+			///database.IncrementLineCount(userLines);
+			//database.IncrementWordCount(userWords.ToDictionary(p => p.Key, p => p.Value.Count()));
+
+			// Increment global line/word count
+			//database.IncrementVar("global_line_count", msgs.Count);
+			//database.IncrementVar("global_word_count", allWords.Count);
+
+			// increment emoticons
+			//database.IncrementEmoticons(emoticons);
 		}
 
 		/*private void AddMessageToIrcLog(ChatMessage message, int userId)
@@ -92,8 +150,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 			}
 			else
 			{
-				var ignored = WordTools.IsIgnoredWord(cword) || cword.Length < 3;
-					StatsDatabase.IncrementWord(cword);
+				StatsDatabase.IncrementWord(cword);
 			}
 			if (WordTools.IsProfanity(lword))
 			{
@@ -101,16 +158,6 @@ namespace BaggyBot.MessagingInterface.Handlers
 			}
 		}
 
-		private void GetEmoticons(StatsDatabaseManager statsDb, int userId, IEnumerable<string> words)
-		{
-			foreach (var word in words)
-			{
-				if (Emoticons.List.Contains(word))
-				{
-					statsDb.IncrementEmoticon(word, userId);
-				}
-			}
-		}
 		private void GenerateRandomQuote(MessageEvent ev, List<string> words)
 		{
 			var message = ev.Message;

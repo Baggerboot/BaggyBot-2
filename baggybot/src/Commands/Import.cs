@@ -35,7 +35,7 @@ namespace BaggyBot.Commands
 
 			var messages = Client.GetBacklog(channel, cutoff, DateTime.MinValue).Select(m =>
 			{
-				StatsDatabase.UpsertUser(m.Sender);
+				m.Sender.BindDbUser(StatsDatabase.UpsertUser(m.Sender));
 				return m;
 			}).ToList();
 

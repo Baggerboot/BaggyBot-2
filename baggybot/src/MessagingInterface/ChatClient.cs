@@ -29,11 +29,13 @@ namespace BaggyBot.MessagingInterface
 
 
 		private readonly Plugin plugin;
+		private ServerCfg configuration;
 		internal StatsDatabaseManager StatsDatabase { get; }
 
 		internal ChatClient(Plugin plugin, ServerCfg configuration)
 		{
 			this.plugin = plugin;
+			this.configuration = configuration;
 			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(configuration.Backend));
 
 			var handlers = new List<ChatClientEventHandler>
@@ -136,6 +138,12 @@ namespace BaggyBot.MessagingInterface
 		public IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
 		{
 			return plugin.GetBacklog(channel, before, after);
+		}
+
+		public bool IncludeChannel(ChatChannel channel)
+		{
+			if (configuration.ExcludeChannels.Contains(channel.Identifier)) return false;
+			return configuration.IncludeChannels.Length == 0 || configuration.IncludeChannels.Contains(channel.Identifier);
 		}
 	}
 }

@@ -296,7 +296,7 @@
     <Compile Include="src\Commands\Part.cs" />
     <Compile Include="src\Commands\PermissionLevel.cs" />
     <Compile Include="src\Commands\Ping.cs" />
-    <Compile Include="src\Commands\RegenerateGraphs.cs" />
+    <Compile Include="src\Commands\Regenerate.cs" />
     <Compile Include="src\Commands\Resolve.cs" />
     <Compile Include="src\Commands\Say.cs" />
     <Compile Include="src\Commands\Set.cs" />

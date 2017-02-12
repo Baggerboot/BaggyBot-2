@@ -560,14 +560,14 @@ namespace BaggyBot.Database
 			}
 
 			Logger.Log(this, "finding user words");
-			var userWords = userSentences.SelectMany(sentence => sentence.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+			var userWords = userSentences.SelectMany(WordTools.GetWords);
 
 			Logger.Log(this, "grouping user words");
-			var userWordCount = userWords.GroupBy(word => word).ToDictionary(group => group.Key, group => group.Count());
+			var userWordCount = userWords.GroupBy(word => word).Where(g => g.Count() > 1).ToDictionary(group => group.Key, group => group.Count());
 
 			Logger.Log(this, "calculating usage difference of " + userWordCount.Count + " words");
 
-			var topics = userWordCount.Select(pair => new Topic(pair.Key, pair.Value, globalWordCount[pair.Key])).ToList();
+			var topics = userWordCount.Where(pair => globalWordCount.ContainsKey(pair.Key)).Select(pair => new Topic(pair.Key, pair.Value, globalWordCount[pair.Key])).ToList();
 
 			Logger.Log(this, "calculating average usage difference");
 			// First, we need to normalise each word, so that a score of 1 means it's used just as often as the average user uses it.
@@ -627,6 +627,38 @@ namespace BaggyBot.Database
 			}
 		}
 
+		public IEnumerable<ChatLog> GetMessages()
+		{
+			List<ChatLog> lines;
+			lock (LockObj)
+			{
+				LockObj.LockMessage = MiscTools.GetCurrentMethod();
+				lines = SqlConnector.ChatLog.Select(line => line).OrderBy(line => line.SentAt).ToList();
+				LockObj.LockMessage = "None";
+			}
+			return lines;
+		}
+
+		public void IncrementWords(Dictionary<string, int> usages)
+		{
+			lock (LockObj)
+			{
+				LockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				SqlConnector.Words.Delete(w => true);
+
+				//var currentUsages = SqlConnector.Words.Select( w => w);
+				var rows = usages.Select(pair => new UsedWord
+				{
+					Word = pair.Key,
+					Uses = pair.Value
+				}).OrderByDescending(w => w.Uses);
+
+				SqlConnector.InsertMultiple(rows);
+
+				LockObj.LockMessage = "None";
+			}
+		}
 	}
 
 	internal class Topic

@@ -14,6 +14,9 @@ namespace BaggyBot.Configuration
 		public int Port { get; set; } = 6667;
 		public bool UseTls { get; set; } = true;
 
+		public string[] IncludeChannels { get; set; } = new string[0];
+		public string[] ExcludeChannels { get; set; } = new string[0];
+
 		public Backend Backend { get; set; } = null;
 		public Operator[] Operators { get; set; } = new Operator[0];
 		public dynamic PluginSettings { get; set; }

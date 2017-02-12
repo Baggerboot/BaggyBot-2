@@ -17,7 +17,9 @@ namespace BaggyBot.Tools
 
 		public static List<string> GetWords(string message)
 		{
-			var words = message.Trim().Split(new [] {' '}, StringSplitOptions.RemoveEmptyEntries).ToList();
+			var words = message.Trim().Split(' ')
+				.Select(w => w.TrimEnd(',', '.'))
+				.Where(w => w != string.Empty).ToList();
 			return words;
 		}
 
