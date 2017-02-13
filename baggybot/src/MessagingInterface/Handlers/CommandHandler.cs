@@ -114,7 +114,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 			}
 		}
 
-		private bool ProcessCommand(CommandArgs cmdInfo)
+		private void ProcessCommand(CommandArgs cmdInfo)
 		{
 			// Inject bot information, but do not return.
 			if (new[] { "help", "about", "info", "baggybot", "stats" }.Contains(cmdInfo.Command.ToLower()) && cmdInfo.Args.Length == 0)
@@ -125,8 +125,6 @@ namespace BaggyBot.MessagingInterface.Handlers
 			if (commands.ContainsKey(cmdInfo.Command))
 			{
 				HandleExistingCommand(cmdInfo);
-				// The command exists, so the event should be consumed.
-				return true;
 			}
 			else
 			{
@@ -136,28 +134,18 @@ namespace BaggyBot.MessagingInterface.Handlers
 					Logger.Log(this, "Saving rem");
 					var newArgument = "say " + cmdInfo.FullArgument;
 					((Alias)commands["alias"]).Use(CommandArgs.FromPrevious("alias", newArgument, cmdInfo));
-					return true;
+					return;
 				}
 				// Or perhaps an alias?
 				if (((Alias)commands["alias"]).ContainsKey(cmdInfo.Command))
 				{
 					var aliasedCommand = ((Alias)commands["alias"]).GetAlias(cmdInfo.Command);
-					if (cmdInfo.FullArgument == null)
-					{
-						aliasedCommand = aliasedCommand.Replace(" $args", "");
-					}
-					else
-					{
-						aliasedCommand = aliasedCommand.Replace("$args", cmdInfo.FullArgument);
-					}
+					aliasedCommand = aliasedCommand.Replace(" $args", cmdInfo.FullArgument ?? "");
+
 					Logger.Log(this, $"Calling aliased command: -{aliasedCommand}");
 
 					ProcessCommand(CommandArgs.FromPrevious(aliasedCommand, cmdInfo));
-					return true;
 				}
-				// If it's neither a rem nor an alias, it's not a valid command,
-				// so we do not consume the event.
-				return false;
 			}
 		}
 
