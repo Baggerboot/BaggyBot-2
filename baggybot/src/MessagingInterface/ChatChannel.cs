@@ -26,5 +26,7 @@ namespace BaggyBot.MessagingInterface
 			Name = name;
 			Identifier = identifier;
 		}
+
+		public override string ToString() => $"{Name} ({Identifier}) {(IsPrivateMessage ? "(private message)" : "")}";
 	}
 }
