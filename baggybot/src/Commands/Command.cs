@@ -1,11 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BaggyBot.Database;
 using BaggyBot.Formatting;
 using BaggyBot.MessagingInterface;
 
 namespace BaggyBot.Commands
 {
-	internal abstract class Command
+	internal abstract class Command : IDisposable
 	{
 		public abstract PermissionLevel Permissions { get; }
 		public abstract string Name { get; }
@@ -19,6 +20,11 @@ namespace BaggyBot.Commands
 		public void InformUsage(CommandArgs cmd)
 		{
 			cmd.Reply($"usage: {Frm.M}{Bot.CommandIdentifiers.First()}{cmd.Command} {Usage}{Frm.M} -- {Description}");
+		}
+
+		public virtual void Dispose()
+		{
+			
 		}
 	}
 }

@@ -18,7 +18,7 @@ namespace BaggyBot.Commands
 		public override string Name => "convert";
 		public override string Usage => "<amount> <ISO Currency Code> [to] <ISO Currency Monospace>";
 		public override string Description => "Converts the value of a given amount of money from one currency to another.";
-		private Timer timer;
+		private readonly Timer timer;
 		private Dictionary<string, decimal> exchangeRates;
 		private const int MAX_LOOKUP_ATTEMPTS = 5;
 
@@ -118,5 +118,10 @@ namespace BaggyBot.Commands
 			}
 		}
 
+		public override void Dispose()
+		{
+			base.Dispose();
+			timer.Dispose();
+		}
 	}
 }

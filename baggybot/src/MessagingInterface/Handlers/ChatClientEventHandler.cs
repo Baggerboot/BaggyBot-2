@@ -4,7 +4,7 @@ using BaggyBot.MessagingInterface.Events;
 
 namespace BaggyBot.MessagingInterface.Handlers
 {
-	public abstract class ChatClientEventHandler
+	public abstract class ChatClientEventHandler : IDisposable
 	{
 		internal ChatClient Client { get; private set; }
 		internal StatsDatabaseManager StatsDatabase => Client.StatsDatabase;
@@ -50,6 +50,11 @@ namespace BaggyBot.MessagingInterface.Handlers
 		}
 
 		public virtual void Initialise()
+		{
+			
+		}
+
+		public virtual void Dispose()
 		{
 			
 		}

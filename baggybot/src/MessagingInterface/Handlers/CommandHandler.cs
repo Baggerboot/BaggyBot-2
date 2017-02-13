@@ -160,5 +160,14 @@ namespace BaggyBot.MessagingInterface.Handlers
 				return false;
 			}
 		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			foreach (var command in commands)
+			{
+				command.Value.Dispose();
+			}
+		}
 	}
 }
