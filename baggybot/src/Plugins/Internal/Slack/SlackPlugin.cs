@@ -44,6 +44,11 @@ namespace BaggyBot.Plugins.Internal.Slack
 			MessageFormatters.Add(new SlackMessageFormatter());
 		}
 
+		public override ChatUser GetUser(string id)
+		{
+			return Users.First(u => u.UniqueId == id);
+		}
+
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
 			var ev = new ManualResetEvent(false);
@@ -88,8 +93,17 @@ namespace BaggyBot.Plugins.Internal.Slack
 											.Concat(socketClient.Groups.Select(ToChatChannel))
 											.Concat(socketClient.DirectMessages.Select(ToChatChannel))
 											.ToList();
-
-			Users = socketClient.Users.Select(ToChatUser).ToList();
+			
+			var usersReady = new SemaphoreSlim(0);
+			socketClient.GetUserList(response =>
+			{
+				Users = response.members.Select(ToChatUser).ToList();
+				usersReady.Release();
+			});
+			if (!usersReady.Wait(TimeSpan.FromSeconds(30)))
+			{
+				return false;
+			};
 
 			activityTimer = new Timer(state => socketClient.SendPresence(Presence.active), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 			return true;

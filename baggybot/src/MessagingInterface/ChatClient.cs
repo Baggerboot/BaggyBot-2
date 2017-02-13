@@ -145,5 +145,10 @@ namespace BaggyBot.MessagingInterface
 			if (configuration.ExcludeChannels.Contains(channel.Identifier)) return false;
 			return configuration.IncludeChannels.Length == 0 || configuration.IncludeChannels.Contains(channel.Identifier);
 		}
+
+		public ChatUser GetUser(string id)
+		{
+			return plugin.GetUser(id);
+		}
 	}
 }

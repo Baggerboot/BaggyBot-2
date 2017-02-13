@@ -86,6 +86,11 @@ namespace BaggyBot.Plugins.Internal.Irc
 			return new ChatUser(user.Nick, $"{user.Nick}!{user.Ident}@{user.Hostmask}", false);
 		}
 
+		public override ChatUser GetUser(string id)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
 			switch (client.SendMessage(target.Identifier, message))

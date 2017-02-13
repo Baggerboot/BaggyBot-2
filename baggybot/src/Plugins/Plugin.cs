@@ -51,6 +51,10 @@ namespace BaggyBot.Plugins
 		/// for instance because the username is user input.
 		/// </summary>
 		public abstract ChatUser FindUser(string username);
+		/// <summary>
+		/// Returns the user with the given ID.
+		/// </summary>
+		public abstract ChatUser GetUser(string id);
 		public abstract MessageSendResult SendMessage(ChatChannel target, string message);
 		public abstract void Join(ChatChannel channel);
 		public abstract void Part(ChatChannel channel, string reason = null);
@@ -81,7 +85,7 @@ namespace BaggyBot.Plugins
 		}
 
 		/// <summary>
-		/// Look up a channel by its ID
+		/// Returns the channel with the given ID.
 		/// </summary>
 		public ChatChannel GetChannel(string channelId)
 		{

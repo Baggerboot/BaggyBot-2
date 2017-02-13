@@ -82,6 +82,11 @@ namespace BaggyBot.Plugins.Internal.Discord
 			throw new ArgumentException("Ambiguous username");
 		}
 
+		public override ChatUser GetUser(string id)
+		{
+			return ToChatUser(server.GetUser(ulong.Parse(id)));
+		}
+
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
 			var channel = server.GetChannel(ulong.Parse(target.Identifier));

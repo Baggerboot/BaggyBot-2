@@ -51,6 +51,11 @@ namespace BaggyBot.Plugins.Internal.Curse
 			OnMessageReceived?.Invoke(msg);
 		}
 
+		public override ChatUser GetUser(string id)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
 			client.SendMessage(client.ChannelMap[target.Identifier], message);
