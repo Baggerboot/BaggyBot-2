@@ -123,7 +123,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public ChatUser DoWhoisCall(string nick)
 		{
-			var ircUser = client.Whois(nick);
+			//var ircUser = client.Whois(nick);
 			// TODO: create IRCUser subclass of ChatUser
 			throw new NotImplementedException();
 			//return new ChatUser(this, );
