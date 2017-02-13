@@ -23,6 +23,11 @@ namespace BaggyBot.Tools
 			}
 		}
 
+		public static string Format(this Exception e)
+		{
+			return $"{e.GetType().Name}: {e.Message}";
+		}
+
 		public static string Truncate(this string value, int maxLength)
 		{
 			if (string.IsNullOrEmpty(value)) return value;
