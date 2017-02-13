@@ -219,8 +219,9 @@ namespace BaggyBot.Commands
 			threads.Remove(Thread.CurrentThread);
 		}
 
-		public void Dispose()
+		public override void Dispose()
 		{
+			base.Dispose();
 			outputStreamReader.Dispose();
 		}
 	}
