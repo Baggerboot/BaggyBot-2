@@ -27,6 +27,8 @@ namespace BaggyBot.Plugins.Internal.Slack
 #pragma warning restore CS0067
 
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
+		public List<ChatUser> Users { get; protected set; }
+
 		public override bool Connected => socketClient.IsConnected;
 
 		private SlackSocketClient socketClient;
@@ -77,15 +79,17 @@ namespace BaggyBot.Plugins.Internal.Slack
 				socketReady.Release();
 			});
 			socketClient.OnMessageReceived += MessageReceivedCallback;
-			
+
 			if (!Task.WaitAll(new[] { clientReady.WaitAsync(), socketReady.WaitAsync() }, TimeSpan.FromSeconds(10)))
 			{
 				return false;
 			}
 			Channels = socketClient.Channels.Select(ToChatChannel)
-			                                .Concat(socketClient.Groups.Select(ToChatChannel))
-			                                .Concat(socketClient.DirectMessages.Select(ToChatChannel))
-			                                .ToList();
+											.Concat(socketClient.Groups.Select(ToChatChannel))
+											.Concat(socketClient.DirectMessages.Select(ToChatChannel))
+											.ToList();
+
+			Users = socketClient.Users.Select(ToChatUser).ToList();
 
 			activityTimer = new Timer(state => socketClient.SendPresence(Presence.active), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 			return true;
@@ -103,7 +107,23 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		private ChatUser ToChatUser(User user)
 		{
-			return new ChatUser(user.name, user.id, preferredName: user.profile.first_name);
+			return new ChatUser(user.name, user.id);
+		}
+
+		private ChatUser GetChatUser(User user)
+		{
+			var match = Users.FirstOrDefault(u => u.UniqueId == user.id);
+			if (match == null)
+			{
+				match = ToChatUser(user);
+				Users.Add(match);
+			}
+			return match;
+		}
+
+		private ChatMessage ToChatMessage(Message message)
+		{
+			return new ChatMessage(message.ts, GetChatUser(socketClient.UserLookup[message.user]), GetChannel(message.channel), message.text);
 		}
 
 		private void MessageReceivedCallback(NewMessage message)
@@ -119,7 +139,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 			}
 			var user = socketClient.UserLookup[message.user];
 			var channel = GetChannel(message.channel);
-			var chatUser = ToChatUser(user);
+			var chatUser = GetChatUser(user);
 			var chatMessage = new ChatMessage(message.ts, chatUser, channel, message.text);
 			OnMessageReceived?.Invoke(chatMessage);
 		}
@@ -139,7 +159,80 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		public override ChatUser FindUser(string name)
 		{
-			return ToChatUser(socketClient.Users.FirstOrDefault(u => u.name == name));
+			return GetChatUser(socketClient.Users.FirstOrDefault(u => u.name == name));
+		}
+
+		private ChatMessage[] GetMessages(ChatChannel channel, DateTime? before, DateTime? after, int count)
+		{
+			var semaphore = new SemaphoreSlim(0);
+			MessageHistory history = null;
+			switch (channel.Identifier[0])
+			{
+				case 'C':
+					{
+						var ch = socketClient.ChannelLookup[channel.Identifier];
+						socketClient.GetChannelHistory((res =>
+						{
+							history = res;
+							semaphore.Release();
+						}), ch, before, after, count);
+						break;
+					}
+
+				case 'G':
+					{
+						var gr = socketClient.GroupLookup[channel.Identifier];
+						socketClient.GetGroupHistory((res =>
+						{
+							history = res;
+							semaphore.Release();
+						}), gr, before, after, count);
+						break;
+					}
+				case 'D':
+					{
+						var dm = socketClient.DirectMessageLookup[channel.Identifier];
+						socketClient.GetDirectMessageHistory((res =>
+						{
+							history = res;
+							semaphore.Release();
+						}), dm, before, after, count);
+						break;
+					}
+				default:
+					throw new ArgumentException("Invalid channel ID");
+			}
+			if (semaphore.Wait(TimeSpan.FromSeconds(30)))
+			{
+				return history.messages.Select(m => new ChatMessage(m.ts, ToChatUser(socketClient.UserLookup[m.user]), channel, m.text)).ToArray();
+			}
+			else
+			{
+				throw new InvalidOperationException("Network connection lost");
+			}
+		}
+
+		public override IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
+		{
+			const int max = 100;
+			int returned;
+			int iteration = 1;
+			var endTimestamp = before;
+			do
+			{
+				DateTime? beginTimestamp = after;
+				if (after == DateTime.MinValue) beginTimestamp = null;
+
+				var messages = GetMessages(channel, endTimestamp, beginTimestamp, max);
+				returned = messages.Length;
+				foreach (var message in messages)
+				{
+					yield return message;
+				}
+				Logger.Log(this, $"Iteration {iteration++}: {messages.Length} messages. First: {messages[0].SentAt} Last: {messages[messages.Length - 1].SentAt}");
+				endTimestamp = messages[messages.Length - 1].SentAt;
+
+			} while (returned == max);
 		}
 	}
 }
