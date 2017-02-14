@@ -56,7 +56,8 @@ namespace BaggyBot.Commands
 			{
 				cite.Remove();
 			}
-			foreach (var tr in doc.DocumentNode.SelectNodes("//table[@class=\"infobox\"]/tr[td][th]"))
+			var nodes = doc.DocumentNode.SelectNodes("//table[@class=\"infobox\"]/tr[td][th]") ?? new HtmlNodeCollection(null);
+			foreach (var tr in nodes)
 			{
 				var th = tr.SelectSingleNode("th").InnerText;
 				var td = tr.SelectSingleNode("td").InnerText;
@@ -65,7 +66,6 @@ namespace BaggyBot.Commands
 			var firstParagraph = doc.DocumentNode.SelectSingleNode(".//p[1]");
 
 			return firstParagraph.InnerText;
-
 		}
 	}
 }

@@ -22,5 +22,14 @@ namespace BaggyBot.Plugins
 		/// characters (such as mathematical symbols).
 		/// </summary>
 		public bool SupportsSpecialCharacters { get; set; } = true;
+
+		/// <summary>
+		/// Attaching photos is supported.
+		/// </summary>
+		public bool CanAttachPictures { get; set; } = false;
+		/// <summary>
+		/// Photos should be re-uploaded to imgur before being attached.
+		/// </summary>
+		public bool RequireReupload { get; set; } = false;
 	}
 }
