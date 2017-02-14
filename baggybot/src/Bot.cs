@@ -17,12 +17,14 @@ namespace BaggyBot
 	public sealed partial class Bot : IDisposable
 	{
 		// Manages multiple chat clients by handling events and forwarding messages
-		private readonly ChatClientManager chatClientManager;
+		private readonly ChatClientManager chatClientManager = new ChatClientManager();
 		// Collects performance statistics
 		private readonly BotDiagnostics botDiagnostics;
+		// The main thread will wait for this semaphore to be signalled before stopping.
+		private static readonly SemaphoreSlim shutdownSemaphore = new SemaphoreSlim(0);
 
 		// Any message prefixed with this character will be interpreted as a command
-		public static string[] CommandIdentifiers = { "-", "/" };
+		public static IReadOnlyList<string> CommandIdentifiers = new[] { "-", "/" };
 		// Version number of the database. This is checked against the 'version' key in the metadata table,
 		// and a database upgrade is attempted if they do not match.
 		public const string DatabaseVersion = "2.0";
@@ -34,115 +36,116 @@ namespace BaggyBot
 		// If the bot is not started in update mode, the value of this field remains null.
 		public static string PreviousVersion { get; private set; }
 
-		public static bool QuitRequested
-		{
-			get;
-			private set;
-		}
-
 		public static DateTime LastUpdate => MiscTools.RetrieveLinkerTimestamp();
 
 		public Bot()
 		{
 			Logger.ClearLog();
 
-
-			//previousVersion = ConfigManager.Config.Metadata.BotVersion;
 			Console.Title = "BaggyBot Statistics Collector version " + Version;
 			Logger.Log(this, "Starting BaggyBot version " + Version, LogLevel.Info);
+
+			botDiagnostics = new BotDiagnostics(NotifyOperators);
 
 			// Hook up IRC Log warings, which notify the bot operator of warnings and errors being logged to the log file.
 			Logger.OnLogEvent += (message, level) =>
 			{
 				if (level == LogLevel.Error || level == LogLevel.Warning)
 				{
-					NotifyOperator("LOG WARNING/ERROR: " + message);
+					NotifyOperators("LOG WRN/ERR: " + message);
 				}
 			};
 
-			chatClientManager = new ChatClientManager();
-			botDiagnostics = new BotDiagnostics(this);
 		}
 
-		public void NotifyOperator(string message)
+		/// <summary>
+		/// Sends a notification to all operators of the bot.
+		/// </summary>
+		private void NotifyOperators(string message)
 		{
 			chatClientManager.NotifyOperators(message);
 		}
 
-		public void OnPostConnect()
-		{
-			botDiagnostics.StartPerformanceLogging();
-		}
-
-		public static void Shutdown()
-		{
-			QuitRequested = true;
-		}
-
-		public void Dispose()
-		{
-			botDiagnostics.Dispose();
-			chatClientManager.Dispose();
-		}
-
-		private void EnterMainLoop()
-		{
-			while (!QuitRequested)
-			{
-				Thread.Sleep(1000);
-			}
-			Logger.Log(this, "Preparing to shut down", LogLevel.Info);
-			chatClientManager.Disconnect("Shutting down");
-			chatClientManager.Dispose();
-			Logger.Log(this, "Disposed SQL server connection object", LogLevel.Info);
-			Logger.Dispose();
-			Console.WriteLine("Goodbye.");
-			Environment.Exit(0);
-		}
-
+		/// <summary>
+		/// Attempts to connect to the given servers.
+		/// </summary>
 		public void Connect(IEnumerable<ServerCfg> servers)
 		{
 			foreach (var server in servers)
 			{
-				TryConnect(server);
+				Connect(server);
 			}
-
-			OnPostConnect();
-
-			if (PreviousVersion != null && PreviousVersion != Version)
-			{
-				NotifyOperator($"Succesfully updated from version {PreviousVersion} to version {Version}");
-			}
-			EnterMainLoop();
+			PostConnect();
 		}
 
-		private void TryConnect(ServerCfg server)
+		/// <summary>
+		/// Tries to connect to a server by looking up the correct plugin for it,
+		/// and connecting that plugin to its server.
+		/// </summary>
+		private void Connect(ServerCfg server)
 		{
-			var intPlugins = Assembly.GetExecutingAssembly().GetTypes()
-			                              .Where(type => typeof(Plugin).IsAssignableFrom(type) && !type.IsAbstract)
-			                              .ToDictionary(type => type.GetCustomAttribute<ServerTypeAttribute>().ServerType);
+			var assembly = Assembly.GetExecutingAssembly();
+			var intPlugins = assembly.GetTypes()
+			                         .Where(type => typeof(Plugin).IsAssignableFrom(type) && !type.IsAbstract)
+			                         .ToDictionary(type => type.GetCustomAttribute<ServerTypeAttribute>().ServerType);
 
 			var extPlugins = new Dictionary<string, Type>();
 			if (Directory.Exists("plugins"))
 			{
 				extPlugins = Directory.GetFiles("plugins", "*.dll", SearchOption.TopDirectoryOnly)
-				                           .Select(file => Assembly.LoadFile(Path.GetFullPath(file)))
-				                           .SelectMany(asm => asm.GetExportedTypes()
-				                                                 .Where(type => typeof(Plugin).IsAssignableFrom(type) && !type.IsAbstract))
-				                           .ToDictionary(type => type.GetCustomAttribute<ServerTypeAttribute>().ServerType);
+				                      .Select(file => Assembly.LoadFile(Path.GetFullPath(file)))
+				                      .SelectMany(asm => asm.GetExportedTypes()
+				                                            .Where(type => typeof(Plugin).IsAssignableFrom(type) && !type.IsAbstract))
+				                      .ToDictionary(type => type.GetCustomAttribute<ServerTypeAttribute>().ServerType);
 			}
+			var serverType = server.ServerType;
 			Type pluginType;
-			if (intPlugins.TryGetValue(server.ServerType, out pluginType) || extPlugins.TryGetValue(server.ServerType, out pluginType))
+			if (intPlugins.TryGetValue(serverType, out pluginType) || extPlugins.TryGetValue(serverType, out pluginType))
 			{
 				chatClientManager.ConnectUsingPlugin(pluginType, server);
 			}
 			else
 			{
-				Logger.Log(this, $"Unable to connect to {server.ServerName}: no plugin of type {server.ServerType} found.");
+				Logger.Log(this, $"Unable to connect to {server.ServerName}: no plugin of type {serverType} found.");
 			}
 		}
 
-		public static void ShutdownNow()
+		private void PostConnect()
+		{
+			if (PreviousVersion != null && PreviousVersion != Version)
+			{
+				NotifyOperators($"Succesfully updated from version {PreviousVersion} to version {Version}");
+			}
+			botDiagnostics.StartPerformanceLogging();
+		}
+
+		public void AwaitShutdown()
+		{
+			// Wait for the semaphore to be signalled
+			shutdownSemaphore.Wait();
+			Logger.Log(this, "Preparing to shut down", LogLevel.Info);
+			chatClientManager.Disconnect("Shutting down");
+			Dispose();
+			Logger.Dispose();
+			Console.WriteLine("Goodbye.");
+			//Environment.Exit(0);
+		}
+
+				public void Dispose()
+		{
+			botDiagnostics.Dispose();
+			chatClientManager.Dispose();
+		}
+
+		/// <summary>
+		/// Signals the bot to shut down.
+		/// </summary>
+		internal static void Shutdown()
+		{
+			shutdownSemaphore.Release();
+		}
+
+		public static void ShutdownAfterMessage()
 		{
 			// If we're running on Windows, the application was most likely started by double-clicking the executable.
 			// This creates a command prompt window that will immediately disappear when the bot exits.
@@ -166,9 +169,9 @@ namespace BaggyBot
 				Console.BufferHeight = 200;
 			}
 
-			//AppDomain.CurrentDomain.AppendPrivatePath(@"plugins");
 			// TODO: verify that this is the correct way to append a directory to the private bin path
-			AppDomain.CurrentDomain.SetupInformation.PrivateBinPath = $"{AppDomain.CurrentDomain.SetupInformation.PrivateBinPath}{Path.PathSeparator}plugins";
+			var setupInformation = AppDomain.CurrentDomain.SetupInformation;
+			setupInformation.PrivateBinPath = $"{setupInformation.PrivateBinPath}{Path.PathSeparator}plugins";
 
 			var parser = new CommandParser(new Operation()
 				.AddKey("previous-version", 'p')
@@ -176,21 +179,21 @@ namespace BaggyBot
 				.AddKey("server", 's'));
 
 			var opts = parser.Parse(args);
-			PreviousVersion = opts.GetKey<string>("previous-version") ?? Version;
-			var server = opts.GetKey<string>("server");
+			PreviousVersion = opts.Keys["previous-version"] ?? Version;
+			var server = opts.Keys["server"];
 
-			var result = ConfigManager.Load(opts.GetKey<string>("config"));
+			var result = ConfigManager.Load(opts.Keys["config"]);
 			switch (result)
 			{
 				case ConfigManager.LoadResult.Success:
 					break;
 				case ConfigManager.LoadResult.NewFileCreated:
 					Logger.Log(null, "A new configuration file has been created, please fill it with the correct settings. BaggyBot will now exit.", LogLevel.Info);
-					ShutdownNow();
+					ShutdownAfterMessage();
 					break;
 				case ConfigManager.LoadResult.Failure:
-					Logger.Log(null, "Unable to load the configuration file. BaggyBot will now exit.");
-					ShutdownNow();
+					Logger.Log(null, "Unable to load the configuration file. BaggyBot will now exit.", LogLevel.Error);
+					ShutdownAfterMessage();
 					break;
 			}
 			Logger.UseColouredOutput = Colours.Windows;
@@ -205,6 +208,7 @@ namespace BaggyBot
 				{
 					bot.Connect(ConfigManager.Config.Servers.Where(s => s.ServerName == server));
 				}
+				bot.AwaitShutdown();
 			}
 		}
 	}

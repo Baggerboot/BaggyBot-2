@@ -15,9 +15,10 @@ namespace BaggyBot.Monitoring.Diagnostics
 		private Timer taskScheduler;
 		private PerformanceCounter pc;
 		private readonly PerformanceLogger performanceLogger;
-		public BotDiagnostics(Bot bot)
+
+		public BotDiagnostics(Action<string> notifyCallback)
 		{
-			AppDomain.CurrentDomain.UnhandledException += (sender, args) => HandleException(args, bot);
+			AppDomain.CurrentDomain.UnhandledException += (sender, args) => HandleException(args, notifyCallback);
 			if (ConfigManager.Config.LogPerformance)
 			{
 				performanceLogger = new PerformanceLogger(PerfLogFile);
@@ -31,13 +32,13 @@ namespace BaggyBot.Monitoring.Diagnostics
 			taskScheduler?.Dispose();
 		}
 
-		private void HandleException(UnhandledExceptionEventArgs args, Bot bot)
+		private void HandleException(UnhandledExceptionEventArgs args, Action<string> notifyCallback)
 		{
 			var e = (Exception)args.ExceptionObject;
-			HandleException(e, bot);
+			HandleException(e, notifyCallback);
 		}
 
-		private void HandleException(Exception e, Bot bot, int level = 0)
+		private void HandleException(Exception e, Action<string> notifyCallback, int level = 0)
 		{
 			var trace = new StackTrace(e, true);
 			var bottomFrame = trace.GetFrame(0);
@@ -48,21 +49,21 @@ namespace BaggyBot.Monitoring.Diagnostics
 			if (aggr != null)
 			{
 				var message = $"{indents}An unhandled AggregateException occurred in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()} - Sub-exceptions: ";
-				bot.NotifyOperator(message);
+				notifyCallback(message);
 				Logger.Log(this, message, LogLevel.Error);
 				foreach (var inner in aggr.InnerExceptions)
 				{
-					HandleException(inner, bot, ++level);
+					HandleException(inner, notifyCallback, ++level);
 				}
 			}
 			else
 			{
 				var message = $"{indents}An unhandled exception occured: {e.GetType().Name} - {e.Message} - in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()}";
-				bot.NotifyOperator(message);
+				notifyCallback(message);
 				Logger.Log(this, message, LogLevel.Error);
 				if (e.InnerException != null)
 				{
-					HandleException(e.InnerException, bot, ++level);
+					HandleException(e.InnerException, notifyCallback, ++level);
 				}
 				else
 				{
