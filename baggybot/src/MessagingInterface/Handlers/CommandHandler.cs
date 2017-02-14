@@ -131,9 +131,14 @@ namespace BaggyBot.MessagingInterface.Handlers
 				// This doesn't look like a valid command. Is it a rem being set?
 				if (cmdInfo.Command == "rem")
 				{
+					if (cmdInfo.Args.Length < 2)
+					{
+						cmdInfo.Reply("usage: rem <key> <message>");
+						return;
+					}
 					Logger.Log(this, "Saving rem");
-					var newArgument = "say " + cmdInfo.FullArgument;
-					((Alias)commands["alias"]).Use(CommandArgs.FromPrevious("alias", newArgument, cmdInfo));
+					var alias = $"{cmdInfo.Args[0]} say {string.Join(" ", cmdInfo.Args.Skip(1))}";
+					((Alias)commands["alias"]).Use(CommandArgs.FromPrevious("alias", alias, cmdInfo));
 					return;
 				}
 				// Or perhaps an alias?
