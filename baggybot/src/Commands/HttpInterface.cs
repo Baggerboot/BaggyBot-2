@@ -18,6 +18,7 @@ namespace BaggyBot.Commands
 			if (command.Args.Length == 0)
 			{
 				InformUsage(command);
+				return;
 			}
 			var parser = new CommandParser(new Operation()
 				.AddArgument("method", "GET")
