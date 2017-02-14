@@ -159,9 +159,15 @@ namespace BaggyBot.MessagingInterface
 			return plugin.GetUser(id);
 		}
 
+		public ChatUser FindUser(string nickname)
+		{
+			return plugin.FindUser(nickname);
+		}
+
 		public void Reconnect()
 		{
 			ConnectionLost?.Invoke("Manual reconnect.", null);
 		}
+
 	}
 }
