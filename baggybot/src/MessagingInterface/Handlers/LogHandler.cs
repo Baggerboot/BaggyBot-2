@@ -7,16 +7,6 @@ namespace BaggyBot.MessagingInterface.Handlers
 {
 	internal class LogHandler : ChatClientEventHandler
 	{
-		// Not all logged events can be accurately represented as messages that were sent to channels.
-		// In such cases, the channel name will instead be set to one of the following values.
-		// Events originating from users will be prefixed with USER_
-		// Events originating from the server will be prefixed with SERVER_
-		// All non-channel events will always start with @
-		private const string CHANNEL_MISC = "@MISC";
-		private const string CHANNEL_NOTICE = "@SERVER_NOTICE";
-		private const string CHANNEL_NICK_CHANGE = "@USER_NICK_CHANGE";
-		private const string CHANNEL_QUIT = "@USER_QUIT";
-
 		public override void HandleMessage(MessageEvent ev)
 		{
 			var message = ev.Message;
@@ -34,19 +24,19 @@ namespace BaggyBot.MessagingInterface.Handlers
 		public override void HandleJoin(JoinEvent ev)
 		{
 			var message = $"{ev.User} has joined {ev.Channel}";
-			DisplayEvent(message, ev.User, ev.Channel);
+			DisplayEvent(message);
 		}
 
 		public override void HandlePart(PartEvent ev)
 		{
 			var message = $"{ev.User} has left {ev.Channel}";
-			DisplayEvent(message, ev.User, ev.Channel);
+			DisplayEvent(message);
 		}
 
 		public override void HandleKick(KickEvent ev)
 		{
 			var message = $"{ev.Kickee} was kicked by {ev.Kicker.Nickname} from {ev.Channel} ({ev.Reason})";
-			DisplayEvent(message, ev.Kicker, ev.Channel);
+			DisplayEvent(message);
 		}
 
 		public override void HandleKicked(KickedEvent ev)
@@ -57,16 +47,16 @@ namespace BaggyBot.MessagingInterface.Handlers
 		public override void HandleNameChange(NameChangeEvent ev)
 		{
 			var message = $"{ev.OldName.Nickname} is now known as {ev.NewName.Nickname}";
-			DisplayEvent(message, ev.NewName, new ChatChannel(CHANNEL_NICK_CHANGE));
+			DisplayEvent(message);
 		}
-		internal void DisplayEvent(string message, ChatUser sender, ChatChannel channel)
+		internal void DisplayEvent(string message)
 		{
 			Logger.Log(this, message, LogLevel.Irc);
 		}
 
 		public override void HandleQuit(QuitEvent ev)
 		{
-			DisplayEvent(ev.User + " has quit (" + ev.Reason + ")", ev.User, new ChatChannel(CHANNEL_QUIT));
+			DisplayEvent(ev.User + " has quit (" + ev.Reason + ")");
 		}
 	}
 }

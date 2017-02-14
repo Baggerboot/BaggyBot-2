@@ -4,23 +4,24 @@ using BaggyBot.MessagingInterface.Handlers;
 
 namespace BaggyBot.MessagingInterface.Handlers
 {
+	/// <summary>
+	/// Binds database User objects to ChatUser objects.
+	/// Binding will not occur if there is no database connection.
+	/// </summary>
 	internal class BindHandler : ChatClientEventHandler
 	{
-		private ChatUser Bind(ChatUser user)
+		private void Bind(ChatUser user)
 		{
-			if (StatsDatabase.ConnectionState != ConnectionState.Open) return user;
+			if (StatsDatabase.ConnectionState != ConnectionState.Open) return;
 
 			var dbUser = StatsDatabase.UpsertUser(user);
 			user.BindDbUser(dbUser);
-			return user;
 		}
 
-		private ChatMessage Bind(ChatMessage message)
+		private void Bind(ChatMessage message)
 		{
 			Bind(message.Sender);
-			return message;
 		}
-
 
 		public override void HandleMessage(MessageEvent ev)
 		{
