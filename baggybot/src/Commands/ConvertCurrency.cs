@@ -16,7 +16,7 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.All;
 		public override string Name => "convert";
-		public override string Usage => "<amount> <ISO Currency Code> [to] <ISO Currency Monospace>";
+		public override string Usage => "<amount> <ISO Currency Code> [to] <ISO Currency Code>";
 		public override string Description => "Converts the value of a given amount of money from one currency to another.";
 		private readonly Timer timer;
 		private Dictionary<string, decimal> exchangeRates;
