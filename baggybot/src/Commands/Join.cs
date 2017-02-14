@@ -17,7 +17,7 @@ namespace BaggyBot.Commands
 				Client.JoinChannel(command.Args[0]);
 			}
 			else {
-				command.Reply("Usage: -join <channel>");
+				InformUsage(command);
 			}
 		}
 	}
