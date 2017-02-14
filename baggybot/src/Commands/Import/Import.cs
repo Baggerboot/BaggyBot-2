@@ -22,7 +22,6 @@ namespace BaggyBot.Commands.Import
 
 		public override void Use(CommandArgs command)
 		{
-			// TODO: implement map-users
 			var parser = new CommandParser(
 				new Operation())
 				.AddOperation("load", new Operation()

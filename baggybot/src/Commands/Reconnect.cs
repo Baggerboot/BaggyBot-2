@@ -9,8 +9,7 @@
 
 		public override void Use(CommandArgs command)
 		{
-			// TODO: reimplement this
-			command.Reply("I cannot do that right now.");
+			Client.Reconnect();
 		}
 	}
 }

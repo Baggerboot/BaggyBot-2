@@ -99,7 +99,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override void Dispose()
 		{
-			throw new NotImplementedException();
+			client.Dispose();
 		}
 
 		public override ChatUser FindUser(string name)

@@ -27,6 +27,7 @@ namespace BaggyBot.MessagingInterface
 		public ChatChannel GetChannel(string id) => plugin.GetChannel(id);
 		public void NotifyOperators(string message) => plugin.NotifyOperators(message);
 
+		internal event Action<string, Exception> ConnectionLost;
 
 		private readonly Plugin plugin;
 		private ServerCfg configuration;
@@ -93,6 +94,7 @@ namespace BaggyBot.MessagingInterface
 			plugin.OnJoin += (user, channel) => eventManager.HandleJoin(new JoinEvent(user, channel));
 			plugin.OnPart += (user, channel) => eventManager.HandlePart(new PartEvent(user, channel));
 			plugin.OnQuit += (user, reason) => eventManager.HandleQuit(new QuitEvent(user, reason));
+			plugin.OnConnectionLost += ConnectionLost;
 		}
 
 		public bool Validate(ChatUser user)
@@ -149,6 +151,11 @@ namespace BaggyBot.MessagingInterface
 		public ChatUser GetUser(string id)
 		{
 			return plugin.GetUser(id);
+		}
+
+		public void Reconnect()
+		{
+			ConnectionLost?.Invoke("Manual reconnect.", null);
 		}
 	}
 }

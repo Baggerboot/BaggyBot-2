@@ -32,10 +32,10 @@ namespace BaggyBot.MessagingInterface
 			Logger.Log(this, $"Connecting plugin: {plugin.ServerType}:{plugin.ServerName}");
 			var client = new ChatClient(plugin, configuration);
 
-			// If the plugin loses  connection, we need to dispose of all the state associated with it.
-			plugin.OnConnectionLost += (_, __) => client.Dispose();
+			// If the plugin loses connection, we need to dispose of all the state associated with it.
+			client.ConnectionLost += (_, __) => client.Dispose();
 			// When that's done, we can try reconnecting.
-			plugin.OnConnectionLost += (message, exception) => HandleConnectionLoss(plugin.GetType(), configuration, message, exception);
+			client.ConnectionLost += (message, exception) => HandleConnectionLoss(plugin.GetType(), configuration, message, exception);
 
 			var result = client.Connect();
 			if (!result)
