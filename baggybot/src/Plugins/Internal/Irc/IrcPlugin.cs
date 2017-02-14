@@ -105,6 +105,22 @@ namespace BaggyBot.Plugins.Internal.Irc
 					throw new ArgumentOutOfRangeException();
 			}
 		}
+
+		public override MessageSendResult SendMessage(ChatUser target, string message)
+		{
+			switch (client.SendMessage(target.Nickname, message))
+			{
+				case IRCSharp.MessageSendResult.Success:
+					return MessageSendResult.Success;
+				case IRCSharp.MessageSendResult.Failure:
+					return MessageSendResult.Success;
+				case IRCSharp.MessageSendResult.FloodLimitHit:
+					return MessageSendResult.FloodLimitHit;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
 		public override void Join(ChatChannel channel)
 		{
 			client.JoinChannel(channel.Identifier);

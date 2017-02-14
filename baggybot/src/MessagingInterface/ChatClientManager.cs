@@ -33,7 +33,11 @@ namespace BaggyBot.MessagingInterface
 			var client = new ChatClient(plugin, configuration);
 
 			// If the plugin loses connection, we need to dispose of all the state associated with it.
-			client.ConnectionLost += (_, __) => client.Dispose();
+			client.ConnectionLost += (_, __) =>
+			{
+				clients.Remove(client.ServerName);
+				client.Dispose();
+			};
 			// When that's done, we can try reconnecting.
 			client.ConnectionLost += (message, exception) => HandleConnectionLoss(plugin.GetType(), configuration, message, exception);
 
@@ -109,7 +113,20 @@ namespace BaggyBot.MessagingInterface
 				{
 					foreach (var op in client.Operators)
 					{
-						//client.SendMessage(new ChatChannel(op.Nick, true), message);
+						ChatUser opUser;
+						if (op.UniqueId != null)
+						{
+							opUser = client.GetUser(op.UniqueId);
+						}
+						else if (op.Uid != null)
+						{
+							opUser = client.GetUser(client.StatsDatabase.GetUserById(int.Parse(op.Uid)).UniqueId);
+						}
+						else
+						{
+							opUser = client.FindUser(op.Nick);
+						}
+						client.SendMessage(opUser, message);
 					}
 				}
 			}

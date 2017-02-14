@@ -62,6 +62,11 @@ namespace BaggyBot.Plugins.Internal.Slack
 			return success ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
 
+		public override MessageSendResult SendMessage(ChatUser target, string message)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override void Join(ChatChannel channel) { }
 		public override void Part(ChatChannel channel, string reason = null) { }
 		public override void Quit(string reason) { }

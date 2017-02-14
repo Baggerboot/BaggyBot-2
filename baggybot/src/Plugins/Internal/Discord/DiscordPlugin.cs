@@ -94,6 +94,11 @@ namespace BaggyBot.Plugins.Internal.Discord
 			return MessageSendResult.Success;
 		}
 
+		public override MessageSendResult SendMessage(ChatUser target, string message)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override void Join(ChatChannel channel) { }
 
 		public void Reconnect()

@@ -131,6 +131,12 @@ namespace BaggyBot.MessagingInterface
 			return plugin.SendMessage(target, message);
 		}
 
+		internal MessageSendResult SendMessage(ChatUser user, string message)
+		{
+			message = plugin.MessageFormatters.Aggregate(message, (current, formatter) => formatter.ProcessOutgoingMessage(current));
+			return plugin.SendMessage(user, message);
+		}
+
 		public MessageSendResult Reply(ChatChannel channel, ChatUser user, string message)
 		{
 			message = plugin.MessageFormatters.Aggregate(message, (current, formatter) => formatter.ProcessOutgoingMessage(current));

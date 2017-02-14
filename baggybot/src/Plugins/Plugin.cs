@@ -56,6 +56,7 @@ namespace BaggyBot.Plugins
 		/// </summary>
 		public abstract ChatUser GetUser(string id);
 		public abstract MessageSendResult SendMessage(ChatChannel target, string message);
+		public abstract MessageSendResult SendMessage(ChatUser target, string message);
 		public abstract void Join(ChatChannel channel);
 		public abstract void Part(ChatChannel channel, string reason = null);
 		public abstract void Quit(string reason);
