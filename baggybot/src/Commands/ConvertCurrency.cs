@@ -66,56 +66,51 @@ namespace BaggyBot.Commands
 				return;
 			}
 			var match = Regex.Match(command.FullArgument, @"^((?:\d*(?:\.|,)\d+)|(?:\d+))\s*([a-z]{3}).*\s([a-z]{3})$", RegexOptions.IgnoreCase);
-			if (match.Success)
-			{
-				decimal fromAmount;
-				if (!decimal.TryParse(match.Groups[1].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out fromAmount))
-				{
-					command.Reply($"I don't know how to turn {match.Groups[1].Value} into a number.");
-					return;
-				}
-				else
-				{
-					if (exchangeRates == null)
-					{
-						command.Reply("please wait a moment, I'm still looking up the exchange rates.");
-						return;
-					}
-					var fromCurrency = match.Groups[2].Value.ToUpper();
-					var toCurrency = match.Groups[3].Value.ToUpper();
-
-					if (toCurrency != "EUR" && !exchangeRates.ContainsKey(toCurrency))
-					{
-						command.Reply($"I don't know the exchange rate of {toCurrency}");
-						return;
-					}
-					if (fromCurrency != "EUR" && !exchangeRates.ContainsKey(fromCurrency))
-					{
-						command.Reply($"I don't know the exchange rate of {fromCurrency}");
-						return;
-					}
-					decimal result;
-					// The base currency is EUR, so if we're converting to or from EUR, no additional conversion is necessary.
-					if (fromCurrency == "EUR")
-					{
-						result = fromAmount * exchangeRates[toCurrency];
-					}
-					else if (toCurrency == "EUR")
-					{
-						result = fromAmount / exchangeRates[fromCurrency];
-					}
-					// First convert from the source currency to EUR, then convert from EUR to the target currency.
-					else
-					{
-						result = fromAmount / exchangeRates[fromCurrency] * exchangeRates[toCurrency];
-					}
-					command.Reply($"{fromAmount} {fromCurrency} = {result:F} {toCurrency}");
-				}
-			}
-			else
+			if (!match.Success)
 			{
 				InformUsage(command);
+				return;
 			}
+			decimal fromAmount;
+			if (!decimal.TryParse(match.Groups[1].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out fromAmount))
+			{
+				command.Reply($"I don't know how to turn {match.Groups[1].Value} into a number.");
+				return;
+			}
+			if (exchangeRates == null)
+			{
+				command.Reply("please wait a moment, I'm still looking up the exchange rates.");
+				return;
+			}
+			var fromCurrency = match.Groups[2].Value.ToUpper();
+			var toCurrency = match.Groups[3].Value.ToUpper();
+
+			if (toCurrency != "EUR" && !exchangeRates.ContainsKey(toCurrency))
+			{
+				command.Reply($"I don't know the exchange rate of {toCurrency}");
+				return;
+			}
+			if (fromCurrency != "EUR" && !exchangeRates.ContainsKey(fromCurrency))
+			{
+				command.Reply($"I don't know the exchange rate of {fromCurrency}");
+				return;
+			}
+			decimal result;
+			// The base currency is EUR, so if we're converting to or from EUR, no additional conversion is necessary.
+			if (fromCurrency == "EUR")
+			{
+				result = fromAmount*exchangeRates[toCurrency];
+			}
+			else if (toCurrency == "EUR")
+			{
+				result = fromAmount/exchangeRates[fromCurrency];
+			}
+			// First convert from the source currency to EUR, then convert from EUR to the target currency.
+			else
+			{
+				result = fromAmount/exchangeRates[fromCurrency]*exchangeRates[toCurrency];
+			}
+			command.Reply($"{fromAmount} {fromCurrency} = {result:F} {toCurrency}");
 		}
 
 		public override void Dispose()
