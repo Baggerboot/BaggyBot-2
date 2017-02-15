@@ -239,7 +239,7 @@
     <Compile Include="src\CommandParsing\Argument.cs" />
     <Compile Include="src\Commands\Alias.cs" />
     <Compile Include="src\Commands\Bf.cs" />
-    <Compile Include="src\Commands\ConvertCurrency.cs" />
+    <Compile Include="src\Commands\Convert\ConvertCurrency.cs" />
     <Compile Include="src\Commands\Cs.cs" />
     <Compile Include="src\Commands\HttpInterface.cs" />
     <Compile Include="src\Commands\Interpreters\Brainfuck\BrainfuckInterpreter.cs" />
