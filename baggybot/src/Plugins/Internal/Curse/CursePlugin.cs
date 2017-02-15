@@ -82,6 +82,21 @@ namespace BaggyBot.Plugins.Internal.Curse
 			throw new NotImplementedException();
 		}
 
+		public override void Delete(ChatMessage message)
+		{
+			client.DeleteMessage(message.Channel.Identifier, message.SentAt);
+		}
+
+		public override void Kick(ChatUser chatUser)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void Ban(ChatUser chatUser)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override bool Connect()
 		{
 			try

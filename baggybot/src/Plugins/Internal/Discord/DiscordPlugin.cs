@@ -38,7 +38,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 				{
 					var user = ToChatUser(e.User);
 					var channel = ToChatChannel(e.Channel);
-					OnMessageReceived?.Invoke(new ChatMessage(e.Message.Timestamp, user, channel, e.Message.Text));
+					OnMessageReceived?.Invoke(new ChatMessage(e.Message.Timestamp, user, channel, e.Message.Text, state: e.Message));
 				}
 			};
 		}
@@ -60,6 +60,11 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override void Dispose()
 		{
 			client.Dispose();
+		}
+
+		public override void Ban(ChatUser chatUser)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override bool Connect()
@@ -111,6 +116,17 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override void Quit(string reason)
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void Delete(ChatMessage message)
+		{
+			var m = (Message)message.State;
+			m.Delete();
+		}
+
+		public override void Kick(ChatUser chatUser)
+		{
+			server.GetUser(ulong.Parse(chatUser.UniqueId)).Kick();
 		}
 	}
 }

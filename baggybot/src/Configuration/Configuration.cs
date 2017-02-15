@@ -1,3 +1,8 @@
+using BaggyBot.EmbeddedData;
+using BaggyBot.MessagingInterface.Handlers.Administration;
+using BaggyBot.MessagingInterface.Handlers.Administration.Triggers;
+using Microsoft.SqlServer.Server;
+
 namespace BaggyBot.Configuration
 {
 	public class Configuration
@@ -11,6 +16,7 @@ namespace BaggyBot.Configuration
 		public Interpreters Interpreters { get; private set; } = new Interpreters();
 		public Integrations Integrations { get; private set; } = new Integrations();
 		public Quotes Quotes { get; private set; } = new Quotes();
+		public Administration Administration { get; private set; } = new Administration();
 		public Logging Logging { get; private set; } = new Logging();
 
 		public Operator[] Operators { get; set; } = new Operator[0];
@@ -18,4 +24,18 @@ namespace BaggyBot.Configuration
 
 		public Metadata Metadata { get; private set; } = new Metadata();
 	}
+
+	public class Administration
+	{
+		public bool Enabled { get; set; } = false;
+		public Event[] Events { get; set; } = new Event[0];
+	}
+
+	public class ActionMessages
+	{
+		public string Warn { get; set; }
+		public string WarnKick { get; set; }
+		public string WarnBan { get; set; }
+	}
+
 }

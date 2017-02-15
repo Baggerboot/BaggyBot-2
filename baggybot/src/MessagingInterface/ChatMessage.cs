@@ -11,14 +11,16 @@ namespace BaggyBot.MessagingInterface
 		public string Body { get; }
 		public bool Action { get; }
 		public DateTime SentAt { get; }
+		public object State { get; }
 
-		public ChatMessage(DateTime sentAt, ChatUser sender, ChatChannel channel, string body, bool action = false)
+		public ChatMessage(DateTime sentAt, ChatUser sender, ChatChannel channel, string body, bool action = false, object state = null)
 		{
 			SentAt = sentAt;
 			Sender = sender;
 			Channel = channel;
 			Body = body;
 			Action = action;
+			State = state;
 		}
 
 		public ChatMessage Edit(string body)

@@ -9,6 +9,8 @@ namespace BaggyBot.Plugins
 {
 	public abstract class Plugin : IDisposable
 	{
+		// TODO: GetMentionString
+
 		// events
 		public abstract event Action<ChatMessage> OnMessageReceived;
 		public abstract event Action<ChatUser, ChatUser> OnNameChange;
@@ -60,6 +62,9 @@ namespace BaggyBot.Plugins
 		public abstract void Join(ChatChannel channel);
 		public abstract void Part(ChatChannel channel, string reason = null);
 		public abstract void Quit(string reason);
+		public abstract void Delete(ChatMessage message);
+		public abstract void Kick(ChatUser chatUser);
+		public abstract void Ban(ChatUser chatUser);
 		public abstract bool Connect();
 		public abstract void Disconnect();
 		public abstract void Dispose();

@@ -71,6 +71,21 @@ namespace BaggyBot.Plugins.Internal.Slack
 		public override void Part(ChatChannel channel, string reason = null) { }
 		public override void Quit(string reason) { }
 
+		public override void Delete(ChatMessage message)
+		{
+			socketClient.DeleteMessage(null, message.Channel.Identifier, message.SentAt);
+		}
+
+		public override void Kick(ChatUser chatUser)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void Ban(ChatUser chatUser)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void Reconnect()
 		{
 			throw new NotImplementedException();

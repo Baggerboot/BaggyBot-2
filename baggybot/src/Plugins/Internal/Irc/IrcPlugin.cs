@@ -161,6 +161,21 @@ namespace BaggyBot.Plugins.Internal.Irc
 			client.Quit(reason);
 		}
 
+		public override void Delete(ChatMessage message)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void Kick(ChatUser chatUser)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void Ban(ChatUser chatUser)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override void Dispose()
 		{
 		}

@@ -5,6 +5,7 @@ using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.MessagingInterface.Handlers;
+using BaggyBot.MessagingInterface.Handlers.Administration;
 using BaggyBot.Monitoring;
 using BaggyBot.Plugins;
 
@@ -169,5 +170,19 @@ namespace BaggyBot.MessagingInterface
 			ConnectionLost?.Invoke("Manual reconnect.", null);
 		}
 
+		public void Delete(ChatMessage message)
+		{
+			plugin.Delete(message);
+		}
+
+		public void Kick(ChatUser chatUser)
+		{
+			plugin.Kick(chatUser);
+		}
+
+		public void Ban(ChatUser chatUser)
+		{
+			plugin.Ban(chatUser);
+		}
 	}
 }

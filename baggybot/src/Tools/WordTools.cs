@@ -35,7 +35,7 @@ namespace BaggyBot.Tools
 		}
 		public static bool IsProfanity(string word)
 		{
-			return profanities.Select(x => word.Contains(x)).Contains(true);
+			return profanities.Any(word.Contains);
 		}
 	}
 }

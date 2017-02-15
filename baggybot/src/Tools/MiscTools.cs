@@ -24,6 +24,17 @@ namespace BaggyBot.Tools
 			return sf.GetMethod().Name;
 		}
 
+		public static double? GetPercentage(string percentage)
+		{
+			if (percentage == null) return null;
+
+			if (!percentage.EndsWith("%"))
+			{
+				throw new ArgumentException("Invalid percentage value: " + percentage);
+			}
+			return double.Parse(percentage.TrimEnd('%'))/100.0;
+		}
+
 		/// <summary>
 		/// Dynamically and recursively looks up properties on an object.
 		/// For instance, the mapping { "TimeOfDay", "Hours" }, when performed on a DateTime object,
