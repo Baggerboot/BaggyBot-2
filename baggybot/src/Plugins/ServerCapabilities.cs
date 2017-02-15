@@ -18,6 +18,15 @@ namespace BaggyBot.Plugins
 		public bool AllowsMultilineMessages { get; set; }
 
 		/// <summary>
+		/// Messages can be edited by their owner or someone with the appropriate permissions.
+		/// </summary>
+		public bool CanEditMessages { get; set; }
+		/// <summary>
+		/// Messages can be deleted by their owner or someone with the appropriate permissions.
+		/// </summary>
+		public bool CanDeleteMessages { get; set; }
+
+		/// <summary>
 		/// Other chat clients are able to correctly handle special unicode
 		/// characters (such as mathematical symbols).
 		/// </summary>
