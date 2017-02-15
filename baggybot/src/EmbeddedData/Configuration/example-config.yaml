@@ -54,6 +54,99 @@ quotes:
   chance: 0.015
   allow-quote-notifications: false
 
+# Administration is done by configuring the bot to perform actions when
+# certain events occur.
+# A few default events are configured for convenience.
+administration:
+  # When set to false, disables the entire administration module.
+  enabled: false
+  # Configure baggybot to react to certain events.
+  events:
+    -
+      # A friendly name for the type of events that will be handled.
+      name: 'Example'
+      # Set to false to disable this handler.
+      enabled: false
+      # A list of triggers that will trigger this event. Each trigger contains
+      # one or more conditions. If all of the conditions in a trigger are 
+      # true, the trigger will fire, and an action will be performed.
+      triggers:
+        -
+          # Checks if the message matches a regular expression
+          regex:
+            expression: 'i want to use regex to parse html'
+            case-sensitive: false
+          # Requires all other conditions in this trigger to activate
+          # a certain amount of times before the trigger fires.
+          repetition:
+            # Should the repetition count be reset if the trigger fires?
+            reset: false
+            # The number of repetitions required for the trigger to fire.
+            threshold: 2
+            # Reduce the repetition count by one at the specified interval.
+            tick-down: 10s
+      # If any of the above triggers fires, BaggyBot will act on it as
+      # configured here. The following actions are supported:
+      # - warn: Sends a warning message to the user
+      # - delete: Deletes the offending message
+      # - kick: kicks the offending user
+      # - warn-kick: Warns the user that they will be kicked if they continue.
+      # - ban: bans the offending user
+      # - warn-ban: Warns the user that they will be banned if the continue.
+      actions:
+        - [warn]
+      # Defines the contents of warning messages. The $user variable will
+      # be substituted by the name of the offending user.
+      messages:
+        warn: 'Pls ;_;'
+    -
+      name: 'profanity'
+      enabled: true
+      triggers:
+        -
+          profanity:
+            # Uses the internal profanity list to determine whether a word
+            # is profanity or not.
+            internal-profanity-list: true
+            # Additional words that trigger the profanity filter
+            words: []
+      actions:
+        - [delete, warn]
+        - [delete, kick]
+      messages:
+        warn: '$user, please watch your language.'
+    -
+      name: 'allcaps'
+      enabled: true
+      triggers:
+        -
+          # The message should contain at least the given percentage of
+          # uppercase characters.
+          caps: 80%
+          # The message should contain at least this many characters.
+          min-characters: 5
+      actions:
+        - [delete, warn]
+        - [delete, kick]
+      messages:
+        warn: '$user, please do not abuse the caps lock key.'
+    -
+      name: 'spam'
+      enabled: true
+      triggers:
+        -
+          repetition:
+            threshold: 4
+            tick-down: 5s
+        -
+          similarity:
+            percentage: 50%
+      actions:
+        - [delete, warn]
+        - [delete, kick]
+      messages:
+        warn: '$user, please do not spam.'
+
 logging:
   log-file: baggybot.log
   # Set to true if you want log messages with the Debug log level to be logged
