@@ -22,8 +22,10 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration.Triggers
 		public bool Check(MessageEvent ev)
 		{
 			// TODO: implement message similarity
+
+			var similar = ev.Message.Body.ToLower() == previous?.Message?.Body?.ToLower();
 			previous = ev;
-			return false;
+			return similar;
 		}
 
 		public void Initialise()

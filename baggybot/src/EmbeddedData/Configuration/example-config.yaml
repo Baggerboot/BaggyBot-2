@@ -84,17 +84,17 @@ administration:
             # The number of repetitions required for the trigger to fire.
             threshold: 2
             # Reduce the repetition count by one at the specified interval.
-            tick-down: 10s
+            tick-down: 10
       # If any of the above triggers fires, BaggyBot will act on it as
       # configured here. The following actions are supported:
-      # - warn: Sends a warning message to the user
-      # - delete: Deletes the offending message
-      # - kick: kicks the offending user
-      # - warn-kick: Warns the user that they will be kicked if they continue.
-      # - ban: bans the offending user
-      # - warn-ban: Warns the user that they will be banned if the continue.
+      # - Warn: Sends a warning message to the user
+      # - Delete: Deletes the offending message
+      # - Kick: kicks the offending user
+      # - WarnKick: Warns the user that they will be kicked if they continue.
+      # - Ban: bans the offending user
+      # - WarnBan: Warns the user that they will be banned if the continue.
       actions:
-        - [warn]
+        - [Warn]
       # Defines the contents of warning messages. The $user variable will
       # be substituted by the name of the offending user.
       messages:
@@ -111,8 +111,8 @@ administration:
             # Additional words that trigger the profanity filter
             words: []
       actions:
-        - [delete, warn]
-        - [delete, kick]
+        - [Delete, Warn]
+        - [Delete, Kick]
       messages:
         warn: '$user, please watch your language.'
     -
@@ -126,8 +126,8 @@ administration:
           # The message should contain at least this many characters.
           min-characters: 5
       actions:
-        - [delete, warn]
-        - [delete, kick]
+        - [Delete, Warn]
+        - [Delete, Kick]
       messages:
         warn: '$user, please do not abuse the caps lock key.'
     -
@@ -137,13 +137,14 @@ administration:
         -
           repetition:
             threshold: 4
-            tick-down: 5s
+            tick-down: 5
         -
+		  min-characters: 5
           similarity:
             percentage: 50%
       actions:
-        - [delete, warn]
-        - [delete, kick]
+        - [Delete, Warn]
+        - [Delete, Kick]
       messages:
         warn: '$user, please do not spam.'
 

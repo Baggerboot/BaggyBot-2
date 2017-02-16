@@ -17,7 +17,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration.Triggers
 			{
 				Reset = Reset,
 				Threshold = Threshold,
-				TickDown = TickDown
+				TickDown = double.Parse(TickDown)
 			};
 		}
 	}
@@ -25,12 +25,13 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration.Triggers
 	public class UserRepetitionTrigger : RepetitionTrigger, ITriggerable
 	{
 		private int counter = 0;
+		public new double TickDown { get; set; }
 
 		public bool Check(MessageEvent ev)
 		{
 			Task.Run(() =>
 			{
-				Task.Delay(TimeSpan.Parse(TickDown)).Wait();
+				Task.Delay(TimeSpan.FromSeconds(TickDown)).Wait();
 				lock (this)
 				{
 					counter--;

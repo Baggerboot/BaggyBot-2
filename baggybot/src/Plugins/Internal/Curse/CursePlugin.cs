@@ -30,24 +30,30 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		private readonly CurseClient client = new CurseClient();
 		private readonly NetworkCredential loginCredentials;
+		private string serverName;
 
 		public CursePlugin(ServerCfg config) : base(config)
 		{
+			// Configure the plugin
 			Capabilities.AllowsMultilineMessages = true;
 			Capabilities.AtMention = true;
-
-
 			MessageFormatters.Add(new CurseMessageFormatter());
+			
+			serverName = (string)config.PluginSettings["server-name"];
+			
 			loginCredentials = new NetworkCredential(config.Username, config.Password);
+
+			// Configure the Curse client
 			client.MessageReceived += HandleMessage;
 			client.WebsocketReconnected += () => Logger.Log(this, $"Websocket connction lost, but managed to reconnect.", LogLevel.Warning);
+			client.ConnectionLost += () => OnConnectionLost?.Invoke("Websocket connection lost", null);
 		}
 
-		private void HandleMessage(Group server, Channel channel, MessageResponse message)
+		private void HandleMessage(Group group, Channel channel, MessageResponse message)
 		{
 			var chatChannel = new ChatChannel(message.ConversationID, channel.GroupTitle);
 			var sender = new ChatUser(message.SenderName, message.SenderID.ToString());
-			var msg = new ChatMessage(message.Timestamp, sender, chatChannel, message.Body);
+			var msg = new ChatMessage(message.Timestamp, sender, chatChannel, message.Body, state: message);
 			OnMessageReceived?.Invoke(msg);
 		}
 
@@ -64,7 +70,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override MessageSendResult SendMessage(ChatUser target, string message)
 		{
-			throw new NotImplementedException();
+			client.SendMessage(client.GroupMap[]);
 		}
 
 		public override void Join(ChatChannel channel)
@@ -84,12 +90,12 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override void Delete(ChatMessage message)
 		{
-			client.DeleteMessage(message.Channel.Identifier, message.SentAt);
+			client.DeleteMessage(message.Channel.Identifier, ((MessageResponse)message.State).ServerID, message.SentAt);
 		}
 
 		public override void Kick(ChatUser chatUser)
 		{
-			throw new NotImplementedException();
+			//client.KickUser();
 		}
 
 		public override void Ban(ChatUser chatUser)

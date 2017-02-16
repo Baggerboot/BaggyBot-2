@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface.Events;
+using IronPython.Modules;
 
 namespace BaggyBot.MessagingInterface.Handlers.Administration
 {
