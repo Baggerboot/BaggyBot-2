@@ -20,7 +20,15 @@ namespace BaggyBot.Commands
 #else
 			var build = "Release Build";
 #endif
-			var message = $"BaggyBot {Bot.Version} ({botBit}-bit) -- Running on {Environment.OSVersion.VersionString} ({osBit}-bit) -- {build} {hasDebugger}";
+			var managedMemory = Math.Round(GC.GetTotalMemory(false) / 1024.0 / 1024.0, 0);
+
+			double totalMemory;
+			using (var proc = Process.GetCurrentProcess())
+			{
+				totalMemory = Math.Round(proc.PrivateMemorySize64/1024.0/1024.0, 0);
+			}
+
+			var message = $"BaggyBot {Bot.Version} ({botBit}-bit) -- Running on {Environment.OSVersion.VersionString} ({osBit}-bit) -- {build} {hasDebugger} -- {managedMemory}MB managed, {totalMemory}MB total";
 			command.ReturnMessage(message);
 		}
 	}
