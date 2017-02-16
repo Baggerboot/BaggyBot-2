@@ -174,6 +174,12 @@ namespace BaggyBot.Plugins.Internal.Slack
 				return;
 			}
 			var user = socketClient.UserLookup[message.user];
+
+			if (socketClient.MyData.id == user.id)
+			{
+				return;
+			}
+			
 			var channel = GetChannel(message.channel);
 			var chatUser = GetChatUser(user);
 			var chatMessage = new ChatMessage(message.ts, chatUser, channel, message.text);
