@@ -23,9 +23,9 @@ namespace BaggyBot
 		public ImageSearchResponse.ImageResult ImageSearch(string query)
 		{
 			var encoded = WebUtility.UrlEncode(query);
-			var rs = Get<ImageSearchResponse>($"https://api.cognitive.microsoft.com/bing/v5.0/search?q={encoded}&mkt=en-US");
+			var rs = Get<ImageSearchResponse>($"https://api.cognitive.microsoft.com/bing/v5.0/images/search?q={encoded}&mkt=en-US&count=1");
 
-			var image = rs?.images?.value?.FirstOrDefault();
+			var image = rs?.value?.FirstOrDefault();
 			return image;
 		}
 
@@ -174,7 +174,7 @@ namespace BaggyBot
 			}
 		}
 
-
+		/*
 		public class ImageSearchResponse
 		{
 			public string _type { get; set; }
@@ -336,6 +336,94 @@ namespace BaggyBot
 			public class Value5
 			{
 				public string id { get; set; }
+			}
+		}
+		*/
+
+
+		public class ImageSearchResponse
+		{
+			public string _type { get; set; }
+			public Instrumentation instrumentation { get; set; }
+			public string readLink { get; set; }
+			public string webSearchUrl { get; set; }
+			public int totalEstimatedMatches { get; set; }
+			public ImageResult[] value { get; set; }
+			public Queryexpansion[] queryExpansions { get; set; }
+			public int nextOffsetAddCount { get; set; }
+			public Pivotsuggestion[] pivotSuggestions { get; set; }
+			public bool displayShoppingSourcesBadges { get; set; }
+			public bool displayRecipeSourcesBadges { get; set; }
+
+			public class Instrumentation
+			{
+				public string pageLoadPingUrl { get; set; }
+			}
+
+			public class ImageResult
+			{
+				public string name { get; set; }
+				public string webSearchUrl { get; set; }
+				public string thumbnailUrl { get; set; }
+				public DateTime datePublished { get; set; }
+				public string contentUrl { get; set; }
+				public string hostPageUrl { get; set; }
+				public string contentSize { get; set; }
+				public string encodingFormat { get; set; }
+				public string hostPageDisplayUrl { get; set; }
+				public int width { get; set; }
+				public int height { get; set; }
+				public Thumbnail thumbnail { get; set; }
+				public string imageInsightsToken { get; set; }
+				public Insightssourcessummary insightsSourcesSummary { get; set; }
+				public string imageId { get; set; }
+				public string accentColor { get; set; }
+			}
+
+			public class Thumbnail
+			{
+				public int width { get; set; }
+				public int height { get; set; }
+			}
+
+			public class Insightssourcessummary
+			{
+				public int shoppingSourcesCount { get; set; }
+				public int recipeSourcesCount { get; set; }
+			}
+
+			public class Queryexpansion
+			{
+				public string text { get; set; }
+				public string displayText { get; set; }
+				public string webSearchUrl { get; set; }
+				public string searchLink { get; set; }
+				public Thumbnail1 thumbnail { get; set; }
+			}
+
+			public class Thumbnail1
+			{
+				public string thumbnailUrl { get; set; }
+			}
+
+			public class Pivotsuggestion
+			{
+				public string pivot { get; set; }
+				public Suggestion[] suggestions { get; set; }
+			}
+
+			public class Suggestion
+			{
+				public string text { get; set; }
+				public string displayText { get; set; }
+				public string webSearchUrl { get; set; }
+				public string searchLink { get; set; }
+				public Thumbnail2 thumbnail { get; set; }
+			}
+
+			public class Thumbnail2
+			{
+				public string thumbnailUrl { get; set; }
 			}
 		}
 	}

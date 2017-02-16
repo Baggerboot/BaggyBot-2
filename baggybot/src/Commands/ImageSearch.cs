@@ -30,16 +30,10 @@ namespace BaggyBot.Commands
 				var imageUrl = WebUtility.UrlEncode(image.contentUrl);
 				var title = WebUtility.UrlEncode(image.name);
 				var descr = WebUtility.UrlEncode("From " + image.hostPageDisplayUrl);
-
-				if (Client.Capabilities.RequireReupload)
-				{
-					var url = Imgur.Upload(imageUrl, title, descr);
-					command.Reply($"{url ?? image.contentUrl}");
-				}
-				else
-				{
-					command.Reply($"{image.contentUrl}");
-				}
+				// Bing refuses to serve out the original URL, so we reupload it to Imgur.
+				// An alternative option would be to run a HEAD on the image URL to get the redirect URL.
+				var url = Imgur.Upload(imageUrl, title, descr);
+				command.Reply($"{url ?? image.contentUrl}");
 			}
 		}
 
