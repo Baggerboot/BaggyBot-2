@@ -31,6 +31,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 		private readonly CurseClient client = new CurseClient();
 		private readonly NetworkCredential loginCredentials;
 		private string serverName;
+		private Group requestedGroup;
 
 		public CursePlugin(ServerCfg config) : base(config)
 		{
@@ -70,7 +71,8 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override MessageSendResult SendMessage(ChatUser target, string message)
 		{
-			client.SendMessage(client.GroupMap[]);
+			client.SendMessage(requestedGroup, client.GetUser(requestedGroup, int.Parse(target.UniqueId)), message);
+			return MessageSendResult.Success;
 		}
 
 		public override void Join(ChatChannel channel)
@@ -90,12 +92,19 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override void Delete(ChatMessage message)
 		{
-			client.DeleteMessage(message.Channel.Identifier, ((MessageResponse)message.State).ServerID, message.SentAt);
+			try
+			{
+				client.CurseApi.DeleteMessage(message.Channel.Identifier, ((MessageResponse) message.State).ServerID, message.SentAt);
+			}
+			catch (NotAuthorisedException)
+			{
+				Logger.Log(this, $"Failed to delete message by {message.Sender}: Not authorised.", LogLevel.Warning);
+			}
 		}
 
 		public override void Kick(ChatUser chatUser)
 		{
-			//client.KickUser();
+			client.KickUser(requestedGroup, client.GetUser(requestedGroup, int.Parse(chatUser.UniqueId)));
 		}
 
 		public override void Ban(ChatUser chatUser)
@@ -114,7 +123,11 @@ namespace BaggyBot.Plugins.Internal.Curse
 				Logger.Log(this, $"Connection failed. An exception occurred ({e.GetType().Name}: {e.Message})");
 				return false;
 			}
-			Channels = client.ChannelMap.Values.Select(ch => new ChatChannel(ch.GroupID, ch.GroupTitle)).ToList();
+			requestedGroup = client.Groups.First(g => g.GroupTitle == serverName);
+
+			Channels = client.ChannelMap.Values
+				.Where(ch => ch.RootGroupID == requestedGroup.GroupID)
+				.Select(ch => new ChatChannel(ch.GroupID, ch.GroupTitle)).ToList();
 			return true;
 		}
 
@@ -130,7 +143,8 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override ChatUser FindUser(string name)
 		{
-			throw new NotImplementedException();
+			var user = client.FindMember(requestedGroup.GroupID, name);
+			return new ChatUser(user.Username, user.UserID.ToString(), preferredName:user.Nickname);
 		}
 
 		public override IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
@@ -141,7 +155,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 			var endTimestamp = before;
 			do
 			{
-				var messages = client.GetMessages(channel.Identifier, after, endTimestamp, max);
+				var messages = client.CurseApi.GetMessages(channel.Identifier, after, endTimestamp, max);
 				returned = messages.Length;
 				foreach (var message in messages)
 				{
