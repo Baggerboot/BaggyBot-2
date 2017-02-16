@@ -68,6 +68,12 @@ namespace BaggyBot.MessagingInterface
 		/// </summary>
 		private SqlConnector ConnectDatabase(Backend backend)
 		{
+			if (backend == null)
+			{
+				Logger.Log(this, "No database specified. Statistics collection will not be possible.", LogLevel.Warning);
+				return null;
+			}
+
 			var sqlConnector = new SqlConnector();
 			Logger.Log(this, "Connecting to the database", LogLevel.Info);
 			try

@@ -15,7 +15,7 @@ namespace BaggyBot.Database
 	{
 		protected SqlConnector SqlConnector;
 		protected LockObject LockObj;
-		public ConnectionState ConnectionState => SqlConnector.ConnectionState;
+		public ConnectionState ConnectionState => SqlConnector?.ConnectionState ?? ConnectionState.Closed;
 
 
 		public DatabaseManager(SqlConnector sqlConnector)
