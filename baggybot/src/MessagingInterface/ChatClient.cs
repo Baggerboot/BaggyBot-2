@@ -86,9 +86,17 @@ namespace BaggyBot.MessagingInterface
 
 		private void AttachEventHandlers(ChatClientEventManager eventManager)
 		{
-			plugin.OnMessageReceived += message => eventManager.HandleMessage(new MessageEvent(message,
-				reply => Reply(message.Channel, message.Sender, reply),
-				reply => SendMessage(message.Channel, reply)));
+			plugin.OnMessageReceived += message =>
+			{
+				foreach (var formatter in plugin.MessageFormatters)
+				{
+					message = formatter.ProcessIncomingMessage(message);
+				}
+				eventManager.HandleMessage(new MessageEvent(message,
+				                                            reply => Reply(message.Channel, message.Sender, reply),
+				                                            reply => SendMessage(message.Channel, reply)));
+				;
+			};
 			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(oldName, newName));
 			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(kickee, channel, kicker, reason));
 			plugin.OnKicked += (channel, kicker, reason) => eventManager.HandleKicked(new KickedEvent(channel, kicker, reason));
