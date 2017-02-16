@@ -38,5 +38,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 			actionsPerformed++;
 			return Actions[index];
 		}
+
+		public override string ToString() => $"{Name}: {Triggers.Length} triggers.";
 	}
 }

@@ -62,7 +62,7 @@ administration:
   enabled: false
   # Configure baggybot to react to certain events.
   events:
-    -
+    - &example
       # A friendly name for the type of events that will be handled.
       name: 'Example'
       # Set to false to disable this handler.
@@ -99,7 +99,7 @@ administration:
       # be substituted by the name of the offending user.
       messages:
         warn: 'Pls ;_;'
-    -
+    - &profanity
       name: 'profanity'
       enabled: true
       triggers:
@@ -115,7 +115,7 @@ administration:
         - [Delete, Kick]
       messages:
         warn: '$user, please watch your language.'
-    -
+    - &allcaps
       name: 'allcaps'
       enabled: true
       triggers:
@@ -130,7 +130,7 @@ administration:
         - [Delete, Kick]
       messages:
         warn: '$user, please do not abuse the caps lock key.'
-    -
+    - &spam
       name: 'spam'
       enabled: true
       triggers:
@@ -206,6 +206,8 @@ servers:
     backend: *default
     # A list of users with operator privileges
     operators: [*you, *your-friend]
+    # A list of administration events BaggyBot should react to
+    administration-events: [*example, *profanity, *allcaps, *spam]
 
     # This section contains plugin-specific settings which will vary depending
     # on the plugin used to connect to the server.

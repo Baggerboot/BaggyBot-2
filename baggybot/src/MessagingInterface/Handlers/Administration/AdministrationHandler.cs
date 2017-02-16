@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface.Events;
+using BaggyBot.Monitoring;
 using IronPython.Modules;
 
 namespace BaggyBot.MessagingInterface.Handlers.Administration
@@ -11,45 +12,48 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 	{
 		private readonly Dictionary<string, UserEvent[]> userEventMapping = new Dictionary<string, UserEvent[]>();
 
+		public override void Initialise()
+		{
+			if (ConfigManager.Config.Administration.Enabled)
+			{
+				var evts = Client.Configuration.AdministrationEvents.Where(e => e.Enabled);
+				Logger.Log(this, $"Administration module enabled: {evts.Count()} events configured.");
+			}
+		}
+
 		public override void HandleMessage(MessageEvent ev)
 		{
-			var cfg = ConfigManager.Config.Administration;
-
-			if (cfg.Enabled)
+			// Only handle events if the administration module is enabled globally
+			if (!ConfigManager.Config.Administration.Enabled) return;
+			foreach (var handler in GetMapping(ev.Message.Sender.UniqueId))
 			{
-				CreateMapping(ev);
+				if (!handler.Triggers.Any(t => t.ShouldTrigger(ev))) continue;
 
-				foreach (var handler in userEventMapping[ev.Message.Sender.UniqueId])
+				var actions = handler.GetActions(ev);
+				foreach (var action in actions)
 				{
-					if (handler.Triggers.Any(t => t.ShouldTrigger(ev)))
+					switch (action)
 					{
-						var actions = handler.GetActions(ev);
-						foreach (var action in actions)
-						{
-							switch (action)
-							{
-								case Action.Warn:
-									WarnUser(ev, handler.Messages.Warn);
-									break;
-								case Action.WarnKick:
-									WarnUser(ev, handler.Messages.WarnKick);
-									break;
-								case Action.WarnBan:
-									WarnUser(ev, handler.Messages.WarnBan);
-									break;
-								case Action.Delete:
-									Client.Delete(ev.Message);
-									break;
-								case Action.Kick:
-									Client.Kick(ev.Message.Sender);
-									break;
-								case Action.Ban:
-									Client.Ban(ev.Message.Sender);
-									break;
-								default:
-									throw new ArgumentOutOfRangeException();
-							}
-						}
+						case Action.Warn:
+							WarnUser(ev, handler.Messages.Warn);
+							break;
+						case Action.WarnKick:
+							WarnUser(ev, handler.Messages.WarnKick);
+							break;
+						case Action.WarnBan:
+							WarnUser(ev, handler.Messages.WarnBan);
+							break;
+						case Action.Delete:
+							Client.Delete(ev.Message);
+							break;
+						case Action.Kick:
+							Client.Kick(ev.Message.Sender);
+							break;
+						case Action.Ban:
+							Client.Ban(ev.Message.Sender);
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
 					}
 				}
 			}
@@ -68,14 +72,13 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 			ev.ReturnMessageCallback(message);
 		}
 
-		private void CreateMapping(MessageEvent ev)
+		private IEnumerable<UserEvent> GetMapping(string uniqueId)
 		{
-			if (userEventMapping.ContainsKey(ev.Message.Sender.UniqueId)) return;
+			if (userEventMapping.ContainsKey(uniqueId)) return userEventMapping[uniqueId];
 
-			userEventMapping.Add(ev.Message.Sender.UniqueId, 
-				ConfigManager.Config.Administration.Events
-				.Where(e => e.Enabled)
-				.Select(e => e.Create()).ToArray());
+			var adminEvents = Client.Configuration.AdministrationEvents.Where(e =>e.Enabled);
+			userEventMapping.Add(uniqueId, adminEvents.Select(e => e.Create()).ToArray());
+			return userEventMapping[uniqueId];
 		}
 	}
 }

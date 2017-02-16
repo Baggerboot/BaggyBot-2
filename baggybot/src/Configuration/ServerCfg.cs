@@ -1,4 +1,5 @@
 using System;
+using BaggyBot.MessagingInterface.Handlers.Administration;
 
 namespace BaggyBot.Configuration
 {
@@ -19,6 +20,7 @@ namespace BaggyBot.Configuration
 
 		public Backend Backend { get; set; } = null;
 		public Operator[] Operators { get; set; } = new Operator[0];
+		public Event[] AdministrationEvents { get; set; } = new Event[0];
 		public dynamic PluginSettings { get; set; }
 	}
 }

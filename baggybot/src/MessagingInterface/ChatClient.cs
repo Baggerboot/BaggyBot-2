@@ -31,13 +31,13 @@ namespace BaggyBot.MessagingInterface
 		internal event Action<string, Exception> ConnectionLost;
 
 		private readonly Plugin plugin;
-		private ServerCfg configuration;
+		public ServerCfg Configuration;
 		internal StatsDatabaseManager StatsDatabase { get; }
 
 		internal ChatClient(Plugin plugin, ServerCfg configuration)
 		{
 			this.plugin = plugin;
-			this.configuration = configuration;
+			this.Configuration = configuration;
 			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(configuration.Backend));
 
 			var handlers = new List<ChatClientEventHandler>
@@ -151,8 +151,8 @@ namespace BaggyBot.MessagingInterface
 
 		public bool IncludeChannel(ChatChannel channel)
 		{
-			if (configuration.ExcludeChannels.Contains(channel.Identifier)) return false;
-			return configuration.IncludeChannels.Length == 0 || configuration.IncludeChannels.Contains(channel.Identifier);
+			if (Configuration.ExcludeChannels.Contains(channel.Identifier)) return false;
+			return Configuration.IncludeChannels.Length == 0 || Configuration.IncludeChannels.Contains(channel.Identifier);
 		}
 
 		public ChatUser GetUser(string id)

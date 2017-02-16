@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Tools;
-using IRCSharp.Annotations;
 
 namespace BaggyBot.MessagingInterface.Handlers.Administration.Triggers
 {
