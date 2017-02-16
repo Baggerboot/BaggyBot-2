@@ -28,7 +28,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 			foreach (var handler in GetMapping(ev.Message.Sender.UniqueId))
 			{
 				if (!handler.Triggers.Any(t => t.ShouldTrigger(ev))) continue;
-
+				Logger.Log(this, $"Event \"{handler.Name}\" triggered", LogLevel.Trace);
 				var actions = handler.GetActions(ev);
 				foreach (var action in actions)
 				{
