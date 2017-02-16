@@ -32,7 +32,7 @@ namespace BaggyBot.Tools
 			{
 				throw new ArgumentException("Invalid percentage value: " + percentage);
 			}
-			return double.Parse(percentage.TrimEnd('%'))/100.0;
+			return double.Parse(percentage.TrimEnd('%')) / 100.0;
 		}
 
 		/// <summary>

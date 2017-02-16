@@ -9,6 +9,7 @@ namespace BaggyBot.Monitoring
 {
 	public enum LogLevel
 	{
+		Trace,
 		Debug,
 		Info,
 		Message,
@@ -67,6 +68,7 @@ namespace BaggyBot.Monitoring
 			Blue,
 			Magenta,
 			White,
+			Grey,
 			Reset
 		}
 
@@ -87,6 +89,10 @@ namespace BaggyBot.Monitoring
 
 			switch (level)
 			{
+				case LogLevel.Trace:
+					lineBuilder.Append("[TRC] ");
+					lineColour = Colour.Grey;
+					break;
 				case LogLevel.Debug:
 					lineBuilder.Append("[DEB] ");
 					lineColour = Colour.White;
@@ -101,7 +107,7 @@ namespace BaggyBot.Monitoring
 					break;
 				case LogLevel.Irc:
 					lineBuilder.Append("[IRC] ");
-					lineColour = Colour.Normal;
+					lineColour = Colour.Magenta;
 					break;
 				case LogLevel.Warning:
 					lineBuilder.Append("[WRN] ");
@@ -168,12 +174,13 @@ namespace BaggyBot.Monitoring
 				case Colour.Red:
 					return ConsoleColor.Red;
 				case Colour.Magenta:
-					return ConsoleColor.Cyan;
+					return ConsoleColor.Magenta;
 				case Colour.Yellow:
 					return ConsoleColor.Yellow;
 				case Colour.White:
 					return ConsoleColor.White;
 				case Colour.Reset:
+				case Colour.Grey:
 				case Colour.Normal:
 				default:
 					return ConsoleColor.Gray;
@@ -198,6 +205,8 @@ namespace BaggyBot.Monitoring
 					return KWHT;
 				case Colour.Reset:
 					return RESET;
+				case Colour.Grey:
+					return KWHT;
 				case Colour.Normal:
 				default:
 					return KNRM;
