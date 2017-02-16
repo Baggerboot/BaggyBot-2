@@ -1,3 +1,8 @@
+|Server |  Build status |
+|-----------|-------------|
+|Linux CI:  | [![Build Status](https://travis-ci.org/Baggykiin/BaggyBot-2.svg?branch=master)](https://travis-ci.org/Baggykiin/BaggyBot-2) |
+|Windows CI: | [![Build status](https://ci.appveyor.com/api/projects/status/u5ek5bopcg31k9hk?svg=true)](https://ci.appveyor.com/project/baggykiin/baggybot-2) |
+
 
 BaggyBot is an chat bot built for collecting statistics in one or multile channels.
 He also has an elaborate command system, providing features such as searching
