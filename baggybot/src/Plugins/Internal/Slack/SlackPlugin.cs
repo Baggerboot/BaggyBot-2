@@ -64,7 +64,9 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		public override MessageSendResult SendMessage(ChatUser target, string message)
 		{
-			throw new NotImplementedException();
+			socketClient.SendMessage(null, socketClient.DirectMessageLookup[target.UniqueId].id, message);
+			//todo: check success
+			return  MessageSendResult.Success;
 		}
 
 		public override void Join(ChatChannel channel) { }
