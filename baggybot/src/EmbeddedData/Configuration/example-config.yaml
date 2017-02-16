@@ -139,9 +139,9 @@ administration:
             threshold: 4
             tick-down: 5
         -
-		  min-characters: 5
+          min-characters: 5
           similarity:
-            percentage: 50%
+            percentage: 80%
       actions:
         - [Delete, Warn]
         - [Delete, Kick]
