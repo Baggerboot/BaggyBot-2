@@ -50,7 +50,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 		};
 
 
-		internal IrcPlugin(ServerCfg config) : base(config)
+		public IrcPlugin(ServerCfg config) : base(config)
 		{
 			client = new IrcClient();
 			client.OnNetLibDebugLog += (sender, message) => Logger.Log(sender, "[NL#]" + message, LogLevel.Info);
@@ -189,12 +189,12 @@ namespace BaggyBot.Plugins.Internal.Irc
 		{
 			var host = Configuration.Server;
 			var port = Configuration.Port;
-			var nick = Configuration.PluginSettings.Identity.Nick;
-			var ident = Configuration.PluginSettings.Identity.Ident;
-			var realname = Configuration.PluginSettings.Identity.RealName;
+			var nick = (string)Configuration.PluginSettings["identity"]["nick"];
+			var ident = (string)Configuration.PluginSettings["identity"]["ident"];
+			var realname = Configuration.PluginSettings["identity"]["real-name"];
 			var password = Configuration.Password;
 			var tls = Configuration.UseTls;
-			var slackCompatMode = Configuration.PluginSettings.CompatModes.Contains("slack");
+			var slackCompatMode = ((IEnumerable<object>)Configuration.PluginSettings["compat-modes"]).Cast<string>().Contains("slack");
 
 			// The slack IRC server messes up domain names, because it prepends
 			// http://<domain> to everything that looks like it's a domain name
@@ -246,9 +246,19 @@ namespace BaggyBot.Plugins.Internal.Irc
 				Logger.Log(this, "Failed to connect to the IRC server: " + e.Message, LogLevel.Error);
 				return false;
 			}
+			PostConnect();
 			return true;
 		}
-		
+
+		private void PostConnect()
+		{
+			var channels = ((IEnumerable<object>)Configuration.PluginSettings["auto-join-channels"]).Cast<string>();
+			foreach (var channel in channels)
+			{
+				client.JoinChannel(channel);
+			}
+		}
+
 		/// <summary>
 		/// Custom code for checking whether a user has registered with NickServ. Ugly, but it works.
 		/// </summary>
