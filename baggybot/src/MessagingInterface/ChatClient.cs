@@ -37,7 +37,7 @@ namespace BaggyBot.MessagingInterface
 		internal ChatClient(Plugin plugin, ServerCfg configuration)
 		{
 			this.plugin = plugin;
-			this.Configuration = configuration;
+			Configuration = configuration;
 			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(configuration.Backend));
 
 			var handlers = new List<ChatClientEventHandler>
@@ -101,7 +101,6 @@ namespace BaggyBot.MessagingInterface
 				eventManager.HandleMessage(new MessageEvent(message,
 				                                            reply => Reply(message.Channel, message.Sender, reply),
 				                                            reply => SendMessage(message.Channel, reply)));
-				;
 			};
 			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(oldName, newName));
 			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(kickee, channel, kicker, reason));

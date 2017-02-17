@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Cryptography;
 using BaggyBot.MessagingInterface;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Plugins;
@@ -75,7 +74,7 @@ namespace BaggyBot.Commands
 		/// name, and considers the rest to be arguments.
 		/// </summary>
 		/// <param name="commandPrefix">The command prefix matching this command.</param>
-		/// <param name="message">The IRC message from which the command should be
+		/// <param name="ev">The IRC message from which the command should be
 		/// constructed.</param>
 		/// <returns>A CommandArgs object generated from the supplied ChatMessage.
 		/// </returns>

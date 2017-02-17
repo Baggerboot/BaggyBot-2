@@ -1,7 +1,4 @@
-using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface.Handlers.Administration;
-using BaggyBot.MessagingInterface.Handlers.Administration.Triggers;
-using Microsoft.SqlServer.Server;
 
 namespace BaggyBot.Configuration
 {

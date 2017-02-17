@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -125,7 +124,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 			if (!usersReady.Wait(TimeSpan.FromSeconds(30)))
 			{
 				return false;
-			};
+			}
 
 			activityTimer = new Timer(state => socketClient.SendPresence(Presence.active), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 			return true;
@@ -157,7 +156,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 			return match;
 		}
 
-		private ChatMessage ToChatMessage(Message message)
+		private ChatMessage ToChatMessage(NewMessage message)
 		{
 			return new ChatMessage(message.ts, GetChatUser(socketClient.UserLookup[message.user]), GetChannel(message.channel), message.text);
 		}
@@ -180,10 +179,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 				return;
 			}
 			
-			var channel = GetChannel(message.channel);
-			var chatUser = GetChatUser(user);
-			var chatMessage = new ChatMessage(message.ts, chatUser, channel, message.text);
-			OnMessageReceived?.Invoke(chatMessage);
+			OnMessageReceived?.Invoke(ToChatMessage(message));
 		}
 
 		public override void Disconnect()

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using BaggyBot.Monitoring;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 

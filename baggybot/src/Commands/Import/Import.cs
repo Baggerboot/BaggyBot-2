@@ -5,8 +5,6 @@ using System.Linq;
 using BaggyBot.CommandParsing;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Tools;
-using LinqToDB.Expressions;
-using Mono.CSharp;
 using Newtonsoft.Json;
 
 namespace BaggyBot.Commands.Import
@@ -114,13 +112,13 @@ namespace BaggyBot.Commands.Import
 			switch (filetype)
 			{
 				case "slack-history":
-					return ImportFromSlackHistory(channel, contents);
+					return ImportFromSlackHistory(contents);
 				default:
 					throw new ArgumentException("Invalid file type: " + filetype);
 			}
 		}
 
-		private List<ChatMessage> ImportFromSlackHistory(ChatChannel channel, string contents)
+		private List<ChatMessage> ImportFromSlackHistory(string contents)
 		{
 			var data = JsonConvert.DeserializeObject<SlackHistory.ChannelImport>(contents);
 

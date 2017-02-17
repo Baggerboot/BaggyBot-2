@@ -1,6 +1,5 @@
 using System.Data;
 using BaggyBot.MessagingInterface.Events;
-using BaggyBot.MessagingInterface.Handlers;
 
 namespace BaggyBot.MessagingInterface.Handlers
 {

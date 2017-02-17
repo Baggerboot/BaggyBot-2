@@ -4,7 +4,6 @@ using System.Linq;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
-using IronPython.Modules;
 
 namespace BaggyBot.MessagingInterface.Handlers.Administration
 {

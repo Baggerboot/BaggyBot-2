@@ -1,7 +1,5 @@
-﻿
-using System;
+﻿using System;
 using BaggyBot.Database.Model;
-using BaggyBot.Plugins;
 
 namespace BaggyBot.MessagingInterface
 {

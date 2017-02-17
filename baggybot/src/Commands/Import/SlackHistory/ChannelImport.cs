@@ -1,6 +1,5 @@
 ﻿
 using System;
-using HtmlAgilityPack;
 using Newtonsoft.Json;
 
 namespace BaggyBot.Commands.Import.SlackHistory

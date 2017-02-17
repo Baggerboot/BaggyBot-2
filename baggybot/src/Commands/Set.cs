@@ -1,6 +1,4 @@
-﻿using System;
-using BaggyBot.CommandParsing;
-using BaggyBot.Database;
+﻿using BaggyBot.CommandParsing;
 using BaggyBot.Database.Model;
 
 namespace BaggyBot.Commands

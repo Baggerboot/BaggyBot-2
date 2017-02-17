@@ -1,9 +1,4 @@
-﻿using System;
-using BaggyBot.EmbeddedData;
-using BaggyBot.Tools;
-using IRCSharp.IRC;
-
-namespace BaggyBot.Commands
+﻿namespace BaggyBot.Commands
 {
 	[DisabledCommand]
 	internal class NickServ : Command

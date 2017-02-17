@@ -5,7 +5,6 @@ using BaggyBot.Configuration;
 using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Tools;
-using Discord.API.Client.Rest;
 
 namespace BaggyBot.Commands
 {

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using BaggyBot.CommandParsing;
-using BaggyBot.Tools;
 
 namespace BaggyBot.Commands
 {

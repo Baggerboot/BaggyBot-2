@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using BaggyBot.Configuration;
-using BaggyBot.Database;
 using BaggyBot.MessagingInterface;
 using Discord;
 
@@ -95,7 +94,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
 			var channel = server.GetChannel(ulong.Parse(target.Identifier));
-			var result = channel.SendMessage(message).Result;
+			channel.SendMessage(message).Wait();
 			return MessageSendResult.Success;
 		}
 

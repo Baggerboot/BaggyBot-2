@@ -9,7 +9,6 @@ using BaggyBot.EmbeddedData;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
-using Discord.API.Client.Rest;
 
 namespace BaggyBot.MessagingInterface.Handlers
 {
@@ -75,18 +74,6 @@ namespace BaggyBot.MessagingInterface.Handlers
 
 		}
 
-		private struct UsedWord
-		{
-			public int SenderId { get; }
-			public string Word { get; }
-
-			public UsedWord(int senderId, string word)
-			{
-				SenderId = senderId;
-				Word = word;
-			}
-		}
-
 		public static void ProcessBatch(StatsDatabaseManager database, IEnumerable<ChatMessage> messages)
 		{
 
@@ -104,7 +91,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 
 			// Increment actions/lines for the user
 			//database.IncrementActions(userActions);
-			///database.IncrementLineCount(userLines);
+			//database.IncrementLineCount(userLines);
 			//database.IncrementWordCount(userWords.ToDictionary(p => p.Key, p => p.Value.Count()));
 
 			// Increment global line/word count

@@ -1,14 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using BaggyBot.Configuration;
-using BaggyBot.Tools;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-namespace BaggyBot.Commands
+﻿namespace BaggyBot.Commands
 {
 	internal class GoogleSearch : Command
 	{

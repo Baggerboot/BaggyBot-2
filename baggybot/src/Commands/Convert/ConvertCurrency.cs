@@ -10,7 +10,7 @@ using BaggyBot.Monitoring;
 using BaggyBot.Tools;
 using Newtonsoft.Json.Linq;
 
-namespace BaggyBot.Commands
+namespace BaggyBot.Commands.Convert
 {
 	internal class ConvertCurrency : Command
 	{

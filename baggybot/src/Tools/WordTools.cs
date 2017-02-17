@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace BaggyBot.Tools
@@ -10,10 +9,10 @@ namespace BaggyBot.Tools
 	internal static class WordTools
 	{
 		// Direct copy from BaggyBot 1.0 wheee
-		private static readonly string[] profanities = { "fuck", "cock", "dick", "bitch", "shit", "nigger", "asshole", "faggot", "wank", "cunt", "piss" };
-		private static readonly string[] conjunctions = { "and", "but", "or", "yet", "for", "nor", "so" };
-		private static readonly string[] ignoredWords = { "you", "its", "not", "was", "are", "can", "now", "all", "how", "that", "this", "what", "thats", "they", "then", "there", "when", "with", "well", "from", "will", "here", "out", "dont" };
-		private static readonly string[] articles = { "the", "an", "a" };
+		public static readonly string[] Profanities = { "fuck", "cock", "dick", "bitch", "shit", "nigger", "asshole", "faggot", "wank", "cunt", "piss" };
+		public static readonly string[] Conjunctions = { "and", "but", "or", "yet", "for", "nor", "so" };
+		public static readonly string[] IgnoredWords = { "you", "its", "not", "was", "are", "can", "now", "all", "how", "that", "this", "what", "thats", "they", "then", "there", "when", "with", "well", "from", "will", "here", "out", "dont" };
+		public static readonly string[] Articles = { "the", "an", "a" };
 
 		public static List<string> GetWords(string message)
 		{
@@ -25,17 +24,17 @@ namespace BaggyBot.Tools
 
 		public static string[] GetProfanities()
 		{
-			return profanities;
+			return Profanities;
 		}
 
 		public static bool IsIgnoredWord(string word)
 		{
 			word = word.ToLower();
-			return conjunctions.Contains(word) || ignoredWords.Contains(word) || articles.Contains(word);
+			return Conjunctions.Contains(word) || IgnoredWords.Contains(word) || Articles.Contains(word);
 		}
 		public static bool IsProfanity(string word)
 		{
-			return profanities.Any(word.Contains);
+			return Profanities.Any(word.Contains);
 		}
 	}
 }

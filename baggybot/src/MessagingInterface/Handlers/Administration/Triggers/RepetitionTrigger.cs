@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using BaggyBot.MessagingInterface.Events;
-using Discord.API.Client.Rest;
 
 namespace BaggyBot.MessagingInterface.Handlers.Administration.Triggers
 {
@@ -24,7 +23,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration.Triggers
 
 	public class UserRepetitionTrigger : RepetitionTrigger, ITriggerable
 	{
-		private int counter = 0;
+		private int counter;
 		public new double TickDown { get; set; }
 
 		public bool Check(MessageEvent ev)

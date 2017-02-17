@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data;
-using BaggyBot.MessagingInterface.Events;
+﻿using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
 
 namespace BaggyBot.MessagingInterface.Handlers

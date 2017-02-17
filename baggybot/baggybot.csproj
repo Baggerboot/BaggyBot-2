@@ -285,7 +285,6 @@
     <Compile Include="src\Database\Upgrades\DatabaseUpgrader.cs" />
     <Compile Include="src\MessagingInterface\Handlers\CommandHandler.cs" />
     <Compile Include="src\Commands\CommandArgs.cs" />
-    <Compile Include="src\Plugins\DisconnectReason.cs" />
     <Compile Include="src\Plugins\IMessagePreprocessor.cs" />
     <Compile Include="src\Plugins\Internal\Curse\CurseMessageFormatter.cs" />
     <Compile Include="src\Plugins\MessageFormatter.cs" />
@@ -333,7 +332,6 @@
     <Compile Include="src\Tools\MiscTools.cs" />
     <Compile Include="src\Tools\PythonFunction.cs" />
     <Compile Include="src\Tools\PythonTools.cs" />
-    <Compile Include="src\Tools\UserTools.cs" />
     <Compile Include="src\Tools\WordTools.cs" />
     <EmbeddedResource Include="src\EmbeddedData\Configuration\example-config.yaml" />
     <None Include="packages.config" />

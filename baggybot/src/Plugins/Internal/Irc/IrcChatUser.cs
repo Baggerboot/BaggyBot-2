@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BaggyBot.MessagingInterface;
-using BaggyBot.Plugins;
+﻿using BaggyBot.MessagingInterface;
 
 namespace BaggyBot.Plugins.Internal.Irc
 {

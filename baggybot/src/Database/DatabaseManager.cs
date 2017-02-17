@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using BaggyBot.Database.Model;
 using BaggyBot.Tools;
 using LinqToDB.Mapping;
@@ -20,7 +18,7 @@ namespace BaggyBot.Database
 
 		public DatabaseManager(SqlConnector sqlConnector)
 		{
-			this.SqlConnector = sqlConnector;
+			SqlConnector = sqlConnector;
 			LockObj = new LockObject();
 		}
 

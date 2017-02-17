@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using BaggyBot.Monitoring;
-using Mono.CSharp.Linq;
 
 namespace BaggyBot.Database
 {

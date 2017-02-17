@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Xml.Serialization.Configuration;
-using BaggyBot.Plugins;
 
 namespace BaggyBot.MessagingInterface
 {
