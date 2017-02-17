@@ -50,22 +50,31 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
-			var ev = new ManualResetEvent(false);
+			var ev = new ManualResetEventSlim(false);
 			var success = false;
-			socketClient.SendMessage(received =>
-			{
-				ev.Set();
-				success = received.ok;
-			}, target.Identifier, message);
-			ev.WaitOne(TimeSpan.FromSeconds(10));
+			socketClient.SendMessage(
+				received =>
+				{
+					ev.Set();
+					success = received.ok;
+				}, target.Identifier, message);
+			ev.Wait(TimeSpan.FromSeconds(10));
 			return success ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
 
 		public override MessageSendResult SendMessage(ChatUser target, string message)
 		{
-			socketClient.SendMessage(null, socketClient.DirectMessageLookup[target.UniqueId].id, message);
-			//todo: check success
-			return  MessageSendResult.Success;
+			var ev = new ManualResetEventSlim(false);
+			var success = false;
+			socketClient.SendMessage(
+				received =>
+				{
+					ev.Set();
+					success = received.ok;
+				},
+				socketClient.DirectMessageLookup[target.UniqueId].id, message);
+			ev.Wait(TimeSpan.FromSeconds(10));
+			return success ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
 
 		public override void Join(ChatChannel channel) { }
@@ -114,7 +123,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 											.Concat(socketClient.Groups.Select(ToChatChannel))
 											.Concat(socketClient.DirectMessages.Select(ToChatChannel))
 											.ToList();
-			
+
 			var usersReady = new SemaphoreSlim(0);
 			socketClient.GetUserList(response =>
 			{
@@ -178,7 +187,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 			{
 				return;
 			}
-			
+
 			OnMessageReceived?.Invoke(ToChatMessage(message));
 		}
 
