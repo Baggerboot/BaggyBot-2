@@ -40,7 +40,7 @@ namespace BaggyBot.MessagingInterface
 			this.plugin = plugin;
 			Configuration = configuration;
 			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(configuration.Backend));
-			Permissions = new PermissionsManager(StatsDatabase);
+			Permissions = new PermissionsManager(StatsDatabase, Configuration.Operators);
 
 			var handlers = new List<ChatClientEventHandler>
 			{
@@ -112,28 +112,6 @@ namespace BaggyBot.MessagingInterface
 			plugin.OnQuit += (user, reason) => eventManager.HandleQuit(new QuitEvent(user, reason));
 			plugin.OnConnectionLost += ConnectionLost;
 		}
-
-		public bool IsOperator(ChatUser user)
-		{
-			Logger.Log(null, "Validating user");
-			return Operators.Any(op => Validate(user, op));
-		}
-
-		private bool Validate(ChatUser user, Operator op)
-		{
-			Func<string, string, bool> match = (input, reference) => reference.Equals("*") || input.Equals(reference);
-
-			var nickM = match(user.Nickname, op.Nick);
-			var uniqueIdM = match(user.UniqueId, op.UniqueId);
-			var uidM = true;
-			if (op.Uid != "*")
-			{
-				uidM = match(user.DbUser.Id.ToString(), op.Uid);
-			}
-
-			return nickM && uniqueIdM && uidM;
-		}
-
 
 		public void Dispose()
 		{

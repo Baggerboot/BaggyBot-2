@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using BaggyBot.Commands;
+using BaggyBot.Configuration;
 using BaggyBot.Database;
 using BaggyBot.Database.Model;
 using BaggyBot.Monitoring;
@@ -10,11 +12,77 @@ namespace BaggyBot.MessagingInterface
 {
 	internal class PermissionsManager
 	{
-		private StatsDatabaseManager database;
+		private readonly StatsDatabaseManager database;
+		private readonly IEnumerable<Operator> operators;
 
-		public PermissionsManager(StatsDatabaseManager statsDatabase)
+		public PermissionsManager(StatsDatabaseManager database, IEnumerable<Operator> operators)
 		{
-			database = statsDatabase;
+			this.database = database;
+			this.operators = operators;
+		}
+
+		/// <summary>
+		/// Checks whether the given user is defined as an operator in the config file.
+		/// </summary>
+		public bool IsOperator(ChatUser user)
+		{
+			Logger.Log(null, "Performing operator check on " + user);
+			return operators.Any(op => Validate(user, op));
+		}
+
+		/// <summary>
+		/// Validates a user against an operator configuration.
+		/// <returns>
+		/// True if the Operator configuration matches the given user,
+		/// false otherwise.
+		/// </returns>
+		/// </summary>
+		private bool Validate(ChatUser user, Operator op)
+		{
+			Func<string, string, bool> match = (input, reference) => reference.Equals("*") || input.Equals(reference);
+
+			var nickM = match(user.Nickname, op.Nick);
+			var uniqueIdM = match(user.UniqueId, op.UniqueId);
+			var uidM = true;
+			if (op.Uid != "*")
+			{
+				uidM = database.MapUser(user).Id == int.Parse(op.Uid);
+			}
+
+			return nickM && uniqueIdM && uidM;
+		}
+
+
+		/// <summary>
+		/// Checks whether the sender of a command has access to the given permission node.
+		/// Tries to use the permission system first, but falls back to an operator
+		/// check otherwise.
+		/// </summary>
+		public bool Test(CommandArgs command, string permissionName)
+		{
+			return Test(command.Sender, command.Channel, permissionName);
+		}
+
+		/// <summary>
+		/// Checks whether the sender of a message has access to the given permission node.
+		/// Tries to use the permission system first, but falls back to an operator
+		/// check otherwise.
+		/// </summary>
+		public bool Test(ChatMessage message, string permissionName)
+		{
+			return Test(message.Sender, message.Channel, permissionName);
+		}
+
+		/// <summary>
+		/// Checks whether a user has access to the given permission node.
+		/// Tries to use the permission system first, but falls back to an operator
+		/// check otherwise.
+		/// </summary>
+		public bool Test(ChatUser user, ChatChannel channel, string permissionName)
+		{
+			var permEntry = CheckPermission(user, channel, permissionName);
+
+			return permEntry ?? IsOperator(user);
 		}
 
 		/// <summary>
@@ -54,7 +122,7 @@ namespace BaggyBot.MessagingInterface
 			yield return permissionName;
 
 			var cur = permissionName.Length;
-			while ((cur = permissionName.LastIndexOf(".", cur-1, StringComparison.Ordinal)) >= 0)
+			while ((cur = permissionName.LastIndexOf(".", cur - 1, StringComparison.Ordinal)) >= 0)
 			{
 				yield return permissionName.Substring(0, cur) + ".*";
 			}

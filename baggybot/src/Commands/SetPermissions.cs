@@ -47,7 +47,11 @@ namespace BaggyBot.Commands
 						.AddKey("channel-id", 'C')
 						.AddKey("user-group", 'g')
 						.AddKey("perm-name", 'p')
-						.AddKey("perm-group", 'P'));
+						.AddKey("perm-group", 'P'))
+						.AddOperation(
+				"test",
+				new Operation()
+				.AddArgument("perm-name"));
 		}
 
 		public override void Use(CommandArgs cmdArgs, OperationResult cmd)
@@ -80,7 +84,7 @@ namespace BaggyBot.Commands
 			var group = cmd.Keys["user-group"];
 			var name = cmd.Keys["user-name"];
 			if (group != null) userGroup = StatsDatabase.GetUserGroup(group);
-			if (name != null) userGroup = StatsDatabase.GetSingleUserGroup(Client.FindUser(name).DbUser);
+			if (name != null) userGroup = StatsDatabase.GetSingleUserGroup(StatsDatabase.MapUser(Client.FindUser(name)));
 
 			PermissionGroup permGroup = null;
 			group = cmd.Keys["perm-group"];

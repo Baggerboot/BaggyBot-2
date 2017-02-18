@@ -121,7 +121,7 @@ namespace BaggyBot.Commands
 		public override void Use(CommandArgs command)
 		{
 			ThreadId++;
-			var isOperator = Client.IsOperator(command.Sender);
+			var isOperator = Client.Permissions.Test(command, PermissionName);
 
 			if (!(isOperator || RestrictionsCheck(command)))
 			{

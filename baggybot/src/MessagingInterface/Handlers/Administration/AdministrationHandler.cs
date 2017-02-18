@@ -24,8 +24,8 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 		{
 			// Only handle events if the administration module is enabled globally
 			if (!ConfigManager.Config.Administration.Enabled) return;
-			// Ignore bot operators
-			if (Client.IsOperator(ev.Message.Sender)) return;
+			// Only handle events for non-operators and users who aren't ignored
+			if (Client.Permissions.Test(ev.Message, "baggybot.administration.ignore-user")) return;
 
 			foreach (var handler in GetMapping(ev.Message.Sender.UniqueId))
 			{
@@ -78,7 +78,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 		{
 			if (userEventMapping.ContainsKey(uniqueId)) return userEventMapping[uniqueId];
 
-			var adminEvents = Client.Configuration.AdministrationEvents.Where(e =>e.Enabled);
+			var adminEvents = Client.Configuration.AdministrationEvents.Where(e => e.Enabled);
 			userEventMapping.Add(uniqueId, adminEvents.Select(e => e.Create()).ToArray());
 			return userEventMapping[uniqueId];
 		}
