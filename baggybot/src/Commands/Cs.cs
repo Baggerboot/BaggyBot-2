@@ -87,7 +87,7 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			var isOperator = Client.Validate(command.Sender);
+			var isOperator = Client.IsOperator(command.Sender);
 
 			if (!commandBuilders.ContainsKey(command.Sender.Nickname))
 			{

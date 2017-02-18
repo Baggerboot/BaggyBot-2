@@ -11,7 +11,7 @@ using BaggyBot.Plugins;
 
 namespace BaggyBot.MessagingInterface
 {
-	public class ChatClient : IDisposable
+	internal class ChatClient : IDisposable
 	{
 		public string ServerType => plugin.ServerType;
 		public string ServerName => plugin.ServerName;
@@ -28,17 +28,19 @@ namespace BaggyBot.MessagingInterface
 		public ChatChannel GetChannel(string id) => plugin.GetChannel(id);
 		public void NotifyOperators(string message) => plugin.NotifyOperators(message);
 
-		internal event Action<string, Exception> ConnectionLost;
+		public event Action<string, Exception> ConnectionLost;
 
 		private readonly Plugin plugin;
 		public ServerCfg Configuration;
-		internal StatsDatabaseManager StatsDatabase { get; }
+		public StatsDatabaseManager StatsDatabase { get; }
+		public PermissionsManager Permissions { get; }
 
 		internal ChatClient(Plugin plugin, ServerCfg configuration)
 		{
 			this.plugin = plugin;
 			Configuration = configuration;
 			StatsDatabase = new StatsDatabaseManager(ConnectDatabase(configuration.Backend));
+			Permissions = new PermissionsManager(StatsDatabase);
 
 			var handlers = new List<ChatClientEventHandler>
 			{
@@ -111,7 +113,7 @@ namespace BaggyBot.MessagingInterface
 			plugin.OnConnectionLost += ConnectionLost;
 		}
 
-		public bool Validate(ChatUser user)
+		public bool IsOperator(ChatUser user)
 		{
 			Logger.Log(null, "Validating user");
 			return Operators.Any(op => Validate(user, op));

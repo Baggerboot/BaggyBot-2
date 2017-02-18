@@ -27,7 +27,7 @@ namespace BaggyBot
 		public static IReadOnlyList<string> CommandIdentifiers = new[] { "-", "/" };
 		// Version number of the database. This is checked against the 'version' key in the metadata table,
 		// and a database upgrade is attempted if they do not match.
-		public const string DatabaseVersion = "2.0";
+		public const string DatabaseVersion = "2.1";
 		public const string ConfigVersion = "0.1";
 
 		// If the bot is started in update mode, a previous version has to be specified.

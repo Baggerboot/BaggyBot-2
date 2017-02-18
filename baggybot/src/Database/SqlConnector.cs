@@ -26,6 +26,12 @@ namespace BaggyBot.Database
 		public ITable<Quote> Quotes { get; private set; }
 		public ITable<UsedWord> Words { get; private set; }
 		public ITable<MiscData> MiscData { get; private set; }
+		public ITable<PermissionEntry> PermissionEntries { get; private set; }
+		public ITable<PermissionGroup> PermissionGroups { get; private set; }
+		public ITable<PermissionGroupMembership> PermissionGroupMembership { get; private set; }
+		public ITable<UserGroup> UserGroups { get; private set; }
+		public ITable<UserGroupMembership> UserGroupMembership { get; private set; }
+
 		private ITable<Metadata> metadata;
 
 		private ConnectionState internalState;
@@ -89,6 +95,11 @@ namespace BaggyBot.Database
 			TryDropTable<ChatLog>();
 			TryDropTable<Metadata>();
 			TryDropTable<MiscData>();
+			TryDropTable<PermissionEntry>();
+			TryDropTable<PermissionGroup>();
+			TryDropTable<PermissionGroupMembership>();
+			TryDropTable<UserGroup>();
+			TryDropTable<UserGroupMembership>();
 		}
 
 		private void TryDropTable<T>() where T:Poco
@@ -116,6 +127,11 @@ namespace BaggyBot.Database
 			connection.CreateTable<ChatLog>();
 			connection.CreateTable<Metadata>();
 			connection.CreateTable<MiscData>();
+			connection.CreateTable<PermissionEntry>();
+			connection.CreateTable<PermissionGroup>();
+			connection.CreateTable<PermissionGroupMembership>();
+			connection.CreateTable<UserGroup>();
+			connection.CreateTable<UserGroupMembership>();
 		}
 
 		private void AddMetadata()
@@ -202,6 +218,11 @@ namespace BaggyBot.Database
 			Words = connection.GetTable<UsedWord>();
 			ChatLog = connection.GetTable<ChatLog>();
 			MiscData = connection.GetTable<MiscData>();
+			PermissionEntries = connection.GetTable<PermissionEntry>();
+			PermissionGroups = connection.GetTable<PermissionGroup>();
+			PermissionGroupMembership = connection.GetTable<PermissionGroupMembership>();
+			UserGroups = connection.GetTable<UserGroup>();
+			UserGroupMembership = connection.GetTable<UserGroupMembership>();
 
 			try
 			{
@@ -220,6 +241,11 @@ namespace BaggyBot.Database
 				Words.FirstOrDefault();
 				ChatLog.FirstOrDefault();
 				MiscData.FirstOrDefault();
+				PermissionEntries.FirstOrDefault();
+				PermissionGroups.FirstOrDefault();
+				PermissionGroupMembership.FirstOrDefault();
+				UserGroups.FirstOrDefault();
+				UserGroupMembership.FirstOrDefault();
 				// ReSharper restore ReturnValueOfPureMethodIsNotUsed
 			}
 			catch (Exception e)
@@ -253,7 +279,7 @@ namespace BaggyBot.Database
 			}
 			else
 			{
-				Logger.Log(this, $"Unable to upgrade the database (current version: {currentVersion}) to match the bot (current version {Bot.DatabaseVersion})", LogLevel.Error);
+				Logger.Log(this, $"Unable to upgrade the database: No upgrade path found from {currentVersion} to {Bot.DatabaseVersion}", LogLevel.Error);
 				return false;
 			}
 		}

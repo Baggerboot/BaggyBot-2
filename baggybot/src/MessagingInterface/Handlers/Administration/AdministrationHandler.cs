@@ -24,6 +24,9 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 		{
 			// Only handle events if the administration module is enabled globally
 			if (!ConfigManager.Config.Administration.Enabled) return;
+			// Ignore bot operators
+			if (Client.IsOperator(ev.Message.Sender)) return;
+
 			foreach (var handler in GetMapping(ev.Message.Sender.UniqueId))
 			{
 				if (!handler.Triggers.Any(t => t.ShouldTrigger(ev))) continue;

@@ -30,7 +30,7 @@ namespace BaggyBot.Commands
 		protected abstract void GetBuffer(CommandArgs command);
 		protected void ProcessControlCommand(CommandArgs command)
 		{
-			if (!Client.Validate(command.Sender))
+			if (!Client.IsOperator(command.Sender))
 			{
 				command.ReturnMessage("Python Interpreter control commands may only be used by the bot operator");
 				return;

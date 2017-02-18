@@ -68,25 +68,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 
 		private void HandleExistingCommand(CommandArgs cmdInfo)
 		{
-			bool isValid;
-			if (commands[cmdInfo.Command].Permissions == PermissionLevel.BotOperator)
-			{
-				try
-				{
-					isValid = Client.Validate(cmdInfo.Sender);
-
-				}
-				catch (Exception)
-				{
-					cmdInfo.Reply("I am unable to validate your account.");
-					return;
-				}
-			}
-			else
-			{
-				isValid = true;
-			}
-			if (!isValid)
+			if (!commands[cmdInfo.Command].HasPermission(cmdInfo))
 			{
 				cmdInfo.ReturnMessage(Messages.CmdNotAuthorised);
 				return;

@@ -196,7 +196,7 @@ namespace BaggyBot.Database
 					SentAt = message.SentAt,
 					MessageType = MessageTypes.ChatMessage,
 					ChannelId = message.Channel.Identifier,
-					Channel =  message.Channel.Name,
+					Channel = message.Channel.Name,
 					SenderId = message.Sender.DbUser.Id,
 					Nick = message.Sender.Nickname,
 					Message = message.Body
@@ -242,10 +242,10 @@ namespace BaggyBot.Database
 				LockObj.LockMessage = MiscTools.GetCurrentMethod();
 				matches =
 					(from line in SqlConnector.ChatLog
-					where line.Message.ToLower().Contains(query.ToLower())
-						&& (uid == -1 || line.SenderId == uid)
-						&& (nickname == null || line.Nick  == nickname)
-					select line).ToList();
+					 where line.Message.ToLower().Contains(query.ToLower())
+						 && (uid == -1 || line.SenderId == uid)
+						 && (nickname == null || line.Nick == nickname)
+					 select line).ToList();
 			}
 			LockObj.LockMessage = "None";
 			return matches;
@@ -259,8 +259,8 @@ namespace BaggyBot.Database
 				LockObj.LockMessage = MiscTools.GetCurrentMethod();
 				matches =
 					(from quote in SqlConnector.Quotes
-					where quote.Text.ToLower().Contains(search.ToLower())
-					select quote).ToList();
+					 where quote.Text.ToLower().Contains(search.ToLower())
+					 select quote).ToList();
 
 			}
 			LockObj.LockMessage = "None";
@@ -284,7 +284,7 @@ namespace BaggyBot.Database
 			}
 			LockObj.LockMessage = "None";
 		}
-		
+
 		public void IncrementEmoticon(string emoticon, int uid)
 		{
 			lock (LockObj)
@@ -369,7 +369,7 @@ namespace BaggyBot.Database
 			}
 			LockObj.LockMessage = "None";
 		}
-		
+
 		public void UpsertMiscData(string type, string key, string value)
 		{
 			lock (LockObj)
@@ -486,7 +486,7 @@ namespace BaggyBot.Database
 			}
 			LockObj.LockMessage = "None";
 		}
-	
+
 		public DateTime? GetLastQuotedLine(int userId)
 		{
 			DateTime? ret;
@@ -540,17 +540,17 @@ namespace BaggyBot.Database
 				LockObj.LockMessage = MiscTools.GetCurrentMethod();
 				Logger.Log(this, "finding words");
 				var words = from word in SqlConnector.Words
-					where word.Uses > 1
-					select word;
+							where word.Uses > 1
+							select word;
 				Logger.Log(this, "building dictionary");
 				globalWordCount = words.ToDictionary(word => word.Word, word => word.Uses);
 
 				Logger.Log(this, "finding sentences");
 				userSentences = (from sentence in SqlConnector.ChatLog
-					where sentence.SenderId == uid
-					      && sentence.ChannelId == channelId
-					      && !sentence.Message.StartsWith(Bot.CommandIdentifiers.First())
-					select sentence.Message).ToList();
+								 where sentence.SenderId == uid
+									   && sentence.ChannelId == channelId
+									   && !sentence.Message.StartsWith(Bot.CommandIdentifiers.First())
+								 select sentence.Message).ToList();
 
 				LockObj.LockMessage = "None";
 			}
@@ -614,7 +614,7 @@ namespace BaggyBot.Database
 				}
 			}
 		}
-		
+
 		public bool MiscDataContainsKey(string type, string key)
 		{
 			lock (LockObj)
@@ -657,6 +657,222 @@ namespace BaggyBot.Database
 				SqlConnector.InsertMultiple(rows);
 
 				LockObj.LockMessage = "None";
+			}
+		}
+
+		private UserGroup[] GetUserMembership(User dbUser)
+		{
+			UserGroup[] membership;
+			lock (LockObj)
+			{
+				LockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				membership = (from entry in SqlConnector.UserGroupMembership
+							  join userGroup in SqlConnector.UserGroups on entry.GroupId equals userGroup.Id
+							  where entry.Enabled
+							  where entry.UserId == dbUser.Id
+							  select userGroup).ToArray();
+
+
+				LockObj.LockMessage = "None";
+			}
+			return membership;
+		}
+
+		private PermissionGroup[] GetPermissionMembership(string[] nodes)
+		{
+			PermissionGroup[] membership;
+			lock (LockObj)
+			{
+				LockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				membership = (from entry in SqlConnector.PermissionGroupMembership
+							  join permGroup in SqlConnector.PermissionGroups on entry.GroupId equals permGroup.Id
+							  where entry.Enabled
+							  where nodes.Contains(entry.PermissionName)
+							  select permGroup).ToArray();
+
+				LockObj.LockMessage = "None";
+			}
+			return membership;
+		}
+
+		public PermissionEntry[] GetPermissionEntries(User dbUser, ChatChannel channel, string[] nodes)
+		{
+			var userMembership = GetUserMembership(dbUser);
+			if (userMembership.Any())
+			{
+				Logger.Log(this, $"User {dbUser} is a member of {string.Join(", ", userMembership.Select(g => $"\"{g.Name}\""))}.", LogLevel.Trace);
+			}
+
+			var permMembership = GetPermissionMembership(nodes);
+
+			var userGroupIds = userMembership.Select(g => g.Id);
+			var permGroupIds = permMembership.Select(g => g.Id);
+
+			PermissionEntry[] entries;
+			lock (LockObj)
+			{
+				LockObj.LockMessage = MiscTools.GetCurrentMethod();
+
+				entries = (from entry in SqlConnector.PermissionEntries
+						   where entry.Enabled
+						   where (entry.ChannelId == null || (channel != null && entry.ChannelId == channel.Identifier))
+						   where entry.UserGroup == null || userGroupIds.Contains(entry.UserGroup.Value)
+						   where entry.PermissionGroup == null || permGroupIds.Contains(entry.PermissionGroup.Value)
+						   select entry).ToList().OrderBy(entry => entry.Specificity).ToArray();
+
+				LockObj.LockMessage = "None";
+			}
+			return entries;
+		}
+
+		public PermissionGroup CreatePermissionGroup(string name)
+		{
+			lock (LockObj)
+			{
+				if (SqlConnector.PermissionGroups.Any(p => p.Name == name))
+				{
+					throw new ArgumentException("A group with the given name already exists");
+				}
+				var group = new PermissionGroup
+				{
+					Name = name,
+					Created = DateTime.Now
+				};
+				SqlConnector.Insert(group);
+				return SqlConnector.PermissionGroups.First(g => g.Name == name);
+			}
+		}
+
+
+		public PermissionGroup GetPermissionGroup(string groupName)
+		{
+			lock (LockObj)
+			{
+				var matches = SqlConnector.PermissionGroups.Where(g => g.Name == groupName);
+				if (matches.Count() <= 1) return matches.FirstOrDefault();
+				throw new CorruptedDatabaseException("Multiple permission groups with the same name defined");
+			}
+		}
+
+		/// <summary>
+		/// Retrieves the single-user usergroup belonging to the given user,
+		/// creating it if it does not exist.
+		/// </summary>
+		public PermissionGroup GetSinglePermissionGroup(string name)
+		{
+			var uniqueGroupName = "perm-group-" + name;
+
+			lock (LockObj)
+			{
+				var matches = SqlConnector.PermissionGroups.Where(g => g.Name == uniqueGroupName && g.SinglePermission).ToList();
+				if (matches.Count == 0)
+				{
+					var group = new PermissionGroup
+					{  
+						Name = uniqueGroupName,
+						SinglePermission = true,
+						Created = DateTime.Now
+					};
+					SqlConnector.Insert(group);
+					var created = SqlConnector.PermissionGroups.First(g => g.Name == uniqueGroupName && g.SinglePermission);
+					var membership = new PermissionGroupMembership
+					{
+						GroupId = created.Id,
+						PermissionName = name,
+						Enabled = true,
+						Added = DateTime.Now
+					};
+					SqlConnector.Insert(membership);
+					Logger.Log(this, $"Created new single-permission group \"{uniqueGroupName}\" for {name}");
+					return created;
+					;
+				}
+				if (matches.Count == 1) return matches.First();
+				throw new CorruptedDatabaseException("Multiple permission groups with the same name defined");
+			}
+		}
+
+		/// <summary>
+		/// Creates a new, empty usergroup with the given name.
+		/// </summary>
+		public UserGroup CreateUserGroup(string name)
+		{
+			lock (LockObj)
+			{
+				if (SqlConnector.UserGroups.Any(g => g.Name == name))
+				{
+					throw new ArgumentException("A group with the given name already exists");
+				}
+				var group = new UserGroup
+				{
+					Name = name,
+					Created = DateTime.Now
+				};
+				SqlConnector.Insert(group);
+				return SqlConnector.UserGroups.First(g => g.Name == name);
+			}
+		}
+
+		/// <summary>
+		/// Retrieves the usergroup with the given name, or null if it does not exist.
+		/// </summary>
+		public UserGroup GetUserGroup(string groupName)
+		{
+			lock (LockObj)
+			{
+				var matches = SqlConnector.UserGroups.Where(g => g.Name == groupName);
+				if (matches.Count() <= 1) return matches.FirstOrDefault();
+				throw new CorruptedDatabaseException("Multiple user groups with the same name defined");
+			}
+		}
+
+		/// <summary>
+		/// Retrieves the single-user usergroup belonging to the given user,
+		/// creating it if it does not exist.
+		/// </summary>
+		public UserGroup GetSingleUserGroup(User user)
+		{
+			var uniqueGroupName = "user-group-" + user.UniqueId;
+
+			lock (LockObj)
+			{
+				var matches = SqlConnector.UserGroups.Where(g => g.Name == uniqueGroupName && g.SingleUser).ToList();
+				if (matches.Count == 0)
+				{
+					var group = new UserGroup
+					{
+						Name = uniqueGroupName,
+						SingleUser = true,
+						Created = DateTime.Now
+					};
+					SqlConnector.Insert(group);
+					var created = SqlConnector.UserGroups.First(g => g.Name == uniqueGroupName && g.SingleUser);
+					var membership = new UserGroupMembership
+					{
+						GroupId = created.Id,
+						UserId = user.Id,
+						Enabled = true,
+						Added = DateTime.Now
+					};
+					SqlConnector.Insert(membership);
+					Logger.Log(this, $"Created new single-user group \"{uniqueGroupName}\" for {user}");
+					return created;
+					;
+				}
+				if (matches.Count == 1) return matches.First();
+				throw new CorruptedDatabaseException("Multiple user groups with the same name defined");
+			}
+		}
+
+		public void AddPermissionEntry(PermissionEntry entry)
+		{
+			lock (LockObj)
+			{
+				if(SqlConnector.UserGroups.Any(g => g.Name == entry.Name)) throw new ArgumentException("A permissions entry with the given name already exists.");
+				SqlConnector.Insert(entry);
+				Logger.Log(this, $"Added new permissions entry with name \"{entry.Name}\" to the database.");
 			}
 		}
 	}

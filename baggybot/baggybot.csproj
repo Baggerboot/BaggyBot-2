@@ -177,9 +177,15 @@
     <Compile Include="src\Commands\Import\Import.cs" />
     <Compile Include="src\Commands\Import\SlackHistory\ChannelImport.cs" />
     <Compile Include="src\Commands\Import\SlackHistory\MillisecondEpochConverter.cs" />
+    <Compile Include="src\Commands\SetPermissions.cs" />
     <Compile Include="src\Configuration\Imgur.cs" />
     <Compile Include="src\Database\DatabaseManager.cs" />
+    <Compile Include="src\Database\Model\PermissionGroup.cs" />
+    <Compile Include="src\Database\Model\PermissionGroupMembership.cs" />
+    <Compile Include="src\Database\Model\UserGroup.cs" />
     <Compile Include="src\Database\Model\MessageTypes.cs" />
+    <Compile Include="src\Database\Model\PermissionEntry.cs" />
+    <Compile Include="src\Database\Model\UserGroupMembership.cs" />
     <Compile Include="src\ExternalApis\Bing.cs" />
     <Compile Include="src\Commands\GoogleSearch.cs" />
     <Compile Include="src\Commands\ImageSearch.cs" />
@@ -224,6 +230,7 @@
     <Compile Include="src\MessagingInterface\Events\NameChangeEvent.cs" />
     <Compile Include="src\MessagingInterface\Events\PartEvent.cs" />
     <Compile Include="src\MessagingInterface\Events\QuitEvent.cs" />
+    <Compile Include="src\MessagingInterface\PermissionsManager.cs" />
     <Compile Include="src\Monitoring\Diagnostics\TraceBuilder.cs" />
     <Compile Include="src\Plugins\Internal\Curse\CursePlugin.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordExtensionMethods.cs" />

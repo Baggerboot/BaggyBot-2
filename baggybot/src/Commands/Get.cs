@@ -97,7 +97,7 @@ namespace BaggyBot.Commands
 
 		private void GetCfg(CommandArgs command, OperationResult result)
 		{
-			if (!Client.Validate(command.Sender))
+			if (!Client.IsOperator(command.Sender))
 			{
 				command.Reply(Messages.CmdNotAuthorised);
 				return;
