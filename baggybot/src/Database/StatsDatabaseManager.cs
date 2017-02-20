@@ -639,7 +639,7 @@ namespace BaggyBot.Database
 			return lines;
 		}
 
-		public void IncrementWords(Dictionary<string, int> usages)
+		public void ResetWords(Dictionary<string, int> usages)
 		{
 			lock (LockObj)
 			{

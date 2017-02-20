@@ -16,8 +16,8 @@ namespace BaggyBot.Commands
 
 			var usage = messages.SelectMany(m => WordTools.GetWords(m.Message)).GroupBy(w => w).ToDictionary(g => g.Key, g => g.Count());
 
-			StatsDatabase.IncrementWords(usage);
-			command.Reply("done.");
+			StatsDatabase.ResetWords(usage);
+			command.Reply($"Regenerated word count for {usage.Count} words (Total: {usage.Sum(p => p.Value)}).");
 		}
 	}
 }
