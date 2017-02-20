@@ -72,7 +72,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 					ev.Set();
 					success = received.ok;
 				},
-				socketClient.DirectMessageLookup[target.UniqueId].id, message);
+				socketClient.DirectMessages.First(m => m.user == target.UniqueId).id, message);
 			ev.Wait(TimeSpan.FromSeconds(10));
 			return success ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
