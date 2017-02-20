@@ -540,10 +540,12 @@ namespace BaggyBot.Database
 				LockObj.LockMessage = MiscTools.GetCurrentMethod();
 				Logger.Log(this, "finding words");
 				var words = from word in SqlConnector.Words
-							where word.Uses > 1
-							select word;
+				            group word by word.Word.ToLower();
 				Logger.Log(this, "building dictionary");
-				globalWordCount = words.ToDictionary(word => word.Word, word => word.Uses);
+
+				globalWordCount = words.ToDictionary(word => word.Key, word => word.Sum(w => w.Uses));
+
+				
 
 				Logger.Log(this, "finding sentences");
 				userSentences = (from sentence in SqlConnector.ChatLog
@@ -563,11 +565,17 @@ namespace BaggyBot.Database
 			var userWords = userSentences.SelectMany(WordTools.GetWords);
 
 			Logger.Log(this, "grouping user words");
-			var userWordCount = userWords.GroupBy(word => word).Where(g => g.Count() > 1).ToDictionary(group => group.Key, group => group.Count());
+			var userWordCount = userWords.GroupBy(word => word.ToLower()).Where(g => g.Count() > 1).ToDictionary(group => group.MostFrequent(), group => group.Count());
 
 			Logger.Log(this, "calculating usage difference of " + userWordCount.Count + " words");
 
-			var topics = userWordCount.Where(pair => globalWordCount.ContainsKey(pair.Key)).Select(pair => new Topic(pair.Key, pair.Value, globalWordCount[pair.Key])).ToList();
+			var topics = userWordCount.Where(pair => globalWordCount.ContainsKey(pair.Key.ToLower())).Select(pair => new Topic(pair.Key, pair.Value, globalWordCount[pair.Key.ToLower()])).ToList();
+
+			if (topics.Count == 0)
+			{
+				// Topics.Count can be 0 if the user only used a few words.
+				return null;
+			}
 
 			Logger.Log(this, "calculating average usage difference");
 			// First, we need to normalise each word, so that a score of 1 means it's used just as often as the average user uses it.

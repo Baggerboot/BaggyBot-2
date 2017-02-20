@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BaggyBot.Tools
@@ -21,6 +22,14 @@ namespace BaggyBot.Tools
 			{
 				yield return col;
 			}
+		}
+
+		/// <summary>
+		/// Returns the most frequently occurring value in a sequence.
+		/// </summary>
+		public static T MostFrequent<T>(this IEnumerable<T> sequence)
+		{
+			return sequence.GroupBy(e => e).OrderByDescending(g => g.Count()).First().Key;
 		}
 
 		public static string Format(this Exception e)
