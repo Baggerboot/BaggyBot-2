@@ -69,8 +69,10 @@ namespace BaggyBot.Commands.Import
 			if (channel != null)
 			{
 				buffer = buffer.Select(m => new ChatMessage(m.SentAt, m.Sender, channel, m.Body, m.Action)).ToList();
-				command.Reply($"All messages in the buffer have been moved to {channel}");
+				command.Reply($"all messages in the buffer have been moved to {channel}");
+				return;
 			}
+			command.Reply("please specify a transformation.");
 		}
 
 		private void ImportMessages(CommandArgs command, OperationResult result)
