@@ -34,7 +34,8 @@ namespace BaggyBot.Commands.Import
 					.AddFlag("lookup-users")
 					.AddFlag("current-channel", 'c'))
 				.AddOperation("commit", new Operation())
-;
+				.AddOperation("dump", new Operation()
+				.AddArgument("file-name"));
 
 			var result = parser.Parse(command.FullArgument);
 
@@ -117,7 +118,14 @@ namespace BaggyBot.Commands.Import
 
 		private List<ChatMessage> ImportFromLog(ChatChannel channel)
 		{
-			
+			return StatsDatabase.GetChatLog(channel).Select(l =>
+			{
+				var dbUser = StatsDatabase.GetUserById(l.SenderId.Value);
+				return new ChatMessage(
+					l.SentAt,
+					new ChatUser(l.Nick, dbUser.UniqueId, preferredName: dbUser.AddressableName),
+					new ChatChannel(l.ChannelId, l.Channel), l.Message);
+			}).ToList();
 		}
 
 		private List<ChatMessage> ImportFromFile(ChatChannel channel, string file, string filetype)

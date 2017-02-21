@@ -892,6 +892,23 @@ namespace BaggyBot.Database
 				Logger.Log(this, $"Added new permissions entry with name \"{entry.Name}\" to the database.");
 			}
 		}
+
+		public ChatLog[] GetChatLog(ChatChannel channel = null)
+		{
+			ChatLog[] log;
+			lock (LockObj)
+			{
+				if (channel == null)
+				{
+					log = SqlConnector.ChatLog.ToArray();
+				}
+				else
+				{
+					log = SqlConnector.ChatLog.Where(l => l.ChannelId == channel.Identifier).ToArray();
+				}
+			}
+			return log;
+		}
 	}
 
 	internal class Topic
