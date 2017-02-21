@@ -6,6 +6,7 @@ using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
 using LinqToDB;
+using Mono.CSharp.Linq;
 
 namespace BaggyBot.Database
 {
@@ -540,10 +541,15 @@ namespace BaggyBot.Database
 				LockObj.LockMessage = MiscTools.GetCurrentMethod();
 				Logger.Log(this, "finding words");
 				var words = from word in SqlConnector.Words
-				            group word by word.Word.ToLower();
+				            group word by word.Word.ToLower() into grouped
+							select new
+							{
+								Word = grouped.Key,
+								Uses = grouped.Sum(w => w.Uses)
+							};
 				Logger.Log(this, "building dictionary");
 
-				globalWordCount = words.ToDictionary(word => word.Key, word => word.Sum(w => w.Uses));
+				globalWordCount = words.ToDictionary(word => word.Word, word => word.Uses);
 
 				
 
@@ -579,17 +585,20 @@ namespace BaggyBot.Database
 
 			Logger.Log(this, "calculating average usage difference");
 			// First, we need to normalise each word, so that a score of 1 means it's used just as often as the average user uses it.
-			// This is done by taking the average score for a word, calculating the multiplier that will turn this score into a score of 1,
+			// This is done by taking the average usage percentage for a word, calculating the multiplier that will turn this score into a score of 1,
 			// and then multiplying all words by that multiplier.
-			var avgScore = topics.Average(topic => topic.Score);
-			var avgMultiplier = 1 / avgScore;
+
+			var totalUsage = globalWordCount.Sum(w => w.Value);
+			var userUsage = userWordCount.Sum(w => w.Value);
+
+			var multiplier = (double)totalUsage / userUsage;
 
 			var maxGlobalCount = globalWordCount.Max(pair => pair.Value);
 
 			Logger.Log(this, "multiplying difference with multiplier");
 			foreach (var topic in topics)
 			{
-				topic.Normalise(avgMultiplier);
+				topic.Normalise(multiplier);
 				topic.ScoreByOccurrence(maxGlobalCount);
 			}
 			return topics.OrderByDescending(topic => topic.Score);
@@ -890,20 +899,39 @@ namespace BaggyBot.Database
 		public string Name { get; }
 		public int UserCount { get; }
 		public int GlobalCount { get; }
+
+		public double UsagePercentage { get; }
+		/// <summary>
+		/// How many times the specified user used this word relative to their average word usage.
+		/// </summary>
+		public double UsageFactor { get; private set; }
+
+		public double ScoredByOccurrence { get; private set; }
 		public double Score { get; private set; }
 
 		public void Normalise(double multiplier)
 		{
-			Score = Score * multiplier;
+			UsageFactor = UsagePercentage * multiplier;
 		}
 
 		public void ScoreByOccurrence(int maxGlobalCount)
 		{
+			var countPercentage = (double)GlobalCount/maxGlobalCount;
+
+			ScoredByOccurrence = UsageFactor + countPercentage / 2;
+			Score = ScoredByOccurrence;
+
+			if (UserCount == GlobalCount)
+			{
+				Score = Score - 0.1;
+			}
+
+
 			// Todo: find a better way to do this
 			// This biases less common words.
 			if (UserCount != GlobalCount && GlobalCount < maxGlobalCount / 2.0)
 			{
-				Score += 1.5;
+				//Score += 1.5;
 			}
 		}
 
@@ -912,7 +940,9 @@ namespace BaggyBot.Database
 			Name = name;
 			UserCount = userCount;
 			GlobalCount = globalCount;
-			Score = (double)UserCount / GlobalCount;
+			UsagePercentage = (double)UserCount / GlobalCount;
 		}
+
+		public override string ToString() => $"{Name}: {UserCount} / {GlobalCount} -- Score: {Score}";
 	}
 }

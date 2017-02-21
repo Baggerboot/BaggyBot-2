@@ -26,10 +26,12 @@ namespace BaggyBot.Commands.Import
 					.AddKey("channel-name", null, 'c')
 					.AddKey("channel-id", command.Channel.Identifier, 'C')
 					.AddKey("file-name", null, 'f')
-					.AddKey("file-type", "slack-history", 't'))
+					.AddKey("file-type", "slack-history", 't')
+					.AddFlag("from-log", 'l'))
 				.AddOperation("transform", new Operation()
 					.AddKey("channel-name", null, 'n')
 					.AddKey("channel-id", null, 'i')
+					.AddFlag("lookup-users")
 					.AddFlag("current-channel", 'c'))
 				.AddOperation("commit", new Operation())
 ;
@@ -82,6 +84,7 @@ namespace BaggyBot.Commands.Import
 			var channel = channelName != null ? Client.FindChannel(channelName) : Client.GetChannel(channelId);
 			var file = result.Keys["file-name"];
 			var filetype = result.Keys["file-type"];
+			bool fromLog = result.Flags["from-log"];
 
 			var cutoff = DateTime.Now;
 			// TODO: we probably want to drop any messages before the cutoff point to prevent duplicates
@@ -90,7 +93,11 @@ namespace BaggyBot.Commands.Import
 			List<ChatMessage> sorted;
 			try
 			{
-				if (file == null)
+				if (fromLog)
+				{
+					sorted = ImportFromLog(channel);
+				}
+				else if (file == null)
 				{
 					sorted = ImportFromBacklog(channel, cutoff);
 				}
@@ -106,6 +113,11 @@ namespace BaggyBot.Commands.Import
 			}
 			buffer = buffer.Concat(sorted).OrderBy(m => m.SentAt).ToList();
 			command.Reply($"{sorted.Count} messages have been added to the buffer (total: {buffer.Count} messages). Oldest: {sorted.First().SentAt} - Newest: {sorted.Last().SentAt} -- Oldest in buffer: {buffer.First().SentAt} - Newest: {buffer.Last().SentAt}");
+		}
+
+		private List<ChatMessage> ImportFromLog(ChatChannel channel)
+		{
+			
 		}
 
 		private List<ChatMessage> ImportFromFile(ChatChannel channel, string file, string filetype)
@@ -125,9 +137,9 @@ namespace BaggyBot.Commands.Import
 			var data = JsonConvert.DeserializeObject<SlackHistory.ChannelImport>(contents);
 
 			var messages = data.messages.Where(m => m.subtype != "file_comment" && m.subtype != "bot_message").Select(m => new ChatMessage(m.ts,
-																	 Client.GetUser(m.user),
-																	 new ChatChannel(data.channel_info.id, data.channel_info.name),
-																	 m.text)).OrderBy(m => m.SentAt).ToList();
+				Client.GetUser(m.user),
+				new ChatChannel(data.channel_info.id, data.channel_info.name),
+				m.text)).OrderBy(m => m.SentAt).ToList();
 			return messages;
 		}
 

@@ -4,13 +4,14 @@ using BaggyBot.CommandParsing;
 using BaggyBot.Database;
 using BaggyBot.Formatting;
 using BaggyBot.MessagingInterface;
+using BaggyBot.Permissions;
 
 namespace BaggyBot.Commands
 {
 	internal abstract class Command : IDisposable
 	{
 		public abstract PermissionLevel Permissions { get; }
-		public string PermissionName => "baggybot.modules.commands." + Name;
+		public PermNode PermissionName => PermNode.Commands.AddNode(Name);
 		public abstract string Name { get; }
 		public abstract string Usage { get; }
 		public abstract string Description { get; }

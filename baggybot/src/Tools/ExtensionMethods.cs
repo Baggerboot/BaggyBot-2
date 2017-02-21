@@ -32,6 +32,24 @@ namespace BaggyBot.Tools
 			return sequence.GroupBy(e => e).OrderByDescending(g => g.Count()).First().Key;
 		}
 
+		/// <summary>
+		/// Returns the median of a sequence
+		/// </summary>
+		public static double Median<T>(this IEnumerable<T> sequence, Func<T, double> selector)
+		{
+			var list = sequence.ToList();
+			var count = list.Count;
+			var ordered = list.OrderBy(selector).ToList();
+			if (count % 2 == 0)
+			{
+				return ordered.Skip(count/2 - 1).Take(2).Average(selector);
+			}
+			else
+			{
+				return selector(ordered[count/2]);
+			}
+		}
+
 		public static string Format(this Exception e)
 		{
 			return $"{e.GetType().Name}: {e.Message}";

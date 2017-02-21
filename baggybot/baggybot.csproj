@@ -230,8 +230,9 @@
     <Compile Include="src\MessagingInterface\Events\NameChangeEvent.cs" />
     <Compile Include="src\MessagingInterface\Events\PartEvent.cs" />
     <Compile Include="src\MessagingInterface\Events\QuitEvent.cs" />
-    <Compile Include="src\MessagingInterface\PermissionsManager.cs" />
+    <Compile Include="src\Permissions\PermissionsManager.cs" />
     <Compile Include="src\Monitoring\Diagnostics\TraceBuilder.cs" />
+    <Compile Include="src\Permissions\PermNode.cs" />
     <Compile Include="src\Plugins\Internal\Curse\CursePlugin.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordExtensionMethods.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordPlugin.cs" />

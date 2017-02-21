@@ -30,7 +30,7 @@ namespace BaggyBot.Commands
 		protected abstract void GetBuffer(CommandArgs command);
 		protected void ProcessControlCommand(CommandArgs command)
 		{
-			if (!Client.Permissions.Test(command, "baggybot.modules.commands.interpreters.control"))
+			if (!Client.Permissions.Test(command, PermissionName.AddNode("control")))
 			{
 				command.ReturnMessage("Interpreter control commands may only be used by the bot operator");
 				return;

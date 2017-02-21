@@ -5,10 +5,10 @@ using System.Linq;
 using BaggyBot.Commands;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
-using BaggyBot.Database.Model;
+using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 
-namespace BaggyBot.MessagingInterface
+namespace BaggyBot.Permissions
 {
 	internal class PermissionsManager
 	{
@@ -58,7 +58,7 @@ namespace BaggyBot.MessagingInterface
 		/// Tries to use the permission system first, but falls back to an operator
 		/// check otherwise.
 		/// </summary>
-		public bool Test(CommandArgs command, string permissionName)
+		public bool Test(CommandArgs command, PermNode permissionName)
 		{
 			return Test(command.Sender, command.Channel, permissionName);
 		}
@@ -68,7 +68,7 @@ namespace BaggyBot.MessagingInterface
 		/// Tries to use the permission system first, but falls back to an operator
 		/// check otherwise.
 		/// </summary>
-		public bool Test(ChatMessage message, string permissionName)
+		public bool Test(ChatMessage message, PermNode permissionName)
 		{
 			return Test(message.Sender, message.Channel, permissionName);
 		}
@@ -78,7 +78,7 @@ namespace BaggyBot.MessagingInterface
 		/// Tries to use the permission system first, but falls back to an operator
 		/// check otherwise.
 		/// </summary>
-		public bool Test(ChatUser user, ChatChannel channel, string permissionName)
+		public bool Test(ChatUser user, ChatChannel channel, PermNode permissionName)
 		{
 			var permEntry = CheckPermission(user, channel, permissionName);
 
@@ -90,7 +90,7 @@ namespace BaggyBot.MessagingInterface
 		/// <returns>True or false if permission is explicitly granted or denied,
 		/// null if no permission entries are applicable for this user.</returns>
 		/// </summary>
-		public bool? CheckPermission(ChatUser user, string permissionName)
+		public bool? CheckPermission(ChatUser user, PermNode permissionName)
 		{
 			return CheckPermission(user, null, permissionName);
 		}
@@ -100,7 +100,7 @@ namespace BaggyBot.MessagingInterface
 		/// <returns>True or false if permission is explicitly granted or denied,
 		/// null if no permission entries are applicable for this user.</returns>
 		/// </summary>
-		public bool? CheckPermission(ChatUser user, ChatChannel channel, string permissionName)
+		public bool? CheckPermission(ChatUser user, ChatChannel channel, PermNode permissionName)
 		{
 			// If we don't have a DB connection, we should fall back to built-in permissions.
 			if (database.ConnectionState != ConnectionState.Open) return null;
@@ -117,14 +117,14 @@ namespace BaggyBot.MessagingInterface
 			return entries.FirstOrDefault()?.Value;
 		}
 
-		private IEnumerable<string> GetNodes(string permissionName)
+		private IEnumerable<string> GetNodes(PermNode permissionName)
 		{
-			yield return permissionName;
+			yield return permissionName.Path;
 
-			var cur = permissionName.Length;
-			while ((cur = permissionName.LastIndexOf(".", cur - 1, StringComparison.Ordinal)) >= 0)
+			var cur = permissionName.Path.Length;
+			while ((cur = permissionName.Path.LastIndexOf(".", cur - 1, StringComparison.Ordinal)) >= 0)
 			{
-				yield return permissionName.Substring(0, cur) + ".*";
+				yield return permissionName.Path.Substring(0, cur) + ".*";
 			}
 		}
 	}

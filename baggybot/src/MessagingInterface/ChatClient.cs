@@ -7,6 +7,7 @@ using BaggyBot.MessagingInterface.Events;
 using BaggyBot.MessagingInterface.Handlers;
 using BaggyBot.MessagingInterface.Handlers.Administration;
 using BaggyBot.Monitoring;
+using BaggyBot.Permissions;
 using BaggyBot.Plugins;
 
 namespace BaggyBot.MessagingInterface

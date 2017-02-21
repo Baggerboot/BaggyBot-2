@@ -4,6 +4,7 @@ using System.Linq;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
+using BaggyBot.Permissions;
 
 namespace BaggyBot.MessagingInterface.Handlers.Administration
 {
@@ -16,7 +17,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 			if (ConfigManager.Config.Administration.Enabled)
 			{
 				var evts = Client.Configuration.AdministrationEvents.Where(e => e.Enabled);
-				Logger.Log(this, $"Administration module enabled: {evts.Count()} events configured.");
+				Logger.Log(this, $"Administration module enabled: {evts.Count()} events configured.", LogLevel.Info);
 			}
 		}
 
@@ -25,7 +26,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 			// Only handle events if the administration module is enabled globally
 			if (!ConfigManager.Config.Administration.Enabled) return;
 			// Only handle events for non-operators and users who aren't ignored
-			if (Client.Permissions.Test(ev.Message, "baggybot.administration.ignore-user")) return;
+			if (Client.Permissions.Test(ev.Message, PermNode.Administration.AddNode("ignore-user"))) return;
 
 			foreach (var handler in GetMapping(ev.Message.Sender.UniqueId))
 			{
