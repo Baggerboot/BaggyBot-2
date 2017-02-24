@@ -25,6 +25,7 @@ namespace BaggyBot.Commands
 				.AddArgument("url")
 				.AddFlag("follow-redirects", 'f')
 				.AddFlag("show-headers", 'h')
+				.AddFlag("preserve-newlines", 'n')
 				.AddKey("content-type", 'c')
 				.AddRestArgument());
 
@@ -82,7 +83,7 @@ namespace BaggyBot.Commands
 						sb.AppendLine(text);
 					}
 				}
-				if (Client.Capabilities.AllowsMultilineMessages)
+				if (Client.Capabilities.AllowsMultilineMessages || cmd.Flags["preserve-newlines"])
 				{
 					command.ReturnMessage($"{Frm.MMultiline}{sb}{Frm.MMultiline}");
 				}
