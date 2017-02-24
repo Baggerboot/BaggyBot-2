@@ -23,7 +23,12 @@ namespace BaggyBot.Permissions
 
 		public PermNode AddNode(string subNode)
 		{
-			return new PermNode(Path + NodeSeparator + subNode);
+			return new PermNode(Path + NodeSeparator.Path + subNode);
+		}
+
+		public override string ToString()
+		{
+			return Path;
 		}
 	}
 }

@@ -112,7 +112,7 @@ namespace BaggyBot.Permissions
 			}
 			else
 			{
-				Logger.Log(this, $"No permission entries apply to {user} in {channel} for {permissionName}");
+				Logger.Log(this, $"No permission entries apply to {user} in {channel} for {permissionName.Path}");
 			}
 			return entries.FirstOrDefault()?.Value;
 		}
