@@ -52,6 +52,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public IrcPlugin(ServerCfg config) : base(config)
 		{
+			MessageFormatters.Add(new IrcMessageFormatter());
 			client = new IrcClient();
 			client.OnNetLibDebugLog += (sender, message) => Logger.Log(sender, "[NL#]" + message, LogLevel.Info);
 			client.OnMessageReceived += MessageReceivedHandler;
@@ -83,7 +84,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		private ChatUser ToChatUser(IrcUser user)
 		{
-			return new ChatUser(user.Nick, $"{user.Nick}!{user.Ident}@{user.Hostmask}", false);
+			return new ChatUser(user.Nick, $"{user.Nick}!{user.Ident}@{user.Hostmask}");
 		}
 
 		public override ChatUser GetUser(string id)
@@ -93,17 +94,29 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
-			switch (client.SendMessage(target.Identifier, message))
+			var lines = message.Split(new [] { "\r\n", "\n" }, StringSplitOptions.None);
+
+			MessageSendResult result = MessageSendResult.Success;
+			foreach (var line in lines)
 			{
-				case IRCSharp.MessageSendResult.Success:
-					return MessageSendResult.Success;
-				case IRCSharp.MessageSendResult.Failure:
-					return MessageSendResult.Success;
-				case IRCSharp.MessageSendResult.FloodLimitHit:
-					return MessageSendResult.FloodLimitHit;
-				default:
-					throw new ArgumentOutOfRangeException();
+				switch (client.SendMessage(target.Identifier, line))
+				{
+					// Not perfect since we only get the result of the last message this way.
+					// oh well.
+					case IRCSharp.MessageSendResult.Success:
+						result = MessageSendResult.Success;
+						break;
+					case IRCSharp.MessageSendResult.Failure:
+						result = MessageSendResult.Success;
+						break;
+					case IRCSharp.MessageSendResult.FloodLimitHit:
+						result = MessageSendResult.FloodLimitHit;
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
 			}
+			return result;
 		}
 
 		public override MessageSendResult SendMessage(ChatUser target, string message)
@@ -182,7 +195,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public override ChatUser FindUser(string name)
 		{
-			throw new NotImplementedException();
+			return new ChatUser(name, null);
 		}
 
 		public override bool Connect()
