@@ -237,6 +237,7 @@
     <Compile Include="src\Plugins\Internal\Discord\DiscordExtensionMethods.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordPlugin.cs" />
     <Compile Include="src\Plugins\Internal\Irc\IrcChatUser.cs" />
+    <Compile Include="src\Plugins\Internal\Irc\IrcMessageFormatter.cs" />
     <Compile Include="src\Plugins\Internal\Slack\SlackMessagePreprocessor.cs" />
     <Compile Include="src\Plugins\Internal\Slack\SlackPlugin.cs" />
     <Compile Include="src\MessagingInterface\ChatChannel.cs" />
