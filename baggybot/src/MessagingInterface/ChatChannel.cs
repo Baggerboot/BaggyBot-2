@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace BaggyBot.MessagingInterface
 {
@@ -21,6 +22,18 @@ namespace BaggyBot.MessagingInterface
 			IsPrivateMessage = isPrivateMessage;
 			Name = name;
 			Identifier = identifier;
+		}
+
+		public override bool Equals(object obj)
+		{
+			var channel = obj as ChatChannel;
+			if (channel?.Identifier == null || Identifier == null) return false;
+			return string.Equals(Identifier, channel.Identifier, StringComparison.Ordinal);
+		}
+
+		public override int GetHashCode()
+		{
+			return Identifier?.GetHashCode() ?? 0;
 		}
 
 		public override string ToString() => $"{Name} ({Identifier}) {(IsPrivateMessage ? "(private message)" : "")}";

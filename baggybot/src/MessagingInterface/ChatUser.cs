@@ -49,6 +49,18 @@ namespace BaggyBot.MessagingInterface
 			DbUser = user;
 		}
 
+		public override bool Equals(object obj)
+		{
+			var chatUser = obj as ChatUser;
+			if (chatUser?.UniqueId == null || UniqueId == null) return false;
+			return string.Equals(UniqueId, chatUser.UniqueId, StringComparison.Ordinal);
+		}
+
+		public override int GetHashCode()
+		{
+			return UniqueId?.GetHashCode() ?? 0;
+		}
+
 		public override string ToString()
 		{
 			return $"{AddressableName} ({UniqueId})";
