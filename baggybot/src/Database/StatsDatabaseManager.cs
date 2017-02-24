@@ -541,7 +541,7 @@ namespace BaggyBot.Database
 				LockObj.LockMessage = MiscTools.GetCurrentMethod();
 				Logger.Log(this, "finding words");
 				var words = from word in SqlConnector.Words
-				            group word by word.Word.ToLower() into grouped
+							group word by word.Word.ToLower() into grouped
 							select new
 							{
 								Word = grouped.Key,
@@ -551,7 +551,7 @@ namespace BaggyBot.Database
 
 				globalWordCount = words.ToDictionary(word => word.Word, word => word.Uses);
 
-				
+
 
 				Logger.Log(this, "finding sentences");
 				userSentences = (from sentence in SqlConnector.ChatLog
@@ -787,7 +787,7 @@ namespace BaggyBot.Database
 				if (matches.Count == 0)
 				{
 					var group = new PermissionGroup
-					{  
+					{
 						Name = uniqueGroupName,
 						SinglePermission = true,
 						Created = DateTime.Now
@@ -907,7 +907,7 @@ namespace BaggyBot.Database
 		{
 			lock (LockObj)
 			{
-				if(SqlConnector.UserGroups.Any(g => g.Name == entry.Name)) throw new ArgumentException("A permissions entry with the given name already exists.");
+				if (SqlConnector.UserGroups.Any(g => g.Name == entry.Name)) throw new ArgumentException("A permissions entry with the given name already exists.");
 				SqlConnector.Insert(entry);
 				Logger.Log(this, $"Added new permissions entry with name \"{entry.Name}\" to the database.");
 			}
@@ -977,7 +977,7 @@ namespace BaggyBot.Database
 
 		public void ScoreByOccurrence(int maxGlobalCount)
 		{
-			var countPercentage = (double)GlobalCount/maxGlobalCount;
+			var countPercentage = (double)GlobalCount / maxGlobalCount;
 
 			ScoredByOccurrence = UsageFactor + countPercentage / 2;
 			Score = ScoredByOccurrence;
