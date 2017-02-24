@@ -883,6 +883,26 @@ namespace BaggyBot.Database
 			}
 		}
 
+		public User GetSingleUserFromGroup(UserGroup group)
+		{
+			if (!group.SingleUser) throw new ArgumentException("Given group is not a single-user group.");
+			lock (LockObj)
+			{
+				var membership = SqlConnector.UserGroupMembership.First(m => m.GroupId == group.Id);
+				return GetUserById(membership.UserId);
+			}
+		}
+
+		public string GetSinglePermissionFromGroup(PermissionGroup group)
+		{
+			if (!group.SinglePermission) throw new ArgumentException("Given group is not a single-permission group.");
+			lock (LockObj)
+			{
+				var membership = SqlConnector.PermissionGroupMembership.First(m => m.GroupId == group.Id);
+				return membership.PermissionName;
+			}
+		}
+
 		public void AddPermissionEntry(PermissionEntry entry)
 		{
 			lock (LockObj)
@@ -890,6 +910,30 @@ namespace BaggyBot.Database
 				if(SqlConnector.UserGroups.Any(g => g.Name == entry.Name)) throw new ArgumentException("A permissions entry with the given name already exists.");
 				SqlConnector.Insert(entry);
 				Logger.Log(this, $"Added new permissions entry with name \"{entry.Name}\" to the database.");
+			}
+		}
+
+		public string DescribePermissionEntry(PermissionEntry entry)
+		{
+			lock (LockObj)
+			{
+				var channelDesc = entry.ChannelId == null ? "all channels" : $"channel with ID \"{entry.ChannelId}\"";
+
+				var permGroup = SqlConnector.PermissionGroups.FirstOrDefault(g => g.Id == entry.PermissionGroup);
+				string permDesc;
+				if (permGroup == null) permDesc = "all permissions";
+				else if (permGroup.SinglePermission) permDesc = $"\"{GetSinglePermissionFromGroup(permGroup)}\"";
+				else permDesc = $"permission group\"{permGroup.Name}\"";
+
+				var userGroup = SqlConnector.UserGroups.FirstOrDefault(g => g.Id == entry.UserGroup);
+				string userDesc;
+				if (userGroup == null) userDesc = "all users";
+				else if (userGroup.SingleUser) userDesc = GetSingleUserFromGroup(userGroup).Nickname;
+				else userDesc = $"user group \"{userGroup.Name}\"";
+
+				//var word = (int)entry.Action % 2 == 0 ? "to" : "from";
+
+				return $"{entry.Action} {permDesc} for {userDesc} in {channelDesc}";
 			}
 		}
 

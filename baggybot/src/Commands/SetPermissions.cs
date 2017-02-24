@@ -102,6 +102,7 @@ namespace BaggyBot.Commands
 				Action = action
 			};
 			StatsDatabase.AddPermissionEntry(entry);
+			cmdArgs.ReturnMessage($"Permission applied: {StatsDatabase.DescribePermissionEntry(entry)}.");
 		}
 
 		private void Remove(CommandArgs cmdArgs, OperationResult cmd)
