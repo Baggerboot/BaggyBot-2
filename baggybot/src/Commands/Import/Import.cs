@@ -23,8 +23,9 @@ namespace BaggyBot.Commands.Import
 			var parser = new CommandParser(
 				new Operation())
 				.AddOperation("load", new Operation()
-					.AddKey("channel-name", null, 'c')
-					.AddKey("channel-id", command.Channel.Identifier, 'C')
+					.AddKey("channel-name", null, 'n')
+					.AddKey("channel-id", null, 'i')
+					.AddFlag("current-channel", 'c')
 					.AddKey("file-name", null, 'f')
 					.AddKey("file-type", "slack-history", 't')
 					.AddFlag("from-log", 'l'))
@@ -32,10 +33,11 @@ namespace BaggyBot.Commands.Import
 					.AddKey("channel-name", null, 'n')
 					.AddKey("channel-id", null, 'i')
 					.AddFlag("lookup-users")
-					.AddFlag("current-channel", 'c'))
+					.AddFlag("current-channel", 'c')
+					.AddFlag("dedup", 'd'))
 				.AddOperation("commit", new Operation())
 				.AddOperation("dump", new Operation()
-				.AddArgument("file-name"));
+					.AddArgument("file-name"));
 
 			var result = parser.Parse(command.FullArgument);
 
@@ -54,6 +56,7 @@ namespace BaggyBot.Commands.Import
 					else command.Reply($"something went wrong. {inserted} out of {buffer.Count} messages have been inserted.");
 					break;
 				default:
+					command.Reply("unknown operation: " + result.OperationName);
 					break;
 			}
 		}
@@ -69,7 +72,23 @@ namespace BaggyBot.Commands.Import
 					? (channelId == null ? null : Client.GetChannel(channelId))
 					: Client.FindChannel(channelName));
 
-			if (channel != null)
+			if (result.Flags["dedup"])
+			{
+				var deduplicated = buffer.GroupBy(m => m).Select(g => g.First());
+				var previous = buffer.Count;
+				buffer = deduplicated.ToList();
+				var difference = previous - buffer.Count;
+				if (difference == 0)
+				{
+					command.Reply("no duplicate messages were found.");
+				}
+				else
+				{
+					command.Reply($"removed {difference} duplicate(s) (prev. buffer size: {previous} - new size: {buffer.Count} messages.");
+				}
+				return;
+			}
+			else if (channel != null)
 			{
 				buffer = buffer.Select(m => new ChatMessage(m.SentAt, m.Sender, channel, m.Body, m.Action)).ToList();
 				command.Reply($"all messages in the buffer have been moved to {channel}");
@@ -82,10 +101,15 @@ namespace BaggyBot.Commands.Import
 		{
 			var channelName = result.Keys["channel-name"];
 			var channelId = result.Keys["channel-id"];
-			var channel = channelName != null ? Client.FindChannel(channelName) : Client.GetChannel(channelId);
+			var currentChannel = result.Flags["current-channel"];
+			var channel = currentChannel
+				? command.Channel
+				: (channelName == null
+					? (channelId == null ? null : Client.GetChannel(channelId))
+					: Client.FindChannel(channelName));
 			var file = result.Keys["file-name"];
 			var filetype = result.Keys["file-type"];
-			bool fromLog = result.Flags["from-log"];
+			var fromLog = result.Flags["from-log"];
 
 			var cutoff = DateTime.Now;
 			// TODO: we probably want to drop any messages before the cutoff point to prevent duplicates
