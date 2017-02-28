@@ -106,7 +106,7 @@ namespace BaggyBot.Permissions
 			// If we don't have a DB connection, we should fall back to built-in permissions.
 			if (database.ConnectionState != ConnectionState.Open) return null;
 
-			var entries = database.GetPermissionEntries(user.DbUser, channel, GetNodes(permissionName).ToArray());
+			var entries = GetPermissionEntries(user, channel, permissionName);
 			if (entries.Any())
 			{
 				Logger.Log(this, $"Applicable permissions: \"{string.Join(", ", entries.Select(e => e.ToString()))}\"");
@@ -118,7 +118,13 @@ namespace BaggyBot.Permissions
 			return entries.FirstOrDefault()?.Value;
 		}
 
-		public PermissionEntry[] 
+	    /// <summary>
+	    /// Gets all permission entries applicable to the given user/channel combination.
+	    /// </summary>
+	    public PermissionEntry[] GetPermissionEntries(ChatUser user, ChatChannel channel, PermNode permissionName)
+	    {
+	        return database.GetPermissionEntries(user.DbUser, channel, GetNodes(permissionName).ToArray());
+	    }
 
 		private IEnumerable<string> GetNodes(PermNode permissionName)
 		{
