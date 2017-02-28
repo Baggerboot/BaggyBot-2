@@ -5,6 +5,7 @@ using System.Linq;
 using BaggyBot.Commands;
 using BaggyBot.Configuration;
 using BaggyBot.Database;
+using BaggyBot.Database.Model;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 
@@ -116,6 +117,8 @@ namespace BaggyBot.Permissions
 			}
 			return entries.FirstOrDefault()?.Value;
 		}
+
+		public PermissionEntry[] 
 
 		private IEnumerable<string> GetNodes(PermNode permissionName)
 		{

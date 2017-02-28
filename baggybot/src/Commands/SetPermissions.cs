@@ -8,6 +8,7 @@ using BaggyBot.Commands;
 using BaggyBot.Database.Model;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Tools;
+using SlackAPI;
 
 namespace BaggyBot.Commands
 {
@@ -15,7 +16,7 @@ namespace BaggyBot.Commands
 	{
 		public override PermissionLevel Permissions => PermissionLevel.BotOperator;
 		public override string Name => "perm";
-		public override string Usage => "";
+		public override string Usage => "[add] | [remove] | [find] | [test]";
 		public override string Description => "Manage permission entries.";
 
 		public override CommandParser CommandParser { get; }
@@ -48,10 +49,10 @@ namespace BaggyBot.Commands
 						.AddKey("user-group", 'g')
 						.AddKey("perm-name", 'p')
 						.AddKey("perm-group", 'P'))
-						.AddOperation(
-				"test",
-				new Operation()
-				.AddArgument("perm-name"));
+				.AddOperation(
+					"test",
+					new Operation()
+						.AddArgument("perm-name"));
 		}
 
 		public override void Use(CommandArgs cmdArgs, OperationResult cmd)
@@ -67,7 +68,15 @@ namespace BaggyBot.Commands
 				case "find":
 					Find(cmdArgs, cmd);
 					break;
+				case "test":
+					Test(cmdArgs, cmd);
+					break;
 			}
+		}
+
+		private void Test(CommandArgs cmdArgs, OperationResult cmd)
+		{
+			var entries = 
 		}
 
 		private void Add(CommandArgs cmdArgs, OperationResult cmd)
