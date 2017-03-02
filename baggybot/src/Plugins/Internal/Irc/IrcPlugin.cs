@@ -195,7 +195,8 @@ namespace BaggyBot.Plugins.Internal.Irc
 
 		public override ChatUser FindUser(string name)
 		{
-			return new ChatUser(name, null);
+			var res = client.Whois(name);
+			return ToChatUser(res);
 		}
 
 		public override bool Connect()
