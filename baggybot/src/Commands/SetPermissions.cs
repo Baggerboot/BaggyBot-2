@@ -7,6 +7,7 @@ using BaggyBot.CommandParsing;
 using BaggyBot.Commands;
 using BaggyBot.Database.Model;
 using BaggyBot.MessagingInterface;
+using BaggyBot.Permissions;
 using BaggyBot.Tools;
 using SlackAPI;
 
@@ -37,6 +38,10 @@ namespace BaggyBot.Commands
 						.AddKey("perm-group", 'P')
 						.AddFlag("disabled"))
 				.AddOperation(
+					"addgroup",
+					new Operation()
+						.AddArgument("group-name"))
+				.AddOperation(
 					"remove",
 					new Operation()
 						.AddArgument("name"))
@@ -52,7 +57,10 @@ namespace BaggyBot.Commands
 				.AddOperation(
 					"test",
 					new Operation()
-						.AddArgument("perm-name"));
+						.AddArgument("perm-name")
+						.AddKey("channel", 'c')
+						.AddKey("channel-id", 'C')
+						.AddKey("user-name", 'u'));
 		}
 
 		public override void Use(CommandArgs cmdArgs, OperationResult cmd)
@@ -76,7 +84,28 @@ namespace BaggyBot.Commands
 
 		private void Test(CommandArgs cmdArgs, OperationResult cmd)
 		{
-			var entries = 
+			var permName = cmd.Arguments["perm-name"];
+			var userName = cmd.Keys["user-name"];
+			var channelId = cmd.Keys["channel-id"];
+			var channelName = cmd.Keys["channel"];
+
+			var user = userName == null ? cmdArgs.Sender : Client.FindUser(userName);
+			var channel = channelName != null
+				? Client.FindChannel(channelName)
+				: channelId != null
+					? Client.GetChannel(channelId)
+					: cmdArgs.Channel;
+
+			var entries = Client.Permissions.GetPermissionEntries(user, channel, new PermNode(permName));
+
+			if (entries.Length == 0)
+			{
+				cmdArgs.Reply($"no applicable permission entries found for {user} in {channel}.");
+			}
+			else
+			{
+				cmdArgs.Reply($"most relevant permission entry: {StatsDatabase.DescribePermissionEntry(entries.First())}");
+			}
 		}
 
 		private void Add(CommandArgs cmdArgs, OperationResult cmd)
@@ -87,13 +116,14 @@ namespace BaggyBot.Commands
 			// This might seem pointless, but it ensures that the channel ID is valid
 			if (channelId != null) channelId = Client.GetChannel(channelId).Identifier;
 
-			var action = (PermissionValue)Enum.Parse(typeof(PermissionValue), cmd.Arguments["action"].ToPascalCase());
+			var action = (PermissionValue) Enum.Parse(typeof(PermissionValue), cmd.Arguments["action"].ToPascalCase());
 
 			UserGroup userGroup = null;
 			var group = cmd.Keys["user-group"];
 			var name = cmd.Keys["user-name"];
 			if (group != null) userGroup = StatsDatabase.GetUserGroup(group);
-			if (name != null) userGroup = StatsDatabase.GetSingleUserGroup(StatsDatabase.MapUser(Client.FindUser(name)));
+			if (name != null)
+				userGroup = StatsDatabase.GetSingleUserGroup(StatsDatabase.MapUser(Client.FindUser(name)));
 
 			PermissionGroup permGroup = null;
 			group = cmd.Keys["perm-group"];
@@ -116,12 +146,10 @@ namespace BaggyBot.Commands
 
 		private void Remove(CommandArgs cmdArgs, OperationResult cmd)
 		{
-
 		}
 
 		private void Find(CommandArgs cmdArgs, OperationResult cmd)
 		{
-
 		}
 	}
 }
