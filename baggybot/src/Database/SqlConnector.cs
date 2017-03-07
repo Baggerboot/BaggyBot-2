@@ -153,6 +153,9 @@ namespace BaggyBot.Database
 			internalState = ConnectionState.Connecting;
 			connection = PostgreSQLTools.CreateDataConnection(connectionString);
 			internalState = ConnectionState.Open;
+
+			Logger.Log(this, $"Opened connection to {connection.Connection.Database} ({connection.DataProvider.Name}/{connection.DataProvider.ConnectionNamespace})", LogLevel.Info);
+
 			connection.OnClosing += (sender, args) => internalState = ConnectionState.Closed;
 			connection.OnClosed += (sender, args) => internalState = ConnectionState.Closed;
 			metadata = connection.GetTable<Metadata>();
