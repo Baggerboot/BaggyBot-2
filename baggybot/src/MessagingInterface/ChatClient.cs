@@ -78,11 +78,11 @@ namespace BaggyBot.MessagingInterface
 			}
 
 			var sqlConnector = new SqlConnector();
-			Logger.Log(this, "Connecting to the database", LogLevel.Info);
+			Logger.Log(this, "Connecting to the database...", LogLevel.Info);
 			try
 			{
 				if (sqlConnector.OpenConnection(backend.ConnectionString))
-					Logger.Log(this, "Database connection established", LogLevel.Info);
+					Logger.Log(this, "Integrity check successful, database ready.", LogLevel.Info);
 				else
 					Logger.Log(this, "Database connection not established. Statistics collection will not be possible.", LogLevel.Warning);
 			}
