@@ -26,7 +26,7 @@ namespace BaggyBot.Database
 		{
 			return typeof (SqlConnector).GetProperties()
 				.Where(p => p.PropertyType.Name == "ITable`1")
-				.Select(p => p.PropertyType.GetCustomAttribute<TableAttribute>().Name);
+				.Select(p => p.PropertyType.GenericTypeArguments.First().GetCustomAttribute<TableAttribute>().Name);
 		}
 
 		protected void Update<T>(T match) where T : Poco
