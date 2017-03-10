@@ -21,7 +21,6 @@ namespace BaggyBot.MessagingInterface
 		public IReadOnlyList<ChatChannel> Channels => plugin.Channels;
 		public ServerCapabilities Capabilities => plugin.Capabilities;
 
-		public bool Connect() => plugin.Connect();
 		public void JoinChannel(ChatChannel channel) => plugin.Join(channel);
 		public void Quit(string reason) => plugin.Quit(reason);
 		public void Part(ChatChannel channel, string reason = null) => plugin.Part(channel, reason);
@@ -32,6 +31,7 @@ namespace BaggyBot.MessagingInterface
 
 		public event Action<string, Exception> ConnectionLost;
 
+		private readonly ChatClientEventManager eventManager;
 		private readonly Plugin plugin;
 		public ServerCfg Configuration;
 		public StatsDatabaseManager StatsDatabase { get; }
@@ -62,9 +62,18 @@ namespace BaggyBot.MessagingInterface
 				handler.BindClient(this);
 				handler.Initialise();
 			}
-			var eventManager = new ChatClientEventManager(handlers);
+			eventManager = new ChatClientEventManager(handlers);
+			AttachEventHandlers();
+		}
 
-			AttachEventHandlers(eventManager);
+		public bool Connect()
+		{
+			var res = plugin.Connect();
+			if (res)
+			{
+				eventManager.HandleConnectionEstablished();
+			}
+			return res;
 		}
 
 		/// <summary>
@@ -94,7 +103,7 @@ namespace BaggyBot.MessagingInterface
 			return sqlConnector;
 		}
 
-		private void AttachEventHandlers(ChatClientEventManager eventManager)
+		private void AttachEventHandlers()
 		{
 			plugin.OnMessageReceived += message =>
 			{
