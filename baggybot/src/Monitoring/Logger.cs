@@ -30,6 +30,9 @@ namespace BaggyBot.Monitoring
 	public static class Logger
 	{
 		public static Colours UseColouredOutput { get; set; }
+		public static bool LogToFile { get; set; } = true;
+		public static bool LogToConsole { get; set; } = true;
+
 		public const string LogFileName = "baggybot.log";
 		private static bool disposed;
 		private static string prefix = string.Empty;
@@ -154,7 +157,7 @@ namespace BaggyBot.Monitoring
 
 		private static void WriteToLogFile(StringBuilder lineBuilder, bool writeLine)
 		{
-			if (disposed) return;
+			if (disposed || !LogToFile) return;
 
 			if (writeLine)
 				textWriter.WriteLine(lineBuilder.ToString());
@@ -215,6 +218,8 @@ namespace BaggyBot.Monitoring
 
 		private static void WriteToConsole(Colour lineColour, LogLevel level, StringBuilder lineBuilder)
 		{
+			if (!LogToConsole) return;
+
 			if (UseColouredOutput == Colours.Windows)
 			{
 				Console.ForegroundColor = GetForegroundColour(lineColour);
