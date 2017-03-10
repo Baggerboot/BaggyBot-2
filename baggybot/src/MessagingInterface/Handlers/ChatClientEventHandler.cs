@@ -58,5 +58,10 @@ namespace BaggyBot.MessagingInterface.Handlers
 		{
 			
 		}
+
+		public virtual void HandleConnectionEstablished()
+		{
+
+		}
 	}
 }

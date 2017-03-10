@@ -67,5 +67,13 @@ namespace BaggyBot.MessagingInterface.Handlers
 				handler.HandleQuit(quitEvent);
 			}
 		}
+
+		public void HandleConnectionEstablished()
+		{
+			foreach (var handler in internalHandlers)
+			{
+				handler.HandleConnectionEstablished();
+			}
+		}
 	}
 }
