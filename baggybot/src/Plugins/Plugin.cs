@@ -27,6 +27,10 @@ namespace BaggyBot.Plugins
 		/// </summary>
 		public abstract bool Connected { get; }
 		/// <summary>
+		/// A ChatUser representing the current user.
+		/// </summary>
+		public abstract ChatUser Self { get; }
+		/// <summary>
 		/// A list of channels the client is currently a part of.
 		/// </summary>
 		public abstract IReadOnlyList<ChatChannel> Channels { get; protected set; }
@@ -73,6 +77,7 @@ namespace BaggyBot.Plugins
 		/// The server configuration as defined in the configuration file.
 		/// </summary>
 		protected ServerCfg Configuration { get; }
+
 
 		protected Plugin(ServerCfg config)
 		{

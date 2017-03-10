@@ -23,6 +23,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 #pragma warning restore CS0067
 
 		public override bool Connected => client.State == ConnectionState.Connected;
+		public override ChatUser Self => new ChatUser(client.CurrentUser.Name, client.CurrentUser.Id.ToString());
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 
 		private readonly DiscordClient client;

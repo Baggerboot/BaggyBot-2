@@ -28,6 +28,7 @@ namespace BaggyBot.MessagingInterface
 		public ChatChannel FindChannel(string name) => plugin.FindChannel(name);
 		public ChatChannel GetChannel(string id) => plugin.GetChannel(id);
 		public void NotifyOperators(string message) => plugin.NotifyOperators(message);
+		public ChatUser Self => plugin.Self;
 
 		public event Action<string, Exception> ConnectionLost;
 

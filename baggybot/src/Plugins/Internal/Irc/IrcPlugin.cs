@@ -33,6 +33,7 @@ namespace BaggyBot.Plugins.Internal.Irc
 		private readonly IrcClient client;
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.Connected;
+		public override ChatUser Self => new ChatUser(client.Nick, $"{client.Nick}!{client.Ident}@{client.LocalHost}");
 
 		// These IRC commands are not handled in any way, as the information contained in them
 		// is not considered useful for the bot.

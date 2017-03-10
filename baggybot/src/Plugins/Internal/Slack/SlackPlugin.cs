@@ -30,7 +30,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 		public List<ChatUser> Users { get; protected set; }
 
 		public override bool Connected => socketClient.IsConnected;
-
+		public override ChatUser Self => new ChatUser(socketClient.MySelf.name, socketClient.MySelf.id);
 		private SlackSocketClient socketClient;
 		private Timer activityTimer;
 

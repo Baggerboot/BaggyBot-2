@@ -27,6 +27,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 		public override bool Connected => client.Connected;
+		public override ChatUser Self => new ChatUser(client.Self.Username, client.Self.UserID.ToString());
 
 		private readonly CurseClient client = new CurseClient();
 		private readonly NetworkCredential loginCredentials;
@@ -143,7 +144,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override ChatUser FindUser(string name)
 		{
-			var user = client.FindMember(requestedGroup.GroupID, name);
+			var user = client.FindMember(requestedGroup, name);
 			return new ChatUser(user.Username, user.UserID.ToString(), preferredName:user.Nickname);
 		}
 
