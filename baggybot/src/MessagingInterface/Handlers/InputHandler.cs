@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface.Events;
@@ -11,16 +12,19 @@ namespace BaggyBot.MessagingInterface.Handlers
 {
 	public class InputHandler : ChatClientEventHandler
 	{
-		private int height => Console.WindowHeight;
-		private int width => Console.WindowWidth;
+		private int Height => Console.WindowHeight;
+		private int Width => Console.WindowWidth;
 
-		private int previousX;
-		private int previousY;
+		private const int ChatAreaHeight = 1;
+		private int TextBufferHeight => Height - ChatAreaHeight;
 
 		private int currentChannelIndex = 0;
+		private ChatChannel CurrentChannel => Client.Channels[currentChannelIndex];
 
 		private string currentText = string.Empty;
-		private List<string> textBuffer = new List<string>();
+		private object consoleLock = new object();
+
+		private Dictionary<string, List<string>> textBuffers = new Dictionary<string, List<string>>();
 
 		public InputHandler()
 		{
@@ -30,51 +34,72 @@ namespace BaggyBot.MessagingInterface.Handlers
 		{
 			Logger.Log(this, "Suppressing console logging...", LogLevel.Info);
 			Logger.LogToConsole = false;
+			Console.CursorVisible = false;
 		}
 
 		public override void HandleConnectionEstablished()
 		{
+			Task.Run(() => InputLoop());
 			Task.Run(() => RenderLoop());
 		}
 
 		public override void HandleMessage(MessageEvent ev)
 		{
-			AddMessage($"[{ev.Message.Channel.Name}] {ev.Message.Sender.Nickname}: {ev.Message.Body}");
+			AddMessage(ev.Message.Channel.Identifier, FormatMessage(ev.Message));
 			Rerender();
 		}
 
-		private void SetCursorPosition(int x, int y)
+		private string FormatMessage(ChatMessage message)
 		{
-			previousX = Console.CursorLeft;
-			previousY = Console.CursorTop;
-
-			Console.SetCursorPosition(x, y);
+			return FormatMessage(message.Channel.Name, message.Sender.Nickname, message.Body);
 		}
 
-		private void RestoreCursorPosition()
+		private string FormatMessage(string channel, string sender, string body)
 		{
-			Console.SetCursorPosition(previousX, previousY);
+			return $"[{channel}] {sender}: {body}";
 		}
 
-		private void AddMessage(string message)
+		private void AddMessage(string bufferName, string message)
 		{
-			textBuffer.Add(message);
+			if (!textBuffers.ContainsKey(bufferName)) InitBuffer(bufferName);
+			textBuffers[bufferName].Add(message);
 		}
 
+		private void InitBuffer(string bufferName)
+		{
+			textBuffers[bufferName] = new List<string>();
+			Task.Run(() =>
+			{
+				IEnumerable<ChatMessage> backlog;
+				try
+				{
+					backlog = Client.GetBacklog(Client.GetChannel(bufferName), DateTime.Now, DateTime.MinValue).Reverse().Take(Height);
 
+				}
+				catch (Exception e)
+				{
+					return;
+				}
+				foreach (var line in backlog)
+				{
+					textBuffers[bufferName].Add(FormatMessage(line));
+				}
+				Rerender();
+			});
+		}
 
-		private void ClearCurrentLine()
+		private void ClearCurrentLine(char clearChar = ' ')
 		{
 			var x = Console.CursorLeft;
 			var y = Console.CursorTop;
 			// Clear the input line by writing spaces to it
-			Console.Write(new string(Enumerable.Repeat(' ', width).ToArray()));
+			Console.Write(new string(Enumerable.Repeat(clearChar, Width).ToArray()));
 			Console.SetCursorPosition(x, y);
 		}
 
 		private void ResetTextBuffer()
 		{
-			for (int i = 0; i < height; i++)
+			for (var i = 0; i < Height; i++)
 			{
 				ClearCurrentLine();
 				Console.WriteLine();
@@ -83,15 +108,21 @@ namespace BaggyBot.MessagingInterface.Handlers
 
 		private void Rerender()
 		{
-			RenderTextBuffer();
-			RenderChatArea();
+			lock (consoleLock)
+			{
+				RenderTextBuffer(CurrentChannel.Identifier);
+				RenderChatArea();
+			}
 		}
 
-		private void RenderTextBuffer()
+		private void RenderTextBuffer(string bufferName)
 		{
 			ResetTextBuffer();
-			var lastMessages = textBuffer.Skip(textBuffer.Count - height);
-			SetCursorPosition(0, 0);
+			if (!textBuffers.ContainsKey(bufferName)) InitBuffer(bufferName);
+
+			var currentBuffer = textBuffers[bufferName];
+			var lastMessages = currentBuffer.Skip(currentBuffer.Count - Height);
+			Console.SetCursorPosition(0, 0);
 			Console.ForegroundColor = ConsoleColor.White;
 			foreach (var message in lastMessages)
 			{
@@ -104,7 +135,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 			var channel = Client.Channels[currentChannelIndex];
 
 			// Move the cursor to the input line
-			SetCursorPosition(0, height - 1);
+			Console.SetCursorPosition(0, TextBufferHeight);
 			// Clear it
 			ClearCurrentLine();
 			// Write the input interface
@@ -112,7 +143,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 			Console.Write($"{channel.Name} > {currentText}");
 		}
 
-		private void RenderLoop()
+		private void InputLoop()
 		{
 			while (Client.Connected)
 			{
@@ -124,21 +155,38 @@ namespace BaggyBot.MessagingInterface.Handlers
 						currentChannelIndex = ++currentChannelIndex % Client.Channels.Count;
 						break;
 					case ConsoleKey.DownArrow:
-						currentChannelIndex = --currentChannelIndex % Client.Channels.Count;
+						currentChannelIndex = (currentChannelIndex + Client.Channels.Count - 1) % Client.Channels.Count;
 						break;
 					case ConsoleKey.Enter:
-						var channel = Client.Channels[currentChannelIndex];
-						Client.SendMessage(channel, currentText);
-						AddMessage($"[{channel.Name}] {Client.Self.Nickname}: {currentText}");
+						Client.SendMessage(CurrentChannel, currentText);
+						AddMessage(CurrentChannel.Identifier, FormatMessage(CurrentChannel.Name, Client.Self.Nickname, currentText));
 						currentText = string.Empty;
 						break;
 					case ConsoleKey.Backspace:
-						currentText = currentText.Substring(0, currentText.Length - 1);
+						if (currentText.Length > 0)
+						{
+							currentText = currentText.Substring(0, currentText.Length - 1);
+						}
 						break;
 					default:
 						currentText = currentText + key.KeyChar;
 						break;
 				}
+			}
+		}
+
+		private void RenderLoop()
+		{
+			var show = false;
+			while (Client.Connected)
+			{
+				lock (consoleLock)
+				{
+					show = !show;
+					Console.Write(show ? "_" : " ");
+					Console.CursorLeft = Console.CursorLeft-1;
+				}
+				Thread.Sleep(500);
 			}
 		}
 	}
