@@ -14,12 +14,18 @@ namespace BaggyBot.Configuration
 		public Integrations Integrations { get; private set; } = new Integrations();
 		public Quotes Quotes { get; private set; } = new Quotes();
 		public Administration Administration { get; private set; } = new Administration();
+		public Input Input { get; private set; } = new Input();
 		public Logging Logging { get; private set; } = new Logging();
 
 		public Operator[] Operators { get; set; } = new Operator[0];
 		public ServerCfg[] Servers { get; set; } = new ServerCfg[0];
 
 		public Metadata Metadata { get; private set; } = new Metadata();
+	}
+
+	public class Input
+	{
+		public bool Enabled { get; set; } = false;
 	}
 
 	public class Administration

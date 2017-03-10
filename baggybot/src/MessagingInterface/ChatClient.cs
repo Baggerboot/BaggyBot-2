@@ -57,6 +57,10 @@ namespace BaggyBot.MessagingInterface
 				// Processes commands
 				new CommandHandler()
 			};
+
+			// Allows sending messages through console input
+			if(ConfigManager.Config.Input.Enabled) handlers.Add(new InputHandler());
+
 			foreach (var handler in handlers)
 			{
 				handler.BindClient(this);

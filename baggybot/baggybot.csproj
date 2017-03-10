@@ -231,6 +231,7 @@
     <Compile Include="src\MessagingInterface\Events\NameChangeEvent.cs" />
     <Compile Include="src\MessagingInterface\Events\PartEvent.cs" />
     <Compile Include="src\MessagingInterface\Events\QuitEvent.cs" />
+    <Compile Include="src\MessagingInterface\Handlers\InputHandler.cs" />
     <Compile Include="src\Permissions\PermissionsManager.cs" />
     <Compile Include="src\Monitoring\Diagnostics\TraceBuilder.cs" />
     <Compile Include="src\Permissions\PermNode.cs" />

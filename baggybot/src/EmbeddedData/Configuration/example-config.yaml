@@ -148,6 +148,11 @@ administration:
       messages:
         warn: '$user, please do not spam.'
 
+# The input module allows you to use BaggyBot as a simple commandline chat
+# client. As it suppresses console logging, it is disabled by default.
+input:
+  enabled: false
+
 logging:
   log-file: baggybot.log
   # Set to true if you want log messages with the Debug log level to be logged
