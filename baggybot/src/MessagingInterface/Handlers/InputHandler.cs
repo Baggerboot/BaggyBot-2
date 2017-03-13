@@ -76,7 +76,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 					backlog = Client.GetBacklog(Client.GetChannel(bufferName), DateTime.Now, DateTime.MinValue).Reverse().Take(Height);
 
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					return;
 				}
