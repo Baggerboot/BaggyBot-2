@@ -51,9 +51,12 @@ namespace BaggyBot.Commands
 						.AddKey("query", 'q')
 						.AddKey("channel", 'c')
 						.AddKey("channel-id", 'C')
+						.AddKey("user", 'u')
 						.AddKey("user-group", 'g')
 						.AddKey("perm-name", 'p')
-						.AddKey("perm-group", 'P'))
+						.AddKey("perm-group", 'P')
+						.AddKey("enabled-only", false, 'e')
+						.AddKey("max-results", 3, 'n'))
 				.AddOperation(
 					"test",
 					new Operation()
@@ -141,7 +144,7 @@ namespace BaggyBot.Commands
 				Action = action
 			};
 			StatsDatabase.AddPermissionEntry(entry);
-			cmdArgs.ReturnMessage($"Permission applied: {StatsDatabase.DescribePermissionEntry(entry)}.");
+			cmdArgs.ReturnMessage($"Entry added: {StatsDatabase.DescribePermissionEntry(entry)}.");
 		}
 
 		private void Remove(CommandArgs cmdArgs, OperationResult cmd)
@@ -150,6 +153,36 @@ namespace BaggyBot.Commands
 
 		private void Find(CommandArgs cmdArgs, OperationResult cmd)
 		{
+			var query = cmd.Keys["query"];
+			var channelId = cmd.Keys["channel-id"];
+			var channelName = cmd.Keys["channel"];
+			var userGroup = cmd.Keys["user-group"];
+			var permGroup = cmd.Keys["perm-group"];
+			var userName = cmd.Keys["user"];
+			var permName = cmd.Keys["perm-name"];
+			var enabledOnly = cmd.GetKey<bool>("enabled-only");
+			var maxResults = cmd.GetKey<int>("max-results");
+
+			var user = userName == null ? null : Client.FindUser(userName);
+			var channel = channelName != null
+				? Client.FindChannel(channelName)
+				: channelId != null
+					? Client.GetChannel(channelId)
+					: cmdArgs.Channel;
+
+			var permissions = Client.Permissions.FindPermissionEntries(query, userGroup, permGroup, user.DbUser, new PermNode(permName), channel, enabledOnly);
+			if (permissions.Length == 0)
+			{
+				cmdArgs.Reply("no matching permission entries found.");
+			}
+			foreach (var entry in permissions.Take(maxResults))
+			{
+				cmdArgs.ReturnMessage(StatsDatabase.DescribePermissionEntry(entry));
+			}
+			if (permissions.Length - maxResults > 0)
+			{
+				cmdArgs.ReturnMessage($"...and {permissions.Length - maxResults} more.");
+			}
 		}
 	}
 }

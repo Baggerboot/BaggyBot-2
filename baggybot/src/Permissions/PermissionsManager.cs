@@ -125,6 +125,14 @@ namespace BaggyBot.Permissions
 	        return database.GetPermissionEntries(user.DbUser, channel, GetNodes(permissionName).ToArray());
 	    }
 
+		/// <summary>
+		/// Returns all permission entries matching the given search parameters.
+		/// </summary>
+		public PermissionEntry[] FindPermissionEntries(string query = null, string userGroup = null, string permGroup = null, User user = null, PermNode permissionName = null, ChatChannel channel = null, bool enabledOnly = false)
+		{
+			return database.FindPermissionEntries(query, userGroup, permGroup, user, GetNodes(permissionName).ToArray(), channel, enabledOnly);
+		}
+
 		private IEnumerable<string> GetNodes(PermNode permissionName)
 		{
 			yield return permissionName.Path;
