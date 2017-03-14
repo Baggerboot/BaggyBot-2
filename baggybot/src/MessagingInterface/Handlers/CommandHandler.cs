@@ -87,7 +87,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 				}
 				catch (Exception e)
 				{
-					var exceptionMessage = $"An unhandled exception (type: {e.GetType()}) occurred while trying to process your command! Exception message: \"{e.Message}\"";
+					var exceptionMessage = $"An unhandled exception occurred while trying to process your command ({e.GetType().Name}: {e.Message})";
 					cmdInfo.ReturnMessage(exceptionMessage);
 					// Previously, debugging information (filename and line number) were put in the error message.
 					// That's dubm, no reason to bother the user with information that's useless to them. Log the exception instead.
