@@ -27,7 +27,6 @@ namespace BaggyBot.Permissions
 		/// </summary>
 		public bool IsOperator(ChatUser user)
 		{
-			Logger.Log(null, "Performing operator check on " + user);
 			return operators.Any(op => Validate(user, op));
 		}
 
@@ -109,11 +108,11 @@ namespace BaggyBot.Permissions
 			var entries = GetPermissionEntries(user, channel, permissionName);
 			if (entries.Any())
 			{
-				Logger.Log(this, $"Applicable permissions: \"{string.Join(", ", entries.Select(e => e.ToString()))}\"");
+				Logger.Log(this, $"Applicable permissions: \"{string.Join(", ", entries.Select(e => e.ToString()))}\"", LogLevel.Trace);
 			}
 			else
 			{
-				Logger.Log(this, $"No permission entries apply to {user} in {channel} for {permissionName.Path}");
+				Logger.Log(this, $"No permission entries apply to {user} in {channel} for {permissionName.Path}", LogLevel.Trace);
 			}
 			return entries.FirstOrDefault()?.Value;
 		}
