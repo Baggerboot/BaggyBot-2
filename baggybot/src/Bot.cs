@@ -196,6 +196,8 @@ namespace BaggyBot
 					ShutdownAfterMessage();
 					break;
 			}
+			// On Linux, with older Mono versions, coloured output sometimes doesn't seem to work.
+			// Setting this to Colours.Ansi will fix that issue.
 			Logger.UseColouredOutput = Colours.Windows;
 
 			using (var bot = new Bot())
