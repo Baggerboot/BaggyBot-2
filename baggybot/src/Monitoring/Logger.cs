@@ -261,7 +261,7 @@ namespace BaggyBot.Monitoring
 		{
 			var stackTrace = new StackTrace(e, true);
 		    var frame = stackTrace.GetFrame(0);
-			Log(sender, $"An unhandled exception (type: {e.GetType()}) occurred while {currentAction}. Exception message: \"{e.Message}\"; in file:{frame?.GetFileName()}:{frame?.GetFileLineNumber()}", LogLevel.Error);
+			Log(sender, $"An unhandled exception occurred while {currentAction} ({e.GetType().Name}: {e.Message}) in file:{frame?.GetFileName()}:{frame?.GetFileLineNumber()}", LogLevel.Error);
 		}
 	}
 }
