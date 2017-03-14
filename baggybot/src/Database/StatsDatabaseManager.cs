@@ -5,6 +5,7 @@ using BaggyBot.Database.Model;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
 using BaggyBot.Tools;
+using IronPython.Modules;
 using LinqToDB;
 using Mono.CSharp.Linq;
 
@@ -714,6 +715,33 @@ namespace BaggyBot.Database
 			return membership;
 		}
 
+		public PermissionEntry[] FindPermissionEntries(string query = null, string userGroup = null, string permGroup = null, User user = null, string[] permNodes = null, ChatChannel channel = null, bool enabledOnly = false)
+		{
+			var permGroups = permGroup == null
+				? (permNodes == null
+					? null
+					: GetPermissionMembership(permNodes).Select(g => g.Id))
+				: new[] {GetPermissionGroup(permGroup).Id};
+
+			var userGroups = userGroup == null
+				? (user == null
+					? null
+					: GetUserMembership(user).Select(g => g.Id))
+				: new[] {GetUserGroup(userGroup).Id};
+
+			lock (LockObj)
+			{
+				var entries = from entry in SqlConnector.PermissionEntries
+					where entry.PermissionGroup == null || permGroups == null || permGroups.Contains(entry.PermissionGroup.Value)
+					where entry.UserGroup == null || userGroups == null || userGroups.Contains(entry.UserGroup.Value)
+					where query == null || entry.Name.ToLower().Contains(query.ToLower())
+					where channel == null || entry.ChannelId == channel.Identifier
+					where !enabledOnly || entry.Enabled
+					select entry;
+				return entries.ToArray();
+			}
+		}
+
 		public PermissionEntry[] GetPermissionEntries(User dbUser, ChatChannel channel, string[] nodes)
 		{
 			var userMembership = GetUserMembership(dbUser);
@@ -933,7 +961,7 @@ namespace BaggyBot.Database
 
 				//var word = (int)entry.Action % 2 == 0 ? "to" : "from";
 
-				return $"{entry.Action} {permDesc} for {userDesc} in {channelDesc}";
+				return $"{entry.Name}: {entry.Action} {permDesc} for {userDesc} in {channelDesc}";
 			}
 		}
 
