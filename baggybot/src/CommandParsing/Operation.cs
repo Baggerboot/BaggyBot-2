@@ -70,6 +70,11 @@ namespace BaggyBot.CommandParsing
 			return AddKey(longForm, defaultValue, typeof(int), shortForm);
 		}
 
+		public Operation AddKey(string longForm, bool defaultValue, char? shortForm = null)
+		{
+			return AddKey(longForm, defaultValue, typeof(bool), shortForm);
+		}
+
 		public Operation AddKey(string longForm, string defaultValue, char? shortForm = null)
 		{
 			return AddKey(longForm, defaultValue, typeof(string), shortForm);
@@ -282,6 +287,7 @@ namespace BaggyBot.CommandParsing
 		private static object ConvertString(string value, Type type)
 		{
 			if (type == typeof(string)) return value;
+			if (type == typeof(bool)) return Convert.ToBoolean(value);
 			if (type == typeof(int)) return Convert.ToInt32(value);
 			if (type == typeof(double)) return Convert.ToDouble(value);
 			if (type == typeof(DateTime)) return Convert.ToDateTime(value);
