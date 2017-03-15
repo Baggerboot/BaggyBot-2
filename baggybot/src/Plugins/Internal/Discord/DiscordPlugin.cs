@@ -62,9 +62,16 @@ namespace BaggyBot.Plugins.Internal.Discord
 			client.Dispose();
 		}
 
-		public override void Ban(ChatUser chatUser)
+		public override void Ban(ChatUser chatUser, ChatChannel channel = null)
 		{
+			if(channel != null) throw new NotSupportedException("The Discord plugin does not support banning users from a channel.");
 			throw new NotImplementedException();
+		}
+
+		public override void Kick(ChatUser chatUser, ChatChannel channel = null)
+		{
+			if(channel != null) throw new NotSupportedException("The Discord plugin does not support kicking users from a channel.");
+			server.GetUser(ulong.Parse(chatUser.UniqueId)).Kick();
 		}
 
 		public override bool Connect()
@@ -122,11 +129,6 @@ namespace BaggyBot.Plugins.Internal.Discord
 		{
 			var m = (Message)message.State;
 			m.Delete();
-		}
-
-		public override void Kick(ChatUser chatUser)
-		{
-			server.GetUser(ulong.Parse(chatUser.UniqueId)).Kick();
 		}
 	}
 }

@@ -103,14 +103,16 @@ namespace BaggyBot.Plugins.Internal.Curse
 			}
 		}
 
-		public override void Kick(ChatUser chatUser)
+		public override void Kick(ChatUser chatUser, ChatChannel channel = null)
 		{
+			//if(channel != null) throw new NotSupportedException("The Curse plugin does not support kicking users from a channel.");
 			client.KickUser(requestedGroup, client.GetUser(requestedGroup, int.Parse(chatUser.UniqueId)));
 		}
 
-		public override void Ban(ChatUser chatUser)
+		public override void Ban(ChatUser chatUser, ChatChannel channel = null)
 		{
-			throw new NotImplementedException();
+			//if(channel != null) throw new NotSupportedException("The Curse plugin does not support banning users from a channel.");
+			client.BanUser(requestedGroup, client.GetUser(requestedGroup, int.Parse(chatUser.UniqueId)));
 		}
 
 		public override bool Connect()

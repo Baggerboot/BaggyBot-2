@@ -67,8 +67,8 @@ namespace BaggyBot.Plugins
 		public abstract void Part(ChatChannel channel, string reason = null);
 		public abstract void Quit(string reason);
 		public abstract void Delete(ChatMessage message);
-		public abstract void Kick(ChatUser chatUser);
-		public abstract void Ban(ChatUser chatUser);
+		public abstract void Kick(ChatUser chatUser, ChatChannel channel = null);
+		public abstract void Ban(ChatUser chatUser, ChatChannel channel = null);
 		public abstract bool Connect();
 		public abstract void Disconnect();
 		public abstract void Dispose();

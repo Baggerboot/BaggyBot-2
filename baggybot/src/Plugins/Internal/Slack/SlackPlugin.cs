@@ -87,12 +87,12 @@ namespace BaggyBot.Plugins.Internal.Slack
 			socketClient.DeleteMessage(null, message.Channel.Identifier, message.SentAt);
 		}
 
-		public override void Kick(ChatUser chatUser)
+		public override void Kick(ChatUser chatUser, ChatChannel channel = null)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override void Ban(ChatUser chatUser)
+		public override void Ban(ChatUser chatUser, ChatChannel channel = null)
 		{
 			throw new NotImplementedException();
 		}

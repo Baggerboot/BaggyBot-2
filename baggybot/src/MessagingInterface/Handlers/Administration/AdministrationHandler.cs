@@ -50,10 +50,10 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 							Client.Delete(ev.Message);
 							break;
 						case Action.Kick:
-							Client.Kick(ev.Message.Sender);
+							Client.Kick(ev.Message.Sender, ev.Message.Channel);
 							break;
 						case Action.Ban:
-							Client.Ban(ev.Message.Sender);
+							Client.Ban(ev.Message.Sender, ev.Message.Channel);
 							break;
 						default:
 							throw new ArgumentOutOfRangeException();

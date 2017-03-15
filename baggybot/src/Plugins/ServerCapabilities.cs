@@ -21,6 +21,24 @@
 		public bool CanDeleteMessages { get; set; }
 
 		/// <summary>
+		/// Users can be kicked from a single channel.
+		/// </summary>
+		public bool CanKickFromChannel { get; set; }
+		/// <summary>
+		/// Users can be kicked from the entire server.
+		/// </summary>
+		public bool CanKickFromServer { get; set; }
+
+		/// <summary>
+		/// Users can be barred from joining a single channel.
+		/// </summary>
+		public bool CanBanFromChannel { get; set; }
+		/// <summary>
+		/// Users can be barred from joining the entire server.
+		/// </summary>
+		public bool CanBanFromServer { get; set; }
+
+		/// <summary>
 		/// Other chat clients are able to correctly handle special unicode
 		/// characters (such as mathematical symbols).
 		/// </summary>

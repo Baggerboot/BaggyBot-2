@@ -183,14 +183,14 @@ namespace BaggyBot.MessagingInterface
 			plugin.Delete(message);
 		}
 
-		public void Kick(ChatUser chatUser)
+		public void Kick(ChatUser chatUser, ChatChannel channel)
 		{
-			plugin.Kick(chatUser);
+			plugin.Kick(chatUser, channel);
 		}
 
-		public void Ban(ChatUser chatUser)
+		public void Ban(ChatUser chatUser, ChatChannel channel)
 		{
-			plugin.Ban(chatUser);
+			plugin.Ban(chatUser, channel);
 		}
 	}
 }

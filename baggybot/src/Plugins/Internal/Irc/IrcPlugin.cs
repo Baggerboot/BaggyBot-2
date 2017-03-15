@@ -180,12 +180,12 @@ namespace BaggyBot.Plugins.Internal.Irc
 			throw new NotImplementedException();
 		}
 
-		public override void Kick(ChatUser chatUser)
+		public override void Kick(ChatUser chatUser, ChatChannel channel = null)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override void Ban(ChatUser chatUser)
+		public override void Ban(ChatUser chatUser, ChatChannel channel = null)
 		{
 			throw new NotImplementedException();
 		}
