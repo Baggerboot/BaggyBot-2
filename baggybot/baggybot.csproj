@@ -173,6 +173,7 @@
   <ItemGroup>
     <Compile Include="src\CommandParsing\LambdaLookup.cs" />
     <Compile Include="src\Commands\Ban.cs" />
+    <Compile Include="src\Commands\Bash.cs" />
     <Compile Include="src\Commands\Diagnostics.cs" />
     <Compile Include="src\Commands\DisabledCommandAttribute.cs" />
     <Compile Include="src\Commands\Exception.cs" />
@@ -181,6 +182,7 @@
     <Compile Include="src\Commands\Import\SlackHistory\MillisecondEpochConverter.cs" />
     <Compile Include="src\Commands\Kick.cs" />
     <Compile Include="src\Commands\SetPermissions.cs" />
+    <Compile Include="src\Commands\StdioBridge.cs" />
     <Compile Include="src\Configuration\Imgur.cs" />
     <Compile Include="src\Database\DatabaseManager.cs" />
     <Compile Include="src\Database\Model\PermissionGroup.cs" />
