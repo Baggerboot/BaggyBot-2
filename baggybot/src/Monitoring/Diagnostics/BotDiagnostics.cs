@@ -69,7 +69,7 @@ namespace BaggyBot.Monitoring.Diagnostics
 				{
 					foreach (var frame in trace.GetFrames())
 					{
-						Logger.Log(this, $"{indents}  -> at {frame}", LogLevel.Error);
+						Logger.Log(this, $"{indents}  -> in {frame}", LogLevel.Error);
 					}
 				}
 			}
