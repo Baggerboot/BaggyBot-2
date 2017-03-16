@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Timers;
+using System.Runtime.Remoting.Channels;
+using System.Threading;
+using System.Threading.Tasks;
 using BaggyBot.Configuration;
+using IronPython.Modules;
+using Timer = System.Timers.Timer;
 
 namespace BaggyBot.Monitoring.Diagnostics
 {
@@ -19,12 +23,13 @@ namespace BaggyBot.Monitoring.Diagnostics
 		public BotDiagnostics(Action<string> notifyCallback)
 		{
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => HandleException(args, notifyCallback);
+			TaskScheduler.UnobservedTaskException += (sender, args) => HandleException(args, notifyCallback);
 			if (ConfigManager.Config.LogPerformance)
 			{
 				performanceLogger = new PerformanceLogger(PerfLogFile);
 			}
 		}
-		
+
 		public void Dispose()
 		{
 			pc?.Dispose();
@@ -32,13 +37,19 @@ namespace BaggyBot.Monitoring.Diagnostics
 			taskScheduler?.Dispose();
 		}
 
-		private void HandleException(UnhandledExceptionEventArgs args, Action<string> notifyCallback)
+		private void HandleException(UnobservedTaskExceptionEventArgs args, Action<string> notifyCallback)
 		{
-			var e = (Exception)args.ExceptionObject;
+			var e = args.Exception;
 			HandleException(e, notifyCallback);
 		}
 
-		private void HandleException(Exception e, Action<string> notifyCallback, int level = 0)
+		private void HandleException(UnhandledExceptionEventArgs args, Action<string> notifyCallback)
+		{
+			var e = (Exception) args.ExceptionObject;
+			HandleException(e, notifyCallback);
+		}
+
+		private static void HandleException(Exception e, Action<string> notifyCallback, int level = 0)
 		{
 			var trace = new StackTrace(e, true);
 			var bottomFrame = trace.GetFrame(0);
@@ -48,9 +59,10 @@ namespace BaggyBot.Monitoring.Diagnostics
 			var aggr = e as AggregateException;
 			if (aggr != null)
 			{
-				var message = $"{indents}An unhandled AggregateException occurred in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()} - Sub-exceptions: ";
+				var message =
+					$"{indents}An unhandled AggregateException occurred in file: {bottomFrame?.GetFileName()}:{bottomFrame?.GetFileLineNumber()} - Sub-exceptions: ";
+				Logger.Log(null, message, LogLevel.ExceptionDetails);
 				notifyCallback(message);
-				Logger.Log(this, message, LogLevel.Error);
 				foreach (var inner in aggr.InnerExceptions)
 				{
 					HandleException(inner, notifyCallback, ++level);
@@ -58,18 +70,23 @@ namespace BaggyBot.Monitoring.Diagnostics
 			}
 			else
 			{
-				var message = $"{indents}An unhandled exception occured: {e.GetType().Name} - {e.Message} - in file: {bottomFrame.GetFileName()}:{bottomFrame.GetFileLineNumber()}";
+				var message =
+					$"{indents}An unhandled exception occured: {e.GetType().Name} - {e.Message} - in file: {bottomFrame?.GetFileName()}:{bottomFrame?.GetFileLineNumber()}";
+				Logger.Log(null, message, LogLevel.ExceptionDetails);
 				notifyCallback(message);
-				Logger.Log(this, message, LogLevel.Error);
 				if (e.InnerException != null)
 				{
 					HandleException(e.InnerException, notifyCallback, ++level);
 				}
 				else
 				{
-					foreach (var frame in trace.GetFrames())
+					var stackFrames = trace.GetFrames();
+					if (stackFrames != null)
 					{
-						Logger.Log(this, $"{indents}  -> in {frame}", LogLevel.Error);
+						foreach (var frame in stackFrames)
+						{
+							Logger.Log(null, $"{indents}  -> in {frame}", LogLevel.ExceptionDetails);
+						}
 					}
 				}
 			}
@@ -91,11 +108,11 @@ namespace BaggyBot.Monitoring.Diagnostics
 
 			Logger.Log(this, "Logging performance statistics to " + PerfLogFile, LogLevel.Info);
 
-			taskScheduler = new Timer { Interval = 2000 };
+			taskScheduler = new Timer {Interval = 2000};
 			taskScheduler.Start();
 			taskScheduler.Elapsed += (source, eventArgs) =>
 			{
-				var mem = (long)(pc.NextValue() / 1024);
+				var mem = (long) (pc.NextValue() / 1024);
 				// TODO: Find a better way to get access to these values
 				//var users = ircInterface.TotalUserCount;
 				//var chans = ircInterface.ChannelCount;

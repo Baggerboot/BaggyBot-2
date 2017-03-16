@@ -15,7 +15,8 @@ namespace BaggyBot.Monitoring
 		Message,
 		Irc,
 		Warning,
-		Error
+		Error,
+		ExceptionDetails
 	}
 
 	public enum Colours
@@ -117,6 +118,7 @@ namespace BaggyBot.Monitoring
 					lineColour = Colour.Yellow;
 					break;
 				case LogLevel.Error:
+				case LogLevel.ExceptionDetails:
 					lineBuilder.Append("[ERR] ");
 					lineColour = Colour.Red;
 					break;
