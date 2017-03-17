@@ -2,15 +2,15 @@
 
 namespace BaggyBot.Commands
 {
-	internal class Bash : StdioBridge
+	internal class Scala : StdioBridge
 	{
-		public override string Name => "bash";
-		public override string Usage => "<bash expression>";
+		public override string Name => "scala";
+		public override string Usage => "<scala expression>";
 		public override string Description => "";
 
-		public Bash()
+		public Scala()
 		{
-			Init("bash");
+			Init("scala");
 		}
 
 		public override void Use(CommandArgs command)

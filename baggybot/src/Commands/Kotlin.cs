@@ -2,15 +2,15 @@
 
 namespace BaggyBot.Commands
 {
-	internal class Bash : StdioBridge
+	internal class Kotlin : StdioBridge
 	{
-		public override string Name => "bash";
-		public override string Usage => "<bash expression>";
+		public override string Name => "kotlinc";
+		public override string Usage => "<kotlin expression>";
 		public override string Description => "";
 
-		public Bash()
+		public Kotlin()
 		{
-			Init("bash");
+			Init("kotlin");
 		}
 
 		public override void Use(CommandArgs command)
