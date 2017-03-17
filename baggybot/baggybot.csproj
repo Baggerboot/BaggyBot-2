@@ -182,6 +182,7 @@
     <Compile Include="src\Commands\Import\SlackHistory\MillisecondEpochConverter.cs" />
     <Compile Include="src\Commands\Kick.cs" />
     <Compile Include="src\Commands\Kotlin.cs" />
+    <Compile Include="src\Commands\Lisp.cs" />
     <Compile Include="src\Commands\Scala.cs" />
     <Compile Include="src\Commands\SetPermissions.cs" />
     <Compile Include="src\Commands\StdioBridge.cs" />
