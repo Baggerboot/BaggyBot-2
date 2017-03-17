@@ -4,13 +4,13 @@ namespace BaggyBot.Commands
 {
 	internal class Kotlin : StdioBridge
 	{
-		public override string Name => "kotlinc";
+		public override string Name => "kotlin";
 		public override string Usage => "<kotlin expression>";
 		public override string Description => "";
 
 		public Kotlin()
 		{
-			Init("kotlin");
+			Init("kotlinc");
 		}
 
 		public override void Use(CommandArgs command)
