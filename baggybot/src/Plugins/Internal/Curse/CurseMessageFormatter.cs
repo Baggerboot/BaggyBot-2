@@ -23,7 +23,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 				case FormattingType.Monospace:
 					return "`";
 				case FormattingType.MonospaceBlock:
-					return "```\n";
+					return position == FormattingPosition.Begin ? "```\n" : "\n```";
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
