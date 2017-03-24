@@ -25,8 +25,9 @@ namespace BaggyBot.Commands
 
 			if (command.Args.Length == 0)
 			{
-				var availableCommands = string.Join(", ", commandList.Select(pair => pair.Key));
-				command.ReturnMessage($"Use -help <command> to get help about a specific command. -- Available commands: {availableCommands}");
+				var allowedCommands = commandList.Where(c => Client.Permissions.Test(command, c.Value.PermissionName));
+				var commandNames = string.Join(", ", allowedCommands.Select(pair => pair.Key));
+				command.ReturnMessage($"Use -help <command> to get help about a specific command. -- Available commands: {commandNames}");
 			}
 			else if (command.Args.Length == 1)
 			{
