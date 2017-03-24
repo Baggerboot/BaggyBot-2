@@ -31,7 +31,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		private readonly CurseClient client = new CurseClient();
 		private readonly NetworkCredential loginCredentials;
-		private string serverName;
+		private readonly string serverName;
 		private Group requestedGroup;
 
 		public CursePlugin(ServerCfg config) : base(config)
