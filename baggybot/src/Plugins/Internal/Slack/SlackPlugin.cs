@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
 using BaggyBot.Monitoring;
+using BaggyBot.Tools;
 using IronPython.Runtime.Operations;
 using SlackAPI;
 using SlackAPI.WebSocketMessages;
@@ -136,8 +137,20 @@ namespace BaggyBot.Plugins.Internal.Slack
 				return false;
 			}
 
-			activityTimer = new Timer(state => socketClient.SendPresence(Presence.active), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+			activityTimer = new Timer(state => SendPresence(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 			return true;
+		}
+
+		private void SendPresence()
+		{
+			try
+			{
+				socketClient.SendPresence(Presence.active);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(this, $"Unable to send presence. An exception occurred: {e.Format()}", LogLevel.Warning);
+			}
 		}
 
 		private ChatChannel ToChatChannel(Channel ch)
