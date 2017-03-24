@@ -2,3 +2,6 @@ language: csharp
 solution: baggybot.sln
 before_script:
   - bash before_build.sh
+  - cd Curse.NET
+  - nuget restore
+  - cd ..
