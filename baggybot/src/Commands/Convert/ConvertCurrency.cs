@@ -24,7 +24,7 @@ namespace BaggyBot.Commands.Convert
 
 		public ConvertCurrency()
 		{
-			timer = new Timer(UpdateExchangeRate, null, TimeSpan.FromSeconds(1), TimeSpan.FromHours(2));
+			timer = new Timer(UpdateExchangeRate, null, TimeSpan.FromSeconds(1), TimeSpan.FromHours(12));
 		}
 
 		private void UpdateExchangeRate(object stateInfo)
