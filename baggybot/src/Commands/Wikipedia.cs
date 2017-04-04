@@ -64,7 +64,9 @@ namespace BaggyBot.Commands
 
 			var firstParagraph = doc.DocumentNode.SelectSingleNode(".//p[1]");
 
-			return firstParagraph.InnerText;
+			var decodedText = WebUtility.HtmlDecode(firstParagraph.InnerText);
+
+			return decodedText;
 		}
 	}
 }
