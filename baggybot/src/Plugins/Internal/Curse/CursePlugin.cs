@@ -150,6 +150,11 @@ namespace BaggyBot.Plugins.Internal.Curse
 			return new ChatUser(user.Username, user.UserID.ToString(), preferredName:user.Nickname);
 		}
 
+		public override string GetMentionString(ChatUser user)
+		{
+			return $"@{user.UniqueId}:{user.Nickname}";
+		}
+
 		public override IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
 		{
 			const int max = 100;

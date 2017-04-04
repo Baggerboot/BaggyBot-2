@@ -18,6 +18,7 @@ namespace BaggyBot.Commands
 		public override void Use(CommandArgs command)
 		{
 			var cmdParser = new CommandParser(new Operation())
+				.AddOperation("mention", new Operation())
 				.AddOperation("cfg", new Operation()
 					.AddArgument("config-key"))
 				.AddOperation("uid", new Operation()
@@ -69,7 +70,15 @@ namespace BaggyBot.Commands
 				case "messages":
 					GetMessages(command, result);
 					break;
+				case "mention":
+					GetMention(command, result);
+					break;
 			}
+		}
+
+		private void GetMention(CommandArgs command, OperationResult result)
+		{
+			command.ReturnMessage($"Hello, {Client.GetMentionString(command.Sender)}!");
 		}
 
 		private void GetMessages(CommandArgs command, OperationResult result)

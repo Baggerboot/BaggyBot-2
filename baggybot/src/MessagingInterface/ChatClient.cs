@@ -192,5 +192,10 @@ namespace BaggyBot.MessagingInterface
 		{
 			plugin.Ban(chatUser, channel);
 		}
+
+		public string GetMentionString(ChatUser user)
+		{
+			return plugin.GetMentionString(user);
+		}
 	}
 }
