@@ -37,7 +37,6 @@ namespace BaggyBot.Commands.Convert
 			if (attemptNumber > MAX_LOOKUP_ATTEMPTS) return;
 			try
 			{
-				Logger.Log(this, "Looking up the latest currency exchange rates");
 				var jsonObj = MiscTools.GetJson($"http://api.fixer.io/latest?base=EUR");
 				exchangeRates = new Dictionary<string, decimal>();
 				foreach (var prop in jsonObj["rates"].Children().Cast<JProperty>())

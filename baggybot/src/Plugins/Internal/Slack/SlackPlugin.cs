@@ -146,6 +146,10 @@ namespace BaggyBot.Plugins.Internal.Slack
 			try
 			{
 				socketClient.SendPresence(Presence.active);
+				if (DateTime.Now.TimeOfDay < TimeSpan.FromMinutes(5))
+				{
+					Logger.Log(this, $"Presence sent.", LogLevel.Debug);
+				}
 			}
 			catch (Exception e)
 			{
