@@ -129,7 +129,7 @@ namespace BaggyBot.Plugins
 		/// </summary>
 		public virtual MessageSendResult Reply(ChatChannel channel, ChatUser user, string message)
 		{
-			return SendMessage(channel, $"{(Capabilities.AtMention ? "@" : "")}{user.AddressableName}, {message}");
+			return SendMessage(channel, $"{GetMentionString(user)}, {message}");
 		}
 
 		public virtual string GetMentionString(ChatUser user)
