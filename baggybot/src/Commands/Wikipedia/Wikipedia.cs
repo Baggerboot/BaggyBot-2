@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Text;
 using HtmlAgilityPack;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace BaggyBot.Commands
+namespace BaggyBot.Commands.Wikipedia
 {
 	internal class Wikipedia : Command
 	{
@@ -15,8 +17,13 @@ namespace BaggyBot.Commands
 
 		public override void Use(CommandArgs command)
 		{
-			var uri = new Uri(
-				$"http://en.wikipedia.org/w/api.php?format=json&action=query&titles={command.FullArgument}&prop=info&inprop=url");
+			if (string.IsNullOrWhiteSpace(command.FullArgument))
+			{
+				InformUsage(command);
+				return;
+			}
+
+			var uri = new Uri($"http://en.wikipedia.org/w/api.php?format=json&action=query&titles={command.FullArgument}&prop=info&inprop=url");
 
 			var rq = WebRequest.Create(uri);
 			WebResponse response;
@@ -32,11 +39,17 @@ namespace BaggyBot.Commands
 			using (var sr = new StreamReader(response.GetResponseStream()))
 			{
 				var data = sr.ReadToEnd();
-				dynamic jsonObj = JObject.Parse(data);
-				var page = ((JObject)jsonObj.query.pages).First.First;
-				var title = page["title"];
+				var rs = JsonConvert.DeserializeObject<QueryResponse>(data);
+				var page = rs.query.pages.First.First.ToObject<Page>();
 
-				command.ReturnMessage($"{title} ({page["canonicalurl"]}): {GetContent(page["canonicalurl"].ToString())}");
+				if (page.pageid == 0)
+				{
+					command.Reply($"I could not find a page named {command.FullArgument}");
+				}
+				else
+				{
+					command.ReturnMessage($"{page.title} ({page.canonicalurl}): {GetContent(page.canonicalurl)}");
+				}
 			}
 		}
 
@@ -50,7 +63,7 @@ namespace BaggyBot.Commands
 			var rq = WebRequest.Create(url + "?action=render");
 			var rs = rq.GetResponse();
 			var doc = new HtmlDocument();
-			doc.Load(rs.GetResponseStream());
+			doc.Load(rs.GetResponseStream(), Encoding.UTF8);
 			foreach (var cite in doc.DocumentNode.SelectNodes(".//sup[@class=\"reference\"]"))
 			{
 				cite.Remove();

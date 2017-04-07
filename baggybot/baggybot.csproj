@@ -198,6 +198,7 @@
     <Compile Include="src\Commands\Scala.cs" />
     <Compile Include="src\Commands\SetPermissions.cs" />
     <Compile Include="src\Commands\StdioBridge.cs" />
+    <Compile Include="src\Commands\Wikipedia\QueryResponse.cs" />
     <Compile Include="src\Configuration\Imgur.cs" />
     <Compile Include="src\Database\DatabaseManager.cs" />
     <Compile Include="src\Database\Model\PermissionGroup.cs" />
@@ -302,7 +303,7 @@
     <Compile Include="src\Commands\Update.cs" />
     <Compile Include="src\Commands\Uptime.cs" />
     <Compile Include="src\Commands\UrbanDictionary.cs" />
-    <Compile Include="src\Commands\Wikipedia.cs" />
+    <Compile Include="src\Commands\Wikipedia\Wikipedia.cs" />
     <Compile Include="src\Commands\WolframAlpha.cs" />
     <Compile Include="src\Database\Model\Metadata.cs" />
     <Compile Include="src\Database\Model\MiscData.cs" />
