@@ -98,11 +98,6 @@ namespace BaggyBot.Plugins.Internal.Slack
 			throw new NotImplementedException();
 		}
 
-		public void Reconnect()
-		{
-			throw new NotImplementedException();
-		}
-
 		public override bool Connect()
 		{
 			var clientReady = new SemaphoreSlim(0);
@@ -141,6 +136,12 @@ namespace BaggyBot.Plugins.Internal.Slack
 			return true;
 		}
 
+		private bool Reconnect()
+		{
+			activityTimer.Dispose();
+			return Connect();
+		}
+
 		private void SendPresence()
 		{
 			try
@@ -149,6 +150,17 @@ namespace BaggyBot.Plugins.Internal.Slack
 				if (DateTime.Now.TimeOfDay < TimeSpan.FromMinutes(5))
 				{
 					Logger.Log(this, $"Presence sent.", LogLevel.Debug);
+				}
+				if (!socketClient.IsConnected)
+				{
+					if (Reconnect())
+					{
+						Logger.Log(this, $"Slack socket connection lost, but managed to reconnect", LogLevel.Warning);
+					}
+					else
+					{
+						Logger.Log(this, $"Slack socket connection lost; failed to reconnect.", LogLevel.Error);
+					}
 				}
 			}
 			catch (Exception e)
