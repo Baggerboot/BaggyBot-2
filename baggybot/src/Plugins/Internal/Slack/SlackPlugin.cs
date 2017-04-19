@@ -118,10 +118,6 @@ namespace BaggyBot.Plugins.Internal.Slack
 			{
 				return false;
 			}
-			Channels = socketClient.Channels.Select(ToChatChannel)
-											.Concat(socketClient.Groups.Select(ToChatChannel))
-											.Concat(socketClient.DirectMessages.Select(ToChatChannel))
-											.ToList();
 
 			var usersReady = new SemaphoreSlim(0);
 			socketClient.GetUserList(response =>
@@ -133,6 +129,11 @@ namespace BaggyBot.Plugins.Internal.Slack
 			{
 				return false;
 			}
+
+			Channels = socketClient.Channels.Select(ToChatChannel)
+								.Concat(socketClient.Groups.Select(ToChatChannel))
+								.Concat(socketClient.DirectMessages.Select(ToChatChannel))
+								.ToList();
 
 			activityTimer = new Timer(state => SendPresence(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 			return true;
