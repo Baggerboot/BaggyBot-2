@@ -116,8 +116,8 @@ namespace BaggyBot.MessagingInterface
 					message = formatter.ProcessIncomingMessage(message);
 				}
 				eventManager.HandleMessage(new MessageEvent(message,
-				                                            reply => Reply(message.Channel, message.Sender, reply),
-				                                            reply => SendMessage(message.Channel, reply)));
+				                                            (reply, attachments)=> Reply(message.Channel, message.Sender, reply, attachments),
+				                                            (reply, attachments) => SendMessage(message.Channel, reply, attachments)));
 			};
 			plugin.OnNameChange += (oldName, newName) => eventManager.HandleNameChange(new NameChangeEvent(oldName, newName));
 			plugin.OnKick += (kickee, channel, kicker, reason) => eventManager.HandleKick(new KickEvent(kickee, channel, kicker, reason));
@@ -134,22 +134,22 @@ namespace BaggyBot.MessagingInterface
 			StatsDatabase?.Dispose();
 		}
 
-		public MessageSendResult SendMessage(ChatChannel target, string message)
+		public MessageSendResult SendMessage(ChatChannel target, string message, params Attachment[] attachments)
 		{
 			message = plugin.MessageFormatters.Aggregate(message, (current, formatter) => formatter.ProcessOutgoingMessage(current));
-			return plugin.SendMessage(target, message);
+			return plugin.SendMessage(target, message, attachments);
 		}
 
-		internal MessageSendResult SendMessage(ChatUser user, string message)
+		internal MessageSendResult SendMessage(ChatUser user, string message, params Attachment[] attachments)
 		{
 			message = plugin.MessageFormatters.Aggregate(message, (current, formatter) => formatter.ProcessOutgoingMessage(current));
-			return plugin.SendMessage(user, message);
+			return plugin.SendMessage(user, message, attachments);
 		}
 
-		public MessageSendResult Reply(ChatChannel channel, ChatUser user, string message)
+		public MessageSendResult Reply(ChatChannel channel, ChatUser user, string message, params Attachment[] attachments)
 		{
 			message = plugin.MessageFormatters.Aggregate(message, (current, formatter) => formatter.ProcessOutgoingMessage(current));
-			return plugin.Reply(channel, user, message);
+			return plugin.Reply(channel, user, message, attachments);
 		}
 
 		public IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)

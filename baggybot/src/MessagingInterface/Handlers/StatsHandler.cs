@@ -115,11 +115,11 @@ namespace BaggyBot.MessagingInterface.Handlers
 			var message = ev.Message;
 			if (message.Sender.Nickname == "Ralph" && message.Body.ToLower().Contains("baggybot"))
 			{
-				ev.ReturnMessageCallback("Shut up you fool");
+				ev.ReturnMessage("Shut up you fool");
 			}
 			else if (message.Body.ToLower().Contains("fuck you baggybot"))
 			{
-				ev.ReturnMessageCallback("pls ;___;");
+				ev.ReturnMessage("pls ;___;");
 			}
 		}
 
@@ -157,14 +157,14 @@ namespace BaggyBot.MessagingInterface.Handlers
 			{
 				ControlVariables.SnagNextLine = false;
 				StatsDatabase.Snag(message);
-				ev.ReturnMessageCallback("Snagged line on request.");
+				ev.ReturnMessage("Snagged line on request.");
 				return;
 			}
 			if (ControlVariables.SnagNextLineBy != null && ControlVariables.SnagNextLineBy == message.Sender.Nickname)
 			{
 				ControlVariables.SnagNextLineBy = null;
 				StatsDatabase.Snag(message);
-				ev.ReturnMessageCallback("Snagged line on request.");
+				ev.ReturnMessage("Snagged line on request.");
 				return;
 			}
 
@@ -214,7 +214,7 @@ namespace BaggyBot.MessagingInterface.Handlers
 
 		private void TakeQuote(MessageEvent ev, string snagMessage)
 		{
-			ev.ReturnMessageCallback(snagMessage);
+			ev.ReturnMessage(snagMessage);
 			StatsDatabase.Snag(ev.Message);
 		}
 	}

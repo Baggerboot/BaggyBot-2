@@ -255,6 +255,8 @@
     <Compile Include="src\Permissions\PermissionsManager.cs" />
     <Compile Include="src\Monitoring\Diagnostics\TraceBuilder.cs" />
     <Compile Include="src\Permissions\PermNode.cs" />
+    <Compile Include="src\Plugins\Attachments\Attachment.cs" />
+    <Compile Include="src\Plugins\Attachments\ImageAttachment.cs" />
     <Compile Include="src\Plugins\Internal\Curse\CursePlugin.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordExtensionMethods.cs" />
     <Compile Include="src\Plugins\Internal\Discord\DiscordPlugin.cs" />

@@ -93,8 +93,10 @@ namespace BaggyBot.Plugins.Internal.Irc
 			throw new NotImplementedException();
 		}
 
-		public override MessageSendResult SendMessage(ChatChannel target, string message)
+		public override MessageSendResult SendMessage(ChatChannel target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
+
 			var lines = message.Split(new [] { "\r\n", "\n" }, StringSplitOptions.None);
 
 			MessageSendResult result = MessageSendResult.Success;
@@ -120,8 +122,10 @@ namespace BaggyBot.Plugins.Internal.Irc
 			return result;
 		}
 
-		public override MessageSendResult SendMessage(ChatUser target, string message)
+		public override MessageSendResult SendMessage(ChatUser target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
+
 			switch (client.SendMessage(target.Nickname, message))
 			{
 				case IRCSharp.MessageSendResult.Success:

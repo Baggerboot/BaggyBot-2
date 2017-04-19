@@ -50,8 +50,9 @@ namespace BaggyBot.Plugins.Internal.Slack
 			return Users.First(u => u.UniqueId == id);
 		}
 
-		public override MessageSendResult SendMessage(ChatChannel target, string message)
+		public override MessageSendResult SendMessage(ChatChannel target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
 			var ev = new ManualResetEventSlim(false);
 			var success = false;
 			socketClient.SendMessage(
@@ -64,8 +65,9 @@ namespace BaggyBot.Plugins.Internal.Slack
 			return success ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
 
-		public override MessageSendResult SendMessage(ChatUser target, string message)
+		public override MessageSendResult SendMessage(ChatUser target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
 			var ev = new ManualResetEventSlim(false);
 			var success = false;
 			socketClient.SendMessage(

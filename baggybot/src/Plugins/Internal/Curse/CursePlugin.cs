@@ -39,6 +39,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 			// Configure the plugin
 			Capabilities.AllowsMultilineMessages = true;
 			Capabilities.AtMention = true;
+			Capabilities.RequireReupload = true;
 			MessageFormatters.Add(new CurseMessageFormatter());
 			
 			serverName = (string)config.PluginSettings["server-name"];
@@ -73,8 +74,9 @@ namespace BaggyBot.Plugins.Internal.Curse
 			throw new NotImplementedException();
 		}
 
-		public override MessageSendResult SendMessage(ChatChannel target, string message)
+		public override MessageSendResult SendMessage(ChatChannel target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
 			if (target.IsPrivateMessage)
 			{
 				return SendMessage(target.Users.First(), message);
@@ -86,8 +88,9 @@ namespace BaggyBot.Plugins.Internal.Curse
 			}
 		}
 
-		public override MessageSendResult SendMessage(ChatUser target, string message)
+		public override MessageSendResult SendMessage(ChatUser target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
 			var rs = client.SendMessageAsync(client.GetUser(requestedGroup, int.Parse(target.UniqueId)), message).Result;
 			return rs.OK ? MessageSendResult.Success : MessageSendResult.Failure;
 		}

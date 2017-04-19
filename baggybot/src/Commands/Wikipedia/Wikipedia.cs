@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using BaggyBot.ExternalApis;
+using BaggyBot.Plugins;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -48,18 +52,16 @@ namespace BaggyBot.Commands.Wikipedia
 				}
 				else
 				{
-					command.ReturnMessage($"{page.title} ({page.canonicalurl}): {GetContent(page.canonicalurl)}");
+					var document = GetDocument(page.canonicalurl);
+					var image = GetImageUrl(document);
+					var attachment = image == null ? null : new ImageAttachment(image);
+					command.ReturnMessage($"{page.title} ({page.canonicalurl}): {GetContent(document)}", attachment);
 				}
 			}
 		}
 
-		private string GetContent(string url)
+		private HtmlDocument GetDocument(string url)
 		{
-			// TODO: Enhance Wikipedia command output
-			// - Send more text when allowed.
-			// - Attach an image.
-			// - Attach additional data.
-			// Add ChatClient capabilities as required
 			var rq = WebRequest.Create(url + "?action=render");
 			var rs = rq.GetResponse();
 			var doc = new HtmlDocument();
@@ -68,17 +70,39 @@ namespace BaggyBot.Commands.Wikipedia
 			{
 				cite.Remove();
 			}
-			var nodes = doc.DocumentNode.SelectNodes("//table[@class=\"infobox\"]/tr[td][th]") ?? new HtmlNodeCollection(null);
-			foreach (var tr in nodes)
+			return doc;
+		}
+
+		private string GetImageUrl(HtmlDocument doc)
+		{
+			var image = doc.DocumentNode.SelectNodes("//img").FirstOrDefault(node => node.GetAttributeValue("data-file-width", 100) > 100 && node.GetAttributeValue("data-file-height", 100) > 100);
+			var source = image?.GetAttributeValue("src", null);
+			if (source == null) return null;
+
+			var imageUrl = $"https:{source}";
+			if (Client.Capabilities.RequireReupload)
 			{
-				var th = tr.SelectSingleNode("th").InnerText;
-				var td = tr.SelectSingleNode("td").InnerText;
+				return Imgur.Upload(imageUrl);
 			}
+			else
+			{
+				return imageUrl;
+			}
+		}
 
-			var firstParagraph = doc.DocumentNode.SelectSingleNode(".//p[1]");
+		private string GetContent(HtmlDocument doc)
+		{
+			// TODO: Enhance Wikipedia command output
+			// - Send more text when allowed.
+			// - Attach an image.
+			// - Attach additional data.
+			// Add ChatClient capabilities as required
 
+			var nodes = doc.DocumentNode.SelectNodes("//table[@class=\"infobox\"]/tr[td][th]") ?? new HtmlNodeCollection(null);
+			var pairs = nodes.Select(tr => new KeyValuePair<string,string>(tr.SelectSingleNode("th").InnerText, tr.SelectSingleNode("td").InnerText)).ToList();
+			
+			var firstParagraph = doc.DocumentNode.SelectSingleNode("/p[1]");
 			var decodedText = WebUtility.HtmlDecode(firstParagraph.InnerText);
-
 			return decodedText;
 		}
 	}

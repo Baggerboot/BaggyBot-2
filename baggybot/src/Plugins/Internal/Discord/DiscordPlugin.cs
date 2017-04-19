@@ -99,15 +99,17 @@ namespace BaggyBot.Plugins.Internal.Discord
 			return ToChatUser(server.GetUser(ulong.Parse(id)));
 		}
 
-		public override MessageSendResult SendMessage(ChatChannel target, string message)
+		public override MessageSendResult SendMessage(ChatChannel target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
 			var channel = server.GetChannel(ulong.Parse(target.Identifier));
 			channel.SendMessage(message).Wait();
 			return MessageSendResult.Success;
 		}
 
-		public override MessageSendResult SendMessage(ChatUser target, string message)
+		public override MessageSendResult SendMessage(ChatUser target, string message, params Attachment[] attachments)
 		{
+			message = CreatePlaintextAttachments(message, attachments);
 			throw new NotImplementedException();
 		}
 

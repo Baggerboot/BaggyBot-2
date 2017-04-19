@@ -72,7 +72,7 @@ namespace BaggyBot.MessagingInterface.Handlers.Administration
 			{
 				message = message.Replace("$user", ev.Message.Sender.AddressableName);
 			}
-			ev.ReturnMessageCallback(message);
+			ev.ReturnMessage(message);
 		}
 
 		private IEnumerable<UserEvent> GetMapping(string uniqueId)

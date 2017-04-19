@@ -61,8 +61,8 @@ namespace BaggyBot.Plugins
 		/// Returns the user with the given ID.
 		/// </summary>
 		public abstract ChatUser GetUser(string id);
-		public abstract MessageSendResult SendMessage(ChatChannel target, string message);
-		public abstract MessageSendResult SendMessage(ChatUser target, string message);
+		public abstract MessageSendResult SendMessage(ChatChannel target, string message, params Attachment[] attachments);
+		public abstract MessageSendResult SendMessage(ChatUser target, string message, params Attachment[] attachments);
 		public abstract void Join(ChatChannel channel);
 		public abstract void Part(ChatChannel channel, string reason = null);
 		public abstract void Quit(string reason);
@@ -127,14 +127,19 @@ namespace BaggyBot.Plugins
 		/// <summary>
 		/// Replies to a specific user in a channel.
 		/// </summary>
-		public virtual MessageSendResult Reply(ChatChannel channel, ChatUser user, string message)
+		public virtual MessageSendResult Reply(ChatChannel channel, ChatUser user, string message, params Attachment[] attachments)
 		{
-			return SendMessage(channel, $"{GetMentionString(user)}, {message}");
+			return SendMessage(channel, $"{GetMentionString(user)}, {message}", attachments);
 		}
 
 		public virtual string GetMentionString(ChatUser user)
 		{
 			return user.AddressableName;
+		}
+
+		protected string CreatePlaintextAttachments(string message, Attachment[] attachments)
+		{
+			return attachments.Aggregate(message, (msg, att) => $"{msg}{(Capabilities.AllowsMultilineMessages ? "\n" : " - ")}{att.GetPlaintext()}");
 		}
 	}
 }

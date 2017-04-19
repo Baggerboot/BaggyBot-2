@@ -13,8 +13,8 @@ namespace BaggyBot.Commands
 		public ChatUser Sender { get; }
 		public ChatChannel Channel { get; }
 		public string FullArgument { get; }
-		private readonly Func<string, MessageSendResult> replyCallback;
-		private readonly Func<string, MessageSendResult> returnMessageCallback;
+		private readonly Func<string, Attachment[], MessageSendResult> replyCallback;
+		private readonly Func<string, Attachment[], MessageSendResult> returnMessageCallback;
 
 		/// <summary>
 		/// Creates a new CommandArgs object, containing information about a command invocation.
@@ -28,7 +28,7 @@ namespace BaggyBot.Commands
 		/// the command was sent from, replying to the sender of the command.</param>
 		/// <param name="returnMessageCallback">A callback methodd used to post a message to the channel
 		/// the command was sent from.</param>
-		public CommandArgs(string command, string[] args, ChatUser sender, ChatChannel channel, string fullArgument, Func<string, MessageSendResult> replyCallback, Func<string, MessageSendResult> returnMessageCallback)
+		public CommandArgs(string command, string[] args, ChatUser sender, ChatChannel channel, string fullArgument, Func<string, Attachment[], MessageSendResult> replyCallback, Func<string, Attachment[], MessageSendResult> returnMessageCallback)
 		{
 			Command = command;
 			Args = args;
@@ -93,17 +93,17 @@ namespace BaggyBot.Commands
 		/// Replies to the sender of a command, mentioning their nickname.
 		/// The message will be sent to the same target the command was sent to.
 		/// </summary>
-		public MessageSendResult Reply(string format)
+		public MessageSendResult Reply(string format, params Attachment[] attachments)
 		{
-			return replyCallback(format);
+			return replyCallback(format, attachments);
 		}
 
 		/// <summary>
 		/// Sends a message to the target the command was sent to.
 		/// </summary>
-		public MessageSendResult ReturnMessage(string format)
+		public MessageSendResult ReturnMessage(string format, params Attachment[] attachments)
 		{
-			return returnMessageCallback(format);
+			return returnMessageCallback(format, attachments);
 		}
 	}
 }
