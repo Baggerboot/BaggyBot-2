@@ -55,7 +55,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 			message = CreatePlaintextAttachments(message, attachments);
 			var ev = new ManualResetEventSlim(false);
 			var success = false;
-			socketClient.SendMessage(
+			socketClient.PostMessage(
 				received =>
 				{
 					ev.Set();
@@ -70,7 +70,7 @@ namespace BaggyBot.Plugins.Internal.Slack
 			message = CreatePlaintextAttachments(message, attachments);
 			var ev = new ManualResetEventSlim(false);
 			var success = false;
-			socketClient.SendMessage(
+			socketClient.PostMessage(
 				received =>
 				{
 					ev.Set();
