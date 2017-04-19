@@ -17,11 +17,18 @@ namespace BaggyBot.MessagingInterface
 			Identifier = identifier;
 			Name = identifier;
 		}
-		public ChatChannel(string identifier,string name, bool isPrivateMessage = false)
+		public ChatChannel(string identifier, string name)
 		{
-			IsPrivateMessage = isPrivateMessage;
 			Name = name;
 			Identifier = identifier;
+		}
+
+		public ChatChannel(string identifier, string name, ChatUser otherUser)
+		{
+			Identifier = identifier;
+			Name = name;
+			IsPrivateMessage = true;
+			Users.Add(otherUser);
 		}
 
 		public override bool Equals(object obj)

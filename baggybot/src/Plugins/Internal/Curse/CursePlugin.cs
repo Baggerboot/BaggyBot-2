@@ -47,6 +47,7 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 			// Configure the Curse client
 			client.MessageReceived += HandleMessage;
+			client.PrivateMessageReceived += HandlePrivateMessage;
 			client.WebsocketReconnected += () => Logger.Log(this, $"Websocket connction lost, but managed to reconnect.", LogLevel.Warning);
 			client.ConnectionLost += () => OnConnectionLost?.Invoke("Websocket connection lost", null);
 		}
@@ -59,6 +60,14 @@ namespace BaggyBot.Plugins.Internal.Curse
 			OnMessageReceived?.Invoke(msg);
 		}
 
+		private void HandlePrivateMessage(ContactResponse contact, MessageResponse message)
+		{
+			var sender = new ChatUser(message.SenderName, message.SenderID.ToString());
+			var chatChannel = new ChatChannel(message.ConversationID, contact.Username, sender);
+			var msg = new ChatMessage(message.Timestamp, sender, chatChannel, message.Body, state: message);
+			OnMessageReceived?.Invoke(msg);
+		}
+
 		public override ChatUser GetUser(string id)
 		{
 			throw new NotImplementedException();
@@ -66,14 +75,21 @@ namespace BaggyBot.Plugins.Internal.Curse
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message)
 		{
-			client.SendMessage(client.ChannelMap[target.Identifier], message);
-			return MessageSendResult.Success;
+			if (target.IsPrivateMessage)
+			{
+				return SendMessage(target.Users.First(), message);
+			}
+			else
+			{
+				var rs = client.SendMessageAsync(client.ChannelMap[target.Identifier], message).Result;
+				return rs.OK ? MessageSendResult.Success : MessageSendResult.Failure;
+			}
 		}
 
 		public override MessageSendResult SendMessage(ChatUser target, string message)
 		{
-			client.SendMessage(requestedGroup, client.GetUser(requestedGroup, int.Parse(target.UniqueId)), message);
-			return MessageSendResult.Success;
+			var rs = client.SendMessageAsync(client.GetUser(requestedGroup, int.Parse(target.UniqueId)), message).Result;
+			return rs.OK ? MessageSendResult.Success : MessageSendResult.Failure;
 		}
 
 		public override void Join(ChatChannel channel)

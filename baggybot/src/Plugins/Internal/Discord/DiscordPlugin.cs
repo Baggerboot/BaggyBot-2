@@ -45,7 +45,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 
 		private ChatChannel ToChatChannel(Channel discordChannel)
 		{
-			return new ChatChannel(discordChannel.Id.ToString(), discordChannel.Name, discordChannel.IsPrivate);
+			return new ChatChannel(discordChannel.Id.ToString(), discordChannel.Name);
 		}
 		private ChatUser ToChatUser(User discordUser)
 		{

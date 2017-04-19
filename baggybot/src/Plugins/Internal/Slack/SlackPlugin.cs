@@ -176,7 +176,8 @@ namespace BaggyBot.Plugins.Internal.Slack
 
 		private ChatChannel ToChatChannel(DirectMessageConversation dm)
 		{
-			return new ChatChannel(dm.id, socketClient.UserLookup[dm.user].name, true);
+			var user = socketClient.UserLookup[dm.user];
+			return new ChatChannel(dm.id, user.name, GetChatUser(user));
 		}
 
 		private ChatUser ToChatUser(User user)
