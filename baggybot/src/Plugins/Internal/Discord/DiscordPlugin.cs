@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
 using Discord;
+using Discord.WebSocket;
 
 namespace BaggyBot.Plugins.Internal.Discord
 {
@@ -22,39 +24,42 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override event Action<ChatUser, ChatChannel> OnPart;
 #pragma warning restore CS0067
 
-		public override bool Connected => client.State == ConnectionState.Connected;
-		public override ChatUser Self => new ChatUser(client.CurrentUser.Name, client.CurrentUser.Id.ToString());
+		public override bool Connected => client.ConnectionState == ConnectionState.Connected;
+		public override ChatUser Self => new ChatUser(client.CurrentUser.Username, client.CurrentUser.Id.ToString());
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 
-		private readonly DiscordClient client;
-		private Server server;
+		private readonly DiscordSocketClient client;
+		//private Server server;
 
 		public DiscordPlugin(ServerCfg cfg) : base(cfg)
 		{
-			client = new DiscordClient();
-			client.MessageReceived += (s, e) =>
-			{
-				if (!e.Message.IsAuthor)
-				{
-					var user = ToChatUser(e.User);
-					var channel = ToChatChannel(e.Channel);
-					OnMessageReceived?.Invoke(new ChatMessage(e.Message.Timestamp, user, channel, e.Message.Text, state: e.Message));
-				}
-			};
+			client = new DiscordSocketClient();
+
+			client.MessageReceived += HandleMessageReceived;
 		}
 
-		private ChatChannel ToChatChannel(Channel discordChannel)
+		private async Task HandleMessageReceived(SocketMessage message)
+		{
+			if (message.Author != client.CurrentUser)
+			{
+				var user = ToChatUser(message.Author);
+				var channel = ToChatChannel(message.Channel);
+				OnMessageReceived?.Invoke(new ChatMessage(message.Timestamp.LocalDateTime, user, channel, message.Content, state: message));
+			}
+		}
+
+		private ChatChannel ToChatChannel(IMessageChannel discordChannel)
 		{
 			return new ChatChannel(discordChannel.Id.ToString(), discordChannel.Name);
 		}
-		private ChatUser ToChatUser(User discordUser)
+		private ChatUser ToChatUser(IUser discordUser)
 		{
-			return new ChatUser(discordUser.Name, discordUser.Id.ToString(), preferredName: discordUser.Nickname);
+			return new ChatUser(discordUser.Username, discordUser.Id.ToString(), preferredName: discordUser.Username);
 		}
 
 		public override void Disconnect()
 		{
-			client.Disconnect();
+			client.Dispose();
 		}
 
 		public override void Dispose()
