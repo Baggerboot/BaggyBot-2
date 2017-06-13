@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using BaggyBot.ExternalApis;
 
 namespace BaggyBot.Commands
@@ -27,15 +28,55 @@ namespace BaggyBot.Commands
 			}
 			else
 			{
-				var imageUrl = WebUtility.UrlEncode(image.contentUrl);
 				var title = WebUtility.UrlEncode(image.name);
 				var descr = WebUtility.UrlEncode("From " + image.hostPageDisplayUrl);
+
+				string finalUrl;
 				// Bing refuses to serve out the original URL, so we reupload it to Imgur.
 				// An alternative option would be to run a HEAD on the image URL to get the redirect URL.
-				var url = Imgur.Upload(imageUrl, title, descr);
-				command.Reply($"{url ?? image.contentUrl}");
+				if (Client.Capabilities.RequireReupload)
+				{
+					var imageUrl = WebUtility.UrlEncode(image.contentUrl);
+					finalUrl = Imgur.Upload(imageUrl, title, descr);
+				}
+				else
+				{
+					try
+					{
+						finalUrl = FollowAllRedirects(image.contentUrl);
+					}
+					catch (Exception)
+					{
+						finalUrl = null;
+					}
+				}
+				command.Reply($"{finalUrl ?? image.contentUrl}");
 			}
 		}
 
+		private static string FollowAllRedirects(string url)
+		{
+			var rq = WebRequest.CreateHttp(url);
+			rq.Method = "HEAD";
+
+			HttpWebResponse rs;
+			try
+			{
+				rs = (HttpWebResponse) rq.GetResponse();
+			}
+			catch (WebException e)
+			{
+				rs = (HttpWebResponse) e.Response;
+			}
+			if (rs == null)
+			{
+				throw new InvalidOperationException("URL is not accessible");
+			}
+			int statusCode = (int)rs.StatusCode;
+			// non-300 returned, so the content can be requested directly from this URL.
+			if (statusCode < 300 || statusCode >= 400) return rs.ResponseUri.ToString();
+			// Check if the URL indicated by the Location header has any further redirects.
+			return FollowAllRedirects(rs.Headers["Location"]);
+		}
 	}
 }
