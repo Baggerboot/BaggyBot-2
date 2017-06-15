@@ -29,12 +29,14 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override IReadOnlyList<ChatChannel> Channels { get; protected set; }
 
 		private readonly DiscordSocketClient client;
-		//private Server server;
+		private IGuild server;
 
 		public DiscordPlugin(ServerCfg cfg) : base(cfg)
 		{
+			Capabilities.AllowsMultilineMessages = true;
+			Capabilities.RequireReupload = false;
+			MessageFormatters.Add(new DiscordMessageFormatter());
 			client = new DiscordSocketClient();
-
 			client.MessageReceived += HandleMessageReceived;
 		}
 
@@ -44,17 +46,24 @@ namespace BaggyBot.Plugins.Internal.Discord
 			{
 				var user = ToChatUser(message.Author);
 				var channel = ToChatChannel(message.Channel);
-				OnMessageReceived?.Invoke(new ChatMessage(message.Timestamp.LocalDateTime, user, channel, message.Content, state: message));
+				
+				await Task.Run(() => OnMessageReceived?.Invoke(new ChatMessage(message.Timestamp.LocalDateTime, user, channel, message.Content, state: message)));
 			}
 		}
 
 		private ChatChannel ToChatChannel(IMessageChannel discordChannel)
 		{
-			return new ChatChannel(discordChannel.Id.ToString(), discordChannel.Name);
+			switch (discordChannel)
+			{
+				case IDMChannel dmChannel:
+					return new ChatChannel(dmChannel.Id.ToString(), dmChannel.Name, ToChatUser(dmChannel.Recipient));
+				default:
+					return new ChatChannel(discordChannel.Id.ToString(), discordChannel.Name);
+			}
 		}
 		private ChatUser ToChatUser(IUser discordUser)
 		{
-			return new ChatUser(discordUser.Username, discordUser.Id.ToString(), preferredName: discordUser.Username);
+			return new ChatUser(discordUser.Username, discordUser.Id.ToString());
 		}
 
 		public override void Disconnect()
@@ -76,24 +85,33 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override void Kick(ChatUser chatUser, ChatChannel channel = null)
 		{
 			if(channel != null) throw new NotSupportedException("The Discord plugin does not support kicking users from a channel.");
-			server.GetUser(ulong.Parse(chatUser.UniqueId)).Kick();
+			var user = server.GetUserAsync(ulong.Parse(chatUser.UniqueId)).Result;
+			user.KickAsync().Wait();
 		}
 
 		public override bool Connect()
 		{
-			client.Connect(Configuration.Password, TokenType.Bot).Wait();
+			client.LoginAsync(TokenType.Bot, Configuration.Password).Wait();
+			client.StartAsync().Wait();
 
-			while (!client.Servers.Any())
+			var ev = new ManualResetEventSlim();
+			client.Connected += () =>
 			{
-				Thread.Sleep(100);
+				ev.Set();
+				return Task.Run(() => {});
+			};
+			if (!ev.Wait(TimeSpan.FromSeconds(10)))
+			{
+				return false;
 			}
-			server = client.Servers.First();
+
+			server = client.Guilds.First();
 			return true;
 		}
 
 		public override ChatUser FindUser(string name)
 		{
-			var matches = server.FindUsers(name).ToArray();
+			var matches = server.GetUsersAsync().Result.Where(u => u.Nickname == name).ToArray();
 			if (matches.Length == 0) throw new ArgumentException("Invalid username");
 			if (matches.Length == 1)return ToChatUser(matches[0]);
 			throw new ArgumentException("Ambiguous username");
@@ -101,21 +119,32 @@ namespace BaggyBot.Plugins.Internal.Discord
 
 		public override ChatUser GetUser(string id)
 		{
-			return ToChatUser(server.GetUser(ulong.Parse(id)));
+			return ToChatUser(server.GetUserAsync(ulong.Parse(id)).Result);
 		}
 
 		public override MessageSendResult SendMessage(ChatChannel target, string message, params Attachment[] attachments)
 		{
 			message = CreatePlaintextAttachments(message, attachments);
-			var channel = server.GetChannel(ulong.Parse(target.Identifier));
-			channel.SendMessage(message).Wait();
+			IMessageChannel channel;
+			if (target.IsPrivateMessage)
+			{
+				channel = client.GetDMChannelAsync(ulong.Parse(target.Identifier)).Result;
+			}
+			else
+			{
+				channel = server.GetTextChannelAsync(ulong.Parse(target.Identifier)).Result;
+			}
+			channel.SendMessageAsync(message).Wait();
 			return MessageSendResult.Success;
 		}
 
 		public override MessageSendResult SendMessage(ChatUser target, string message, params Attachment[] attachments)
 		{
 			message = CreatePlaintextAttachments(message, attachments);
-			throw new NotImplementedException();
+			var recipient = server.GetUserAsync(ulong.Parse(target.UniqueId)).Result;
+			var ch = recipient.GetDMChannelAsync().Result;
+			ch.SendMessageAsync(message);
+			return MessageSendResult.Success;
 		}
 
 		public override void Join(ChatChannel channel) { }
@@ -134,8 +163,8 @@ namespace BaggyBot.Plugins.Internal.Discord
 
 		public override void Delete(ChatMessage message)
 		{
-			var m = (Message)message.State;
-			m.Delete();
+			var m = (SocketMessage)message.State;
+			m.DeleteAsync();
 		}
 	}
 }
