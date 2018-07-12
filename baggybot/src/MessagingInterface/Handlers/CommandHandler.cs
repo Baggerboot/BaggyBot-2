@@ -5,6 +5,7 @@ using System.Reflection;
 using BaggyBot.Commands;
 using BaggyBot.Configuration;
 using BaggyBot.EmbeddedData;
+using BaggyBot.Formatting;
 using BaggyBot.MessagingInterface.Events;
 using BaggyBot.Monitoring;
 
@@ -113,9 +114,14 @@ namespace BaggyBot.MessagingInterface.Handlers
 				// This doesn't look like a valid command. Is it a rem being set?
 				if (cmdInfo.Command == "rem")
 				{
+					if (cmdInfo.Args.Length == 1 && cmdInfo.Args[0] == "rem")
+					{
+						cmdInfo.ReturnMessage("さすが姉さま");
+						return;
+					}
 					if (cmdInfo.Args.Length < 2)
 					{
-						cmdInfo.Reply("usage: rem <key> <message>");
+						cmdInfo.Reply($"usage: {Frm.M}{Bot.CommandIdentifiers.First()}{cmdInfo.Command} <key> <message>{Frm.M} -- Creates an alias for a message");
 						return;
 					}
 					Logger.Log(this, "Saving rem");

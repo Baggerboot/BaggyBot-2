@@ -633,6 +633,11 @@ namespace BaggyBot.Database
 			}
 		}
 
+		public IEnumerable<StoredAttachment> GetAttachments(string name)
+		{
+
+		}
+
 		public bool MiscDataContainsKey(string type, string key)
 		{
 			lock (LockObj)

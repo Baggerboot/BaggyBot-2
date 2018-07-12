@@ -122,7 +122,7 @@ namespace BaggyBot.Plugins
 		public virtual IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
 		{
 			throw new NotSupportedException("This chat server does not support looking up old messages.");
-		} 
+		}
 
 		/// <summary>
 		/// Replies to a specific user in a channel.

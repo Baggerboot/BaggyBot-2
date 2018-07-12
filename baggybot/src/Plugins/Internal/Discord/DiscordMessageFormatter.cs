@@ -31,6 +31,8 @@ namespace BaggyBot.Plugins.Internal.Discord
 
 		public override ChatMessage ProcessIncomingMessage(ChatMessage message)
 		{
+
+
 			return message;
 		}
 	}

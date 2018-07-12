@@ -54,8 +54,14 @@ namespace BaggyBot.Commands.Wikipedia
 				{
 					var document = GetDocument(page.canonicalurl);
 					var image = GetImageUrl(document);
-					var attachment = image == null ? null : new ImageAttachment(image);
-					command.ReturnMessage($"{page.title} ({page.canonicalurl}): {GetContent(document)}", attachment);
+					if(image == null)
+					{
+						command.ReturnMessage($"{page.title} ({page.canonicalurl}): {GetContent(document)}");
+					}
+					else
+					{
+						command.ReturnMessage($"{page.title} ({page.canonicalurl}): {GetContent(document)}", new ImageAttachment(image));
+					}
 				}
 			}
 		}
@@ -66,9 +72,14 @@ namespace BaggyBot.Commands.Wikipedia
 			var rs = rq.GetResponse();
 			var doc = new HtmlDocument();
 			doc.Load(rs.GetResponseStream(), Encoding.UTF8);
-			foreach (var cite in doc.DocumentNode.SelectNodes(".//sup[@class=\"reference\"]"))
+
+			var notes = doc.DocumentNode.SelectNodes(".//sup[@class=\"reference\"]");
+			if(notes != null)
 			{
-				cite.Remove();
+				foreach (var cite in notes)
+				{
+					cite.Remove();
+				}
 			}
 			return doc;
 		}
@@ -101,7 +112,7 @@ namespace BaggyBot.Commands.Wikipedia
 			var nodes = doc.DocumentNode.SelectNodes("//table[@class=\"infobox\"]/tr[td][th]") ?? new HtmlNodeCollection(null);
 			var pairs = nodes.Select(tr => new KeyValuePair<string,string>(tr.SelectSingleNode("th").InnerText, tr.SelectSingleNode("td").InnerText)).ToList();
 			
-			var firstParagraph = doc.DocumentNode.SelectSingleNode("/p[1]");
+			var firstParagraph = doc.DocumentNode.SelectSingleNode("/div/p[1]");
 			var decodedText = WebUtility.HtmlDecode(firstParagraph.InnerText);
 			return decodedText;
 		}

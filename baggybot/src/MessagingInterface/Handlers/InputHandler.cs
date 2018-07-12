@@ -101,6 +101,8 @@ namespace BaggyBot.MessagingInterface.Handlers
 		{
 			for (var i = 0; i < Height; i++)
 			{
+				Console.CursorLeft = 0;
+				Console.CursorTop = i;
 				ClearCurrentLine();
 				Console.WriteLine();
 			}
@@ -118,7 +120,11 @@ namespace BaggyBot.MessagingInterface.Handlers
 		private void RenderTextBuffer(string bufferName)
 		{
 			ResetTextBuffer();
-			if (!textBuffers.ContainsKey(bufferName)) InitBuffer(bufferName);
+			if (!textBuffers.ContainsKey(bufferName))
+			{
+				InitBuffer(bufferName);
+				return;
+			}
 
 			var currentBuffer = textBuffers[bufferName];
 			var lastMessages = currentBuffer.Skip(currentBuffer.Count - Height);
@@ -126,7 +132,9 @@ namespace BaggyBot.MessagingInterface.Handlers
 			Console.ForegroundColor = ConsoleColor.White;
 			foreach (var message in lastMessages)
 			{
+				var cp = Console.CursorTop;
 				Console.WriteLine(message);
+				if (Console.CursorTop - cp > 1) Console.CursorTop = cp + 1;
 			}
 		}
 

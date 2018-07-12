@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace BaggyBot.MessagingInterface
 {
@@ -9,6 +10,8 @@ namespace BaggyBot.MessagingInterface
 		public string Body { get; }
 		public bool Action { get; }
 		public DateTime SentAt { get; }
+
+		[JsonIgnore]
 		public object State { get; }
 
 		public ChatMessage(DateTime sentAt, ChatUser sender, ChatChannel channel, string body, bool action = false, object state = null)

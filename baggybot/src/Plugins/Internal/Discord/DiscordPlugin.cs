@@ -7,6 +7,9 @@ using BaggyBot.Configuration;
 using BaggyBot.MessagingInterface;
 using Discord;
 using Discord.WebSocket;
+using LinqToDB.SqlQuery;
+using Newtonsoft.Json;
+using RestSharp.Extensions;
 
 namespace BaggyBot.Plugins.Internal.Discord
 {
@@ -42,12 +45,19 @@ namespace BaggyBot.Plugins.Internal.Discord
 
 		private async Task HandleMessageReceived(SocketMessage message)
 		{
-			if (message.Author != client.CurrentUser)
+			//if (message.Author != client.CurrentUser)
 			{
 				var user = ToChatUser(message.Author);
 				var channel = ToChatChannel(message.Channel);
-				
-				await Task.Run(() => OnMessageReceived?.Invoke(new ChatMessage(message.Timestamp.LocalDateTime, user, channel, message.Content, state: message)));
+
+				//if (Channels.Any(c => c.Identifier == channel.Identifier))
+				{
+					await Task.Run(() => OnMessageReceived?.Invoke(new ChatMessage(message.Timestamp.LocalDateTime, user, channel, message.Content, state: message)));
+				}
+				//else
+				{
+					;
+				}
 			}
 		}
 
@@ -100,18 +110,29 @@ namespace BaggyBot.Plugins.Internal.Discord
 				ev.Set();
 				return Task.Run(() => {});
 			};
+			client.Disconnected += exception =>
+			{
+				;
+				return Task.Run(() => { });
+			};
 			if (!ev.Wait(TimeSpan.FromSeconds(10)))
 			{
 				return false;
 			}
 
-			server = client.Guilds.First();
+			var serverId = ulong.Parse(Configuration.PluginSettings["server-id"]);
+			server = client.Guilds.First(s => s.Id == serverId);
+			var channels = server.GetTextChannelsAsync().Result;
+			Channels = channels.Select(ToChatChannel).ToList();
 			return true;
 		}
 
 		public override ChatUser FindUser(string name)
 		{
-			var matches = server.GetUsersAsync().Result.Where(u => u.Nickname == name).ToArray();
+			var users = server.GetUsersAsync().Result;
+
+
+			var matches = users.Where(u => u.Username == name).ToArray();
 			if (matches.Length == 0) throw new ArgumentException("Invalid username");
 			if (matches.Length == 1)return ToChatUser(matches[0]);
 			throw new ArgumentException("Ambiguous username");
@@ -142,7 +163,7 @@ namespace BaggyBot.Plugins.Internal.Discord
 		{
 			message = CreatePlaintextAttachments(message, attachments);
 			var recipient = server.GetUserAsync(ulong.Parse(target.UniqueId)).Result;
-			var ch = recipient.GetDMChannelAsync().Result;
+			var ch = recipient.GetOrCreateDMChannelAsync().Result;
 			ch.SendMessageAsync(message);
 			return MessageSendResult.Success;
 		}
@@ -159,6 +180,32 @@ namespace BaggyBot.Plugins.Internal.Discord
 		public override void Quit(string reason)
 		{
 			throw new NotImplementedException();
+		}
+
+		public override IEnumerable<ChatMessage> GetBacklog(ChatChannel channel, DateTime before, DateTime after)
+		{
+			var ch = server.GetTextChannelAsync(ulong.Parse(channel.Identifier)).Result;
+
+			var collectedMessages = ch.GetMessagesAsync(1).ToList().Result.SelectMany(r => r).ToList();
+
+			bool newMessages = true;
+			do
+			{
+				var next = ch.GetMessagesAsync(collectedMessages.Last(), Direction.Before, 1000).ToList().Result.SelectMany(r => r).ToList();
+				collectedMessages.AddRange(next);
+				newMessages = next.Any();
+			}
+			while (collectedMessages.Last().CreatedAt.DateTime > after &&  newMessages);
+
+			var tf = collectedMessages.Select(message => new ChatMessage(message.Timestamp.LocalDateTime, ToChatUser(message.Author), channel, message.Content, state: message));
+			var l = tf.ToList();
+			l.Reverse();
+
+			var str = JsonConvert.SerializeObject(l, Newtonsoft.Json.Formatting.Indented);
+
+			System.IO.File.WriteAllText("C:/Users/Baggykiin/Desktop/messages.json", str);
+
+			return tf;
 		}
 
 		public override void Delete(ChatMessage message)

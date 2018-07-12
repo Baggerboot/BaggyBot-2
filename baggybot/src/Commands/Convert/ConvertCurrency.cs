@@ -34,6 +34,8 @@ namespace BaggyBot.Commands.Convert
 
 		private void RequestExchangeRates(int attemptNumber)
 		{
+			// TODO: make this work again
+			return;
 			if (attemptNumber > MAX_LOOKUP_ATTEMPTS) return;
 			try
 			{

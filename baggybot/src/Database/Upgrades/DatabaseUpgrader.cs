@@ -21,7 +21,8 @@ namespace BaggyBot.Database.Upgrades
 				["1.1"] = UpgradeFrom1_1,
 				["1.2"] = UpgradeFrom1_2,
 				["1.2.2"] = UpgradeFrom1_2_2,
-				["2.0"] = UpgradeFrom2_0
+				["2.0"] = UpgradeFrom2_0,
+				["2.1"] = UpgradeFrom2_1
 			};
 		}
 
@@ -33,6 +34,12 @@ namespace BaggyBot.Database.Upgrades
 		public string UpgradeFrom(string version)
 		{
 			return upgrades[version]();
+		}
+
+		private string UpgradeFrom2_1()
+		{
+			connection.CreateTable<StoredAttachment>();
+			return "2.2";
 		}
 
 		private string UpgradeFrom2_0()

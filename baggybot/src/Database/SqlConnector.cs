@@ -31,6 +31,7 @@ namespace BaggyBot.Database
 		public ITable<PermissionGroupMembership> PermissionGroupMembership { get; private set; }
 		public ITable<UserGroup> UserGroups { get; private set; }
 		public ITable<UserGroupMembership> UserGroupMembership { get; private set; }
+		public ITable<StoredAttachment> Attachments { get; private set; }
 
 		private ITable<Metadata> metadata;
 
@@ -100,6 +101,7 @@ namespace BaggyBot.Database
 			TryDropTable<PermissionGroupMembership>();
 			TryDropTable<UserGroup>();
 			TryDropTable<UserGroupMembership>();
+			TryDropTable<StoredAttachment>();
 		}
 
 		private void TryDropTable<T>() where T:Poco
@@ -132,6 +134,7 @@ namespace BaggyBot.Database
 			connection.CreateTable<PermissionGroupMembership>();
 			connection.CreateTable<UserGroup>();
 			connection.CreateTable<UserGroupMembership>();
+			connection.CreateTable<StoredAttachment>();
 		}
 
 		private void AddMetadata()
@@ -226,6 +229,7 @@ namespace BaggyBot.Database
 			PermissionGroupMembership = connection.GetTable<PermissionGroupMembership>();
 			UserGroups = connection.GetTable<UserGroup>();
 			UserGroupMembership = connection.GetTable<UserGroupMembership>();
+			Attachments = connection.GetTable<StoredAttachment>();
 
 			try
 			{
@@ -249,6 +253,7 @@ namespace BaggyBot.Database
 				PermissionGroupMembership.FirstOrDefault();
 				UserGroups.FirstOrDefault();
 				UserGroupMembership.FirstOrDefault();
+				Attachments.FirstOrDefault();
 				// ReSharper restore ReturnValueOfPureMethodIsNotUsed
 			}
 			catch (Exception e)
